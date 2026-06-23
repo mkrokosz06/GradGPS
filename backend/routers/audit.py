@@ -127,6 +127,13 @@ def get_audit(x_user_id: str = Header(..., alias="x-user-id")):
     result = run_audit(requirement_rows, transcript_courses)
     result["subplan"] = subplan
 
+    # Total credits earned across all transcript courses (done + transfer)
+    result["transcript_credits"] = round(
+        sum(float(c.get("credits_earned", 0)) for c in transcript_courses
+            if c.get("status") in ("done", "transfer")),
+        1,
+    )
+
     if gen_ed_rows:
         gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
         result["gen_ed"] = gen_ed_result
