@@ -66,16 +66,19 @@ def _collect_missing(audit_result: dict) -> list[dict]:
             gtype = src.get("sub_type") or src.get("group_type", "")
             items = src.get("items", [])
 
-            if gtype == "choose_credits" and not src.get("satisfied"):
-                # Emit a pool summary entry
-                needed = (src.get("threshold") or 0) - (src.get("credits_earned") or 0)
-                if needed > 0:
-                    missing.append({
-                        "course_code": f"Elective pool ({group.get('name', 'Pool')})",
-                        "course_title": f"Choose {int(src.get('threshold', 3))} credits from approved list",
-                        "credits": needed,
-                        "is_pool": True,
-                    })
+            if gtype == "choose_credits":
+                # Never emit individual pool courses — always treat as a single slot.
+                # If the pool is already satisfied, skip entirely.
+                # If unsatisfied, emit one summary entry for the remaining credits needed.
+                if not src.get("satisfied"):
+                    needed = (src.get("threshold") or 0) - (src.get("credits_earned") or 0)
+                    if needed > 0:
+                        missing.append({
+                            "course_code": f"Elective pool ({group.get('name', 'Pool')})",
+                            "course_title": f"Choose {int(src.get('threshold', 3))} credits from approved list",
+                            "credits": needed,
+                            "is_pool": True,
+                        })
             else:
                 for item in items:
                     if item.get("status") != "missing":
