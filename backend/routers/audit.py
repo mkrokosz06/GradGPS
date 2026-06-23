@@ -7,7 +7,9 @@ from fastapi import APIRouter, HTTPException, Header
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
-from audit_engine import run_audit
+from audit_engine import run_audit, run_gen_ed_audit
+
+GEN_ED_PROGRAM = "__GEN_ED__"
 
 router = APIRouter()
 
@@ -109,9 +111,28 @@ def get_audit(x_user_id: str = Header(..., alias="x-user-id")):
     )
     transcript_courses = tx_resp.get("Items", [])
 
-    # ── 5. Run audit ──────────────────────────────────────────────────────────
+    # ── 5. Fetch gen ed requirements ──────────────────────────────────────────
+    gen_ed_resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq(GEN_ED_PROGRAM)
+    )
+    gen_ed_rows = gen_ed_resp.get("Items", [])
+    while "LastEvaluatedKey" in gen_ed_resp:
+        gen_ed_resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq(GEN_ED_PROGRAM),
+            ExclusiveStartKey=gen_ed_resp["LastEvaluatedKey"]
+        )
+        gen_ed_rows.extend(gen_ed_resp.get("Items", []))
+
+    # ── 6. Run audits ─────────────────────────────────────────────────────────
     result = run_audit(requirement_rows, transcript_courses)
-    result["subplan"] = subplan   # include in response so client knows what was used
+    result["subplan"] = subplan
+
+    if gen_ed_rows:
+        gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
+        result["gen_ed"] = gen_ed_result
+    else:
+        result["gen_ed"] = None
+
     return result
 
 

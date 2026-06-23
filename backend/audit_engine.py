@@ -22,6 +22,93 @@ def _grade_meets(earned_grade: str, min_grade: str) -> bool:
         return True   # unknown grade format — don't block
 
 
+def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> dict:
+    """
+    Like run_audit, but enforces cross-group course exclusivity for gen ed:
+    once a course is consumed to satisfy one group it cannot satisfy another.
+
+    Processing order (so required courses are claimed first):
+      1. required / choose_one  groups
+      2. choose_credits / choose_courses pools
+    """
+    # Build taken lookup
+    taken = {}
+    for c in transcript_courses:
+        code = c["course_code"].strip().upper()
+        taken[code] = {
+            "status":         c.get("status", "done"),
+            "grade":          c.get("grade", ""),
+            "credits_earned": float(c.get("credits_earned", 0)),
+        }
+
+    # Group rows by section
+    groups_map: dict[str, list[dict]] = defaultdict(list)
+    group_meta: dict[str, dict] = {}
+    for row in requirement_rows:
+        g = row.get("requirement_group", "General Requirements")
+        groups_map[g].append(row)
+        if g not in group_meta:
+            group_meta[g] = {
+                "group_type":      row.get("group_type", "required"),
+                "group_threshold": int(row["group_threshold"]) if row.get("group_threshold") else None,
+            }
+
+    # Sort groups: required/choose_one first so they claim courses before pools
+    PRIORITY = {"required": 0, "choose_one": 1, "choose_credits": 2, "choose_courses": 3}
+    ordered_groups = sorted(
+        groups_map.items(),
+        key=lambda kv: PRIORITY.get(group_meta[kv[0]]["group_type"], 99)
+    )
+
+    consumed: set[str] = set()   # course codes already claimed by an earlier group
+
+    group_results = []
+    total_done = total_ip = total_missing = 0
+    total_credits = 0.0
+
+    for group_name, rows in ordered_groups:
+        gtype     = group_meta[group_name]["group_type"]
+        threshold = group_meta[group_name]["group_threshold"]
+
+        result = _eval_type_exclusive(gtype, rows, taken, threshold, consumed)
+
+        # Mark courses this group consumed so later groups can't reuse them.
+        # multi_category courses (interdomain / US / IL dual-designated) are
+        # intentionally exempt — they satisfy two categories simultaneously.
+        for item in result["items"]:
+            if item.get("status") in ("done", "in_progress") and not item.get("multi_category"):
+                consumed.add(item["course_code"])
+
+        d, ip, m = _pool_counts(gtype, result)
+        total_done    += d
+        total_ip      += ip
+        total_missing += m
+        total_credits += result.get("credits_earned", 0.0)
+
+        group_results.append({
+            "name":           group_name,
+            "group_type":     gtype,
+            "threshold":      threshold,
+            "satisfied":      result["satisfied"],
+            "done":           result["done"],
+            "in_progress":    result["in_progress"],
+            "missing":        result["missing"],
+            "credits_earned": result.get("credits_earned", 0.0),
+            "items":          result["items"],
+        })
+
+    program = requirement_rows[0]["program_name"] if requirement_rows else "__GEN_ED__"
+    return {
+        "major":          program,
+        "total":          total_done + total_ip + total_missing,
+        "done":           total_done,
+        "in_progress":    total_ip,
+        "missing":        total_missing,
+        "credits_earned": round(total_credits, 1),
+        "groups":         group_results,
+    }
+
+
 def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> dict:
     """
     Parameters
@@ -190,6 +277,227 @@ def _pool_counts(gtype: str, result: dict) -> tuple[int, int, int]:
             return 0, 0, 1
     # required / choose_one: individual item counts are already accurate
     return result["done"], result["in_progress"], result["missing"]
+
+
+# ── Exclusive dispatch helper (gen ed — cross-group course consumption) ──────
+
+def _eval_type_exclusive(
+    gtype: str, rows: list[dict], taken: dict, threshold, consumed: set[str]
+) -> dict:
+    """
+    Same as _eval_type but skips courses already consumed by a previous group.
+    A course is considered "available" only if its normalised code is not in consumed.
+    """
+    available_rows = []
+    for row in rows:
+        code = row.get("course_code", "").strip().upper()
+        # Also check W-stripped and variant-suffix forms (mirrors _course_status logic)
+        w_stripped = re.sub(r"W$", "", code)
+        variant    = next(
+            (k for k in taken if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
+            None,
+        )
+        actual_code = variant or (w_stripped if w_stripped in taken else code)
+        # multi_category courses (interdomain / US+domain dual-designated) are
+        # never blocked by the consumed set — they can satisfy two groups at once.
+        if actual_code in consumed and not row.get("multi_category"):
+            available_rows.append({**row, "_consumed": True})
+        else:
+            available_rows.append(row)
+
+    return _eval_type_with_consumed(gtype, available_rows, taken, threshold)
+
+
+def _eval_type_with_consumed(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
+    """Like _eval_type but rows may carry _consumed=True to force-missing status."""
+    if gtype == "required":
+        return _eval_required_consumed(rows, taken)
+    elif gtype == "choose_one":
+        return _eval_choose_one_consumed(rows, taken)
+    elif gtype == "choose_credits":
+        return _eval_choose_credits_consumed(rows, taken, threshold)
+    elif gtype == "choose_courses":
+        return _eval_choose_courses_consumed(rows, taken, threshold)
+    else:
+        return _eval_required_consumed(rows, taken)
+
+
+def _course_status_consumed(row: dict, taken: dict) -> str:
+    """Like _course_status but returns 'consumed' when row has _consumed=True."""
+    if row.get("_consumed"):
+        return "consumed"
+    return _course_status(row, taken)
+
+
+def _eval_required_consumed(rows: list[dict], taken: dict) -> dict:
+    items = []
+    done = ip = missing = 0
+    credits_earned = 0.0
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status_consumed(row, taken)
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+        item = {
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "min_grade":    row.get("min_grade", ""),
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        }
+        if row.get("multi_category"):
+            item["multi_category"] = True
+        items.append(item)
+    return {"satisfied": missing == 0 and ip == 0, "done": done, "in_progress": ip,
+            "missing": missing, "credits_earned": credits_earned, "items": items}
+
+
+def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
+    pairs: dict = defaultdict(list)
+    unpaired = []
+    for row in rows:
+        pid = row.get("pair_group_id")
+        if pid:
+            pairs[str(pid)].append(row)
+        else:
+            unpaired.append(row)
+
+    items = []
+    done = ip = missing = 0
+    credits_earned = 0.0
+
+    for pid, pair_rows in pairs.items():
+        pair_status  = "missing"
+        best_credits = 0.0
+        best_code    = ""
+
+        for row in pair_rows:
+            code   = row.get("course_code", "").strip().upper()
+            status = _course_status_consumed(row, taken)
+            if status == "done" and pair_status != "done":
+                pair_status  = "done"
+                best_code    = code
+                best_credits = taken.get(code, {}).get("credits_earned", 0)
+            elif status == "in_progress" and pair_status == "missing":
+                pair_status = "in_progress"
+                best_code   = code
+
+        if pair_status == "done":
+            done += 1
+            credits_earned += best_credits
+        elif pair_status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+
+        for row in pair_rows:
+            code = row.get("course_code", "").strip().upper()
+            pitem = {
+                "course_code":   code,
+                "course_title":  row.get("course_title", ""),
+                "credits":       float(row["credits"]) if row.get("credits") else None,
+                "min_grade":     row.get("min_grade", ""),
+                "status":        _course_status_consumed(row, taken),
+                "grade":         taken.get(code, {}).get("grade", ""),
+                "pair_group_id": pid,
+                "pair_status":   pair_status,
+            }
+            if row.get("multi_category"):
+                pitem["multi_category"] = True
+            items.append(pitem)
+
+    for row in unpaired:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status_consumed(row, taken)
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+        uitem = {
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        }
+        if row.get("multi_category"):
+            uitem["multi_category"] = True
+        items.append(uitem)
+
+    return {"satisfied": missing == 0 and ip == 0, "done": done, "in_progress": ip,
+            "missing": missing, "credits_earned": credits_earned, "items": items}
+
+
+def _eval_choose_credits_consumed(rows: list[dict], taken: dict, threshold) -> dict:
+    items = []
+    credits_earned = 0.0
+    done = ip = missing = 0
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status_consumed(row, taken)
+        cr     = float(row["credits"]) if row.get("credits") else 0.0
+        if status == "done":
+            credits_earned += taken.get(code, {}).get("credits_earned", cr)
+            done += 1
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+        citem = {
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      cr,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        }
+        if row.get("multi_category"):
+            citem["multi_category"] = True
+        items.append(citem)
+    credits_needed = max(0, (threshold or 0) - credits_earned)
+    satisfied = (threshold is None) or (credits_earned >= threshold)
+    return {"satisfied": satisfied, "credits_earned": round(credits_earned, 1),
+            "credits_needed": round(credits_needed, 1), "threshold": threshold,
+            "done": done, "in_progress": ip, "missing": missing, "items": items}
+
+
+def _eval_choose_courses_consumed(rows: list[dict], taken: dict, threshold) -> dict:
+    items = []
+    done = ip = missing = 0
+    credits_earned = 0.0
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status_consumed(row, taken)
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+        ccitem = {
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        }
+        if row.get("multi_category"):
+            ccitem["multi_category"] = True
+        items.append(ccitem)
+    courses_needed = max(0, (threshold or 0) - done)
+    satisfied = (threshold is None) or (done >= threshold)
+    return {"satisfied": satisfied, "courses_needed": courses_needed, "threshold": threshold,
+            "done": done, "in_progress": ip, "missing": missing,
+            "credits_earned": credits_earned, "items": items}
 
 
 # ── Dispatch helper ─────────────────────────────────────────────────────────
