@@ -40,34 +40,42 @@ def seed_transcript_from_pdf(pdf_path: str):
 
 def seed_transcript_from_hardcoded():
     """
-    Matthew's ETI transcript — 17 done + 5 in-progress (22 total).
-    Parsed from his PDF in the previous session.
+    Matthew's real transcript as of 01/09/2026 (parsed from PDF).
+    52 earned credits. Currently pre-major in IST, SP 2026 in progress.
+    Note: MATH 140 F (FA 2024, grade forgiveness) excluded — only the
+    passing repeat (SU 2025, C) is kept, which the parser handles automatically.
+    A-I 100 (SP 2026) is excluded — the hyphenated dept code is not yet
+    supported by the transcript parser regex.
     """
     courses = [
-        # Done courses
-        {"course_code": "ENGL 15",   "grade": "B+", "credits_earned": 3.0, "term": "FA 2023", "status": "done"},
-        {"course_code": "IST 110",   "grade": "A",  "credits_earned": 3.0, "term": "FA 2023", "status": "done"},
-        {"course_code": "IST 140",   "grade": "A",  "credits_earned": 3.0, "term": "FA 2023", "status": "done"},
-        {"course_code": "MATH 110",  "grade": "B",  "credits_earned": 3.0, "term": "FA 2023", "status": "done"},
-        {"course_code": "IST 210",   "grade": "A-", "credits_earned": 3.0, "term": "SP 2024", "status": "done"},
-        {"course_code": "IST 220",   "grade": "B+", "credits_earned": 3.0, "term": "SP 2024", "status": "done"},
-        {"course_code": "IST 230",   "grade": "A",  "credits_earned": 3.0, "term": "SP 2024", "status": "done"},
+        # SU 2024
+        {"course_code": "EDSGN 100", "grade": "A",  "credits_earned": 3.0, "term": "SU 2024", "status": "done"},
+        {"course_code": "ENGL 15",   "grade": "B",  "credits_earned": 3.0, "term": "SU 2024", "status": "done"},
+        # FA 2024
+        {"course_code": "ANTH 140",  "grade": "B+", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
+        {"course_code": "CHEM 110",  "grade": "D",  "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
+        {"course_code": "ECON 102",  "grade": "B-", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
+        {"course_code": "ME 101",    "grade": "A",  "credits_earned": 1.0, "term": "FA 2024", "status": "done"},
+        # SP 2025
+        {"course_code": "CAS 100C",  "grade": "B+", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
+        {"course_code": "GEOSC 40",  "grade": "A",  "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
+        {"course_code": "METEO 3",   "grade": "A-", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
+        {"course_code": "MGMT 301",  "grade": "A-", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
+        {"course_code": "SCM 200",   "grade": "B+", "credits_earned": 4.0, "term": "SP 2025", "status": "done"},
+        # SU 2025
         {"course_code": "MATH 140",  "grade": "C",  "credits_earned": 4.0, "term": "SU 2025", "status": "done"},
-        {"course_code": "IST 242",   "grade": "A",  "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "IST 256",   "grade": "B+", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "IST 261",   "grade": "B",  "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "IST 302",   "grade": "B+", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "STAT 200",  "grade": "B",  "credits_earned": 4.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "IST 331",   "grade": "A",  "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "IST 356",   "grade": "A-", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "IST 361",   "grade": "B+", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "IST 432",   "grade": "A",  "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        # In-progress (FA 2025)
-        {"course_code": "IST 440",   "grade": "",   "credits_earned": 0.0, "term": "FA 2025", "status": "in_progress"},
-        {"course_code": "IST 451",   "grade": "",   "credits_earned": 0.0, "term": "FA 2025", "status": "in_progress"},
-        {"course_code": "IST 454",   "grade": "",   "credits_earned": 0.0, "term": "FA 2025", "status": "in_progress"},
-        {"course_code": "IST 495",   "grade": "",   "credits_earned": 0.0, "term": "FA 2025", "status": "in_progress"},
-        {"course_code": "SRA 111",   "grade": "",   "credits_earned": 0.0, "term": "FA 2025", "status": "in_progress"},
+        # FA 2025
+        {"course_code": "ACCTG 211", "grade": "C",  "credits_earned": 4.0, "term": "FA 2025", "status": "done"},
+        {"course_code": "ECON 104",  "grade": "C",  "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
+        {"course_code": "MKTG 301",  "grade": "C",  "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
+        {"course_code": "MUSIC 11",  "grade": "B+", "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
+        {"course_code": "THEA 101",  "grade": "B-", "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
+        # SP 2026 (in progress)
+        {"course_code": "CAMS 45",   "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "CMPSC 131", "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "HM 208",    "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "KINES 11",  "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "SOC 119",   "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
     ]
     return courses
 
