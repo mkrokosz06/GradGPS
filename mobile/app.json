@@ -10,8 +10,8 @@
     "ios": { "supportsTablet": true },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/android-icon-foreground.png",
-        "backgroundColor": "#1a3a6b"
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#2a4a8f"
       }
     },
     "web": { "bundler": "metro", "favicon": "./assets/favicon.png" },

@@ -1,6 +1,7 @@
 """
-GET  /programs/search?q=forensic    — fuzzy search program names
-POST /programs/select               — save a user's major selection
+GET  /programs/all               — return all program names (cached in memory after first call)
+GET  /programs/search?q=forensic — filter cached list, case-insensitive substring match
+POST /programs/select            — save a user's major selection
 """
 
 from fastapi import APIRouter, Query, Header, HTTPException
@@ -11,26 +12,39 @@ from db import requirements_table, users_table
 
 router = APIRouter()
 
+# In-memory cache populated on first request — avoids a 10-page DynamoDB scan per search
+_programs_cache: list[str] | None = None
+
+
+def _load_all_programs() -> list[str]:
+    global _programs_cache
+    if _programs_cache is not None:
+        return _programs_cache
+    all_names: set[str] = set()
+    scan_kwargs: dict = {"ProjectionExpression": "program_name"}
+    while True:
+        resp = requirements_table.scan(**scan_kwargs)
+        all_names.update(item["program_name"] for item in resp.get("Items", []))
+        last = resp.get("LastEvaluatedKey")
+        if not last:
+            break
+        scan_kwargs["ExclusiveStartKey"] = last
+    _programs_cache = sorted(all_names)
+    return _programs_cache
+
+
+@router.get("/all")
+def get_all_programs():
+    """Return every distinct program name — used by the mobile app to populate the full list."""
+    names = _load_all_programs()
+    return {"results": names, "count": len(names)}
+
 
 @router.get("/search")
 def search_programs(q: str = Query(..., min_length=1)):
-    """
-    Scans the requirements table for distinct program_names containing the query string.
-    DynamoDB doesn't support full-text search natively, so this does a simple
-    case-insensitive substring match on a cached program list.
-
-    For V1 with 551 programs this is fast enough. Post-launch: cache the list in memory.
-    """
-    # Scan is acceptable here because we're only reading program_name (projected),
-    # not the full 31k rows. In production, maintain a separate small programs table.
-    resp = requirements_table.scan(
-        ProjectionExpression="program_name",
-        FilterExpression="contains(program_name, :q)",
-        ExpressionAttributeValues={":q": q},
-    )
-
-    # Deduplicate
-    names = sorted({item["program_name"] for item in resp.get("Items", [])})
+    """Case-insensitive substring search over the cached program list."""
+    q_lower = q.lower()
+    names = [n for n in _load_all_programs() if q_lower in n.lower()]
     return {"results": names, "count": len(names)}
 
 

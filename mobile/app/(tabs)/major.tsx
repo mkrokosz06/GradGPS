@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   View,
   Text,
@@ -11,29 +11,27 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import axios from "axios";
 import { API_BASE, USER_ID } from "../../constants/api";
+import { NavHeader } from "../../components/NavHeader";
 
 export default function MajorScreen() {
-  const [query, setQuery]       = useState("");
-  const [results, setResults]   = useState<string[]>([]);
-  const [searching, setSearching] = useState(false);
-  const [saving, setSaving]     = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [query, setQuery]         = useState("");
+  const [allPrograms, setAllPrograms] = useState<string[]>([]);
+  const [loading, setLoading]     = useState(true);
+  const [saving, setSaving]       = useState(false);
+  const [selected, setSelected]   = useState<string | null>(null);
 
-  const search = useCallback(async (q: string) => {
-    setQuery(q);
-    if (q.trim().length < 2) { setResults([]); return; }
-    setSearching(true);
-    try {
-      const res = await axios.get<{ results: string[] }>(`${API_BASE}/programs/search`, {
-        params: { q: q.trim() },
-      });
-      setResults(res.data.results);
-    } catch {
-      setResults([]);
-    } finally {
-      setSearching(false);
-    }
+  useEffect(() => {
+    axios.get<{ results: string[] }>(`${API_BASE}/programs/all`)
+      .then(res => setAllPrograms(res.data.results))
+      .catch(() => Alert.alert("Error", "Could not load programs list."))
+      .finally(() => setLoading(false));
   }, []);
+
+  const results = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return allPrograms;
+    return allPrograms.filter(n => n.toLowerCase().includes(q));
+  }, [query, allPrograms]);
 
   async function selectMajor(major: string) {
     setSaving(true);
@@ -44,9 +42,7 @@ export default function MajorScreen() {
         { headers: { "x-user-id": USER_ID } },
       );
       setSelected(major);
-      setResults([]);
       setQuery("");
-      Alert.alert("Major saved!", `Switched to:\n${major}\n\nPull to refresh the Audit tab.`);
     } catch (e: any) {
       Alert.alert("Error", e?.response?.data?.detail ?? "Could not save major.");
     } finally {
@@ -55,49 +51,95 @@ export default function MajorScreen() {
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-navy px-5">
-      <Text className="text-gold font-bold text-2xl mt-6 mb-2">Choose Major</Text>
-      <Text className="text-slate-400 text-sm mb-5">
-        Search for your Penn State major to set up your degree audit.
-      </Text>
+    <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
+      <NavHeader subtitle="Change Major" />
 
-      <View className="flex-row items-center bg-navy-light/30 border border-slate-600 rounded-xl px-4 mb-4">
-        <Text className="text-slate-400 mr-2">🔍</Text>
-        <TextInput
-          className="flex-1 text-white py-3 text-base"
-          placeholder="e.g. Enterprise Technology..."
-          placeholderTextColor="#64748b"
-          value={query}
-          onChangeText={search}
-          autoCapitalize="none"
-          returnKeyType="search"
-        />
-        {searching && <ActivityIndicator size="small" color="#E8C84B" />}
+      {/* Search bar */}
+      <View className="px-5 pt-5 pb-3 border-b border-gray-100">
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            backgroundColor: "#f8fafc",
+            borderRadius: 14,
+            borderWidth: 1.5,
+            borderColor: "#e2e8f0",
+            paddingHorizontal: 14,
+          }}
+        >
+          <Text style={{ color: "#94a3b8", fontSize: 15, marginRight: 8 }}>⌕</Text>
+          <TextInput
+            style={{ flex: 1, color: "#111827", paddingVertical: 13, fontSize: 14 }}
+            placeholder="Search Penn State majors…"
+            placeholderTextColor="#94a3b8"
+            value={query}
+            onChangeText={setQuery}
+            autoCapitalize="none"
+            returnKeyType="search"
+          />
+          {loading
+            ? <ActivityIndicator size="small" color="#1a3a6b" />
+            : query.length > 0
+            ? (
+              <TouchableOpacity onPress={() => setQuery("")}>
+                <Text style={{ color: "#94a3b8", fontSize: 16, paddingLeft: 8 }}>×</Text>
+              </TouchableOpacity>
+            ) : null}
+        </View>
       </View>
 
+      {/* Current major banner */}
       {selected && (
-        <View className="bg-done/10 border border-done/30 rounded-xl px-4 py-3 mb-4">
-          <Text className="text-done text-xs font-bold mb-0.5">CURRENT MAJOR</Text>
-          <Text className="text-white text-sm">{selected}</Text>
+        <View
+          style={{
+            marginHorizontal: 20, marginTop: 14,
+            backgroundColor: "#f0fdf4",
+            borderRadius: 14, borderWidth: 1, borderColor: "#bbf7d0",
+            padding: 14,
+          }}
+        >
+          <Text style={{ color: "#16a34a", fontSize: 11, fontWeight: "700", marginBottom: 3 }}>
+            MAJOR SAVED
+          </Text>
+          <Text style={{ color: "#166534", fontSize: 13, fontWeight: "500" }}>{selected}</Text>
+          <Text style={{ color: "#4ade80", fontSize: 11, marginTop: 4 }}>
+            Return to Timeline and pull to refresh.
+          </Text>
         </View>
       )}
 
+      {/* Results list */}
       <FlatList
         data={results}
         keyExtractor={(item) => item}
+        contentContainerStyle={{ paddingTop: 8 }}
         renderItem={({ item }) => (
           <TouchableOpacity
-            className="py-3 px-4 border-b border-slate-800 active:bg-navy-light/20"
             onPress={() => selectMajor(item)}
             disabled={saving}
+            activeOpacity={0.6}
+            style={{
+              paddingHorizontal: 20,
+              paddingVertical: 15,
+              borderBottomWidth: 1,
+              borderBottomColor: "#f3f4f6",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
           >
-            <Text className="text-white text-sm">{item}</Text>
+            <Text style={{ color: "#1e293b", fontSize: 13, flex: 1, marginRight: 12 }}>
+              {item}
+            </Text>
+            <Text style={{ color: "#1a3a6b", fontSize: 13, fontWeight: "700" }}>Select</Text>
           </TouchableOpacity>
         )}
         ListEmptyComponent={
-          query.length >= 2 && !searching ? (
-            <Text className="text-slate-500 text-center mt-6">No programs found</Text>
-          ) : null
+          loading ? null : (
+            <View style={{ alignItems: "center", paddingTop: 48 }}>
+              <Text style={{ color: "#cbd5e1", fontSize: 14 }}>No programs found</Text>
+            </View>
+          )
         }
         keyboardShouldPersistTaps="handled"
       />
