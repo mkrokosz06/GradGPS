@@ -98,6 +98,74 @@ def seed_courses(courses):
     tr   = sum(1 for c in courses if c["status"] == "transfer")
     print(f"  Done: {done}  In-Progress: {ip}  Transfer: {tr}")
 
+def patch_eti_catalog():
+    """
+    Fix two classes of catalog defects for the ETI program:
+
+    1. Junk rows — the scraper captured credit counts ("3", "4") as course_title
+       for some rows, creating duplicate entries that inflate the missing count.
+
+    2. Missing pairs — BA-prefixed Smeal courses and their dept-prefix equivalents
+       (MKTG 301, MGMT 301, FIN 301, BLAW 243) are choose-one alternatives but
+       the scraper didn't capture their pair_group_id relationship.
+    """
+    print("\nPatching ETI catalog...")
+    resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq(MAJOR)
+    )
+    rows = resp.get("Items", [])
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq(MAJOR),
+            ExclusiveStartKey=resp["LastEvaluatedKey"]
+        )
+        rows.extend(resp.get("Items", []))
+
+    # 1. Delete junk rows where course_title is a bare number (credit count artifact)
+    deleted = 0
+    for r in rows:
+        if str(r.get("course_title", "")).strip().isdigit():
+            requirements_table.delete_item(
+                Key={"program_name": r["program_name"], "group_course": r["group_course"]}
+            )
+            deleted += 1
+    print(f"  Removed {deleted} junk rows (credit-count titles).")
+
+    # Reload after deletions
+    resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq(MAJOR)
+    )
+    rows = resp.get("Items", [])
+
+    # 2. Pair BA-prefix courses with their dept-prefix equivalents
+    PAIRS = [
+        ("BA 243",  "BLAW 243", Decimal("580")),  # Legal Environment
+        ("BA 301",  "FIN 301",  Decimal("581")),  # Finance
+        ("BA 303",  "MKTG 301", Decimal("582")),  # Marketing
+        ("BA 304",  "MGMT 301", Decimal("583")),  # Management
+    ]
+
+    def unpaired_row(code):
+        return next(
+            (r for r in rows if r["course_code"] == code and not r.get("pair_group_id")),
+            None,
+        )
+
+    paired = 0
+    for code_a, code_b, pid in PAIRS:
+        row_a, row_b = unpaired_row(code_a), unpaired_row(code_b)
+        if not row_a or not row_b:
+            continue
+        for row in (row_a, row_b):
+            requirements_table.update_item(
+                Key={"program_name": row["program_name"], "group_course": row["group_course"]},
+                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
+                ExpressionAttributeValues={":pid": pid, ":gt": "choose_one"},
+            )
+        paired += 1
+    print(f"  Fixed {paired} missing course pairs (BA↔dept-prefix equivalents).")
+
+
 def check_eti_requirements():
     """Check what requirement groups exist for ETI."""
     print(f"\nChecking ETI requirements in catalog...")
@@ -134,6 +202,7 @@ if __name__ == "__main__":
 
     seed_courses(courses)
 
+    patch_eti_catalog()
     row_count = check_eti_requirements()
     if row_count == 0:
         print("\n  *** ETI program NOT found in catalog! Run load_catalog.py first. ***")
