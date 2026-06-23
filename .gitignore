@@ -1,0 +1,43 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Environment / secrets
+.env
+*.env
+# Keep the example template
+!.env.example
+
+# Large data files
+PSU_Major_Requirements.xlsx
+PSU_Major_Requirements.txt
+
+# Transcripts (student PII)
+*.pdf
+transcripts/
+
+# Node / React Native (for later)
+node_modules/
+.expo/
+.expo-shared/
+
+# macOS / Windows
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Docker volumes / local DB data
+data/

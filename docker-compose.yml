@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  dynamodb:
+    image: amazon/dynamodb-local:latest
+    container_name: degreecheck-dynamodb
+    ports:
+      - "8000:8000"
+    command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
+
+  s3:
+    image: minio/minio:latest
+    container_name: degreecheck-s3
+    ports:
+      - "9000:9000"
+      - "9001:9001"       # MinIO web console
+    environment:
+      MINIO_ROOT_USER: test
+      MINIO_ROOT_PASSWORD: testtest
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  minio_data:

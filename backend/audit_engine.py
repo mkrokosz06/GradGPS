@@ -1,0 +1,454 @@
+"""
+Audit engine.
+Takes a student's completed courses + a major's requirement rows
+and returns a structured audit result.
+"""
+
+import re
+from decimal import Decimal
+from collections import defaultdict
+
+
+GRADE_ORDER = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"]
+
+
+def _grade_meets(earned_grade: str, min_grade: str) -> bool:
+    """Returns True if earned_grade >= min_grade (A is highest)."""
+    if not min_grade or not earned_grade:
+        return True
+    try:
+        return GRADE_ORDER.index(earned_grade) <= GRADE_ORDER.index(min_grade)
+    except ValueError:
+        return True   # unknown grade format — don't block
+
+
+def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> dict:
+    """
+    Parameters
+    ----------
+    requirement_rows : list of dicts from DynamoDB requirements table
+        Keys: program_name, requirement_group, group_type, group_threshold,
+              course_code, credits, min_grade, pair_group_id, ...
+
+    transcript_courses : list of dicts from transcript parser / DynamoDB
+        Keys: course_code, grade, credits_earned, status (done/in_progress/transfer)
+
+    Returns
+    -------
+    dict with keys:
+        major           str
+        total           int
+        done            int
+        in_progress     int
+        missing         int
+        credits_earned  float
+        groups          list of group result dicts
+    """
+
+    # ── Build lookup from student transcript ──────────────────────────────────
+    # course_code → {"status": ..., "grade": ..., "credits_earned": ...}
+    taken = {}
+    for c in transcript_courses:
+        code = c["course_code"].strip().upper()
+        taken[code] = {
+            "status":         c.get("status", "done"),
+            "grade":          c.get("grade", ""),
+            "credits_earned": float(c.get("credits_earned", 0)),
+        }
+
+    # ── Group requirement rows by section ────────────────────────────────────
+    # Preserve insertion order (rows come sorted by group_course SK from DynamoDB)
+    groups_map: dict[str, list[dict]] = defaultdict(list)
+    group_meta: dict[str, dict]       = {}
+
+    for row in requirement_rows:
+        g = row.get("requirement_group", "General Requirements")
+        groups_map[g].append(row)
+        if g not in group_meta:
+            group_meta[g] = {
+                "group_type":      row.get("group_type", "required"),
+                "group_threshold": int(row["group_threshold"]) if row.get("group_threshold") else None,
+            }
+
+    # ── Evaluate each group ──────────────────────────────────────────────────
+    group_results = []
+    total_done = total_ip = total_missing = 0
+    total_credits = 0.0
+
+    for group_name, rows in groups_map.items():
+        # A group may contain rows with different group_types (e.g. ETI Requirements
+        # has both choose_one and choose_credits rows). Split and evaluate each
+        # sub-type separately, then merge into one group result.
+        type_buckets: dict[str, list[dict]] = defaultdict(list)
+        for row in rows:
+            type_buckets[row.get("group_type", "required")].append(row)
+
+        if len(type_buckets) == 1:
+            # Homogeneous — simple path
+            gtype     = next(iter(type_buckets))
+            threshold = group_meta[group_name]["group_threshold"]
+            result    = _eval_type(gtype, rows, taken, threshold)
+
+            d, ip, m = _pool_counts(gtype, result)
+            total_done    += d
+            total_ip      += ip
+            total_missing += m
+            total_credits += result.get("credits_earned", 0.0)
+
+            group_results.append({
+                "name":           group_name,
+                "group_type":     gtype,
+                "threshold":      threshold,
+                "satisfied":      result["satisfied"],
+                "done":           result["done"],
+                "in_progress":    result["in_progress"],
+                "missing":        result["missing"],
+                "credits_earned": result.get("credits_earned", 0.0),
+                "items":          result["items"],
+            })
+
+        else:
+            # Mixed types — evaluate sub-buckets and combine into sub-groups
+            sub_results = []
+            agg_done = agg_ip = agg_missing = 0
+            agg_credits = 0.0
+
+            for gtype, bucket_rows in type_buckets.items():
+                # Threshold for choose_credits rows is stored per-row; use the first
+                thr = None
+                if gtype in ("choose_credits", "choose_courses"):
+                    for r in bucket_rows:
+                        if r.get("group_threshold"):
+                            thr = int(r["group_threshold"])
+                            break
+
+                res = _eval_type(gtype, bucket_rows, taken, thr)
+                d, ip, m = _pool_counts(gtype, res)
+                agg_done    += d
+                agg_ip      += ip
+                agg_missing += m
+                agg_credits += res.get("credits_earned", 0.0)
+                sub_results.append({
+                    "sub_type":       gtype,
+                    "threshold":      thr,
+                    "satisfied":      res["satisfied"],
+                    "done":           res["done"],
+                    "in_progress":    res["in_progress"],
+                    "missing":        res["missing"],
+                    "credits_earned": res.get("credits_earned", 0.0),
+                    "items":          res["items"],
+                })
+
+            total_done    += agg_done
+            total_ip      += agg_ip
+            total_missing += agg_missing
+            total_credits += agg_credits
+
+            group_results.append({
+                "name":           group_name,
+                "group_type":     "mixed",
+                "threshold":      None,
+                "satisfied":      all(s["satisfied"] for s in sub_results),
+                "done":           agg_done,
+                "in_progress":    agg_ip,
+                "missing":        agg_missing,
+                "credits_earned": round(agg_credits, 1),
+                "sub_groups":     sub_results,
+                # Flatten items for backwards-compat
+                "items":          [item for s in sub_results for item in s["items"]],
+            })
+
+    major = requirement_rows[0]["program_name"] if requirement_rows else "Unknown"
+
+    return {
+        "major":          major,
+        "total":          total_done + total_ip + total_missing,
+        "done":           total_done,
+        "in_progress":    total_ip,
+        "missing":        total_missing,
+        "credits_earned": round(total_credits, 1),
+        "groups":         group_results,
+    }
+
+
+# ── Helpers ──────────────────────────────────────────────────────────────────
+
+def _pool_counts(gtype: str, result: dict) -> tuple[int, int, int]:
+    """
+    Return (done, in_progress, missing) contribution to the global totals.
+
+    For choose_credits / choose_courses pools, each pool counts as a SINGLE
+    requirement slot — not one slot per pool item.  This prevents inflating
+    the "missing" count with unchosen electives from a satisfied pool.
+    """
+    if gtype in ("choose_credits", "choose_courses"):
+        if result["satisfied"]:
+            return 1, 0, 0
+        elif result["in_progress"] > 0:
+            return 0, 1, 0
+        else:
+            return 0, 0, 1
+    # required / choose_one: individual item counts are already accurate
+    return result["done"], result["in_progress"], result["missing"]
+
+
+# ── Dispatch helper ─────────────────────────────────────────────────────────
+
+def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
+    if gtype == "required":
+        return _eval_required(rows, taken)
+    elif gtype == "choose_one":
+        return _eval_choose_one(rows, taken)
+    elif gtype == "choose_credits":
+        return _eval_choose_credits(rows, taken, threshold)
+    elif gtype == "choose_courses":
+        return _eval_choose_courses(rows, taken, threshold)
+    else:
+        return _eval_required(rows, taken)   # fallback
+
+
+# ── Group type evaluators ────────────────────────────────────────────────────
+
+def _course_status(row: dict, taken: dict) -> str:
+    """Returns "done", "in_progress", or "missing" for a single course row."""
+    code      = row.get("course_code", "").strip().upper()
+    min_grade = row.get("min_grade", "")
+    # Try matches in order of specificity:
+    #  1. Exact: "CAS 100" → "CAS 100"
+    #  2. W-stripped: catalog "IST 440W" → transcript "IST 440"
+    #     (transcript_parser normalises trailing W from transcript codes)
+    #  3. Variant suffix: catalog "CAS 100" → transcript "CAS 100C"
+    #     (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
+    entry = (
+        taken.get(code)
+        or taken.get(re.sub(r"W$", "", code))
+        or next(
+            (v for k, v in taken.items()
+             if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
+            None,
+        )
+    )
+
+    if not entry:
+        return "missing"
+
+    if entry["status"] == "in_progress":
+        return "in_progress"
+
+    if entry["status"] in ("done", "transfer"):
+        if _grade_meets(entry.get("grade", ""), min_grade):
+            return "done"
+        else:
+            return "missing"   # grade too low — still counts as missing
+
+    return "missing"
+
+
+def _eval_required(rows: list[dict], taken: dict) -> dict:
+    """Every course must be completed."""
+    items = []
+    done = ip = missing = 0
+    credits_earned = 0.0
+
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status(row, taken)
+
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+
+        items.append({
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "min_grade":    row.get("min_grade", ""),
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        })
+
+    return {
+        "satisfied":     missing == 0 and ip == 0,
+        "done":          done,
+        "in_progress":   ip,
+        "missing":       missing,
+        "credits_earned": credits_earned,
+        "items":         items,
+    }
+
+
+def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
+    """
+    Courses sharing a pair_group_id are alternatives — need at least one per pair.
+    Courses without a pair_group_id are treated as individually required (rare).
+    """
+    # Group by pair_group_id
+    pairs: dict = defaultdict(list)
+    unpaired = []
+
+    for row in rows:
+        pid = row.get("pair_group_id")
+        if pid:
+            pairs[str(pid)].append(row)
+        else:
+            unpaired.append(row)
+
+    items  = []
+    done   = ip = missing = 0
+    credits_earned = 0.0
+
+    # Each pair counts as ONE requirement — satisfied if any course in it is done/ip
+    for pid, pair_rows in pairs.items():
+        pair_status = "missing"
+        best_grade  = ""
+        best_code   = ""
+        best_credits = 0.0
+
+        for row in pair_rows:
+            code   = row.get("course_code", "").strip().upper()
+            status = _course_status(row, taken)
+            if status == "done" and pair_status != "done":
+                pair_status  = "done"
+                best_grade   = taken.get(code, {}).get("grade", "")
+                best_code    = code
+                best_credits = taken.get(code, {}).get("credits_earned", 0)
+            elif status == "in_progress" and pair_status == "missing":
+                pair_status = "in_progress"
+                best_code   = code
+
+        if pair_status == "done":
+            done += 1
+            credits_earned += best_credits
+        elif pair_status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+
+        # Add all courses in the pair to items, mark the satisfied one
+        for row in pair_rows:
+            code = row.get("course_code", "").strip().upper()
+            items.append({
+                "course_code":   code,
+                "course_title":  row.get("course_title", ""),
+                "credits":       float(row["credits"]) if row.get("credits") else None,
+                "min_grade":     row.get("min_grade", ""),
+                "status":        _course_status(row, taken),
+                "grade":         taken.get(code, {}).get("grade", ""),
+                "pair_group_id": pid,
+                "pair_status":   pair_status,   # overall pair outcome
+            })
+
+    # Handle unpaired rows as required
+    for row in unpaired:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status(row, taken)
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+        items.append({
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        })
+
+    return {
+        "satisfied":      missing == 0 and ip == 0,
+        "done":           done,
+        "in_progress":    ip,
+        "missing":        missing,
+        "credits_earned": credits_earned,
+        "items":          items,
+    }
+
+
+def _eval_choose_credits(rows: list[dict], taken: dict, threshold: int | None) -> dict:
+    """Sum credits of completed pool courses; satisfied when >= threshold."""
+    items          = []
+    credits_earned = 0.0
+    done = ip = missing = 0
+
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status(row, taken)
+        cr     = float(row["credits"]) if row.get("credits") else 0.0
+
+        if status == "done":
+            credits_earned += taken.get(code, {}).get("credits_earned", cr)
+            done += 1
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+
+        items.append({
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      cr,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        })
+
+    credits_needed = max(0, (threshold or 0) - credits_earned)
+    satisfied = (threshold is None) or (credits_earned >= threshold)
+
+    return {
+        "satisfied":       satisfied,
+        "credits_earned":  round(credits_earned, 1),
+        "credits_needed":  round(credits_needed, 1),
+        "threshold":       threshold,
+        "done":            done,
+        "in_progress":     ip,
+        "missing":         missing,
+        "items":           items,
+    }
+
+
+def _eval_choose_courses(rows: list[dict], taken: dict, threshold: int | None) -> dict:
+    """Count completed pool courses; satisfied when count >= threshold."""
+    items = []
+    done = ip = missing = 0
+    credits_earned = 0.0
+
+    for row in rows:
+        code   = row.get("course_code", "").strip().upper()
+        status = _course_status(row, taken)
+
+        if status == "done":
+            done += 1
+            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+        elif status == "in_progress":
+            ip += 1
+        else:
+            missing += 1
+
+        items.append({
+            "course_code":  code,
+            "course_title": row.get("course_title", ""),
+            "credits":      float(row["credits"]) if row.get("credits") else None,
+            "status":       status,
+            "grade":        taken.get(code, {}).get("grade", ""),
+        })
+
+    courses_needed = max(0, (threshold or 0) - done)
+    satisfied = (threshold is None) or (done >= threshold)
+
+    return {
+        "satisfied":      satisfied,
+        "courses_needed": courses_needed,
+        "threshold":      threshold,
+        "done":           done,
+        "in_progress":    ip,
+        "missing":        missing,
+        "credits_earned": credits_earned,
+        "items":          items,
+    }

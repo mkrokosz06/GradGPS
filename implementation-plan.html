@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DegreeCheck — Implementation Plan</title>
+  <style>
+    :root {
+      --navy:   #0a1628;
+      --blue:   #1a3a6b;
+      --accent: #2e6be6;
+      --sky:    #4aa8f2;
+      --gold:   #f0b429;
+      --green:  #22c55e;
+      --red:    #ef4444;
+      --purple: #a855f7;
+      --orange: #f97316;
+      --white:  #ffffff;
+      --text:   #e2e8f0;
+      --muted:  #94a3b8;
+      --card:   rgba(255,255,255,0.04);
+      --border: rgba(255,255,255,0.08);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--navy);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: linear-gradient(135deg, #0a1628 0%, #0f2040 60%, #0a1628 100%);
+      border-bottom: 1px solid rgba(46,107,230,0.25);
+      padding: 64px 40px 56px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    header::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 50% -20%, rgba(46,107,230,0.2) 0%, transparent 65%);
+    }
+    .header-badge {
+      display: inline-block;
+      background: rgba(168,85,247,0.15);
+      border: 1px solid rgba(168,85,247,0.4);
+      color: #c084fc;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      padding: 5px 16px;
+      border-radius: 20px;
+      margin-bottom: 20px;
+    }
+    header h1 {
+      font-size: clamp(28px, 5vw, 48px);
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -1px;
+      position: relative;
+    }
+    header h1 span { color: var(--sky); }
+    header p {
+      color: var(--muted);
+      font-size: 16px;
+      margin-top: 12px;
+      position: relative;
+    }
+
+    /* ── LAYOUT ── */
+    main { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .status-chip {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 20px;
+      text-align: center;
+    }
+    .status-chip .num {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1;
+    }
+    .status-chip .lbl {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+    .done   { color: var(--green); border-color: rgba(34,197,94,0.3); background: rgba(34,197,94,0.05); }
+    .active { color: var(--gold);  border-color: rgba(240,180,41,0.3); background: rgba(240,180,41,0.05); }
+    .todo   { color: var(--sky);   border-color: rgba(74,168,242,0.3); background: rgba(74,168,242,0.05); }
+
+    /* ── SECTION HEADER ── */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 24px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* ── PHASE CARDS ── */
+    .phases { display: flex; flex-direction: column; gap: 32px; }
+
+    .phase {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+    }
+    .phase-header {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 24px 28px;
+      border-bottom: 1px solid var(--border);
+    }
+    .phase-num {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; font-weight: 900;
+      flex-shrink: 0;
+    }
+    .phase-num.p-done   { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .phase-num.p-active { background: rgba(240,180,41,0.15); color: var(--gold); }
+    .phase-num.p-todo   { background: rgba(46,107,230,0.15); color: var(--sky); }
+    .phase-num.p-post   { background: rgba(168,85,247,0.15); color: var(--purple); }
+
+    .phase-meta h2 { font-size: 20px; font-weight: 700; color: #fff; }
+    .phase-meta p  { font-size: 13px; color: var(--muted); margin-top: 2px; }
+
+    .phase-badge {
+      margin-left: auto;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 20px;
+    }
+    .badge-done   { background: rgba(34,197,94,0.15);  color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+    .badge-active { background: rgba(240,180,41,0.15); color: var(--gold);  border: 1px solid rgba(240,180,41,0.3); }
+    .badge-todo   { background: rgba(46,107,230,0.15); color: var(--sky);   border: 1px solid rgba(74,168,242,0.3); }
+    .badge-post   { background: rgba(168,85,247,0.15); color: var(--purple);border: 1px solid rgba(168,85,247,0.3); }
+
+    .phase-body { padding: 24px 28px; }
+
+    /* ── TASK LIST ── */
+    .task-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .task-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .task-list li .icon {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .icon-done   { background: rgba(34,197,94,0.15);  color: var(--green); }
+    .icon-active { background: rgba(240,180,41,0.15); color: var(--gold); }
+    .icon-todo   { background: rgba(46,107,230,0.12); color: var(--sky); }
+
+    .task-list li strong { color: #fff; }
+    .task-list li span   { color: var(--muted); }
+
+    /* ── CODE CALLOUT ── */
+    .callout {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 16px;
+      font-family: 'Cascadia Code', 'Fira Code', monospace;
+      font-size: 12px;
+      color: #93c5fd;
+      margin: 16px 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+
+    /* ── INFO CALLOUT ── */
+    .info {
+      background: rgba(46,107,230,0.08);
+      border: 1px solid rgba(46,107,230,0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #93c5fd;
+      margin: 16px 0;
+    }
+    .info strong { color: #fff; }
+
+    .warn {
+      background: rgba(240,180,41,0.08);
+      border: 1px solid rgba(240,180,41,0.25);
+      border-radius: 10px;
+      padding: 14px 18px;
+      font-size: 13px;
+      color: #fcd34d;
+      margin: 16px 0;
+    }
+    .warn strong { color: #fff; }
+
+    /* ── TECH GRID ── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .tech-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+    .tech-card .tech-name { font-size: 13px; font-weight: 700; color: #fff; }
+    .tech-card .tech-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── GROUP TYPE CARDS ── */
+    .group-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .group-card {
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid;
+    }
+    .group-card .g-name { font-size: 12px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+    .group-card .g-rule { font-size: 12px; color: var(--muted); margin-top: 6px; }
+    .gc-required  { background: rgba(34,197,94,0.07);  border-color: rgba(34,197,94,0.3);  }
+    .gc-required  .g-name { color: var(--green); }
+    .gc-one       { background: rgba(74,168,242,0.07); border-color: rgba(74,168,242,0.3); }
+    .gc-one       .g-name { color: var(--sky); }
+    .gc-credits   { background: rgba(240,180,41,0.07); border-color: rgba(240,180,41,0.3); }
+    .gc-credits   .g-name { color: var(--gold); }
+    .gc-courses   { background: rgba(249,115,22,0.07); border-color: rgba(249,115,22,0.3); }
+    .gc-courses   .g-name { color: var(--orange); }
+
+    /* ── DIVIDER ── */
+    .divider { border: none; border-top: 1px solid var(--border); margin: 28px 0; }
+
+    /* ── SCREEN FLOW ── */
+    .screens {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+    .screen-card {
+      background: rgba(0,0,0,0.2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .screen-card .s-icon { font-size: 24px; margin-bottom: 8px; }
+    .screen-card .s-name { font-size: 13px; font-weight: 700; color: #fff; }
+    .screen-card .s-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+    /* ── DB TABLE ── */
+    .db-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      margin-top: 16px;
+    }
+    .db-table th {
+      background: rgba(255,255,255,0.05);
+      color: var(--muted);
+      font-weight: 600;
+      text-align: left;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .db-table td {
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+      vertical-align: top;
+    }
+    .db-table tr:last-child td { border-bottom: none; }
+    .col-name  { color: #93c5fd; font-family: monospace; }
+    .col-type  { color: var(--muted); font-family: monospace; }
+    .col-note  { color: var(--text); }
+    .pk { color: var(--gold); font-size: 10px; font-weight: 700; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 32px;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-badge">Technical Implementation Plan</div>
+  <h1>DegreeCheck <span>Build Roadmap</span></h1>
+  <p>Penn State launch — React Native + FastAPI + Supabase &nbsp;·&nbsp; Updated June 2026</p>
+</header>
+
+<main>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <div class="status-chip done">
+      <div class="num">1</div>
+      <div class="lbl">Phase Complete</div>
+    </div>
+    <div class="status-chip active">
+      <div class="num">2</div>
+      <div class="lbl">In Progress</div>
+    </div>
+    <div class="status-chip todo">
+      <div class="num">3</div>
+      <div class="lbl">Phases Remaining</div>
+    </div>
+    <div class="status-chip done">
+      <div class="num">551</div>
+      <div class="lbl">PSU Programs Scraped</div>
+    </div>
+    <div class="status-chip done">
+      <div class="num">31,734</div>
+      <div class="lbl">Requirement Rows</div>
+    </div>
+    <div class="status-chip active">
+      <div class="num">3.65</div>
+      <div class="lbl">Avg Student GPA Tested</div>
+    </div>
+  </div>
+
+  <p class="section-label">Build Phases</p>
+
+  <div class="phases">
+
+    <!-- ─── PHASE 1 ─── -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num p-done">1</div>
+        <div class="phase-meta">
+          <h2>Catalog Data — PSU Scraper</h2>
+          <p>Scrape bulletins.psu.edu · parse requirement structure · output clean dataset</p>
+        </div>
+        <div class="phase-badge badge-done">Complete</div>
+      </div>
+      <div class="phase-body">
+
+        <ul class="task-list">
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>Program index scraper</strong> — fetches all 753 programs from /programs/, filters to 551 University Park only, extracts college + degree metadata</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>Requirement group parser</strong> — walks each program page HTML, classifies headings into requirement groups, detects group type from heading text</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>Four group type detection</strong> — <code>required</code>, <code>choose_one</code>, <code>choose_credits</code>, <code>choose_courses</code> classified per heading text pattern</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>OR-row detection</strong> — detects "or" in first table cell, retroactively upgrades preceding row to <code>choose_one</code>, handles A/or B/or C chains</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>pair_group_id</strong> — every OR-alternative pair shares a unique integer ID so the audit engine knows exactly which courses are interchangeable</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>Excel + TXT output</strong> — styled PSU_Major_Requirements.xlsx (31,734 rows, per-college sheets) and plain-text PSU_Major_Requirements.txt</div>
+          </li>
+          <li>
+            <div class="icon icon-done">✓</div>
+            <div><strong>Polite crawling</strong> — 0.35s delay between requests, 15s timeout with 3 retries, robots.txt compliant (/undergraduate/ + /programs/ allowed)</div>
+          </li>
+        </ul>
+
+        <div class="group-grid">
+          <div class="group-card gc-required">
+            <div class="g-name">required</div>
+            <div class="g-rule">Student must complete every course listed. Audit: each course must appear on transcript.</div>
+          </div>
+          <div class="group-card gc-one">
+            <div class="g-name">choose_one</div>
+            <div class="g-rule">Courses share a pair_group_id. Audit: at least one course per pair_group_id must be on transcript.</div>
+          </div>
+          <div class="group-card gc-credits">
+            <div class="g-name">choose_credits</div>
+            <div class="g-rule">Take any courses from the list until group_threshold credits are reached.</div>
+          </div>
+          <div class="group-card gc-courses">
+            <div class="g-name">choose_courses</div>
+            <div class="g-rule">Take exactly group_threshold courses from the list (any combination).</div>
+          </div>
+        </div>
+
+        <div class="callout">Output: scrape_psu.py  →  PSU_Major_Requirements.xlsx (31,734 rows · 551 programs)
+Columns: program_name, college, degree, campus, requirement_group, group_type,
+         group_threshold, course_code, course_title, credits, min_grade,
+         pair_group_id, url</div>
+
+      </div>
+    </div>
+
+    <!-- ─── PHASE 2 ─── -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num p-active">2</div>
+        <div class="phase-meta">
+          <h2>Audit Engine — Backend API</h2>
+          <p>Python · FastAPI · Supabase PostgreSQL · pdfplumber transcript parsing</p>
+        </div>
+        <div class="phase-badge badge-active">Next</div>
+      </div>
+      <div class="phase-body">
+
+        <div class="info"><strong>Status:</strong> Two manual audits completed and verified (ETI major, Forensic Science/Chemistry). The audit logic is proven — this phase is about turning that logic into a real API endpoint.</div>
+
+        <hr class="divider">
+        <strong style="color:#fff; font-size:13px;">2A — Database Setup (Supabase)</strong>
+        <ul class="task-list" style="margin-top:12px;">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Create Supabase project</strong> — free tier is fine for launch, PostgreSQL hosted, Auth + Storage built in</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Load catalog data</strong> — import the 31,734-row Excel into the <code>requirement_rows</code> table via Python script or Supabase CSV import</div>
+          </li>
+        </ul>
+
+        <table class="db-table">
+          <tr><th colspan="3">requirement_rows</th></tr>
+          <tr>
+            <td class="col-name">id <span class="pk">PK</span></td>
+            <td class="col-type">bigint</td>
+            <td class="col-note">auto-increment</td>
+          </tr>
+          <tr><td class="col-name">program_name</td><td class="col-type">text</td><td class="col-note">e.g. "Enterprise Technology Integration, B.S."</td></tr>
+          <tr><td class="col-name">college</td><td class="col-type">text</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">degree</td><td class="col-type">text</td><td class="col-note">B.S., B.A., etc.</td></tr>
+          <tr><td class="col-name">requirement_group</td><td class="col-type">text</td><td class="col-note">section heading from bulletin</td></tr>
+          <tr><td class="col-name">group_type</td><td class="col-type">text</td><td class="col-note">required / choose_one / choose_credits / choose_courses</td></tr>
+          <tr><td class="col-name">group_threshold</td><td class="col-type">integer</td><td class="col-note">N credits or N courses, nullable</td></tr>
+          <tr><td class="col-name">course_code</td><td class="col-type">text</td><td class="col-note">e.g. "ETI 461"</td></tr>
+          <tr><td class="col-name">course_title</td><td class="col-type">text</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">credits</td><td class="col-type">numeric</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">min_grade</td><td class="col-type">text</td><td class="col-note">nullable — "C", "B", etc.</td></tr>
+          <tr><td class="col-name">pair_group_id</td><td class="col-type">integer</td><td class="col-note">nullable — shared by OR-alternative courses</td></tr>
+          <tr><td class="col-name">scraped_at</td><td class="col-type">timestamptz</td><td class="col-note">for freshness tracking</td></tr>
+        </table>
+
+        <table class="db-table" style="margin-top:20px;">
+          <tr><th colspan="3">users</th></tr>
+          <tr><td class="col-name">id <span class="pk">PK</span></td><td class="col-type">uuid</td><td class="col-note">Supabase Auth UID</td></tr>
+          <tr><td class="col-name">email</td><td class="col-type">text</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">major</td><td class="col-type">text</td><td class="col-note">matched to program_name in requirement_rows</td></tr>
+          <tr><td class="col-name">transcript_path</td><td class="col-type">text</td><td class="col-note">Supabase Storage object key</td></tr>
+          <tr><td class="col-name">transcript_parsed_at</td><td class="col-type">timestamptz</td><td class="col-note">when PDF was last extracted</td></tr>
+        </table>
+
+        <table class="db-table" style="margin-top:20px;">
+          <tr><th colspan="3">transcript_courses</th></tr>
+          <tr><td class="col-name">id <span class="pk">PK</span></td><td class="col-type">bigint</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">user_id</td><td class="col-type">uuid</td><td class="col-note">FK → users.id</td></tr>
+          <tr><td class="col-name">course_code</td><td class="col-type">text</td><td class="col-note">e.g. "CHEM 110"</td></tr>
+          <tr><td class="col-name">grade</td><td class="col-type">text</td><td class="col-note">A, B+, C, TR (transfer), IP (in progress)</td></tr>
+          <tr><td class="col-name">credits_earned</td><td class="col-type">numeric</td><td class="col-note"></td></tr>
+          <tr><td class="col-name">term</td><td class="col-type">text</td><td class="col-note">e.g. "FA 2025"</td></tr>
+          <tr><td class="col-name">status</td><td class="col-type">text</td><td class="col-note">done / in_progress / transfer</td></tr>
+        </table>
+
+        <hr class="divider">
+        <strong style="color:#fff; font-size:13px;">2B — Transcript Parser</strong>
+        <ul class="task-list" style="margin-top:12px;">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>pdfplumber extraction</strong> — open unofficial PSU transcript PDF, extract text line-by-line, parse course codes + grades + terms with regex</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>In-progress detection</strong> — rows with attempted > 0 and earned = 0 and no grade = currently enrolled, flag as <code>in_progress</code></div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Transfer credit handling</strong> — rows marked "TR" grade get status <code>transfer</code>, counted as complete for audit purposes</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Store to transcript_courses table</strong> — upsert on (user_id, course_code, term) so re-uploads cleanly overwrite</div>
+          </li>
+        </ul>
+
+        <div class="callout">def parse_transcript(pdf_bytes: bytes) -> list[dict]:
+    with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
+        text = "\n".join(p.extract_text() for p in pdf.pages)
+    # Match: DEPT 123  Description  3.000  3.000  A  12.000
+    pattern = r"([A-Z]{2,6})\s+(\d{3}[A-Z]?)\s+.+?\s+(\d+\.\d+)\s+(\d+\.\d+)\s+([A-Z][+-]?|TR)\s"
+    courses = []
+    for m in re.finditer(pattern, text):
+        earned = float(m.group(4))
+        grade  = m.group(5)
+        status = "transfer" if grade == "TR" else "done" if earned > 0 else "in_progress"
+        courses.append({"course_code": f"{m.group(1)} {m.group(2)}",
+                         "grade": grade, "credits_earned": earned, "status": status})
+    return courses</div>
+
+        <hr class="divider">
+        <strong style="color:#fff; font-size:13px;">2C — Audit Logic</strong>
+        <ul class="task-list" style="margin-top:12px;">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>required group</strong> — for each course in group: check if course_code is in student's done/in_progress list → done / in_progress / missing</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>choose_one group (pair_group_id)</strong> — group requirement rows by pair_group_id; for each pair: if any course in pair is done → satisfied; if any is in_progress → in_progress; else → missing</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>choose_credits group</strong> — sum credits earned from courses in the pool that appear on transcript; if sum >= group_threshold → satisfied; else show remaining credits needed</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>choose_courses group</strong> — count distinct courses from pool on transcript; if count >= group_threshold → satisfied</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Min grade check</strong> — if min_grade is set, a course only counts as "done" if the student's grade meets or exceeds the requirement (C or better, etc.)</div>
+          </li>
+        </ul>
+
+        <div class="callout">GET /api/audit?user_id=&lt;uuid&gt;
+
+Response:
+{
+  "major": "Enterprise Technology Integration, B.S.",
+  "total_requirements": 36,
+  "done": 8,
+  "in_progress": 1,
+  "missing": 27,
+  "groups": [
+    {
+      "name": "Requirements for the Major",
+      "group_type": "required",
+      "items": [
+        {"course_code": "ETI 461", "status": "done",        "grade": "A"},
+        {"course_code": "ETI 463", "status": "in_progress", "grade": null},
+        {"course_code": "ETI 471", "status": "missing",     "grade": null}
+      ]
+    },
+    ...
+  ]
+}</div>
+
+        <hr class="divider">
+        <strong style="color:#fff; font-size:13px;">2D — FastAPI Setup</strong>
+        <ul class="task-list" style="margin-top:12px;">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>FastAPI project scaffold</strong> — <code>main.py</code>, <code>routers/audit.py</code>, <code>routers/transcript.py</code>, <code>db.py</code> (Supabase client)</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>POST /transcript/upload</strong> — accepts PDF, runs pdfplumber parser, stores to Supabase Storage + transcript_courses table</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>GET /audit</strong> — reads user's major + transcript_courses, runs audit logic, returns structured JSON</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>GET /programs/search</strong> — fuzzy search program_name for the major picker UI</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>JWT auth middleware</strong> — validate Supabase JWT on every protected endpoint</div>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- ─── PHASE 3 ─── -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num p-todo">3</div>
+        <div class="phase-meta">
+          <h2>Mobile App — React Native + Expo</h2>
+          <p>iOS + Android · Google/Apple SSO · transcript upload · audit display</p>
+        </div>
+        <div class="phase-badge badge-todo">Upcoming</div>
+      </div>
+      <div class="phase-body">
+
+        <ul class="task-list">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Expo project init</strong> — <code>npx create-expo-app degreecheck</code>, configure EAS Build for App Store + Google Play submission</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Auth screens</strong> — Google SSO via <code>@react-native-google-signin/google-signin</code>, Apple SSO via <code>expo-apple-authentication</code> (required by Apple when offering any social login), Supabase session management with <code>AsyncStorage</code></div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Major picker screen</strong> — searchable list of 551 programs, calls GET /programs/search, saves selection to user profile</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Transcript upload screen</strong> — <code>expo-document-picker</code> → PDF → POST /transcript/upload → success confirmation</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Audit screen</strong> — main value prop; shows done/in-progress/missing organized by requirement group, color-coded status, credits remaining</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Course detail card</strong> — tap any course to see title, credits, group type, min grade requirement, whether it satisfies an OR pair</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Progress summary bar</strong> — top of audit screen: "8 of 36 done · 1 in progress · 27 remaining"</div>
+          </li>
+        </ul>
+
+        <div class="screens">
+          <div class="screen-card">
+            <div class="s-icon">🔑</div>
+            <div class="s-name">Login</div>
+            <div class="s-desc">Google + Apple SSO</div>
+          </div>
+          <div class="screen-card">
+            <div class="s-icon">🎓</div>
+            <div class="s-name">Pick Major</div>
+            <div class="s-desc">Search 551 programs</div>
+          </div>
+          <div class="screen-card">
+            <div class="s-icon">📄</div>
+            <div class="s-name">Upload Transcript</div>
+            <div class="s-desc">Unofficial PDF</div>
+          </div>
+          <div class="screen-card">
+            <div class="s-icon">✅</div>
+            <div class="s-name">Audit</div>
+            <div class="s-desc">Done / In Progress / Missing</div>
+          </div>
+          <div class="screen-card">
+            <div class="s-icon">📘</div>
+            <div class="s-name">Course Detail</div>
+            <div class="s-desc">Credits, grade req, OR pairs</div>
+          </div>
+        </div>
+
+        <div class="warn" style="margin-top:20px;"><strong>Apple requirement:</strong> Any app that offers a third-party social login (Google) must also offer Sign in with Apple or it will be rejected from the App Store.</div>
+
+        <hr class="divider">
+        <strong style="color:#fff; font-size:13px;">Key Packages</strong>
+        <div class="tech-grid">
+          <div class="tech-card">
+            <div class="tech-name">expo-document-picker</div>
+            <div class="tech-desc">Native file picker for PDF transcript on iOS + Android</div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-name">@react-native-google-signin</div>
+            <div class="tech-desc">Google OAuth — requires SHA-1 fingerprint config in Google Console</div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-name">expo-apple-authentication</div>
+            <div class="tech-desc">Sign in with Apple — iOS only, required by App Store policy</div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-name">@supabase/supabase-js</div>
+            <div class="tech-desc">Auth session, storage uploads, direct DB queries</div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-name">AsyncStorage</div>
+            <div class="tech-desc">Persist Supabase session token between app launches</div>
+          </div>
+          <div class="tech-card">
+            <div class="tech-name">@sentry/react-native</div>
+            <div class="tech-desc">Crash reporting and error tracking in production</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ─── PHASE 4 ─── -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num p-todo">4</div>
+        <div class="phase-meta">
+          <h2>Deploy + Launch Prep</h2>
+          <p>Railway backend · EAS build submission · weekly scraper cron · monitoring</p>
+        </div>
+        <div class="phase-badge badge-todo">Upcoming</div>
+      </div>
+      <div class="phase-body">
+
+        <ul class="task-list">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Deploy FastAPI to Railway</strong> — push Docker container, set env vars (SUPABASE_URL, SUPABASE_KEY), configure Railway domain</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>EAS Build — iOS</strong> — configure app.json (bundleIdentifier, version), submit to TestFlight for internal testing first, then App Store review</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>EAS Build — Android</strong> — configure app.json (package name), generate keystore, submit to Google Play internal track</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Weekly scraper cron</strong> — Railway cron job runs scrape_psu.py every Sunday at 2am, diffs against existing rows, updates only changed requirement data</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Sentry setup</strong> — initialize @sentry/react-native in app.tsx, add Sentry DSN to env, test that crashes are captured before going live</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>App Store assets</strong> — screenshots (6.5" and 5.5" iPhone required), App Preview video optional, description, keywords, privacy policy URL</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Beta test with real students</strong> — recruit 5-10 Penn State students, have them upload transcripts and audit their actual major before public launch</div>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+
+    <!-- ─── POST V1 ─── -->
+    <div class="phase">
+      <div class="phase-header">
+        <div class="phase-num p-post">V2</div>
+        <div class="phase-meta">
+          <h2>Post-Launch Features</h2>
+          <p>Rate My Professor · multi-school · schedule planner · monetization</p>
+        </div>
+        <div class="phase-badge badge-post">Post-V1</div>
+      </div>
+      <div class="phase-body">
+
+        <ul class="task-list">
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Rate My Professor integration</strong> — unofficial GitHub API wrapper; show professor rating + difficulty on each course card in the audit view</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Semester planner</strong> — drag remaining required courses into future semesters, check prerequisite chain conflicts, estimate graduation date</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Prerequisite chain warnings</strong> — flag courses that have deep prerequisite chains so students know what to prioritize (e.g. IST 110→210→300W→420→421)</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Multi-school expansion</strong> — generalize scraper to support other universities with similar bulletin systems, add school picker to onboarding</div>
+          </li>
+          <li>
+            <div class="icon icon-todo">→</div>
+            <div><strong>Monetization</strong> — premium tier (schedule planner, RMP ratings), institutional licensing to university advising offices, or freemium model</div>
+          </li>
+        </ul>
+
+      </div>
+    </div>
+
+  </div><!-- /phases -->
+
+  <!-- TECH STACK SUMMARY -->
+  <div style="margin-top:48px;">
+    <p class="section-label">Full Tech Stack</p>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <div class="tech-name">React Native + Expo</div>
+        <div class="tech-desc">iOS + Android from one codebase. EAS Build for store submission.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-name">FastAPI (Python)</div>
+        <div class="tech-desc">Audit engine, transcript parsing, catalog API. Hosted on Railway.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-name">Supabase</div>
+        <div class="tech-desc">PostgreSQL + Auth + Storage. Hosts catalog data + user transcripts.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-name">pdfplumber</div>
+        <div class="tech-desc">Extracts course codes, grades, terms from unofficial PSU transcript PDFs.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-name">httpx + BeautifulSoup4</div>
+        <div class="tech-desc">Scrapes bulletins.psu.edu — server-side rendered, no Playwright needed.</div>
+      </div>
+      <div class="tech-card">
+        <div class="tech-name">Railway</div>
+        <div class="tech-desc">Backend hosting + weekly scraper cron job. Docker deploy.</div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  DegreeCheck &nbsp;·&nbsp; Penn State Launch &nbsp;·&nbsp; Implementation Plan v2 &nbsp;·&nbsp; June 2026
+</footer>
+
+</body>
+</html>
