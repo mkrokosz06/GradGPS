@@ -292,7 +292,7 @@ def _eval_type_exclusive(
     for row in rows:
         code = row.get("course_code", "").strip().upper()
         # Also check W-stripped and variant-suffix forms (mirrors _course_status logic)
-        w_stripped = re.sub(r"W$", "", code)
+        w_stripped = re.sub(r"[WHN]$", "", code)
         variant    = next(
             (k for k in taken if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
             None,
@@ -529,7 +529,7 @@ def _course_status(row: dict, taken: dict) -> str:
     #     (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
     entry = (
         taken.get(code)
-        or taken.get(re.sub(r"W$", "", code))
+        or taken.get(re.sub(r"[WHN]$", "", code))
         or next(
             (v for k, v in taken.items()
              if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),

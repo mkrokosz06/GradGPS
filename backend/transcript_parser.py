@@ -40,11 +40,16 @@ FAILING_GRADES = {"F", "W", "WN", "XF"}
 
 def _normalise_code(code: str) -> str:
     """
-    Strip trailing W from course codes so transcript 'CHEM 213W' matches
-    catalog entry 'CHEM 213'.  The W suffix is a Writing Across the Curriculum
-    designation — the same course, just with a WAC component.
+    Strip trailing PSU attribute-designation suffixes from course codes so
+    transcript variants match their base catalog entry:
+      W  — Writing Across the Curriculum  (e.g. IST 440W  → IST 440)
+      H  — Honors section                 (e.g. ENGL 30H  → ENGL 30)
+      N  — Non-Western / Diversity attr   (e.g. SOC 119N  → SOC 119)
+
+    Section letters (A/B/C in CAS 100A, 100B, 100C) are intentionally kept —
+    those are distinct catalog entries, not attribute designations.
     """
-    return re.sub(r"W$", "", code.strip())
+    return re.sub(r"[WHN]$", "", code.strip())
 
 
 def parse_transcript(pdf_bytes: bytes) -> list[dict]:
