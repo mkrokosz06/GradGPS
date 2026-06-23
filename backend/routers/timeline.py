@@ -85,6 +85,10 @@ def _collect_missing(audit_result: dict) -> list[dict]:
                         if pid in seen_pairs:
                             continue
                         seen_pairs.add(pid)
+                        # Skip satisfied pairs (pair_status reflects whether any
+                        # course in the pair has been completed or is in-progress)
+                        if item.get("pair_status") in ("done", "in_progress"):
+                            continue
                         # Find the other option to label it
                         partner = next(
                             (it for it in items
