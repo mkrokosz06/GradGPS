@@ -9,10 +9,10 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MENU_WIDTH = Dimensions.get("window").width * 0.78;
 
 const ALL_ITEMS = [
-  { label: "Timeline",          route: "/" },
-  { label: "Upload Transcript", route: "/upload" },
-  { label: "Change Major",      route: "/major" },
-  { label: "Account",           route: "/account" },
+  { label: "Timeline",          route: "/",        match: ["/", "/index"] },
+  { label: "Upload Transcript", route: "/upload",  match: ["/upload"] },
+  { label: "Change Major",      route: "/major",   match: ["/major"] },
+  { label: "Account",           route: "/account", match: ["/account"] },
 ];
 
 export function NavHeader({ subtitle }: { subtitle?: string }) {
@@ -43,11 +43,11 @@ export function NavHeader({ subtitle }: { subtitle?: string }) {
   }
 
   function navigate(route: string) {
-    closeMenu(() => router.replace(route as any));
+    closeMenu(() => router.navigate(route as any));
   }
 
   // Hide the current page from the menu
-  const menuItems = ALL_ITEMS.filter((item) => item.route !== pathname);
+  const menuItems = ALL_ITEMS.filter((item) => !item.match.includes(pathname));
 
   return (
     <>
