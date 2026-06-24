@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -277,7 +277,9 @@ export default function TimelineScreen() {
     }
   }, [userId]);
 
-  // Re-fetch every time this screen comes into focus (e.g. after upload or major change)
+  // Initial load + re-load when userId becomes available (screen may already be focused)
+  useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
+  // Re-fetch when navigating back to this screen (e.g. after upload or major change)
   useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
 
