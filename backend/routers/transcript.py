@@ -4,11 +4,12 @@ Accepts a PDF, parses it, stores courses to DynamoDB, uploads PDF to S3.
 """
 
 import os
-from fastapi import APIRouter, UploadFile, File, HTTPException, Header
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from decimal import Decimal
 
 from db import transcript_table, users_table, get_s3
 from transcript_parser import parse_transcript
+from deps import get_user_id
 
 router = APIRouter()
 

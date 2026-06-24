@@ -9,9 +9,9 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-import { API_BASE, USER_ID } from "../../constants/api";
 import { NavHeader } from "../../components/NavHeader";
+import { useAuth } from "../../context/AuthContext";
+import { getAllPrograms, getSubplans, selectMajor } from "../../services/programService";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -20,14 +20,16 @@ type Screen = "search" | "subplan" | "saved";
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function MajorScreen() {
+  const { userId } = useAuth();
+
   const [screen, setScreen]           = useState<Screen>("search");
   const [query, setQuery]             = useState("");
   const [allPrograms, setAllPrograms] = useState<string[]>([]);
   const [loading, setLoading]         = useState(true);
 
   // Subplan step
-  const [pendingMajor, setPendingMajor]     = useState<string | null>(null);
-  const [subplans, setSubplans]             = useState<string[]>([]);
+  const [pendingMajor, setPendingMajor]       = useState<string | null>(null);
+  const [subplans, setSubplans]               = useState<string[]>([]);
   const [loadingSubplans, setLoadingSubplans] = useState(false);
 
   // Confirmed selection
@@ -36,8 +38,8 @@ export default function MajorScreen() {
   const [saving, setSaving]             = useState(false);
 
   useEffect(() => {
-    axios.get<{ results: string[] }>(`${API_BASE}/programs/all`)
-      .then(res => setAllPrograms(res.data.results))
+    getAllPrograms()
+      .then(setAllPrograms)
       .catch(() => Alert.alert("Error", "Could not load programs list."))
       .finally(() => setLoading(false));
   }, []);
@@ -53,16 +55,11 @@ export default function MajorScreen() {
     setPendingMajor(major);
     setLoadingSubplans(true);
     try {
-      const res = await axios.get<{ subplans: string[] }>(
-        `${API_BASE}/audit/subplans`,
-        { params: { major } },
-      );
-      const plans = res.data.subplans ?? [];
+      const plans = await getSubplans(major);
       if (plans.length > 0) {
         setSubplans(plans);
         setScreen("subplan");
       } else {
-        // No subplans — save immediately
         await saveMajor(major, null);
       }
     } catch {
@@ -81,11 +78,7 @@ export default function MajorScreen() {
   async function saveMajor(major: string, subplan: string | null) {
     setSaving(true);
     try {
-      await axios.post(
-        `${API_BASE}/programs/select`,
-        { major, subplan },
-        { headers: { "x-user-id": USER_ID } },
-      );
+      await selectMajor(userId!, major, subplan);
       setSavedMajor(major);
       setSavedSubplan(subplan);
       setQuery("");

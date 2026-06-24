@@ -3,11 +3,12 @@ GET /audit
 Returns the full degree audit for the authenticated user.
 """
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Depends
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
+from deps import get_user_id
 
 GEN_ED_PROGRAM = "__GEN_ED__"
 
@@ -68,19 +69,15 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
 
 
 @router.get("")
-def get_audit(x_user_id: str = Header(..., alias="x-user-id")):
-    """
-    Header: x-user-id — the student's user ID (from Google/Apple sub claim).
-    In production this will be extracted from a verified JWT.
-    """
+def get_audit(user_id: str = Depends(get_user_id)):
     # ── 1. Get user's selected major + subplan ────────────────────────────────
-    user_resp = users_table.get_item(Key={"user_id": x_user_id})
+    user_resp = users_table.get_item(Key={"user_id": user_id})
     user = user_resp.get("Item")
     if not user:
         raise HTTPException(status_code=404, detail="User not found. Complete onboarding first.")
 
     major   = user.get("major")
-    subplan = user.get("subplan")   # e.g. "Forensic Chemistry" — optional
+    subplan = user.get("subplan")
 
     if not major:
         raise HTTPException(status_code=400, detail="No major selected. Pick your major first.")
@@ -91,7 +88,6 @@ def get_audit(x_user_id: str = Header(..., alias="x-user-id")):
     )
     requirement_rows = req_resp.get("Items", [])
 
-    # Handle DynamoDB pagination (programs with many rows)
     while "LastEvaluatedKey" in req_resp:
         req_resp = requirements_table.query(
             KeyConditionExpression=Key("program_name").eq(major),
@@ -107,7 +103,7 @@ def get_audit(x_user_id: str = Header(..., alias="x-user-id")):
 
     # ── 4. Fetch student's transcript courses ─────────────────────────────────
     tx_resp = transcript_table.query(
-        KeyConditionExpression=Key("user_id").eq(x_user_id)
+        KeyConditionExpression=Key("user_id").eq(user_id)
     )
     transcript_courses = tx_resp.get("Items", [])
 

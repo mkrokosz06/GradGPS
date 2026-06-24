@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,113 +8,152 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-import { API_BASE, USER_ID } from "../../constants/api";
 import { NavHeader } from "../../components/NavHeader";
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-type TimelineCourse = {
-  course_code: string;
-  course_title?: string;
-  grade: string;
-  credits_earned: number;
-  status: "done" | "in_progress" | "missing";
-  is_pool?: boolean;
-};
-
-type Semester = {
-  term: string;
-  label: string;
-  status: "completed" | "current" | "upcoming";
-  credits: number;
-  courses: TimelineCourse[];
-};
-
-type TimelineData = {
-  major: string;
-  subplan: string | null;
-  transcript_credits: number;
-  semesters: Semester[];
-};
+import { useAuth } from "../../context/AuthContext";
+import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function shortTerm(label: string): { season: string; year: string } {
-  const parts = label.split(" ");
-  if (parts.length < 2) return { season: label, year: "" };
-  const abbr: Record<string, string> = {
-    Spring: "SP", Summer: "SU", Fall: "FA",
-  };
-  return { season: abbr[parts[0]] ?? parts[0], year: `'${parts[1].slice(2)}` };
+const CLASS_YEAR_LABELS = ["Freshman", "Sophomore", "Junior", "Senior"];
+
+function getAcademicYearIndex(term: string, firstFaYear: number): number {
+  const [season, yearStr] = term.split(" ");
+  const year = parseInt(yearStr, 10);
+  if (season === "FA") return year - firstFaYear + 1;
+  if (season === "SP") return year - firstFaYear;
+  return year - firstFaYear; // SU — treated same as preceding year
+}
+
+function classYearLabel(idx: number): string | null {
+  if (idx <= 0) return null;
+  return CLASS_YEAR_LABELS[idx - 1] ?? `Year ${idx}`;
+}
+
+// ── Map pin ───────────────────────────────────────────────────────────────────
+
+function MapPin() {
+  const COLOR = "#E8C84B";  // gold
+  return (
+    <View style={{ alignItems: "center" }}>
+      {/* Circle head */}
+      <View style={{
+        width: 22, height: 22, borderRadius: 11,
+        backgroundColor: COLOR,
+        alignItems: "center", justifyContent: "center",
+        shadowColor: COLOR, shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.5, shadowRadius: 4, elevation: 4,
+      }}>
+        {/* Inner dot */}
+        <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#1a3a6b" }} />
+      </View>
+      {/* Downward point (CSS triangle trick) */}
+      <View style={{
+        width: 0, height: 0,
+        borderLeftWidth: 6,  borderLeftColor:  "transparent",
+        borderRightWidth: 6, borderRightColor: "transparent",
+        borderTopWidth: 9,   borderTopColor:   COLOR,
+        marginTop: -1,
+      }} />
+    </View>
+  );
 }
 
 // ── Timeline node ─────────────────────────────────────────────────────────────
+
+// Fixed geometry so the connector line can be precisely aligned to circle center.
+const LABEL_H    = 34;  // reserved height for year-label / pin row
+const LABEL_MB   = 6;   // margin below that row before circle container
+const CIRCLE_BOX = 32;  // fixed-size container wrapping the circle
+// Circle center Y from the top of the node = LABEL_H + LABEL_MB + CIRCLE_BOX/2
+const CIRCLE_CENTER_Y = LABEL_H + LABEL_MB + CIRCLE_BOX / 2; // 56
 
 function TimelineNode({
   semester,
   selected,
   onPress,
   isLast,
+  yearLabel,
+  lineColor,
 }: {
   semester: Semester;
   selected: boolean;
   onPress: () => void;
   isLast: boolean;
+  yearLabel: string | null;
+  lineColor: string;
 }) {
-  const { season, year } = shortTerm(semester.label);
+  const parts       = semester.label.split(" ");  // ["Fall", "2025"]
+  const season      = parts[0] ?? "";
+  const year        = parts[1] ?? "";
   const isCompleted = semester.status === "completed";
   const isCurrent   = semester.status === "current";
 
+  const circleSize   = selected ? 28 : 20;
+  const circleBg     = isCurrent  ? "#E8C84B"
+                     : (isCompleted || selected) ? "#1a3a6b"
+                     : "transparent";
+  const circleBorder = isCurrent  ? "#E8C84B"
+                     : (isCompleted || selected) ? "#1a3a6b"
+                     : "#d1d5db";
+  const textColor    = selected ? "#1a3a6b" : (isCompleted || isCurrent) ? "#374151" : "#9ca3af";
+
+  const LINE_H = 3;
+
   return (
-    <View className="flex-row items-center">
-      {/* Node */}
+    // alignItems: "flex-start" so marginTop on the line is relative to the top of the row
+    <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+      {/* Node column */}
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
-        className="items-center"
-        style={{ width: 56 }}
+        style={{ alignItems: "center", width: 88 }}
       >
-        {/* Outer ring when selected */}
-        <View
-          className={`items-center justify-center rounded-full ${
-            selected ? "w-8 h-8 bg-navy" : "w-6 h-6"
-          }`}
-        >
-          <View
-            className={`rounded-full ${
-              selected
-                ? "w-3.5 h-3.5 bg-white"
-                : isCompleted || isCurrent
-                ? "w-3.5 h-3.5 bg-navy"
-                : "w-3 h-3 border-2 border-gray-300 bg-white"
-            }`}
-          />
+        {/* Label row — fixed height keeps all circles aligned.
+            Current semester shows a gold map pin; others show year label text. */}
+        <View style={{ height: LABEL_H, justifyContent: "flex-end", alignItems: "center", marginBottom: LABEL_MB }}>
+          {isCurrent ? (
+            <MapPin />
+          ) : yearLabel ? (
+            <Text style={{
+              color: "#1a3a6b", fontSize: 10, fontWeight: "800",
+              letterSpacing: 0.7, textTransform: "uppercase",
+            }}>
+              {yearLabel}
+            </Text>
+          ) : null}
         </View>
 
-        {/* Labels */}
-        <Text
-          className={`text-xs font-bold mt-1.5 ${
-            selected ? "text-navy" : isCompleted || isCurrent ? "text-gray-700" : "text-gray-400"
-          }`}
-        >
+        {/* Fixed-size box so circle center Y is constant regardless of selection state */}
+        <View style={{ width: CIRCLE_BOX, height: CIRCLE_BOX, alignItems: "center", justifyContent: "center" }}>
+          <View style={{
+            width: circleSize, height: circleSize, borderRadius: circleSize / 2,
+            backgroundColor: circleBg,
+            borderWidth: 2.5, borderColor: circleBorder,
+            alignItems: "center", justifyContent: "center",
+          }}>
+            {selected && (
+              <View style={{ width: 9, height: 9, borderRadius: 4.5, backgroundColor: "#ffffff" }} />
+            )}
+          </View>
+        </View>
+
+        <Text style={{ marginTop: 7, fontSize: 13, fontWeight: "600", color: textColor }}>
           {season}
         </Text>
-        <Text
-          className={`text-xs ${
-            selected ? "text-navy-mid" : "text-gray-400"
-          }`}
-        >
+        <Text style={{ fontSize: 12, color: selected ? "#2a5298" : "#9ca3af", marginTop: 1 }}>
           {year}
         </Text>
       </TouchableOpacity>
 
-      {/* Connector line to next node */}
+      {/* Connector line — marginTop positions it exactly at circle center */}
       {!isLast && (
-        <View
-          className="h-px"
-          style={{ width: 16, backgroundColor: "#e5e7eb" }}
-        />
+        <View style={{
+          width: 28,
+          height: LINE_H,
+          backgroundColor: lineColor,
+          borderRadius: LINE_H / 2,
+          marginTop: CIRCLE_CENTER_Y - LINE_H / 2,
+        }} />
       )}
     </View>
   );
@@ -205,25 +244,25 @@ export default function TimelineScreen() {
   const [error, setError]           = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const { userId } = useAuth();
 
   const fetchTimeline = useCallback(async () => {
     try {
-      const res = await axios.get<TimelineData>(`${API_BASE}/timeline`, {
-        headers: { "x-user-id": USER_ID },
-      });
-      setData(res.data);
+      const timeline = await getTimeline(userId!);
+      setData(timeline);
       setError(null);
       // Auto-select current semester, or last completed if no current
-      const cur = res.data.semesters.find((s) => s.status === "current");
-      const last = res.data.semesters.filter((s) => s.status === "completed").at(-1);
-      setSelectedTerm(cur?.term ?? last?.term ?? res.data.semesters[0]?.term ?? null);
+      const cur  = timeline.semesters.find((s) => s.status === "current");
+      const last = timeline.semesters.filter((s) => s.status === "completed").at(-1);
+      setSelectedTerm(cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null);
     } catch (e: any) {
-      setError(e?.response?.data?.detail ?? "Could not load timeline. Is the backend running?");
+      const detail = e?.response?.data?.detail;
+      setError(typeof detail === "string" ? detail : "Could not load timeline. Is the backend running?");
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
-  }, []);
+  }, [userId]);
 
   useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
@@ -258,8 +297,21 @@ export default function TimelineScreen() {
 
   if (!data) return null;
 
-  const creditPct       = Math.min(100, Math.round((data.transcript_credits / 120) * 100));
+  const creditPct        = Math.min(100, Math.round((data.transcript_credits / 120) * 100));
   const selectedSemester = data.semesters.find((s) => s.term === selectedTerm);
+
+  // Compute academic year labels (Freshman / Sophomore / …)
+  const firstFaYear = data.semesters
+    .filter((s) => s.term.startsWith("FA"))
+    .reduce((min, s) => Math.min(min, parseInt(s.term.split(" ")[1], 10)), Infinity);
+
+  let prevYearIdx = -1;
+  const semestersWithLabel = data.semesters.map((sem) => {
+    const idx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
+    const label = idx !== prevYearIdx ? classYearLabel(idx) : null;
+    prevYearIdx = idx;
+    return { sem, yearLabel: label };
+  });
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
@@ -299,15 +351,21 @@ export default function TimelineScreen() {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 20, paddingVertical: 20, alignItems: "center" }}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 20, alignItems: "center" }}
           >
-            {data.semesters.map((sem, i) => (
+            {semestersWithLabel.map(({ sem, yearLabel }, i) => (
               <TimelineNode
                 key={sem.term}
                 semester={sem}
                 selected={sem.term === selectedTerm}
                 onPress={() => setSelectedTerm(sem.term)}
-                isLast={i === data.semesters.length - 1}
+                isLast={i === semestersWithLabel.length - 1}
+                yearLabel={yearLabel}
+                lineColor={
+                  sem.status === "completed" ? "#1a3a6b"
+                  : sem.status === "current"  ? "#E8C84B"
+                  : "#e5e7eb"
+                }
               />
             ))}
           </ScrollView>

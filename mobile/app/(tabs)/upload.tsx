@@ -9,19 +9,12 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
-import axios from "axios";
-import { API_BASE, USER_ID } from "../../constants/api";
+import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
-
-type UploadResult = {
-  status: string;
-  courses_parsed: number;
-  done: number;
-  in_progress: number;
-  transfer: number;
-};
+import { uploadTranscript, type UploadResult } from "../../services/transcriptService";
 
 export default function UploadScreen() {
+  const { userId } = useAuth();
   const [uploading, setUploading] = useState(false);
   const [result, setResult]       = useState<UploadResult | null>(null);
 
@@ -37,12 +30,8 @@ export default function UploadScreen() {
     setResult(null);
 
     try {
-      const form = new FormData();
-      form.append("file", { uri: file.uri, name: file.name ?? "transcript.pdf", type: "application/pdf" } as any);
-      const res = await axios.post<UploadResult>(`${API_BASE}/transcript/upload`, form, {
-        headers: { "x-user-id": USER_ID, "Content-Type": "multipart/form-data" },
-      });
-      setResult(res.data);
+      const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf");
+      setResult(data);
     } catch (e: any) {
       Alert.alert("Upload failed", e?.response?.data?.detail ?? "Something went wrong.");
     } finally {

@@ -1,29 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import axios from "axios";
-import { API_BASE, USER_ID } from "../../constants/api";
+import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
-
-type AuditSummary = {
-  major: string;
-  subplan: string | null;
-  transcript_credits: number;
-  total: number;
-  done: number;
-  in_progress: number;
-  missing: number;
-};
+import { getAudit, type AuditSummary } from "../../services/auditService";
 
 export default function AccountScreen() {
+  const { userId, name, signOut } = useAuth();
   const [audit, setAudit] = useState<AuditSummary | null>(null);
 
   useEffect(() => {
-    axios
-      .get<AuditSummary>(`${API_BASE}/audit`, { headers: { "x-user-id": USER_ID } })
-      .then((res) => setAudit(res.data))
-      .catch(() => {});
-  }, []);
+    if (!userId) return;
+    getAudit(userId).then(setAudit).catch(() => {});
+  }, [userId]);
 
   const creditPct = audit ? Math.min(100, Math.round((audit.transcript_credits / 120) * 100)) : 0;
 
@@ -45,9 +34,11 @@ export default function AccountScreen() {
               marginBottom: 14,
             }}
           >
-            <Text style={{ color: "#ffffff", fontSize: 30, fontWeight: "700" }}>M</Text>
+            <Text style={{ color: "#ffffff", fontSize: 30, fontWeight: "700" }}>
+            {name ? name[0].toUpperCase() : "?"}
+          </Text>
           </View>
-          <Text style={{ color: "#1e293b", fontSize: 20, fontWeight: "700" }}>Matthew K.</Text>
+          <Text style={{ color: "#1e293b", fontSize: 20, fontWeight: "700" }}>{name ?? "Student"}</Text>
           <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 3 }}>Penn State University</Text>
         </View>
 
@@ -109,13 +100,14 @@ export default function AccountScreen() {
         {/* Sign out placeholder */}
         <TouchableOpacity
           activeOpacity={0.7}
+          onPress={signOut}
           style={{
             borderRadius: 14, paddingVertical: 14,
             alignItems: "center",
-            borderWidth: 1.5, borderColor: "#e5e7eb",
+            borderWidth: 1.5, borderColor: "#fca5a5",
           }}
         >
-          <Text style={{ color: "#94a3b8", fontSize: 14, fontWeight: "600" }}>Sign Out</Text>
+          <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "600" }}>Sign Out</Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>
