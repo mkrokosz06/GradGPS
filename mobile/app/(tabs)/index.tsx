@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ function getAcademicYearIndex(term: string, firstFaYear: number): number {
   const year = parseInt(yearStr, 10);
   if (season === "FA") return year - firstFaYear + 1;
   if (season === "SP") return year - firstFaYear;
-  return year - firstFaYear; // SU — treated same as preceding year
+  return year - firstFaYear;
 }
 
 function classYearLabel(idx: number): string | null {
@@ -33,10 +33,9 @@ function classYearLabel(idx: number): string | null {
 // ── Map pin ───────────────────────────────────────────────────────────────────
 
 function MapPin() {
-  const COLOR = "#E8C84B";  // gold
+  const COLOR = "#E8C84B";
   return (
     <View style={{ alignItems: "center" }}>
-      {/* Circle head */}
       <View style={{
         width: 22, height: 22, borderRadius: 11,
         backgroundColor: COLOR,
@@ -44,10 +43,8 @@ function MapPin() {
         shadowColor: COLOR, shadowOffset: { width: 0, height: 2 },
         shadowOpacity: 0.5, shadowRadius: 4, elevation: 4,
       }}>
-        {/* Inner dot */}
         <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#1a3a6b" }} />
       </View>
-      {/* Downward point (CSS triangle trick) */}
       <View style={{
         width: 0, height: 0,
         borderLeftWidth: 6,  borderLeftColor:  "transparent",
@@ -61,11 +58,13 @@ function MapPin() {
 
 // ── Timeline node ─────────────────────────────────────────────────────────────
 
-// Fixed geometry so the connector line can be precisely aligned to circle center.
-const LABEL_H    = 34;  // reserved height for year-label / pin row
-const LABEL_MB   = 6;   // margin below that row before circle container
-const CIRCLE_BOX = 32;  // fixed-size container wrapping the circle
-// Circle center Y from the top of the node = LABEL_H + LABEL_MB + CIRCLE_BOX/2
+const NODE_W      = 88;
+const CONNECTOR_W = 28;
+const NODE_TOTAL  = NODE_W + CONNECTOR_W; // 116 px per slot
+
+const LABEL_H        = 34;
+const LABEL_MB       = 6;
+const CIRCLE_BOX     = 32;
 const CIRCLE_CENTER_Y = LABEL_H + LABEL_MB + CIRCLE_BOX / 2; // 56
 
 function TimelineNode({
@@ -74,43 +73,51 @@ function TimelineNode({
   onPress,
   isLast,
   yearLabel,
-  lineColor,
 }: {
   semester: Semester;
   selected: boolean;
   onPress: () => void;
   isLast: boolean;
   yearLabel: string | null;
-  lineColor: string;
 }) {
-  const parts       = semester.label.split(" ");  // ["Fall", "2025"]
+  const parts       = semester.label.split(" ");
   const season      = parts[0] ?? "";
   const year        = parts[1] ?? "";
   const isCompleted = semester.status === "completed";
   const isCurrent   = semester.status === "current";
+  const isUpcoming  = semester.status === "upcoming";
 
-  const circleSize   = selected ? 28 : 20;
-  const circleBg     = isCurrent  ? "#E8C84B"
-                     : (isCompleted || selected) ? "#1a3a6b"
-                     : "transparent";
-  const circleBorder = isCurrent  ? "#E8C84B"
-                     : (isCompleted || selected) ? "#1a3a6b"
-                     : "#d1d5db";
-  const textColor    = selected ? "#1a3a6b" : (isCompleted || isCurrent) ? "#374151" : "#9ca3af";
+  const circleSize = selected ? 28 : 20;
+
+  // Completed → navy fill; Current → gold; Upcoming → white with navy border; Selected → navy
+  const circleBg =
+    isCurrent   ? "#E8C84B" :
+    isUpcoming  ? "#ffffff" :
+    (isCompleted || selected) ? "#1a3a6b" :
+    "#ffffff";
+
+  const circleBorder =
+    isCurrent   ? "#E8C84B" :
+    isUpcoming  ? "#1a3a6b" :
+    (isCompleted || selected) ? "#1a3a6b" :
+    "#d1d5db";
+
+  const textColor = selected ? "#1a3a6b" : (isCompleted || isCurrent) ? "#374151" : "#1a3a6b";
+
+  const lineColor =
+    isCompleted ? "#1a3a6b" :
+    isCurrent   ? "#E8C84B" :
+    "#1a3a6b";   // upcoming connector also navy so it's visible
 
   const LINE_H = 3;
 
   return (
-    // alignItems: "flex-start" so marginTop on the line is relative to the top of the row
     <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-      {/* Node column */}
       <TouchableOpacity
         onPress={onPress}
         activeOpacity={0.7}
-        style={{ alignItems: "center", width: 88 }}
+        style={{ alignItems: "center", width: NODE_W }}
       >
-        {/* Label row — fixed height keeps all circles aligned.
-            Current semester shows a gold map pin; others show year label text. */}
         <View style={{ height: LABEL_H, justifyContent: "flex-end", alignItems: "center", marginBottom: LABEL_MB }}>
           {isCurrent ? (
             <MapPin />
@@ -124,7 +131,6 @@ function TimelineNode({
           ) : null}
         </View>
 
-        {/* Fixed-size box so circle center Y is constant regardless of selection state */}
         <View style={{ width: CIRCLE_BOX, height: CIRCLE_BOX, alignItems: "center", justifyContent: "center" }}>
           <View style={{
             width: circleSize, height: circleSize, borderRadius: circleSize / 2,
@@ -133,7 +139,7 @@ function TimelineNode({
             alignItems: "center", justifyContent: "center",
           }}>
             {selected && (
-              <View style={{ width: 9, height: 9, borderRadius: 4.5, backgroundColor: "#ffffff" }} />
+              <View style={{ width: 9, height: 9, borderRadius: 4.5, backgroundColor: isUpcoming ? "#1a3a6b" : "#ffffff" }} />
             )}
           </View>
         </View>
@@ -141,19 +147,19 @@ function TimelineNode({
         <Text style={{ marginTop: 7, fontSize: 13, fontWeight: "600", color: textColor }}>
           {season}
         </Text>
-        <Text style={{ fontSize: 12, color: selected ? "#2a5298" : "#9ca3af", marginTop: 1 }}>
+        <Text style={{ fontSize: 12, color: selected ? "#2a5298" : isUpcoming ? "#1a3a6b" : "#9ca3af", marginTop: 1 }}>
           {year}
         </Text>
       </TouchableOpacity>
 
-      {/* Connector line — marginTop positions it exactly at circle center */}
       {!isLast && (
         <View style={{
-          width: 28,
+          width: CONNECTOR_W,
           height: LINE_H,
           backgroundColor: lineColor,
           borderRadius: LINE_H / 2,
           marginTop: CIRCLE_CENTER_Y - LINE_H / 2,
+          opacity: isUpcoming ? 0.3 : 1,
         }} />
       )}
     </View>
@@ -200,9 +206,8 @@ function ContentPanel({
   refreshing: boolean;
   onRefresh: () => void;
 }) {
-  const isCompleted = semester.status === "completed";
-  const isCurrent   = semester.status === "current";
-  const isUpcoming  = semester.status === "upcoming";
+  const isCurrent  = semester.status === "current";
+  const isUpcoming = semester.status === "upcoming";
 
   const statusLabel = isCurrent
     ? "In Progress"
@@ -210,24 +215,22 @@ function ContentPanel({
     ? "Recommended"
     : `${semester.credits} credits earned`;
 
-  const statusColor = isCurrent ? "text-progress" : isUpcoming ? "text-gray-400" : "text-done";
+  const statusColor = isCurrent ? "text-progress" : isUpcoming ? "text-navy" : "text-done";
 
   return (
     <View className="flex-1">
-      {/* Panel header */}
       <View className="px-5 pt-4 pb-3 border-b border-gray-100 flex-row items-center justify-between">
         <View>
           <Text className="text-navy font-bold text-lg">{semester.label}</Text>
           <Text className={`text-xs font-semibold mt-0.5 ${statusColor}`}>{statusLabel}</Text>
         </View>
         {isUpcoming && (
-          <View className="bg-gray-100 px-3 py-1 rounded-full">
-            <Text className="text-gray-400 text-xs font-semibold">~{semester.credits} cr</Text>
+          <View className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
+            <Text className="text-navy text-xs font-semibold">~{semester.credits} cr</Text>
           </View>
         )}
       </View>
 
-      {/* Course list — RefreshControl lives here so pull-to-refresh works */}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
@@ -257,6 +260,7 @@ export default function TimelineScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const { userId } = useAuth();
+  const timelineScrollRef = useRef<ScrollView>(null);
 
   const fetchTimeline = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -264,10 +268,24 @@ export default function TimelineScreen() {
       const timeline = await getTimeline(userId);
       setData(timeline);
       setError(null);
-      // Auto-select current semester, or last completed if no current
+      // Auto-select current semester; fall back to last completed
       const cur  = timeline.semesters.find((s) => s.status === "current");
       const last = timeline.semesters.filter((s) => s.status === "completed").at(-1);
-      setSelectedTerm(cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null);
+      const autoTerm = cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null;
+      setSelectedTerm(autoTerm);
+
+      // Scroll horizontal timeline so the selected node is visible
+      const idx = autoTerm
+        ? timeline.semesters.findIndex((s) => s.term === autoTerm)
+        : 0;
+      if (idx > 2) {
+        setTimeout(() => {
+          timelineScrollRef.current?.scrollTo({
+            x: Math.max(0, (idx - 1) * NODE_TOTAL),
+            animated: true,
+          });
+        }, 300);
+      }
     } catch (e: any) {
       const detail = e?.response?.data?.detail;
       setError(typeof detail === "string" ? detail : "Could not load timeline. Is the backend running?");
@@ -277,10 +295,11 @@ export default function TimelineScreen() {
     }
   }, [userId]);
 
-  // Initial load + re-load when userId becomes available (screen may already be focused)
+  // Fetch on mount and whenever userId changes (handles async AsyncStorage load)
   useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
-  // Re-fetch when navigating back to this screen (e.g. after upload or major change)
+  // Re-fetch whenever this screen gains focus (after upload, major change, etc.)
   useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
+
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
@@ -300,10 +319,7 @@ export default function TimelineScreen() {
         <NavHeader />
         <View className="flex-1 items-center justify-center px-8">
           <Text className="text-gray-800 text-center font-semibold mb-6">{error}</Text>
-          <TouchableOpacity
-            onPress={fetchTimeline}
-            className="bg-navy px-6 py-3 rounded-xl"
-          >
+          <TouchableOpacity onPress={fetchTimeline} className="bg-navy px-6 py-3 rounded-xl">
             <Text className="text-white font-bold">Retry</Text>
           </TouchableOpacity>
         </View>
@@ -313,15 +329,9 @@ export default function TimelineScreen() {
 
   if (!data) return null;
 
-  // ── DEBUG — remove once working ─────────────────────────────────────────────
-  const _upcoming = data.semesters.filter(s => s.status === "upcoming").length;
-  const _total    = data.semesters.length;
-  // ────────────────────────────────────────────────────────────────────────────
-
   const creditPct        = Math.min(100, Math.round((data.transcript_credits / 120) * 100));
   const selectedSemester = data.semesters.find((s) => s.term === selectedTerm);
 
-  // Compute academic year labels (Freshman / Sophomore / …)
   const firstFaYear = data.semesters
     .filter((s) => s.term.startsWith("FA"))
     .reduce((min, s) => Math.min(min, parseInt(s.term.split(" ")[1], 10)), Infinity);
@@ -334,17 +344,12 @@ export default function TimelineScreen() {
     return { sem, yearLabel: label };
   });
 
+  const upcomingCount = data.semesters.filter((s) => s.status === "upcoming").length;
+
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
       <View className="flex-1">
-        {/* Header */}
         <NavHeader subtitle={data.major} />
-        {/* DEBUG BANNER — remove once working */}
-        <View style={{ backgroundColor: "#ff0000", padding: 6 }}>
-          <Text style={{ color: "#fff", fontSize: 11, textAlign: "center" }}>
-            DEBUG: {_total} sems total | {_upcoming} upcoming | user={userId}
-          </Text>
-        </View>
 
         {/* Credit progress strip */}
         <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-100">
@@ -355,25 +360,22 @@ export default function TimelineScreen() {
             </View>
             <Text className="text-gray-400 text-xs mb-1">{creditPct}% of 120</Text>
             <View className="items-end">
-              <Text className="text-gray-500 font-bold text-2xl">{120 - data.transcript_credits}</Text>
+              <Text className="text-navy font-bold text-2xl">{120 - data.transcript_credits}</Text>
               <Text className="text-gray-400 text-xs">remaining</Text>
             </View>
           </View>
-          {/* Progress bar */}
           <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <View
-              className="h-full bg-navy rounded-full"
-              style={{ width: `${creditPct}%` }}
-            />
+            <View className="h-full bg-navy rounded-full" style={{ width: `${creditPct}%` }} />
           </View>
         </View>
 
         {/* Horizontal timeline */}
         <View className="border-b border-gray-100 bg-white">
           <ScrollView
+            ref={timelineScrollRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 20, alignItems: "center" }}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8, alignItems: "center" }}
           >
             {semestersWithLabel.map(({ sem, yearLabel }, i) => (
               <TimelineNode
@@ -383,14 +385,15 @@ export default function TimelineScreen() {
                 onPress={() => setSelectedTerm(sem.term)}
                 isLast={i === semestersWithLabel.length - 1}
                 yearLabel={yearLabel}
-                lineColor={
-                  sem.status === "completed" ? "#1a3a6b"
-                  : sem.status === "current"  ? "#E8C84B"
-                  : "#e5e7eb"
-                }
               />
             ))}
           </ScrollView>
+          {/* Hint when there are future semesters */}
+          {upcomingCount > 0 && (
+            <Text style={{ textAlign: "center", fontSize: 10, color: "#1a3a6b", paddingBottom: 8, opacity: 0.6 }}>
+              scroll timeline → {upcomingCount} future semester{upcomingCount > 1 ? "s" : ""}
+            </Text>
+          )}
         </View>
 
         {/* Content area */}
