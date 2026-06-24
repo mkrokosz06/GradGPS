@@ -313,6 +313,11 @@ export default function TimelineScreen() {
 
   if (!data) return null;
 
+  // ── DEBUG — remove once working ─────────────────────────────────────────────
+  const _upcoming = data.semesters.filter(s => s.status === "upcoming").length;
+  const _total    = data.semesters.length;
+  // ────────────────────────────────────────────────────────────────────────────
+
   const creditPct        = Math.min(100, Math.round((data.transcript_credits / 120) * 100));
   const selectedSemester = data.semesters.find((s) => s.term === selectedTerm);
 
@@ -334,6 +339,12 @@ export default function TimelineScreen() {
       <View className="flex-1">
         {/* Header */}
         <NavHeader subtitle={data.major} />
+        {/* DEBUG BANNER — remove once working */}
+        <View style={{ backgroundColor: "#ff0000", padding: 6 }}>
+          <Text style={{ color: "#fff", fontSize: 11, textAlign: "center" }}>
+            DEBUG: {_total} sems total | {_upcoming} upcoming | user={userId}
+          </Text>
+        </View>
 
         {/* Credit progress strip */}
         <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-100">
