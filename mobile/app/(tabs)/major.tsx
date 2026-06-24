@@ -9,6 +9,7 @@ import {
   Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { useAuth } from "../../context/AuthContext";
 import { getAllPrograms, getSubplans, selectMajor } from "../../services/programService";
@@ -20,6 +21,7 @@ type Screen = "search" | "subplan" | "saved";
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function MajorScreen() {
+  const router = useRouter();
   const { userId } = useAuth();
 
   const [screen, setScreen]           = useState<Screen>("search");
@@ -175,17 +177,18 @@ export default function MajorScreen() {
               {savedSubplan}
             </Text>
           )}
-          <Text style={{ color: "#94a3b8", fontSize: 12, textAlign: "center", marginBottom: 32 }}>
-            Go to Timeline and pull to refresh to see your updated degree plan.
-          </Text>
           <TouchableOpacity
-            onPress={() => setScreen("search")}
+            onPress={() => router.navigate("/(tabs)/" as any)}
             style={{
-              borderWidth: 1.5, borderColor: "#1a3a6b",
-              paddingHorizontal: 28, paddingVertical: 11, borderRadius: 12,
+              backgroundColor: "#1a3a6b",
+              paddingHorizontal: 28, paddingVertical: 14, borderRadius: 14,
+              marginBottom: 12,
             }}
           >
-            <Text style={{ color: "#1a3a6b", fontWeight: "700", fontSize: 13 }}>Change Major</Text>
+            <Text style={{ color: "#ffffff", fontWeight: "700", fontSize: 14 }}>Return to Timeline</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => setScreen("search")}>
+            <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 4 }}>Change Major</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>

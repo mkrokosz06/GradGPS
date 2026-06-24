@@ -67,17 +67,17 @@ def select_major(
     if not resp.get("Items"):
         raise HTTPException(status_code=404, detail=f"Major not found: {body.major}")
 
-    update_expr = "SET major = :m"
-    expr_vals   = {":m": body.major}
-
     if body.subplan:
-        update_expr += ", subplan = :s"
-        expr_vals[":s"] = body.subplan
-
-    users_table.update_item(
-        Key={"user_id": user_id},
-        UpdateExpression=update_expr,
-        ExpressionAttributeValues=expr_vals,
-    )
+        users_table.update_item(
+            Key={"user_id": user_id},
+            UpdateExpression="SET major = :m, subplan = :s",
+            ExpressionAttributeValues={":m": body.major, ":s": body.subplan},
+        )
+    else:
+        users_table.update_item(
+            Key={"user_id": user_id},
+            UpdateExpression="SET major = :m REMOVE subplan",
+            ExpressionAttributeValues={":m": body.major},
+        )
 
     return {"status": "ok", "major": body.major, "subplan": body.subplan}

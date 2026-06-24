@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useCallback } from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { getAudit, type AuditSummary } from "../../services/auditService";
@@ -9,10 +10,12 @@ export default function AccountScreen() {
   const { userId, name, signOut } = useAuth();
   const [audit, setAudit] = useState<AuditSummary | null>(null);
 
-  useEffect(() => {
-    if (!userId) return;
-    getAudit(userId).then(setAudit).catch(() => {});
-  }, [userId]);
+  useFocusEffect(
+    useCallback(() => {
+      if (!userId) return;
+      getAudit(userId).then(setAudit).catch(() => {});
+    }, [userId]),
+  );
 
   const creditPct = audit ? Math.min(100, Math.round((audit.transcript_credits / 120) * 100)) : 0;
 

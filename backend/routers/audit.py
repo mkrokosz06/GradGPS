@@ -121,6 +121,7 @@ def get_audit(user_id: str = Depends(get_user_id)):
 
     # ── 6. Run audits ─────────────────────────────────────────────────────────
     result = run_audit(requirement_rows, transcript_courses)
+    result["major"]   = major    # always use the stored value, not run_audit's fallback
     result["subplan"] = subplan
 
     # Total credits earned across all transcript courses (done + transfer)
