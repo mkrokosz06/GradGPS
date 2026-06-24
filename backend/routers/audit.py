@@ -165,22 +165,30 @@ def get_subplans(major: str):
         )
         items.extend(resp.get("Items", []))
 
+    import re
+
     subplans = set()
-    skip_words = {"common", "all options", "university park", "commonwealth", "math 22", "general"}
+
+    # Group names that are NOT subplans — generic section headers used across
+    # all programs. Any name that matches one of these words is skipped.
+    skip_words = {
+        "common", "all options", "university park", "commonwealth",
+        "math 22", "general", "requirements", "core", "elective",
+        "suggested", "curriculum",
+    }
 
     for item in items:
         g  = item.get("requirement_group", "")
         gl = g.lower()
 
-        # Skip common / suggested-plan groups
-        if any(w in gl for w in skip_words):
-            continue
-        # Skip groups with " at " (suggested plan duplicates)
+        # Skip campus-specific / suggested-plan duplicates
         if " at " in gl:
+            continue
+        # Skip generic section headers
+        if any(w in gl for w in skip_words):
             continue
 
         # Extract the subplan name: take text before the first "(" or ":"
-        import re
         name = re.split(r"[(:（]", g)[0].strip()
         # Remove trailing "Option" word to get just the subplan label
         name = re.sub(r"\s+option$", "", name, flags=re.IGNORECASE).strip()
