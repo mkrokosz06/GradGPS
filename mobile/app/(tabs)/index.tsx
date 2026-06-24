@@ -190,7 +190,15 @@ function CourseRow({ course }: { course: TimelineCourse }) {
 
 // ── Content panel ─────────────────────────────────────────────────────────────
 
-function ContentPanel({ semester }: { semester: Semester }) {
+function ContentPanel({
+  semester,
+  refreshing,
+  onRefresh,
+}: {
+  semester: Semester;
+  refreshing: boolean;
+  onRefresh: () => void;
+}) {
   const isCompleted = semester.status === "completed";
   const isCurrent   = semester.status === "current";
   const isUpcoming  = semester.status === "upcoming";
@@ -218,11 +226,14 @@ function ContentPanel({ semester }: { semester: Semester }) {
         )}
       </View>
 
-      {/* Course list */}
+      {/* Course list — RefreshControl lives here so pull-to-refresh works */}
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a3a6b" />
+        }
       >
         {semester.courses.length === 0 ? (
           <Text className="text-gray-300 text-center mt-6">No courses recorded</Text>
@@ -316,12 +327,7 @@ export default function TimelineScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
-      <ScrollView
-        className="flex-1"
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a3a6b" />}
-        scrollEnabled={false}
-        contentContainerStyle={{ flex: 1 }}
-      >
+      <View className="flex-1">
         {/* Header */}
         <NavHeader subtitle={data.major} />
 
@@ -374,13 +380,13 @@ export default function TimelineScreen() {
 
         {/* Content area */}
         {selectedSemester ? (
-          <ContentPanel semester={selectedSemester} />
+          <ContentPanel semester={selectedSemester} refreshing={refreshing} onRefresh={onRefresh} />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Text className="text-gray-300">Select a semester above</Text>
           </View>
         )}
-      </ScrollView>
+      </View>
     </SafeAreaView>
   );
 }
