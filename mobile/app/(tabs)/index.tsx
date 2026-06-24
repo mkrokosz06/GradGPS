@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { useFocusEffect } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
@@ -276,7 +277,8 @@ export default function TimelineScreen() {
     }
   }, [userId]);
 
-  useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
+  // Re-fetch every time this screen comes into focus (e.g. after upload or major change)
+  useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
