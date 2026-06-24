@@ -4,11 +4,12 @@ GET  /programs/search?q=forensic — filter cached list, case-insensitive substr
 POST /programs/select            — save a user's major selection
 """
 
-from fastapi import APIRouter, Query, Header, HTTPException
+from fastapi import APIRouter, Query, HTTPException, Depends
 from pydantic import BaseModel
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table
+from deps import get_user_id
 
 router = APIRouter()
 
@@ -56,10 +57,9 @@ class SelectMajorBody(BaseModel):
 @router.post("/select")
 def select_major(
     body: SelectMajorBody,
-    x_user_id: str = Header(..., alias="x-user-id"),
+    user_id: str = Depends(get_user_id),
 ):
     """Save the student's chosen major (and optional subplan) to their user record."""
-    # Verify the major exists in the catalog
     resp = requirements_table.query(
         KeyConditionExpression=Key("program_name").eq(body.major),
         Limit=1,
@@ -67,15 +67,15 @@ def select_major(
     if not resp.get("Items"):
         raise HTTPException(status_code=404, detail=f"Major not found: {body.major}")
 
-    update_expr  = "SET major = :m"
-    expr_vals    = {":m": body.major}
+    update_expr = "SET major = :m"
+    expr_vals   = {":m": body.major}
 
     if body.subplan:
         update_expr += ", subplan = :s"
         expr_vals[":s"] = body.subplan
 
     users_table.update_item(
-        Key={"user_id": x_user_id},
+        Key={"user_id": user_id},
         UpdateExpression=update_expr,
         ExpressionAttributeValues=expr_vals,
     )

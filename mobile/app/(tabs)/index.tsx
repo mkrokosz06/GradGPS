@@ -247,8 +247,9 @@ export default function TimelineScreen() {
   const { userId } = useAuth();
 
   const fetchTimeline = useCallback(async () => {
+    if (!userId) { setLoading(false); return; }
     try {
-      const timeline = await getTimeline(userId!);
+      const timeline = await getTimeline(userId);
       setData(timeline);
       setError(null);
       // Auto-select current semester, or last completed if no current

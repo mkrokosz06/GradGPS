@@ -19,7 +19,7 @@ S3_BUCKET = os.getenv("S3_BUCKET", "degreecheck-transcripts")
 @router.post("/upload")
 async def upload_transcript(
     file: UploadFile = File(...),
-    x_user_id: str   = Header(..., alias="x-user-id"),
+    user_id: str = Depends(get_user_id),
 ):
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are accepted.")
@@ -36,11 +36,9 @@ async def upload_transcript(
         raise HTTPException(status_code=422, detail="No courses found in transcript. Make sure this is an unofficial PSU transcript PDF.")
 
     # ── 2. Store parsed courses to DynamoDB ───────────────────────────────────
-    # First, delete all existing courses for this user so a re-upload replaces
-    # the whole transcript rather than merging with stale data.
     from boto3.dynamodb.conditions import Key as DKey
     existing = transcript_table.query(
-        KeyConditionExpression=DKey("user_id").eq(x_user_id),
+        KeyConditionExpression=DKey("user_id").eq(user_id),
         ProjectionExpression="user_id, course_code",
     ).get("Items", [])
     if existing:
@@ -48,11 +46,10 @@ async def upload_transcript(
             for item in existing:
                 batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
 
-    # PK=user_id, SK=course_code
     with transcript_table.batch_writer() as batch:
         for c in courses:
             item = {
-                "user_id":        x_user_id,
+                "user_id":        user_id,
                 "course_code":    c["course_code"],
                 "grade":          c.get("grade", ""),
                 "credits_earned": Decimal(str(c.get("credits_earned", 0))),
@@ -62,18 +59,17 @@ async def upload_transcript(
             batch.put_item(Item=item)
 
     # ── 3. Upload raw PDF to S3 ───────────────────────────────────────────────
-    s3_key = f"transcripts/{x_user_id}/transcript.pdf"
+    s3_key = f"transcripts/{user_id}/transcript.pdf"
     try:
         s3 = get_s3()
         s3.put_object(Bucket=S3_BUCKET, Key=s3_key, Body=pdf_bytes, ContentType="application/pdf")
     except Exception as e:
-        # Non-fatal — courses are already in DB
         print(f"S3 upload warning: {e}")
 
     # ── 4. Update user's transcript_parsed_at timestamp ───────────────────────
     from datetime import datetime, timezone
     users_table.update_item(
-        Key={"user_id": x_user_id},
+        Key={"user_id": user_id},
         UpdateExpression="SET transcript_parsed_at = :ts, transcript_s3_key = :key",
         ExpressionAttributeValues={
             ":ts":  datetime.now(timezone.utc).isoformat(),

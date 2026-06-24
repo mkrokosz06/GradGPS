@@ -5,12 +5,13 @@ current in-progress semester, and future recommended semesters built from
 the remaining degree requirements.
 """
 
-from fastapi import APIRouter, HTTPException, Header
+from fastapi import APIRouter, HTTPException, Depends
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit
 from routers.audit import _filter_rows
+from deps import get_user_id
 
 router = APIRouter()
 
@@ -125,9 +126,9 @@ def _collect_missing(audit_result: dict) -> list[dict]:
 
 
 @router.get("")
-def get_timeline(x_user_id: str = Header(..., alias="x-user-id")):
+def get_timeline(user_id: str = Depends(get_user_id)):
     # ── 1. User ──────────────────────────────────────────────────────────────
-    user_resp = users_table.get_item(Key={"user_id": x_user_id})
+    user_resp = users_table.get_item(Key={"user_id": user_id})
     user = user_resp.get("Item")
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
@@ -139,7 +140,7 @@ def get_timeline(x_user_id: str = Header(..., alias="x-user-id")):
 
     # ── 2. Transcript ────────────────────────────────────────────────────────
     tx_resp = transcript_table.query(
-        KeyConditionExpression=Key("user_id").eq(x_user_id)
+        KeyConditionExpression=Key("user_id").eq(user_id)
     )
     transcript_courses = tx_resp.get("Items", [])
 

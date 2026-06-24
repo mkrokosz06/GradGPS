@@ -42,8 +42,8 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
         gl    = group.lower()
 
         # ── Always drop suggested-plan duplicate groups ──
-        # These contain " at university park", " at commonwealth", etc.
-        if " at university park" in gl or " at commonwealth" in gl:
+        # These contain " at university park", " at commonwealth", " at harrisburg", etc.
+        if " at university park" in gl or " at commonwealth" in gl or " at harrisburg" in gl:
             continue
         # Also drop the "MATH 22" variant groups (alternate track for students
         # who took MATH 022 instead of MATH 140 — rare edge case for V1)
