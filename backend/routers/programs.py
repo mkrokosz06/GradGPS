@@ -13,6 +13,23 @@ from deps import get_user_id
 
 router = APIRouter()
 
+# Branch-campus keywords that appear in parentheses in program names.
+# Any program whose name contains one of these is excluded — this app
+# is University Park (main campus) only.
+_BRANCH_CAMPUS_KEYWORDS = {
+    "capital", "brandywine", "dubois", "erie", "fayette",
+    "greater allegheny", "new kensington", "schuylkill",
+    "scranton", "shenango", "york", "university college",
+    "world campus", "commonwealth",
+}
+
+
+def _is_branch_campus(name: str) -> bool:
+    """Return True if program name has a branch-campus parenthetical suffix."""
+    nl = name.lower()
+    return any(f"({kw})" in nl or f"({kw} " in nl for kw in _BRANCH_CAMPUS_KEYWORDS)
+
+
 # In-memory cache populated on first request — avoids a 10-page DynamoDB scan per search
 _programs_cache: list[str] | None = None
 
@@ -30,7 +47,11 @@ def _load_all_programs() -> list[str]:
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
-    _programs_cache = sorted(all_names)
+    # Exclude __GEN_ED__ sentinel and branch-campus programs
+    _programs_cache = sorted(
+        n for n in all_names
+        if n != "__GEN_ED__" and not _is_branch_campus(n)
+    )
     return _programs_cache
 
 
@@ -67,11 +88,23 @@ def select_major(
     if not resp.get("Items"):
         raise HTTPException(status_code=404, detail=f"Major not found: {body.major}")
 
+    # Validate subplan actually exists in the requirement groups for this major
+    # before persisting it, so a stale subplan from a previous major can't leak.
+    effective_subplan = None
     if body.subplan:
+        all_rows_resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq(body.major),
+            ProjectionExpression="requirement_group",
+        )
+        all_group_names = {r.get("requirement_group", "").lower() for r in all_rows_resp.get("Items", [])}
+        if any(body.subplan.lower() in g for g in all_group_names):
+            effective_subplan = body.subplan
+
+    if effective_subplan:
         users_table.update_item(
             Key={"user_id": user_id},
             UpdateExpression="SET major = :m, subplan = :s",
-            ExpressionAttributeValues={":m": body.major, ":s": body.subplan},
+            ExpressionAttributeValues={":m": body.major, ":s": effective_subplan},
         )
     else:
         users_table.update_item(
@@ -80,4 +113,4 @@ def select_major(
             ExpressionAttributeValues={":m": body.major},
         )
 
-    return {"status": "ok", "major": body.major, "subplan": body.subplan}
+    return {"status": "ok", "major": body.major, "subplan": effective_subplan}
