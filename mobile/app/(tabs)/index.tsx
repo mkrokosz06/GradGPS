@@ -8,7 +8,7 @@ import {
   RefreshControl,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
@@ -27,7 +27,8 @@ function getAcademicYearIndex(term: string, firstFaYear: number): number {
 
 function classYearLabel(idx: number): string | null {
   if (idx <= 0) return null;
-  return CLASS_YEAR_LABELS[idx - 1] ?? `Year ${idx}`;
+  // Cap at "Senior" — 5th+ year students are still seniors (or super-seniors)
+  return CLASS_YEAR_LABELS[Math.min(idx - 1, CLASS_YEAR_LABELS.length - 1)];
 }
 
 // ── Map pin ───────────────────────────────────────────────────────────────────
@@ -169,14 +170,31 @@ function TimelineNode({
 // ── Course row ────────────────────────────────────────────────────────────────
 
 function CourseRow({ course }: { course: TimelineCourse }) {
+  const router = useRouter();
   const config = {
     done:        { dot: "✓", dotColor: "text-done",     textColor: "text-gray-800", bg: "bg-green-50" },
     in_progress: { dot: "→", dotColor: "text-progress", textColor: "text-gray-800", bg: "bg-amber-50" },
     missing:     { dot: "○", dotColor: "text-gray-300", textColor: "text-gray-400", bg: "bg-white" },
   }[course.status] ?? { dot: "○", dotColor: "text-gray-300", textColor: "text-gray-400", bg: "bg-white" };
 
+  // Pool entries (e.g. "Elective pool") have no real course code — not tappable
+  if (course.is_pool) {
+    return (
+      <View className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}>
+        <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
+        <View className="flex-1 ml-3">
+          <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
+        </View>
+      </View>
+    );
+  }
+
   return (
-    <View className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}>
+    <TouchableOpacity
+      activeOpacity={0.7}
+      onPress={() => router.push(`/course/${encodeURIComponent(course.course_code)}` as any)}
+      className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
+    >
       <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
       <View className="flex-1 ml-3">
         <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
@@ -190,8 +208,9 @@ function CourseRow({ course }: { course: TimelineCourse }) {
         ) : course.credits_earned > 0 ? (
           <Text className="text-gray-400 text-xs">{course.credits_earned} cr</Text>
         ) : null}
+        <Text className="text-gray-200 text-xs mt-0.5">›</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   );
 }
 
@@ -266,26 +285,36 @@ export default function TimelineScreen() {
     if (!userId) { setLoading(false); return; }
     try {
       const timeline = await getTimeline(userId);
-      setData(timeline);
-      setError(null);
-      // Auto-select current semester; fall back to last completed
-      const cur  = timeline.semesters.find((s) => s.status === "current");
-      const last = timeline.semesters.filter((s) => s.status === "completed").at(-1);
-      const autoTerm = cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null;
-      setSelectedTerm(autoTerm);
+      setData(prev => {
+        const isFirstLoad = prev === null;
 
-      // Scroll horizontal timeline so the selected node is visible
-      const idx = autoTerm
-        ? timeline.semesters.findIndex((s) => s.term === autoTerm)
-        : 0;
-      if (idx > 2) {
-        setTimeout(() => {
-          timelineScrollRef.current?.scrollTo({
-            x: Math.max(0, (idx - 1) * NODE_TOTAL),
-            animated: true,
-          });
-        }, 300);
-      }
+        // Auto-select term: current → last completed → first semester
+        const cur  = timeline.semesters.find((s) => s.status === "current");
+        const last = timeline.semesters.filter((s) => s.status === "completed").at(-1);
+        const defaultTerm = cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null;
+
+        setSelectedTerm(existing => {
+          // Keep the user's selection if it still exists in the refreshed data
+          if (existing && timeline.semesters.some((s) => s.term === existing)) return existing;
+          return defaultTerm;
+        });
+
+        // Only auto-scroll on first load
+        if (isFirstLoad && defaultTerm) {
+          const idx = timeline.semesters.findIndex((s) => s.term === defaultTerm);
+          if (idx > 2) {
+            setTimeout(() => {
+              timelineScrollRef.current?.scrollTo({
+                x: Math.max(0, (idx - 1) * NODE_TOTAL),
+                animated: true,
+              });
+            }, 300);
+          }
+        }
+
+        return timeline;
+      });
+      setError(null);
     } catch (e: any) {
       const detail = e?.response?.data?.detail;
       setError(typeof detail === "string" ? detail : "Could not load timeline. Is the backend running?");
@@ -344,8 +373,6 @@ export default function TimelineScreen() {
     return { sem, yearLabel: label };
   });
 
-  const upcomingCount = data.semesters.filter((s) => s.status === "upcoming").length;
-
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
       <View className="flex-1">
@@ -388,12 +415,6 @@ export default function TimelineScreen() {
               />
             ))}
           </ScrollView>
-          {/* Hint when there are future semesters */}
-          {upcomingCount > 0 && (
-            <Text style={{ textAlign: "center", fontSize: 10, color: "#1a3a6b", paddingBottom: 8, opacity: 0.6 }}>
-              scroll timeline → {upcomingCount} future semester{upcomingCount > 1 ? "s" : ""}
-            </Text>
-          )}
         </View>
 
         {/* Content area */}

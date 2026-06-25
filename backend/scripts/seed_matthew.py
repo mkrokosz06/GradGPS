@@ -163,7 +163,7 @@ def patch_eti_catalog():
                 ExpressionAttributeValues={":pid": pid, ":gt": "choose_one"},
             )
         paired += 1
-    print(f"  Fixed {paired} missing course pairs (BA↔dept-prefix equivalents).")
+    print(f"  Fixed {paired} missing course pairs (BA<->dept-prefix equivalents).")
 
 
 def check_eti_requirements():

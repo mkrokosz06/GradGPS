@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GradGPS Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0f1117;
+      --surface:  #1a1d27;
+      --border:   #2a2d3e;
+      --accent:   #6366f1;
+      --accent2:  #8b5cf6;
+      --text:     #e2e8f0;
+      --muted:    #64748b;
+      --green:    #22c55e;
+      --yellow:   #eab308;
+      --red:      #ef4444;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ---- Top bar ---- */
+    header {
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    header .logo {
+      font-size: 18px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    header .subtitle { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .refresh-btn {
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      padding: 7px 18px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: opacity .15s;
+    }
+    .refresh-btn:hover { opacity: .85; }
+
+    /* ---- Stats cards ---- */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 28px 32px 0;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .stat-card .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .stat-card .value { font-size: 36px; font-weight: 700; margin-top: 6px; }
+    .stat-card.users   .value { color: var(--accent); }
+    .stat-card.trans   .value { color: var(--green); }
+    .stat-card.majors  .value { color: var(--accent2); }
+    .stat-card.courses .value { color: var(--yellow); }
+
+    /* ---- Tabs ---- */
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 24px 32px 0;
+    }
+    .tab {
+      padding: 9px 20px;
+      border-radius: 8px 8px 0 0;
+      border: 1px solid transparent;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all .15s;
+    }
+    .tab.active {
+      background: var(--surface);
+      border-color: var(--border);
+      border-bottom-color: var(--surface);
+      color: var(--text);
+    }
+    .tab:hover:not(.active) { color: var(--text); }
+
+    /* ---- Panel ---- */
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 0 12px 12px 12px;
+      margin: 0 32px 32px;
+      overflow: hidden;
+    }
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .panel-header .count-badge {
+      background: var(--border);
+      color: var(--muted);
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 20px;
+    }
+    input[type="text"], select {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      padding: 7px 12px;
+      font-size: 13px;
+      outline: none;
+      transition: border-color .15s;
+    }
+    input[type="text"]:focus, select:focus { border-color: var(--accent); }
+    input[type="text"] { width: 240px; }
+
+    /* ---- Table ---- */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(99,102,241,.06); }
+    tbody td { padding: 10px 16px; color: var(--text); vertical-align: middle; }
+
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .badge-green  { background: rgba(34,197,94,.15);  color: var(--green); }
+    .badge-yellow { background: rgba(234,179,8,.15);  color: var(--yellow); }
+    .badge-muted  { background: var(--border);         color: var(--muted); }
+    .badge-purple { background: rgba(139,92,246,.15); color: var(--accent2); }
+
+    /* ---- Pagination ---- */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--muted);
+    }
+    .page-btn {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .page-btn:disabled { opacity: .35; cursor: default; }
+    .page-btn:hover:not(:disabled) { border-color: var(--accent); }
+
+    /* ---- Loading / empty ---- */
+    .loading, .empty {
+      padding: 60px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+    .spinner {
+      width: 28px; height: 28px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 12px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">GradGPS Admin</div>
+    <div class="subtitle">Local dashboard — not publicly accessible</div>
+  </div>
+  <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+</header>
+
+<!-- Stats -->
+<div class="stats-row">
+  <div class="stat-card users">
+    <div class="label">Total Signups</div>
+    <div class="value" id="stat-users">—</div>
+  </div>
+  <div class="stat-card trans">
+    <div class="label">Uploaded Transcript</div>
+    <div class="value" id="stat-trans">—</div>
+  </div>
+  <div class="stat-card majors">
+    <div class="label">Programs in Catalog</div>
+    <div class="value" id="stat-majors">—</div>
+  </div>
+  <div class="stat-card courses">
+    <div class="label">Requirement Rows</div>
+    <div class="value" id="stat-courses">—</div>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tabs" style="margin-top: 28px;">
+  <button class="tab active" onclick="switchTab('signups')">Signups</button>
+  <button class="tab"        onclick="switchTab('majors')">Majors</button>
+  <button class="tab"        onclick="switchTab('courses')">Courses</button>
+</div>
+
+<!-- ===================== SIGNUPS PANEL ===================== -->
+<div class="panel" id="panel-signups">
+  <div class="panel-header">
+    <strong>All Users</strong>
+    <span class="count-badge" id="users-count">—</span>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>User ID</th>
+          <th>Major</th>
+          <th>Subplan</th>
+          <th>Transcript Uploaded</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="users-tbody">
+        <tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== MAJORS PANEL ===================== -->
+<div class="panel" id="panel-majors" style="display:none;">
+  <div class="panel-header">
+    <strong>All Programs</strong>
+    <span class="count-badge" id="majors-count">—</span>
+    <input type="text" id="majors-search" placeholder="Search programs…" oninput="filterMajors()" />
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Program Name</th>
+          <th>College</th>
+          <th>Degree</th>
+          <th>Req. Rows</th>
+          <th>Signups</th>
+        </tr>
+      </thead>
+      <tbody id="majors-tbody">
+        <tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== COURSES PANEL ===================== -->
+<div class="panel" id="panel-courses" style="display:none;">
+  <div class="panel-header">
+    <strong>Course Catalog</strong>
+    <span class="count-badge" id="courses-count">—</span>
+    <input  type="text" id="courses-search"  placeholder="Search code or title…" oninput="debounceCourses()" />
+    <select id="courses-major" onchange="loadCourses(0)">
+      <option value="">All majors</option>
+    </select>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Course Code</th>
+          <th>Title</th>
+          <th>Credits</th>
+          <th>Min Grade</th>
+          <th>Group</th>
+          <th>Type</th>
+          <th>Program</th>
+        </tr>
+      </thead>
+      <tbody id="courses-tbody">
+        <tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pagination">
+    <span id="courses-page-info"></span>
+    <button class="page-btn" id="courses-prev" onclick="coursesPrev()">← Prev</button>
+    <button class="page-btn" id="courses-next" onclick="coursesNext()">Next →</button>
+  </div>
+</div>
+
+<script>
+  const BASE = '';  // same origin
+  const LIMIT = 200;
+
+  let _majorsData  = [];
+  let _coursesOffset = 0;
+  let _coursesTotal  = 0;
+  let _courseDebounce = null;
+
+  // ── Active tab ──────────────────────────────────────────────
+  function switchTab(name) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', ['signups','majors','courses'][i] === name);
+    });
+    ['signups','majors','courses'].forEach(n => {
+      document.getElementById('panel-' + n).style.display = n === name ? '' : 'none';
+    });
+  }
+
+  // ── Load everything ─────────────────────────────────────────
+  async function loadAll() {
+    loadStats();
+    loadUsers();
+    loadMajors();
+    loadCourses(0);
+  }
+
+  // ── Stats ────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const d = await get('/admin/stats');
+      document.getElementById('stat-users').textContent   = d.total_users.toLocaleString();
+      document.getElementById('stat-trans').textContent   = d.users_with_transcript.toLocaleString();
+      document.getElementById('stat-majors').textContent  = d.total_majors.toLocaleString();
+      document.getElementById('stat-courses').textContent = d.total_requirement_rows.toLocaleString();
+    } catch(e) { console.error('stats', e); }
+  }
+
+  // ── Users ────────────────────────────────────────────────────
+  async function loadUsers() {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    try {
+      const d = await get('/admin/users');
+      document.getElementById('users-count').textContent = d.count + ' users';
+      if (!d.users.length) {
+        tbody.innerHTML = '<tr><td colspan="5"><div class="empty">No signups yet</div></td></tr>';
+        return;
+      }
+      tbody.innerHTML = d.users.map(u => `
+        <tr>
+          <td style="font-family:monospace;font-size:12px;">${esc(u.user_id)}</td>
+          <td>${esc(u.major)}</td>
+          <td style="color:var(--muted)">${esc(u.subplan)}</td>
+          <td style="color:var(--muted);font-size:12px;">${fmtDate(u.transcript_parsed_at)}</td>
+          <td>${u.transcript_parsed_at
+            ? '<span class="badge badge-green">Uploaded</span>'
+            : '<span class="badge badge-muted">No transcript</span>'}</td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Error: ${e.message}</div></td></tr>`;
+    }
+  }
+
+  // ── Majors ────────────────────────────────────────────────────
+  async function loadMajors() {
+    const tbody = document.getElementById('majors-tbody');
+    tbody.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    try {
+      const d = await get('/admin/majors');
+      _majorsData = d.majors;
+      document.getElementById('majors-count').textContent = d.count + ' programs';
+
+      // Populate the courses major dropdown too
+      const sel = document.getElementById('courses-major');
+      sel.innerHTML = '<option value="">All majors</option>' +
+        d.majors.map(m => `<option value="${esc(m.program_name)}">${esc(m.program_name)}</option>`).join('');
+
+      renderMajors(_majorsData);
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Error: ${e.message}</div></td></tr>`;
+    }
+  }
+
+  function filterMajors() {
+    const q = document.getElementById('majors-search').value.toLowerCase();
+    renderMajors(q ? _majorsData.filter(m => m.program_name.toLowerCase().includes(q)) : _majorsData);
+  }
+
+  function renderMajors(rows) {
+    const tbody = document.getElementById('majors-tbody');
+    if (!rows.length) {
+      tbody.innerHTML = '<tr><td colspan="5"><div class="empty">No programs found</div></td></tr>';
+      return;
+    }
+    tbody.innerHTML = rows.map(m => `
+      <tr>
+        <td><strong>${esc(m.program_name)}</strong></td>
+        <td style="color:var(--muted)">${esc(m.college)}</td>
+        <td><span class="badge badge-purple">${esc(m.degree)}</span></td>
+        <td style="text-align:right;color:var(--muted)">${m.course_count.toLocaleString()}</td>
+        <td style="text-align:right">${m.signups > 0
+          ? `<span class="badge badge-green">${m.signups}</span>`
+          : `<span style="color:var(--muted)">0</span>`}</td>
+      </tr>`).join('');
+  }
+
+  // ── Courses ───────────────────────────────────────────────────
+  function debounceCourses() {
+    clearTimeout(_courseDebounce);
+    _courseDebounce = setTimeout(() => loadCourses(0), 350);
+  }
+
+  async function loadCourses(offset) {
+    _coursesOffset = offset;
+    const tbody  = document.getElementById('courses-tbody');
+    const search = document.getElementById('courses-search').value;
+    const major  = document.getElementById('courses-major').value;
+
+    tbody.innerHTML = '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+
+    const params = new URLSearchParams({ limit: LIMIT, offset });
+    if (search) params.set('search', search);
+    if (major)  params.set('major',  major);
+
+    try {
+      const d = await get('/admin/courses?' + params);
+      _coursesTotal = d.total;
+      document.getElementById('courses-count').textContent = d.total.toLocaleString() + ' rows';
+
+      const start = offset + 1, end = Math.min(offset + LIMIT, d.total);
+      document.getElementById('courses-page-info').textContent =
+        d.total ? `${start}–${end} of ${d.total.toLocaleString()}` : '';
+      document.getElementById('courses-prev').disabled = offset === 0;
+      document.getElementById('courses-next').disabled = end >= d.total;
+
+      if (!d.courses.length) {
+        tbody.innerHTML = '<tr><td colspan="7"><div class="empty">No courses found</div></td></tr>';
+        return;
+      }
+
+      const typeColors = {
+        required:       'badge-muted',
+        choose_one:     'badge-yellow',
+        choose_credits: 'badge-purple',
+        choose_courses: 'badge-green',
+      };
+
+      tbody.innerHTML = d.courses.map(c => `
+        <tr>
+          <td style="font-family:monospace;font-weight:600">${esc(c.course_code)}</td>
+          <td>${esc(c.course_title)}</td>
+          <td style="text-align:right">${c.credits ?? '—'}</td>
+          <td style="text-align:center">${c.min_grade ?? '—'}</td>
+          <td style="color:var(--muted);font-size:12px">${esc(c.requirement_group)}</td>
+          <td><span class="badge ${typeColors[c.group_type] || 'badge-muted'}">${esc(c.group_type)}</span></td>
+          <td style="color:var(--muted);font-size:12px">${esc(c.program_name)}</td>
+        </tr>`).join('');
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="7"><div class="empty">Error: ${e.message}</div></td></tr>`;
+    }
+  }
+
+  function coursesPrev() { if (_coursesOffset >= LIMIT) loadCourses(_coursesOffset - LIMIT); }
+  function coursesNext() { if (_coursesOffset + LIMIT < _coursesTotal) loadCourses(_coursesOffset + LIMIT); }
+
+  // ── Utilities ─────────────────────────────────────────────────
+  async function get(path) {
+    const r = await fetch(BASE + path);
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }
+
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '—';
+    try { return new Date(iso).toLocaleString(); } catch { return iso; }
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────
+  loadAll();
+</script>
+</body>
+</html>

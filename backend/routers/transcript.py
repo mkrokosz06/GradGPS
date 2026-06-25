@@ -37,10 +37,18 @@ async def upload_transcript(
 
     # ── 2. Store parsed courses to DynamoDB ───────────────────────────────────
     from boto3.dynamodb.conditions import Key as DKey
-    existing = transcript_table.query(
-        KeyConditionExpression=DKey("user_id").eq(user_id),
-        ProjectionExpression="user_id, course_code",
-    ).get("Items", [])
+    # Paginate to ensure ALL existing courses are deleted, not just the first page.
+    existing = []
+    query_kwargs = {
+        "KeyConditionExpression": DKey("user_id").eq(user_id),
+        "ProjectionExpression": "user_id, course_code",
+    }
+    resp = transcript_table.query(**query_kwargs)
+    existing.extend(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = transcript_table.query(**query_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+        existing.extend(resp.get("Items", []))
+
     if existing:
         with transcript_table.batch_writer() as batch:
             for item in existing:

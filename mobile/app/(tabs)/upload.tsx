@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,14 +9,19 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
+import { useFocusEffect, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { uploadTranscript, type UploadResult } from "../../services/transcriptService";
 
 export default function UploadScreen() {
   const { userId } = useAuth();
+  const router = useRouter();
   const [uploading, setUploading] = useState(false);
   const [result, setResult]       = useState<UploadResult | null>(null);
+
+  // Clear stale upload result whenever this screen comes into focus.
+  useFocusEffect(useCallback(() => { setResult(null); }, []));
 
   async function pickAndUpload() {
     const picked = await DocumentPicker.getDocumentAsync({
@@ -32,6 +37,8 @@ export default function UploadScreen() {
     try {
       const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf");
       setResult(data);
+      // Navigate to timeline so it refetches fresh data with the new transcript.
+      setTimeout(() => router.navigate("/(tabs)/" as any), 1500);
     } catch (e: any) {
       Alert.alert("Upload failed", e?.response?.data?.detail ?? "Something went wrong.");
     } finally {
@@ -124,7 +131,7 @@ export default function UploadScreen() {
             {/* Footer note */}
             <View className="px-5 py-3 border-t border-gray-100">
               <Text className="text-gray-400 text-xs">
-                Return to Timeline and pull down to refresh your degree audit.
+                Returning to timeline…
               </Text>
             </View>
           </View>

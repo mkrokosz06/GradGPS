@@ -11,6 +11,82 @@ from collections import defaultdict
 
 GRADE_ORDER = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"]
 
+# PSU course equivalences — confirmed cross-listings and prefix renames.
+# Each tuple is (code_a, code_b) where both codes refer to identical content.
+# Bidirectional: taking either satisfies a requirement for either.
+# Sources: bulletin.psu.edu PDFs + official IST advising document (Fall 2025).
+#
+# DO NOT add prefix-level (all-number) aliases for CRIM/CRIMJ — they are
+# separate departments (Criminology vs Criminal Justice) that only share
+# specific cross-listed sections. Only confirmed course-by-course pairs below.
+_EQUIVALENCE_PAIRS: list[tuple[str, str]] = [
+    # ── CRIM ↔ CRIMJ confirmed cross-listings ────────────────────────────────
+    # Same section registered under both prefixes. Confirmed from bulletin PDFs.
+    ("CRIM 12",  "CRIMJ 12"),
+    ("CRIM 100", "CRIMJ 100"),
+    ("CRIM 113", "CRIMJ 113"),
+    ("CRIM 204", "CRIMJ 204"),
+    ("CRIM 406", "CRIMJ 406"),
+    ("CRIM 412", "CRIMJ 412"),
+    ("CRIM 413", "CRIMJ 413"),
+    ("CRIM 421", "CRIMJ 421"),
+    ("CRIM 422", "CRIMJ 422"),
+    ("CRIM 423", "CRIMJ 423"),
+    ("CRIM 424", "CRIMJ 424"),
+    ("CRIM 425", "CRIMJ 425"),
+    ("CRIM 441", "CRIMJ 441"),
+    ("CRIM 451", "CRIMJ 451"),
+    ("CRIM 453", "CRIMJ 453"),
+    ("CRIM 459", "CRIMJ 459"),
+    ("CRIM 467", "CRIMJ 467"),
+    ("CRIM 482", "CRIMJ 482"),
+    # ── IST → ETI renames (effective Fall 2025) ──────────────────────────────
+    # Official IST advising doc: "course content has not changed; ONLY the prefix."
+    ("IST 301", "ETI 301"),
+    ("IST 302", "ETI 302"),
+    ("IST 420", "ETI 420"),
+    ("IST 421", "ETI 421"),
+    # ── IST → HCDD renames (effective Fall 2025) ─────────────────────────────
+    ("IST 311", "HCDD 311"),
+    ("IST 331", "HCDD 331"),
+    ("IST 411", "HCDD 411"),
+    ("IST 412", "HCDD 412"),
+    ("IST 413", "HCDD 413"),
+    ("IST 446", "HCDD 446"),
+    # ── IST → CYBER renames (effective Fall 2025) ────────────────────────────
+    ("IST 451", "CYBER 451"),
+    ("IST 454", "CYBER 454"),
+    ("IST 456", "CYBER 456"),
+    # ── SRA → CYBER rename (effective Fall 2025) ─────────────────────────────
+    ("SRA 221", "CYBER 221"),
+]
+
+# Build bidirectional lookup at module load: code → [equivalent codes]
+_COURSE_ALIASES: dict[str, list[str]] = {}
+for _a, _b in _EQUIVALENCE_PAIRS:
+    _COURSE_ALIASES.setdefault(_a, []).append(_b)
+    _COURSE_ALIASES.setdefault(_b, []).append(_a)
+
+
+def _build_taken(transcript_courses: list[dict]) -> dict:
+    """
+    Build taken lookup from transcript, including confirmed course equivalences.
+    Cross-listed courses (CRIM/CRIMJ) and renamed prefixes (IST→ETI/HCDD/CYBER)
+    are registered under all equivalent codes so the audit matches correctly.
+    """
+    taken: dict = {}
+    for c in transcript_courses:
+        code = c["course_code"].strip().upper()
+        entry = {
+            "status":         c.get("status", "done"),
+            "grade":          c.get("grade", ""),
+            "credits_earned": float(c.get("credits_earned", 0)),
+        }
+        taken[code] = entry
+        for alias in _COURSE_ALIASES.get(code, []):
+            taken.setdefault(alias, entry)
+    return taken
+
 
 def _grade_meets(earned_grade: str, min_grade: str) -> bool:
     """Returns True if earned_grade >= min_grade (A is highest)."""
@@ -31,15 +107,8 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
       1. required / choose_one  groups
       2. choose_credits / choose_courses pools
     """
-    # Build taken lookup
-    taken = {}
-    for c in transcript_courses:
-        code = c["course_code"].strip().upper()
-        taken[code] = {
-            "status":         c.get("status", "done"),
-            "grade":          c.get("grade", ""),
-            "credits_earned": float(c.get("credits_earned", 0)),
-        }
+    # Build taken lookup (includes department prefix aliases)
+    taken = _build_taken(transcript_courses)
 
     # Group rows by section
     groups_map: dict[str, list[dict]] = defaultdict(list)
@@ -134,14 +203,8 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> d
 
     # ── Build lookup from student transcript ──────────────────────────────────
     # course_code → {"status": ..., "grade": ..., "credits_earned": ...}
-    taken = {}
-    for c in transcript_courses:
-        code = c["course_code"].strip().upper()
-        taken[code] = {
-            "status":         c.get("status", "done"),
-            "grade":          c.get("grade", ""),
-            "credits_earned": float(c.get("credits_earned", 0)),
-        }
+    # Includes department prefix aliases (e.g. CRIMJ -> CRIM)
+    taken = _build_taken(transcript_courses)
 
     # ── Group requirement rows by section ────────────────────────────────────
     # Preserve insertion order (rows come sorted by group_course SK from DynamoDB)
