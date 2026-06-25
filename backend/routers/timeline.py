@@ -80,6 +80,18 @@ def _collect_missing(audit_result: dict) -> list[dict]:
                             "credits": needed,
                             "is_pool": True,
                         })
+            elif gtype == "choose_courses":
+                # Satisfied choose_courses pools are skipped entirely (like choose_credits).
+                # Unsatisfied: emit one summary slot for the remaining courses needed.
+                if not src.get("satisfied"):
+                    courses_needed = (src.get("threshold") or 0) - (src.get("done") or 0)
+                    if courses_needed > 0:
+                        missing.append({
+                            "course_code": f"Elective ({group.get('name', 'Pool')})",
+                            "course_title": f"Choose {int(src.get('threshold', 1))} course(s) from approved list",
+                            "credits": 3,
+                            "is_pool": True,
+                        })
             else:
                 for item in items:
                     if item.get("status") != "missing":
@@ -106,6 +118,11 @@ def _collect_missing(audit_result: dict) -> list[dict]:
                         if label in seen_codes:
                             continue
                         seen_codes.add(label)
+                        # Add individual codes too so neither appears again
+                        # unpaired if they show up in a later group
+                        seen_codes.add(item["course_code"])
+                        if partner:
+                            seen_codes.add(partner["course_code"])
                         missing.append({
                             "course_code": label,
                             "course_title": item.get("course_title", ""),
@@ -198,6 +215,12 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         requirement_rows.extend(req_resp.get("Items", []))
 
     requirement_rows = _filter_rows(requirement_rows, subplan)
+    if not requirement_rows:
+        raise HTTPException(
+            status_code=404,
+            detail=f"No requirements found for major: {major}. "
+                   "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
+        )
     audit_result     = run_audit(requirement_rows, transcript_courses)
     missing          = _collect_missing(audit_result)
 

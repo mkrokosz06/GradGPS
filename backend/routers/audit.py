@@ -15,6 +15,15 @@ GEN_ED_PROGRAM = "__GEN_ED__"
 router = APIRouter()
 
 
+import re as _re
+
+# Matches any " at <Word> Campus" / " at <Word> <Word> Campus" pattern.
+# Catches all PSU branch campuses: University Park, Commonwealth, Harrisburg,
+# Brandywine, DuBois, Erie, Fayette, Greater Allegheny, New Kensington,
+# Schuylkill, Scranton, Shenango, York, World Campus, etc.
+_CAMPUS_RE = _re.compile(r" at [\w\s]+ campus", _re.IGNORECASE)
+
+
 def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
     """
     Filter requirement rows to only those relevant to the student's subplan.
@@ -28,22 +37,23 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
                                      Semester-grid duplicates of the real groups. Always dropped.
 
     If no subplan is set, we drop only the suggested-plan duplicates (groups that
-    contain " at " followed by a campus name) to avoid double-counting.
+    contain " at <campus>" or are "Suggested Academic Plan" sections) to avoid
+    double-counting.
     """
     filtered = []
     subplan_lower = subplan.lower() if subplan else None
-
-    # Build a list of all subplan keywords found across ALL groups so we can
-    # detect and exclude groups that belong to OTHER subplans.
-    all_group_names = [r.get("requirement_group", "") for r in rows]
 
     for row in rows:
         group = row.get("requirement_group", "")
         gl    = group.lower()
 
-        # ── Always drop suggested-plan duplicate groups ──
-        # These contain " at university park", " at commonwealth", " at harrisburg", etc.
-        if " at university park" in gl or " at commonwealth" in gl or " at harrisburg" in gl:
+        # ── Always drop campus-specific suggested-plan duplicate groups ──
+        # These match " at <any words> campus" for all 38+ PSU branch campuses.
+        if _CAMPUS_RE.search(gl):
+            continue
+        # Also drop "Suggested Academic Plan" groups (semester-grid duplicates
+        # used by some programs like HPA, HDFS, IT).
+        if "suggested academic plan" in gl:
             continue
         # Also drop the "MATH 22" variant groups (alternate track for students
         # who took MATH 022 instead of MATH 140 — rare edge case for V1)
@@ -64,6 +74,12 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
         if subplan_lower in gl:
             filtered.append(row)
             # (Groups from other subplans are implicitly excluded)
+
+    # Defensive fallback: if the subplan matched zero requirement groups (stale /
+    # mismatched subplan from a previous major), ignore it and return the full
+    # no-subplan filtered set so the audit still runs correctly.
+    if subplan_lower and not filtered:
+        return _filter_rows(rows, None)
 
     return filtered
 
