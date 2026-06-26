@@ -114,4 +114,29 @@ except s3.exceptions.BucketAlreadyOwnedByYou:
 except Exception as e:
     print(f"S3 bucket note: {e}")
 
+
+# ── 5. rmp_professor_courses ─────────────────────────────────────────────────
+# PK: course_code  (normalized PSU code, e.g. "MATH 140")
+# SK: professor_id (RMP teacher ID)
+# Attributes: name, department, overall_avg_rating, overall_num_ratings
+# Built by scripts/build_rmp_index.py — do NOT write to this table manually.
+
+try:
+    dynamodb.create_table(
+        TableName="rmp_professor_courses",
+        KeySchema=[
+            {"AttributeName": "course_code",   "KeyType": "HASH"},
+            {"AttributeName": "professor_id",   "KeyType": "RANGE"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "course_code",   "AttributeType": "S"},
+            {"AttributeName": "professor_id",   "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    print("Created table: rmp_professor_courses")
+except dynamodb.exceptions.ResourceInUseException:
+    print("Table already exists: rmp_professor_courses")
+
+
 print("\nAll tables and buckets ready.")

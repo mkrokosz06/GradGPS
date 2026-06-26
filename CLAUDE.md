@@ -99,10 +99,13 @@ Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
 - `choose_credits` pools in `_collect_missing()` must be treated as a single slot — never iterate individual pool items into the timeline. Fixed with an early `continue` when `gtype == "choose_credits"`.
 - PSU attribute suffixes W (Writing), H (Honors), N (Non-Western) are stripped from course codes for catalog matching. Section letters (A/B/C) are kept.
 
-### ETI catalog patches (applied by `seed_matthew.py`)
-The PSU catalog scraper left two defects for ETI:
+### Catalog patches (applied by `seed_matthew.py`)
+**ETI fixes:**
 1. **Junk rows** — credit counts ("3", "4") imported as `course_title` for 14 courses. Deleted on seed.
 2. **Missing pairs** — BA 243/BLAW 243, BA 301/FIN 301, BA 303/MKTG 301, BA 304/MGMT 301 are choose-one alternatives not captured by the scraper. Pair IDs 580–583 are assigned on seed.
+
+**PHYS 211 / PHYS 250 physics sequence alternatives (32 programs):**
+The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
 
 ### Timeline semester projection
 - `COURSES_PER_SEM = 5` courses per future semester

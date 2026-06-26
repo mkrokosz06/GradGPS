@@ -129,39 +129,44 @@ async def _enrich_professor(prof: dict, code: str) -> dict:
 
 
 @router.get("/{code}/professors")
-async def get_professors(
-    code: str,
-    school_id: str = Query(None),
-):
+async def get_professors(code: str):
     """
-    Auto-detect instructors for this course from PSU's Schedule of Courses,
-    then return their RMP ratings filtered to this specific course code.
-
-    Falls back to [] with schedule_found=False if PSU scrape returns nothing.
+    Return professors who have been rated for this course on RMP,
+    looked up from the pre-built DynamoDB index (rmp_professor_courses table).
+    Each result is enriched with course-specific rating aggregates.
     """
-    sid = school_id or rmp_client.PSU_SCHOOL_ID
+    # Step 1: index lookup — who has ratings for this course?
+    index_entries = await rmp_client.get_professors_for_course(code)
 
-    # Step 1: who teaches this course?
-    instructor_names = await rmp_client.get_psu_instructors(code)
-    schedule_found = bool(instructor_names)
-
-    if not instructor_names:
+    if not index_entries:
         return {"professors": [], "schedule_found": False}
 
-    # Step 2: look up each instructor on RMP (best match per name)
-    async def _search_and_enrich(last_name: str) -> dict | None:
+    # Step 2: enrich each with course-specific rating aggregates
+    async def _enrich_index_entry(entry: dict) -> dict | None:
         try:
-            matches = await rmp_client.search_professor(last_name, sid)
-            if not matches:
-                return None
-            return await _enrich_professor(matches[0], code)
+            ratings = await rmp_client.get_course_ratings(entry["professor_id"], code)
         except Exception:
-            return None
+            ratings = {
+                "course_avg_rating": None,
+                "course_avg_difficulty": None,
+                "course_would_take_again": None,
+                "course_num_ratings": 0,
+                "overall_avg_rating": entry.get("overall_avg_rating"),
+                "overall_avg_difficulty": entry.get("overall_avg_difficulty"),
+                "overall_would_take_again": None,
+                "overall_num_ratings": entry.get("overall_num_ratings"),
+            }
+        return {
+            "id": entry["professor_id"],
+            "name": entry.get("name", ""),
+            "department": entry.get("department"),
+            **ratings,
+        }
 
-    enriched = await asyncio.gather(*[_search_and_enrich(n) for n in instructor_names])
+    enriched = await asyncio.gather(*[_enrich_index_entry(e) for e in index_entries])
     professors = [p for p in enriched if p is not None]
 
-    return {"professors": professors, "schedule_found": schedule_found}
+    return {"professors": professors, "schedule_found": True}
 
 
 @router.get("/{code}/professor")

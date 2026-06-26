@@ -18,6 +18,7 @@ import { getTimeline, type TimelineCourse, type Semester, type TimelineData } fr
 const CLASS_YEAR_LABELS = ["Freshman", "Sophomore", "Junior", "Senior"];
 
 function getAcademicYearIndex(term: string, firstFaYear: number): number {
+  if (term === "Transfer") return -1;
   const [season, yearStr] = term.split(" ");
   const year = parseInt(yearStr, 10);
   if (season === "FA") return year - firstFaYear + 1;
@@ -81,9 +82,10 @@ function TimelineNode({
   isLast: boolean;
   yearLabel: string | null;
 }) {
+  const isTransfer  = semester.term === "Transfer";
   const parts       = semester.label.split(" ");
-  const season      = parts[0] ?? "";
-  const year        = parts[1] ?? "";
+  const season      = isTransfer ? "XFER" : (parts[0] ?? "");
+  const year        = isTransfer ? ""     : (parts[1] ?? "");
   const isCompleted = semester.status === "completed";
   const isCurrent   = semester.status === "current";
   const isUpcoming  = semester.status === "upcoming";
@@ -201,6 +203,7 @@ function CourseRow({ course }: { course: TimelineCourse }) {
         {course.course_title ? (
           <Text className="text-gray-400 text-xs mt-0.5" numberOfLines={1}>{course.course_title}</Text>
         ) : null}
+        <Text className="text-gray-400 text-xs mt-0.5">tap for ratings ›</Text>
       </View>
       <View className="ml-3 items-end">
         {course.grade ? (
@@ -208,7 +211,6 @@ function CourseRow({ course }: { course: TimelineCourse }) {
         ) : course.credits_earned > 0 ? (
           <Text className="text-gray-400 text-xs">{course.credits_earned} cr</Text>
         ) : null}
-        <Text className="text-gray-200 text-xs mt-0.5">›</Text>
       </View>
     </TouchableOpacity>
   );
@@ -367,7 +369,10 @@ export default function TimelineScreen() {
 
   let prevYearIdx = -1;
   const semestersWithLabel = data.semesters.map((sem) => {
-    const idx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
+    if (sem.term === "Transfer") return { sem, yearLabel: null };
+    const rawIdx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
+    // Cap so "Senior" never repeats for 5th-year+ students
+    const idx = rawIdx > 0 ? Math.min(rawIdx, CLASS_YEAR_LABELS.length) : rawIdx;
     const label = idx !== prevYearIdx ? classYearLabel(idx) : null;
     prevYearIdx = idx;
     return { sem, yearLabel: label };

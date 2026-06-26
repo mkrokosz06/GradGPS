@@ -6,8 +6,15 @@ import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { getAudit, type AuditSummary } from "../../services/auditService";
 
+function classYear(credits: number): string {
+  if (credits < 30)  return "Freshman";
+  if (credits < 60)  return "Sophomore";
+  if (credits < 90)  return "Junior";
+  return "Senior";
+}
+
 export default function AccountScreen() {
-  const { userId, name, signOut } = useAuth();
+  const { userId, name, email, signOut } = useAuth();
   const [audit, setAudit] = useState<AuditSummary | null>(null);
 
   useFocusEffect(
@@ -18,6 +25,7 @@ export default function AccountScreen() {
   );
 
   const creditPct = audit ? Math.min(100, Math.round((audit.transcript_credits / 120) * 100)) : 0;
+  const year      = audit ? classYear(audit.transcript_credits) : null;
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
@@ -27,7 +35,7 @@ export default function AccountScreen() {
         contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
       >
-        {/* Avatar + name */}
+        {/* Avatar + name + year */}
         <View className="items-center pt-4 pb-8">
           <View
             style={{
@@ -38,11 +46,22 @@ export default function AccountScreen() {
             }}
           >
             <Text style={{ color: "#ffffff", fontSize: 30, fontWeight: "700" }}>
-            {name ? name[0].toUpperCase() : "?"}
-          </Text>
+              {name ? name[0].toUpperCase() : "?"}
+            </Text>
           </View>
           <Text style={{ color: "#1e293b", fontSize: 20, fontWeight: "700" }}>{name ?? "Student"}</Text>
-          <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 3 }}>Penn State University</Text>
+          {year && (
+            <View style={{
+              marginTop: 6, paddingHorizontal: 12, paddingVertical: 3,
+              backgroundColor: "#dbeafe", borderRadius: 12,
+            }}>
+              <Text style={{ color: "#1a3a6b", fontSize: 12, fontWeight: "700" }}>{year}</Text>
+            </View>
+          )}
+          {email && (
+            <Text style={{ color: "#94a3b8", fontSize: 12, marginTop: 6 }}>{email}</Text>
+          )}
+          <Text style={{ color: "#cbd5e1", fontSize: 11, marginTop: 2 }}>Penn State University</Text>
         </View>
 
         {/* Major card */}
@@ -67,6 +86,30 @@ export default function AccountScreen() {
           </View>
         )}
 
+        {/* Credit progress bar */}
+        {audit && (
+          <View
+            style={{
+              borderRadius: 16, padding: 18,
+              borderWidth: 1, borderColor: "#e5e7eb",
+              marginBottom: 16,
+            }}
+          >
+            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 10 }}>
+              <Text style={{ color: "#64748b", fontSize: 13, fontWeight: "600" }}>Credit Progress</Text>
+              <Text style={{ color: "#1a3a6b", fontSize: 13, fontWeight: "700" }}>
+                {audit.transcript_credits} / 120
+              </Text>
+            </View>
+            <View style={{ height: 10, backgroundColor: "#f1f5f9", borderRadius: 5, overflow: "hidden" }}>
+              <View style={{ height: "100%", width: `${creditPct}%`, backgroundColor: "#1a3a6b", borderRadius: 5 }} />
+            </View>
+            <Text style={{ color: "#94a3b8", fontSize: 11, marginTop: 8, textAlign: "right" }}>
+              {120 - audit.transcript_credits} credits remaining
+            </Text>
+          </View>
+        )}
+
         {/* Stats row */}
         {audit && (
           <View
@@ -77,30 +120,15 @@ export default function AccountScreen() {
               marginBottom: 16,
             }}
           >
-            <StatBox label="Credits Earned" value={audit.transcript_credits} sub="of 120" color="#1a3a6b" />
+            <StatBox label="Done"        value={audit.done}        sub="requirements" color="#16a34a" />
             <View style={{ width: 1, backgroundColor: "#f3f4f6" }} />
-            <StatBox label="Progress"       value={`${creditPct}%`}          sub="complete"  color="#2a5298" />
+            <StatBox label="In Progress" value={audit.in_progress} sub="requirements" color="#d97706" />
             <View style={{ width: 1, backgroundColor: "#f3f4f6" }} />
-            <StatBox label="Remaining"      value={120 - audit.transcript_credits} sub="credits" color="#94a3b8" />
+            <StatBox label="Remaining"   value={audit.missing}     sub="requirements" color="#94a3b8" />
           </View>
         )}
 
-        {/* Degree slots */}
-        {audit && (
-          <View
-            style={{
-              borderRadius: 16, overflow: "hidden",
-              borderWidth: 1, borderColor: "#e5e7eb",
-              marginBottom: 28,
-            }}
-          >
-            <SlotRow label="Requirements done"        value={audit.done}        color="#16a34a" />
-            <SlotRow label="In progress"              value={audit.in_progress} color="#d97706" border />
-            <SlotRow label="Still needed"             value={audit.missing}     color="#94a3b8" border />
-          </View>
-        )}
-
-        {/* Sign out placeholder */}
+        {/* Sign out */}
         <TouchableOpacity
           activeOpacity={0.7}
           onPress={signOut}
@@ -108,6 +136,7 @@ export default function AccountScreen() {
             borderRadius: 14, paddingVertical: 14,
             alignItems: "center",
             borderWidth: 1.5, borderColor: "#fca5a5",
+            marginTop: 12,
           }}
         >
           <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "600" }}>Sign Out</Text>

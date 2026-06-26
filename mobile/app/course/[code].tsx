@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -13,6 +13,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import {
   getCourseDetail,
+  getProfessors,
   getProfessorByName,
   type CourseDetail,
   type ProfessorRating,
@@ -140,6 +141,81 @@ function ProfessorCard({ prof, courseCode }: { prof: ProfessorRating; courseCode
   );
 }
 
+// ── Sort pills ────────────────────────────────────────────────────────────────
+
+type SortKey = "best_rating" | "most_ratings" | "easiest" | "hardest" | "would_take_again";
+
+const SORT_OPTIONS: { key: SortKey; label: string }[] = [
+  { key: "most_ratings",     label: "Most Ratings" },
+  { key: "best_rating",      label: "Best Rating" },
+  { key: "easiest",          label: "Easiest" },
+  { key: "hardest",          label: "Hardest" },
+  { key: "would_take_again", label: "Would Take Again" },
+];
+
+function SortPills({ active, onSelect }: { active: SortKey; onSelect: (k: SortKey) => void }) {
+  return (
+    <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={{ marginBottom: 16 }}
+      contentContainerStyle={{ gap: 8, paddingRight: 4 }}
+    >
+      {SORT_OPTIONS.map((opt) => {
+        const isActive = active === opt.key;
+        return (
+          <TouchableOpacity
+            key={opt.key}
+            onPress={() => onSelect(opt.key)}
+            style={{
+              paddingHorizontal: 14, paddingVertical: 7,
+              borderRadius: 20,
+              backgroundColor: isActive ? "#1a3a6b" : "#f3f4f6",
+              borderWidth: 1,
+              borderColor: isActive ? "#1a3a6b" : "#e5e7eb",
+            }}
+          >
+            <Text style={{ fontSize: 12, fontWeight: "700", color: isActive ? "#fff" : "#6b7280" }}>
+              {opt.label}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </ScrollView>
+  );
+}
+
+function sortProfessors(profs: ProfessorRating[], key: SortKey): ProfessorRating[] {
+  const display = (p: ProfessorRating) => {
+    const hasCourse = p.course_num_ratings > 0;
+    return {
+      rating:     hasCourse ? p.course_avg_rating     : p.overall_avg_rating,
+      difficulty: hasCourse ? p.course_avg_difficulty  : p.overall_avg_difficulty,
+      wta:        hasCourse ? p.course_would_take_again : p.overall_would_take_again,
+    };
+  };
+
+  return [...profs].sort((a, b) => {
+    const da = display(a);
+    const db = display(b);
+
+    const nullLast = (va: number | null, vb: number | null, asc: boolean): number => {
+      if (va == null && vb == null) return 0;
+      if (va == null) return 1;
+      if (vb == null) return -1;
+      return asc ? va - vb : vb - va;
+    };
+
+    switch (key) {
+      case "best_rating":      return nullLast(da.rating,     db.rating,     false);
+      case "most_ratings":     return (b.course_num_ratings  - a.course_num_ratings) || nullLast(da.rating, db.rating, false);
+      case "easiest":          return nullLast(da.difficulty, db.difficulty, true);
+      case "hardest":          return nullLast(da.difficulty, db.difficulty, false);
+      case "would_take_again": return nullLast(da.wta,        db.wta,        false);
+    }
+  });
+}
+
 // ── Main screen ───────────────────────────────────────────────────────────────
 
 export default function CourseDetailScreen() {
@@ -149,11 +225,19 @@ export default function CourseDetailScreen() {
   const [detail, setDetail]               = useState<CourseDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
 
-  const [professors, setProfessors]   = useState<ProfessorRating[]>([]);
-  const [searchName, setSearchName]   = useState("");
-  const [searching, setSearching]     = useState(false);
-  const [searchError, setSearchError] = useState<string | null>(null);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [professors, setProfessors]         = useState<ProfessorRating[]>([]);
+  const [autoLoading, setAutoLoading]       = useState(true);
+  const [autoError, setAutoError]           = useState(false);
+  const [sortKey, setSortKey]               = useState<SortKey>("most_ratings");
+  const [searchName, setSearchName]         = useState("");
+  const [searching, setSearching]           = useState(false);
+  const [searchError, setSearchError]       = useState<string | null>(null);
+  const [hasSearched, setHasSearched]       = useState(false);
+
+  const sortedProfessors = useMemo(
+    () => sortProfessors(professors, sortKey),
+    [professors, sortKey],
+  );
 
   useEffect(() => {
     if (!code) return;
@@ -161,6 +245,17 @@ export default function CourseDetailScreen() {
       .then(setDetail)
       .catch(() => {})
       .finally(() => setDetailLoading(false));
+
+    // Auto-load professors from index
+    getProfessors(code)
+      .then(({ professors: profs }) => {
+        setProfessors(profs);
+        setAutoLoading(false);
+      })
+      .catch(() => {
+        setAutoError(true);
+        setAutoLoading(false);
+      });
   }, [code]);
 
   const runSearch = useCallback(async () => {
@@ -241,62 +336,92 @@ export default function CourseDetailScreen() {
             <Text style={{ fontSize: 16, fontWeight: "800", color: "#1a3a6b", marginBottom: 4 }}>
               Rate My Professor
             </Text>
-            <Text style={{ fontSize: 13, color: "#9ca3af", marginBottom: 16 }}>
-              Search your professor to see their ratings specific to {displayCode}
-            </Text>
 
-            {/* Search row */}
-            <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
-              <TextInput
-                value={searchName}
-                onChangeText={setSearchName}
-                onSubmitEditing={runSearch}
-                returnKeyType="search"
-                placeholder="Professor last name or full name"
-                placeholderTextColor="#9ca3af"
-                style={{
-                  flex: 1, height: 46,
-                  backgroundColor: "#f9fafb",
-                  borderWidth: 1, borderColor: "#e5e7eb",
-                  borderRadius: 10, paddingHorizontal: 14,
-                  fontSize: 14, color: "#1f2937",
-                }}
-              />
-              <TouchableOpacity
-                onPress={runSearch}
-                disabled={searching || !searchName.trim()}
-                style={{
-                  height: 46, paddingHorizontal: 18,
-                  backgroundColor: searchName.trim() ? "#1a3a6b" : "#e5e7eb",
-                  borderRadius: 10,
-                  alignItems: "center", justifyContent: "center",
-                }}
-              >
-                {searching
-                  ? <ActivityIndicator color="#fff" size="small" />
-                  : <Text style={{ color: searchName.trim() ? "#fff" : "#9ca3af", fontWeight: "700", fontSize: 14 }}>Search</Text>
-                }
-              </TouchableOpacity>
-            </View>
-
-            {searchError ? (
-              <Text style={{ color: "#6b7280", fontSize: 13, marginBottom: 12, textAlign: "center" }}>
-                {searchError}
-              </Text>
-            ) : null}
-
-            {professors.map((prof) => (
-              <ProfessorCard key={prof.id} prof={prof} courseCode={displayCode} />
-            ))}
-
-            {!hasSearched && (
-              <View style={{ alignItems: "center", paddingVertical: 24 }}>
-                <Text style={{ fontSize: 28, marginBottom: 8 }}>🎓</Text>
-                <Text style={{ fontSize: 13, color: "#9ca3af", textAlign: "center" }}>
-                  Type your professor's name above{"\n"}to see how they're rated for this course
+            {/* Auto-loaded professors */}
+            {autoLoading ? (
+              <View style={{ paddingVertical: 24, alignItems: "center" }}>
+                <ActivityIndicator color="#1a3a6b" />
+                <Text style={{ fontSize: 13, color: "#9ca3af", marginTop: 8 }}>
+                  Loading professors for {displayCode}…
                 </Text>
               </View>
-            )}
+            ) : professors.length > 0 && !hasSearched ? (
+              <>
+                <Text style={{ fontSize: 13, color: "#9ca3af", marginBottom: 14 }}>
+                  Professors who have been rated for {displayCode} on RMP
+                </Text>
+
+                {/* Sort pills */}
+                <SortPills active={sortKey} onSelect={setSortKey} />
+
+                {sortedProfessors.map((prof) => (
+                  <ProfessorCard key={prof.id} prof={prof} courseCode={displayCode} />
+                ))}
+              </>
+            ) : null}
+
+            {/* Manual search — always visible, replaces auto results when used */}
+            <View style={{ marginTop: professors.length > 0 && !hasSearched ? 16 : 0 }}>
+              <Text style={{ fontSize: 13, color: "#9ca3af", marginBottom: 10 }}>
+                {professors.length > 0 && !hasSearched
+                  ? "Don't see your professor? Search by name:"
+                  : autoError
+                    ? "Couldn't load professors. Search by name:"
+                    : !autoLoading && professors.length === 0
+                      ? `No professors found for ${displayCode}. Search by name:`
+                      : ""}
+              </Text>
+              <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
+                <TextInput
+                  value={searchName}
+                  onChangeText={setSearchName}
+                  onSubmitEditing={runSearch}
+                  returnKeyType="search"
+                  placeholder="Professor last name or full name"
+                  placeholderTextColor="#9ca3af"
+                  style={{
+                    flex: 1, height: 46,
+                    backgroundColor: "#f9fafb",
+                    borderWidth: 1, borderColor: "#e5e7eb",
+                    borderRadius: 10, paddingHorizontal: 14,
+                    fontSize: 14, color: "#1f2937",
+                  }}
+                />
+                <TouchableOpacity
+                  onPress={runSearch}
+                  disabled={searching || !searchName.trim()}
+                  style={{
+                    height: 46, paddingHorizontal: 18,
+                    backgroundColor: searchName.trim() ? "#1a3a6b" : "#e5e7eb",
+                    borderRadius: 10,
+                    alignItems: "center", justifyContent: "center",
+                  }}
+                >
+                  {searching
+                    ? <ActivityIndicator color="#fff" size="small" />
+                    : <Text style={{ color: searchName.trim() ? "#fff" : "#9ca3af", fontWeight: "700", fontSize: 14 }}>Search</Text>
+                  }
+                </TouchableOpacity>
+              </View>
+
+              {searchError ? (
+                <Text style={{ color: "#6b7280", fontSize: 13, marginBottom: 12, textAlign: "center" }}>
+                  {searchError}
+                </Text>
+              ) : null}
+
+              {/* Search results — also use sortedProfessors so filter works on manual search too */}
+              {hasSearched && (
+                <>
+                  {professors.length > 1 && (
+                    <SortPills active={sortKey} onSelect={setSortKey} />
+                  )}
+                  {sortedProfessors.map((prof) => (
+                    <ProfessorCard key={prof.id} prof={prof} courseCode={displayCode} />
+                  ))}
+                </>
+              )}
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
