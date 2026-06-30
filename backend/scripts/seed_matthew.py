@@ -245,6 +245,114 @@ def patch_phys_alternatives():
         print(f"  Skipped {skipped_already} pairs (already patched).")
 
 
+def patch_math_alternatives():
+    """
+    Fix MATH 250/251 catalog defects. MATH 250 (3cr) and MATH 251 (4cr) cover the same
+    differential equations content and are interchangeable for most programs. Four defects:
+
+    1. Biological Engineering, B.S. — both listed as 'required' in same group (scraper bug).
+       Fix: convert both to choose_one pair.
+
+    2. Industrial Engineering, B.S. — only MATH 250 listed as 'required', MATH 251 absent.
+       Fix: insert MATH 251 row + convert both to choose_one pair.
+
+    3. Mining Engineering, B.S. — MATH 250 is orphaned choose_one (no pair_group_id),
+       MATH 251 absent from "Requirements for the Major".
+       Fix: insert MATH 251 + assign pair.
+
+    4. Mathematics, Minor (Science) — both choose_one but no pair_group_id linking them.
+       Fix: assign pair_group_id to both.
+
+    Pair IDs start at 700 (ETI=580-583, PHYS=600+).
+    """
+    from boto3.dynamodb.conditions import Attr
+
+    print("\nPatching MATH 250 / MATH 251 alternatives...")
+
+    def scan_code(code):
+        resp = requirements_table.scan(FilterExpression=Attr("course_code").eq(code))
+        rows = resp["Items"]
+        while "LastEvaluatedKey" in resp:
+            resp = requirements_table.scan(
+                FilterExpression=Attr("course_code").eq(code),
+                ExclusiveStartKey=resp["LastEvaluatedKey"]
+            )
+            rows.extend(resp["Items"])
+        return rows
+
+    math250_rows = scan_code("MATH 250")
+    math251_rows = scan_code("MATH 251")
+
+    by_pg_250 = {(r["program_name"], r["requirement_group"]): r for r in math250_rows}
+    by_pg_251 = {(r["program_name"], r["requirement_group"]): r for r in math251_rows}
+
+    pair_id = Decimal("700")
+    patched = 0
+
+    def make_pair(row_250, row_251):
+        nonlocal pair_id, patched
+        for row in (row_250, row_251):
+            requirements_table.update_item(
+                Key={"program_name": row["program_name"], "group_course": row["group_course"]},
+                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
+                ExpressionAttributeValues={":pid": pair_id, ":gt": "choose_one"},
+            )
+        pair_id += 1
+        patched += 1
+
+    def insert_math251(template_row):
+        """Insert a MATH 251 row cloned from a MATH 250 row."""
+        group_course = f"{template_row['requirement_group']}#MATH 251"
+        item = {k: v for k, v in template_row.items()}
+        item["course_code"]  = "MATH 251"
+        item["course_title"] = "Ordinary and Partial Differential Equations"
+        item["credits"]      = Decimal("4")
+        item["group_course"] = group_course
+        item.pop("pair_group_id", None)
+        requirements_table.put_item(Item=item)
+        return item
+
+    # 1. Biological Engineering — both required in same group → choose_one pair
+    bio_key = ("Biological Engineering, B.S.", "Common Requirements for the Major (All Options)")
+    if bio_key in by_pg_250 and bio_key in by_pg_251:
+        make_pair(by_pg_250[bio_key], by_pg_251[bio_key])
+        print("  Fixed Biological Engineering (both required → choose_one pair).")
+    else:
+        print("  Biological Engineering: rows not found — skipping.")
+
+    # 2. Industrial Engineering — MATH 250 required, MATH 251 absent → insert + pair
+    ie_key = ("Industrial Engineering, B.S. (Engineering)", "Common Requirements for the Major (All Options)")
+    if ie_key in by_pg_250 and ie_key not in by_pg_251:
+        new_row = insert_math251(by_pg_250[ie_key])
+        make_pair(by_pg_250[ie_key], new_row)
+        print("  Fixed Industrial Engineering (inserted MATH 251 + choose_one pair).")
+    else:
+        print("  Industrial Engineering: already fixed or rows not found — skipping.")
+
+    # 3. Mining Engineering — MATH 250 orphaned choose_one, MATH 251 absent
+    mining_key = ("Mining Engineering, B.S.", "Requirements for the Major")
+    if mining_key in by_pg_250 and mining_key not in by_pg_251:
+        new_row = insert_math251(by_pg_250[mining_key])
+        make_pair(by_pg_250[mining_key], new_row)
+        print("  Fixed Mining Engineering (inserted MATH 251 + choose_one pair).")
+    else:
+        print("  Mining Engineering: already fixed or rows not found — skipping.")
+
+    # 4. Mathematics Minor — both choose_one but no pair_group_id
+    minor_key = ("Mathematics, Minor (Science)", "Requirements for the Minor")
+    if minor_key in by_pg_250 and minor_key in by_pg_251:
+        r250, r251 = by_pg_250[minor_key], by_pg_251[minor_key]
+        if not r250.get("pair_group_id") and not r251.get("pair_group_id"):
+            make_pair(r250, r251)
+            print("  Fixed Mathematics Minor (assigned pair_group_id to both choose_one rows).")
+        else:
+            print("  Mathematics Minor: already paired — skipping.")
+    else:
+        print("  Mathematics Minor: rows not found — skipping.")
+
+    print(f"  Total: {patched} pairs fixed.")
+
+
 def patch_choose_credits_option_groups():
     """
     Fix catalog defect: option groups named 'X Option (N credits)' where the scraper
@@ -341,6 +449,7 @@ if __name__ == "__main__":
 
     patch_eti_catalog()
     patch_phys_alternatives()
+    patch_math_alternatives()
     patch_choose_credits_option_groups()
     row_count = check_eti_requirements()
     if row_count == 0:
