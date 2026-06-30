@@ -108,11 +108,7 @@ Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
 The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
 
 **MATH 250 / MATH 251 differential equations alternatives:**
-MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable across most programs. Four catalog defects patched by `patch_math_alternatives()` in `seed_matthew.py` (pair IDs 700+):
-- Biological Engineering — both listed as `required` in same group (scraper bug) → `choose_one` pair
-- Industrial Engineering — only MATH 250 listed as `required`, MATH 251 absent → MATH 251 inserted + both paired
-- Mining Engineering — MATH 250 orphaned `choose_one` with no pair, MATH 251 absent → MATH 251 inserted + paired
-- Mathematics Minor — both `choose_one` but no `pair_group_id` linking them → pair ID assigned
+MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable across all programs. `patch_math_alternatives()` in `seed_matthew.py` (pair IDs 700+) generically scans every `(program, group)` where MATH 250 appears and pairs it with MATH 251, inserting a MATH 251 row where absent. Skips `choose_credits` pools (no pairing needed) and already-paired rows (idempotent).
 
 ### Timeline semester projection
 - `COURSES_PER_SEM = 5` courses per future semester
