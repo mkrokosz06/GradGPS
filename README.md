@@ -1,17 +1,19 @@
-# DegreeCheck
+# GradGPS
 
-AI-powered college advising app that tells students exactly what courses they still need to graduate — no advisor appointment required.
+AI-powered degree advisor for Penn State students. Upload your transcript, pick your major, and get an instant audit of every requirement — done, in progress, or missing — plus a projected semester-by-semester timeline to graduation.
 
-Launching exclusively at **Penn State University Park**. Free to use. B2C.
+Launching exclusively at **Penn State University Park**. Free during beta. B2C.
 
 ---
 
 ## What It Does
 
-1. Student signs in with Google or Apple
+1. Student signs up with name + PSU email
 2. Uploads their unofficial PSU transcript (PDF)
-3. Selects their major
+3. Selects their major (and subplan if applicable)
 4. Gets an instant audit: every requirement marked **Done**, **In Progress**, or **Missing**
+5. Views a projected timeline showing which future semesters remaining courses fall in
+6. Taps any course to see professor ratings (via RateMyProfessors)
 
 ---
 
@@ -20,8 +22,8 @@ Launching exclusively at **Penn State University Park**. Free to use. B2C.
 | Phase | Description | Status |
 |-------|-------------|--------|
 | 1 | PSU catalog scraper | Complete |
-| 2 | Audit engine + FastAPI backend | In Progress |
-| 3 | React Native mobile app | Upcoming |
+| 2 | Audit engine + FastAPI backend | Complete |
+| 3 | React Native mobile app | Complete |
 | 4 | Deploy + App Store launch | Upcoming |
 
 ---
@@ -30,15 +32,14 @@ Launching exclusively at **Penn State University Park**. Free to use. B2C.
 
 | Layer | Technology |
 |-------|-----------|
-| Mobile | React Native + Expo (iOS + Android) |
+| Mobile | React Native 0.81 + Expo SDK 54 + Expo Router v3 |
+| Styling | NativeWind v4 (Tailwind for React Native) |
 | Backend | Python + FastAPI |
-| Database | AWS DynamoDB |
-| File storage | AWS S3 (transcript PDFs) |
-| Local dev | LocalStack (emulates DynamoDB + S3 locally via Docker) |
+| Database | AWS DynamoDB (DynamoDB Local in dev) |
+| File storage | AWS S3 / MinIO (MinIO in dev) |
+| Local dev | Docker — DynamoDB Local (port 8000) + MinIO (port 9000) |
 | Scraper | httpx + BeautifulSoup4 |
 | Transcript parsing | pdfplumber |
-| Hosting | Railway |
-| Error tracking | Sentry |
 
 ---
 
@@ -46,134 +47,103 @@ Launching exclusively at **Penn State University Park**. Free to use. B2C.
 
 ```
 /
-├── scrape_psu.py                  # PSU catalog scraper
-├── PSU_Major_Requirements.xlsx    # Scraped output — 31,734 rows, 551 programs
-├── PSU_Major_Requirements.txt     # Plain-text version of the above
-├── docker-compose.yml             # LocalStack (DynamoDB + S3 local emulation)
-├── briefing.html                  # Business briefing document
-├── implementation-plan.html       # Technical implementation plan
+├── docker-compose.yml             # DynamoDB Local + MinIO S3
 ├── README.md
-└── backend/
-    ├── main.py                    # FastAPI app entry point
-    ├── db.py                      # DynamoDB + S3 client (LocalStack in dev, real AWS in prod)
-    ├── audit_engine.py            # Degree audit logic (all 4 group types)
-    ├── transcript_parser.py       # pdfplumber PDF → course list
-    ├── requirements.txt
-    ├── .env.example
-    ├── routers/
-    │   ├── audit.py               # GET /audit
-    │   ├── transcript.py          # POST /transcript/upload
-    │   └── programs.py            # GET /programs/search, POST /programs/select
-    └── scripts/
-        ├── setup_tables.py        # Create DynamoDB tables + S3 bucket
-        └── load_catalog.py        # Load Excel data into DynamoDB
+├── CLAUDE.md                      # Full architecture + dev guide
+├── backend/
+│   ├── main.py                    # FastAPI app entry point
+│   ├── audit_engine.py            # Degree audit + gen ed audit logic
+│   ├── transcript_parser.py       # pdfplumber PDF → course list
+│   ├── db.py                      # DynamoDB + S3 clients
+│   ├── deps.py                    # Shared FastAPI dependency (user_id header)
+│   ├── requirements.txt
+│   ├── routers/
+│   │   ├── audit.py               # GET /audit
+│   │   ├── timeline.py            # GET /timeline
+│   │   ├── transcript.py          # POST /transcript/upload
+│   │   ├── programs.py            # GET /programs/search, POST /programs/select
+│   │   ├── courses.py             # GET /courses/:code + professor ratings
+│   │   ├── users.py               # User profile
+│   │   └── admin.py               # Admin utilities
+│   └── scripts/
+│       ├── setup_tables.py        # Create DynamoDB tables + S3 bucket
+│       ├── load_catalog.py        # Load 31k PSU requirement rows
+│       ├── seed_gen_ed.py         # Load gen ed requirements
+│       └── seed_matthew.py        # Seed test user + transcript + catalog patches
+└── mobile/
+    ├── app/
+    │   ├── _layout.tsx            # Root Stack + AuthProvider
+    │   ├── (tabs)/                # Main app screens (tab bar hidden)
+    │   │   ├── index.tsx          # Timeline screen
+    │   │   ├── account.tsx        # Account + audit summary
+    │   │   ├── major.tsx          # Major + subplan selection
+    │   │   └── upload.tsx         # Transcript upload
+    │   ├── onboarding/            # Welcome → signup → major → upload flow
+    │   ├── course/[code].tsx      # Course detail + professor ratings
+    │   ├── tos.tsx                # Terms of Service
+    │   └── privacy.tsx            # Privacy Policy
+    ├── components/
+    │   └── NavHeader.tsx          # Top bar + hamburger side-menu
+    ├── context/
+    │   └── AuthContext.tsx        # Auth state + AsyncStorage
+    ├── services/                  # Typed API wrappers (axios)
+    └── constants/
+        └── api.ts                 # API_BASE + dev USER_ID
 ```
 
 ---
 
-## Phase 1 — Catalog Scraper (Complete)
+## Local Development
 
-Scrapes [bulletins.psu.edu](https://bulletins.psu.edu) for all undergraduate program requirements.
+### Prerequisites
+- Docker Desktop
+- Python 3.11+
+- Node.js 20+
+- Expo Go on your phone (or iOS/Android simulator)
 
-**Output:** `PSU_Major_Requirements.xlsx`
-
-| Stat | Value |
-|------|-------|
-| Programs scraped | 551 (University Park only) |
-| Requirement rows | 31,734 |
-| Colleges covered | All PSU colleges |
-| Scrape frequency | Weekly cron (planned) |
-
-### Requirement Group Types
-
-Every requirement row is classified into one of four types:
-
-| Type | Rule |
-|------|------|
-| `required` | Student must complete every course listed |
-| `choose_one` | Take any one course from an OR-alternative pair (linked by `pair_group_id`) |
-| `choose_credits` | Take courses from the pool until N credit hours are reached |
-| `choose_courses` | Take any N courses from the listed options |
-
-### OR Alternative Pairs
-
-Penn State lists alternatives as table rows where the first cell is "or":
-
-```
-BA 302    Business Law             3cr
-or
-SCM 301   Supply Chain Management  3cr
-```
-
-Both courses share a `pair_group_id` integer. The audit engine checks: *at least one course per pair must be completed.*
-
-### Output Columns
-
-```
-program_name, college, degree, campus, requirement_group, group_type,
-group_threshold, course_code, course_title, credits, min_grade,
-pair_group_id, url
-```
-
-### Running the Scraper
-
+### 1. Start infrastructure
 ```bash
-pip install requests beautifulsoup4 lxml pandas openpyxl
-python scrape_psu.py
+docker-compose up -d   # DynamoDB Local (port 8000) + MinIO S3 (port 9000)
 ```
 
-Takes approximately 5 minutes. Output written to `PSU_Major_Requirements.xlsx` and `PSU_Major_Requirements.txt`.
-
----
-
-## Phase 2 — Audit Engine + Backend (In Progress)
-
-### Local Development Setup
-
+### 2. Seed the database
+Data is in-memory — run these after every Docker restart:
 ```bash
-# 1. Start LocalStack (emulates DynamoDB + S3 on localhost:4566)
-docker compose up -d
-
-# 2. Install backend dependencies
 cd backend
-pip install -r requirements.txt
-
-# 3. Copy env file and configure
-cp .env.example .env
-
-# 4. Create DynamoDB tables + S3 bucket in LocalStack
-python scripts/setup_tables.py
-
-# 5. Load PSU catalog data into DynamoDB
-python scripts/load_catalog.py
-
-# 6. Start the API
-uvicorn main:app --reload
+python scripts/setup_tables.py    # create tables/buckets
+python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
+python scripts/seed_gen_ed.py     # load gen ed requirements
+python scripts/seed_matthew.py    # seed test user + transcript
 ```
 
-### DynamoDB Tables
+### 3. Start the backend
+```bash
+cd backend
+python -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
+```
 
-Three tables:</p>
+### 4. Start the mobile app
+```bash
+cd mobile
+npx expo start
+```
+Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants/api.ts`.
 
-**`requirements`** — loaded from the scraped Excel (31,734 rows)
-- PK: `program_name` / SK: `group_course` (requirement_group#course_code)
-- GSI on `course_code` for reverse lookup
+---
 
-**`users`** — one row per student, stores major selection and transcript S3 path
+## DynamoDB Tables
 
-**`transcript_courses`** — parsed courses from the student's uploaded PDF
-- PK: `user_id` / SK: `course_code`
+| Table | PK | SK | Contents |
+|-------|----|----|---------|
+| `requirements` | `program_name` | `group_course` | All PSU major + gen ed requirements |
+| `users` | `user_id` | — | User profile (major, subplan, timestamps) |
+| `transcript_courses` | `user_id` | `course_code` | Parsed transcript courses |
 
-### Transcript Parsing
+Gen ed requirements are stored under `program_name = "__GEN_ED__"`.
 
-Uses `pdfplumber` to extract courses from the unofficial PSU transcript PDF.
+---
 
-Handles:
-- Completed courses (grade earned)
-- In-progress courses (attempted > 0, earned = 0, no grade)
-- Transfer credits (grade = "TR")
-
-### Audit Logic
+## Audit Logic
 
 ```
 For each requirement group in the student's major:
@@ -184,54 +154,39 @@ For each requirement group in the student's major:
   choose_courses:  count of completed pool courses >= group_threshold
 ```
 
-### API Endpoints (FastAPI)
+---
+
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/transcript/upload` | Accept PDF, parse, store to DB |
-| GET | `/audit` | Return full audit for authenticated user |
-| GET | `/programs/search` | Fuzzy search program names for major picker |
+| GET | `/audit` | Full degree audit for user |
+| GET | `/timeline` | Semester-by-semester projection |
+| GET | `/programs/search` | Fuzzy search program names |
+| POST | `/programs/select` | Save major + subplan selection |
+| GET | `/courses/:code` | Course detail (title, credits, description) |
+| GET | `/courses/:code/professors` | Auto-detect professors + RMP ratings |
+| GET | `/users/me` | User profile |
 
 ---
 
-## Phase 3 — Mobile App (Upcoming)
+## Test User
 
-React Native + Expo. Single codebase for iOS and Android.
-
-### Screens
-
-1. **Login** — Google SSO + Sign in with Apple (required by App Store when offering Google)
-2. **Major Picker** — searchable list of 551 programs
-3. **Transcript Upload** — `expo-document-picker` → PDF → backend
-4. **Audit** — requirement groups with Done / In Progress / Missing status
-5. **Course Detail** — credits, min grade, OR pair info
-
-### Key Packages
-
-```
-@react-native-google-signin/google-signin
-expo-apple-authentication
-expo-document-picker
-@supabase/supabase-js
-@sentry/react-native
-```
+| Field | Value |
+|-------|-------|
+| user_id | `matthew-test-001` |
+| major | Enterprise Technology Integration, B.S. |
+| transcript | Real PSU unofficial transcript, 26 courses |
 
 ---
 
-## Phase 4 — Deploy (Upcoming)
+## Roadmap
 
-- **Backend:** Railway (Docker, cron job for weekly scraper)
-- **iOS:** EAS Build → TestFlight → App Store
-- **Android:** EAS Build → Google Play internal track → production
-
----
-
-## Post-V1 Roadmap
-
-- **Rate My Professor** — show professor ratings on each course card (unofficial GitHub API wrapper)
-- **Semester planner** — drag remaining courses into future semesters, check prerequisite conflicts
-- **Prerequisite chain warnings** — flag deep chains so students know what to take first
-- **Multi-school** — expand scraper to other universities
+- **Auth** — real sign-in flow (replacing hardcoded dev user)
+- **Deploy** — AWS backend + EAS Build for App Store / Google Play
+- **Multi-school** — expand scraper and parser to other universities
+- **Prerequisite warnings** — flag deep chains so students know what to take first
 
 ---
 
@@ -239,14 +194,6 @@ expo-document-picker
 
 Penn State Undergraduate Bulletin — [bulletins.psu.edu](https://bulletins.psu.edu)
 
-- `/undergraduate/` and `/programs/` are permitted per robots.txt
-- `/archive/` is blocked — V1 uses current catalog year only
+- `/undergraduate/` and `/programs/` permitted per robots.txt
 - 0.35s delay between requests, 15s timeout, 3 retries
-
----
-
-## Notes
-
-- Transcript storage is **unofficial PDF only** — avoids FERPA complications
-- Catalog accuracy is maintained via weekly re-scrape
-- OR-alternative pairs are tracked with `pair_group_id` — a globally unique integer assigned at scrape time so the audit engine knows which courses are interchangeable without any hardcoding
+- Catalog accuracy maintained via periodic re-scrape

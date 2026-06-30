@@ -157,18 +157,3 @@ function StatBox({ label, value, sub, color }: { label: string; value: number | 
     </View>
   );
 }
-
-function SlotRow({ label, value, color, border }: { label: string; value: number; color: string; border?: boolean }) {
-  return (
-    <View
-      style={{
-        flexDirection: "row", justifyContent: "space-between", alignItems: "center",
-        paddingHorizontal: 18, paddingVertical: 14,
-        borderTopWidth: border ? 1 : 0, borderTopColor: "#f3f4f6",
-      }}
-    >
-      <Text style={{ color: "#64748b", fontSize: 13 }}>{label}</Text>
-      <Text style={{ color, fontSize: 15, fontWeight: "700" }}>{value}</Text>
-    </View>
-  );
-}
