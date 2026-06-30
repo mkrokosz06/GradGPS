@@ -1,12 +1,22 @@
 import api from "./api";
 
+export type PoolCourse = {
+  course_code:  string;
+  course_title: string;
+  credits:      number;
+};
+
 export type TimelineCourse = {
-  course_code:    string;
-  course_title?:  string;
-  grade:          string;
-  credits_earned: number;
-  status:         "done" | "in_progress" | "missing";
-  is_pool?:       boolean;
+  course_code:          string;
+  course_title?:        string;
+  grade:                string;
+  credits_earned:       number;
+  status:               "done" | "in_progress" | "missing";
+  is_pool?:             boolean;
+  gen_ed_categories?:   string[];
+  pool_courses?:        PoolCourse[];
+  pool_needed_credits?: number;
+  pool_needed_courses?: number;
 };
 
 export type Semester = {

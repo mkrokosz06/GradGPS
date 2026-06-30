@@ -9,7 +9,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
-from audit_engine import run_audit
+from audit_engine import run_audit, run_gen_ed_audit
 from routers.audit import _filter_rows
 from deps import get_user_id
 
@@ -68,30 +68,62 @@ def _collect_missing(audit_result: dict) -> list[dict]:
             items = src.get("items", [])
 
             if gtype == "choose_credits":
-                # Never emit individual pool courses — always treat as a single slot.
                 # If the pool is already satisfied, skip entirely.
-                # If unsatisfied, emit one summary entry for the remaining credits needed.
                 if not src.get("satisfied"):
-                    needed = (src.get("threshold") or 0) - (src.get("credits_earned") or 0)
+                    pool_items = src.get("items", [])
+                    ip_credits = sum(
+                        float(it.get("credits") or 3)
+                        for it in pool_items
+                        if it.get("status") == "in_progress"
+                    )
+                    earned_so_far = (src.get("credits_earned") or 0) + ip_credits
+                    needed = max(0, (src.get("threshold") or 0) - earned_so_far)
                     if needed > 0:
-                        missing.append({
-                            "course_code": f"Elective pool ({group.get('name', 'Pool')})",
-                            "course_title": f"Choose {int(src.get('threshold', 3))} credits from approved list",
-                            "credits": needed,
-                            "is_pool": True,
-                        })
+                        entry: dict = {
+                            "course_code":        group.get("name", "Required Courses"),
+                            "course_title":       f"Choose {int(needed)} more credits",
+                            "credits":            needed,
+                            "is_pool":            True,
+                            "pool_needed_credits": int(needed),
+                        }
+                        # For small pools (≤15 options) include the individual courses
+                        # so the mobile UI can render an expandable dropdown.
+                        if len(pool_items) <= 15:
+                            entry["pool_courses"] = [
+                                {
+                                    "course_code":  it.get("course_code", ""),
+                                    "course_title": it.get("course_title", ""),
+                                    "credits":      float(it.get("credits") or 3),
+                                }
+                                for it in pool_items
+                                if it.get("status") == "missing"
+                            ]
+                        missing.append(entry)
             elif gtype == "choose_courses":
                 # Satisfied choose_courses pools are skipped entirely (like choose_credits).
                 # Unsatisfied: emit one summary slot for the remaining courses needed.
                 if not src.get("satisfied"):
+                    pool_items = src.get("items", [])
                     courses_needed = (src.get("threshold") or 0) - (src.get("done") or 0)
                     if courses_needed > 0:
-                        missing.append({
-                            "course_code": f"Elective ({group.get('name', 'Pool')})",
-                            "course_title": f"Choose {int(src.get('threshold', 1))} course(s) from approved list",
-                            "credits": 3,
-                            "is_pool": True,
-                        })
+                        entry = {
+                            "course_code":         group.get("name", "Required Courses"),
+                            "course_title":        f"Choose {int(courses_needed)} more course(s)",
+                            "credits":             3,
+                            "is_pool":             True,
+                            "pool_needed_courses": int(courses_needed),
+                        }
+                        if len(pool_items) <= 15:
+                            entry["pool_courses"] = [
+                                {
+                                    "course_code":  it.get("course_code", ""),
+                                    "course_title": it.get("course_title", ""),
+                                    "credits":      float(it.get("credits") or 3),
+                                }
+                                for it in pool_items
+                                if it.get("status") == "missing"
+                            ]
+                        missing.append(entry)
             else:
                 for item in items:
                     if item.get("status") != "missing":
@@ -162,8 +194,12 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     transcript_courses = tx_resp.get("Items", [])
 
     # ── 3. Group by term ─────────────────────────────────────────────────────
+    # Transfer credits get their own sentinel semester at the front of the timeline.
+    transfer_courses = [c for c in transcript_courses if c.get("status") == "transfer"]
+    regular_courses  = [c for c in transcript_courses if c.get("status") != "transfer"]
+
     term_map: dict[str, list] = {}
-    for c in transcript_courses:
+    for c in regular_courses:
         t = c.get("term") or "Unknown"
         term_map.setdefault(t, []).append(c)
 
@@ -178,12 +214,35 @@ def get_timeline(user_id: str = Depends(get_user_id)):
 
     # Build completed / current semester objects
     semesters = []
+
+    # Prepend Transfer semester if any transfer credits exist
+    if transfer_courses:
+        transfer_credits = round(
+            sum(float(c.get("credits_earned", 0)) for c in transfer_courses), 1
+        )
+        semesters.append({
+            "term":    "Transfer",
+            "label":   "Transfer Credits",
+            "status":  "completed",
+            "credits": transfer_credits,
+            "courses": [
+                {
+                    "course_code":    c.get("course_code", ""),
+                    "grade":          "TR",
+                    "credits_earned": float(c.get("credits_earned", 0)),
+                    "status":         "done",
+                    "course_title":   c.get("course_title", ""),
+                }
+                for c in transfer_courses
+            ],
+        })
+
     for t in sorted_terms:
         courses = term_map[t]
         status  = "current" if t == current_term else "completed"
         credits = round(
             sum(float(c.get("credits_earned", 0)) for c in courses
-                if c.get("status") in ("done", "transfer")),
+                if c.get("status") == "done"),
             1,
         )
         semesters.append({
@@ -214,15 +273,43 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         )
         requirement_rows.extend(req_resp.get("Items", []))
 
-    requirement_rows = _filter_rows(requirement_rows, subplan)
+    taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
+    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes)
     if not requirement_rows:
         raise HTTPException(
             status_code=404,
             detail=f"No requirements found for major: {major}. "
                    "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
         )
-    audit_result     = run_audit(requirement_rows, transcript_courses)
-    missing          = _collect_missing(audit_result)
+    audit_result = run_audit(requirement_rows, transcript_courses)
+    missing      = _collect_missing(audit_result)
+
+    # ── 4b. Gen ed audit → single pool entry if any categories incomplete ────
+    gen_ed_resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq("__GEN_ED__")
+    )
+    gen_ed_rows = gen_ed_resp.get("Items", [])
+    while "LastEvaluatedKey" in gen_ed_resp:
+        gen_ed_resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq("__GEN_ED__"),
+            ExclusiveStartKey=gen_ed_resp["LastEvaluatedKey"]
+        )
+        gen_ed_rows.extend(gen_ed_resp.get("Items", []))
+
+    if gen_ed_rows:
+        gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
+        missing_cats = [
+            g["name"] for g in gen_ed_result.get("groups", [])
+            if not g.get("satisfied")
+        ]
+        if missing_cats:
+            missing.append({
+                "course_code":       "Gen Ed",
+                "course_title":      f"Incomplete: {', '.join(missing_cats)}",
+                "credits":           3,
+                "is_pool":           True,
+                "gen_ed_categories": missing_cats,
+            })
 
     # ── 5. Distribute missing courses into future semesters ──────────────────
     COURSES_PER_SEM = 5
@@ -239,12 +326,16 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             "credits": est_credits,
             "courses": [
                 {
-                    "course_code":    c.get("course_code", ""),
-                    "course_title":   c.get("course_title", ""),
-                    "credits_earned": float(c.get("credits", 3) or 3),
-                    "status":         "missing",
-                    "grade":          "",
-                    "is_pool":        c.get("is_pool", False),
+                    "course_code":         c.get("course_code", ""),
+                    "course_title":        c.get("course_title", ""),
+                    "credits_earned":      float(c.get("credits", 3) or 3),
+                    "status":              "missing",
+                    "grade":               "",
+                    "is_pool":             c.get("is_pool", False),
+                    "gen_ed_categories":   c.get("gen_ed_categories"),
+                    "pool_courses":        c.get("pool_courses"),
+                    "pool_needed_credits": c.get("pool_needed_credits"),
+                    "pool_needed_courses": c.get("pool_needed_courses"),
                 }
                 for c in chunk
             ],

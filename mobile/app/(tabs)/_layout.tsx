@@ -14,10 +14,11 @@ export default function Layout() {
         tabBarStyle: { display: "none" },
       }}
     >
-      <Tabs.Screen name="index"   options={{ title: "Timeline" }} />
-      <Tabs.Screen name="upload"  options={{ title: "Upload" }} />
-      <Tabs.Screen name="major"   options={{ title: "Major" }} />
-      <Tabs.Screen name="account" options={{ title: "Account" }} />
+      <Tabs.Screen name="index"    options={{ title: "Home" }} />
+      <Tabs.Screen name="timeline" options={{ title: "Timeline" }} />
+      <Tabs.Screen name="upload"   options={{ title: "Upload" }} />
+      <Tabs.Screen name="major"    options={{ title: "Major" }} />
+      <Tabs.Screen name="account"  options={{ title: "Account" }} />
     </Tabs>
   );
 }

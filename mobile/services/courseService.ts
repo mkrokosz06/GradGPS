@@ -2,7 +2,7 @@ import axios from "axios";
 import { API_BASE } from "../constants/api";
 import api from "./api";
 
-// Longer timeout for course endpoints — they chain PSU scrape + RMP calls
+// Longer timeout for course endpoints — they chain PSU scrape + professor rating calls
 const courseApi = axios.create({
   baseURL: API_BASE,
   timeout: 35_000,
@@ -37,7 +37,7 @@ export async function getCourseDetail(code: string): Promise<CourseDetail> {
   return res.data;
 }
 
-/** Auto-detect instructors from PSU schedule and return their course-specific RMP ratings. */
+/** Auto-detect instructors from PSU schedule and return their course-specific ratings. */
 export async function getProfessors(
   code: string,
 ): Promise<{ professors: ProfessorRating[]; schedule_found: boolean }> {
@@ -47,7 +47,7 @@ export async function getProfessors(
   return res.data;
 }
 
-/** Manual fallback: search RMP by professor name. */
+/** Manual fallback: search by professor name. */
 export async function getProfessorByName(
   code: string,
   professorName: string,

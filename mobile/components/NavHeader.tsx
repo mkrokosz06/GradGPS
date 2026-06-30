@@ -9,10 +9,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 const MENU_WIDTH = Dimensions.get("window").width * 0.78;
 
 const ALL_ITEMS = [
-  { label: "Timeline",          route: "/",        match: ["/", "/index"] },
-  { label: "Upload Transcript", route: "/upload",  match: ["/upload"] },
-  { label: "Change Major",      route: "/major",   match: ["/major"] },
-  { label: "Account",           route: "/account", match: ["/account"] },
+  { label: "Home",              route: "/",          match: ["/", "/index"] },
+  { label: "Timeline",          route: "/timeline",  match: ["/timeline"] },
+  { label: "Upload Transcript", route: "/upload",    match: ["/upload"] },
+  { label: "Change Major",      route: "/major",     match: ["/major"] },
+  { label: "Account",           route: "/account",   match: ["/account"] },
 ];
 
 export function NavHeader({ subtitle }: { subtitle?: string }) {
@@ -97,6 +98,17 @@ export function NavHeader({ subtitle }: { subtitle?: string }) {
                   </TouchableOpacity>
                 ))}
               </View>
+
+              {/* Legal footer */}
+              <View style={[styles.legalFooter, { paddingBottom: insets.bottom + 20 }]}>
+                <TouchableOpacity onPress={() => navigate("/tos")} activeOpacity={0.6}>
+                  <Text style={styles.legalLink}>Terms of Service</Text>
+                </TouchableOpacity>
+                <Text style={styles.legalDot}>·</Text>
+                <TouchableOpacity onPress={() => navigate("/privacy")} activeOpacity={0.6}>
+                  <Text style={styles.legalLink}>Privacy Policy</Text>
+                </TouchableOpacity>
+              </View>
             </Animated.View>
           </View>
         </Modal>
@@ -143,4 +155,12 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1, borderBottomColor: "#f8fafc",
   },
   menuLabel:  { color: "#1e293b", fontSize: 16, fontWeight: "500" },
+  legalFooter: {
+    flexDirection: "row", alignItems: "center",
+    paddingHorizontal: 24, paddingTop: 16,
+    borderTopWidth: 1, borderTopColor: "#f1f5f9",
+    gap: 8,
+  },
+  legalLink: { color: "#94a3b8", fontSize: 12, textDecorationLine: "underline" },
+  legalDot:  { color: "#cbd5e1", fontSize: 12 },
 });

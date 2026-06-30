@@ -348,7 +348,7 @@ export default function CourseDetailScreen() {
             ) : professors.length > 0 && !hasSearched ? (
               <>
                 <Text style={{ fontSize: 13, color: "#9ca3af", marginBottom: 14 }}>
-                  Professors who have been rated for {displayCode} on RMP
+                  Professor ratings for {displayCode}
                 </Text>
 
                 {/* Sort pills */}

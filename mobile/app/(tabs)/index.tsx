@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useCallback, useState } from "react";
 import {
   View,
   Text,
@@ -11,181 +11,254 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { useAuth } from "../../context/AuthContext";
-import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
+import { getAudit, type AuditSummary } from "../../services/auditService";
+import { getTimeline, type TimelineData, type TimelineCourse, type Semester } from "../../services/timelineService";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const CLASS_YEAR_LABELS = ["Freshman", "Sophomore", "Junior", "Senior"];
-
-function getAcademicYearIndex(term: string, firstFaYear: number): number {
-  if (term === "Transfer") return -1;
-  const [season, yearStr] = term.split(" ");
-  const year = parseInt(yearStr, 10);
-  if (season === "FA") return year - firstFaYear + 1;
-  if (season === "SP") return year - firstFaYear;
-  return year - firstFaYear;
+function greeting(name: string | null): string {
+  const hour = new Date().getHours();
+  const sal  = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const first = name?.trim().split(" ")[0] ?? null;
+  return first ? `${sal}, ${first}` : sal;
 }
 
-function classYearLabel(idx: number): string | null {
-  if (idx <= 0) return null;
-  // Cap at "Senior" — 5th+ year students are still seniors (or super-seniors)
-  return CLASS_YEAR_LABELS[Math.min(idx - 1, CLASS_YEAR_LABELS.length - 1)];
+function courseType(c: TimelineCourse): { label: string; bg: string; color: string } {
+  if (c.is_pool || (c.gen_ed_categories && c.gen_ed_categories.length > 0)) {
+    return { label: "Gen Ed / Elective", bg: "#f0fdf4", color: "#15803d" };
+  }
+  return { label: "Required", bg: "#f0f4ff", color: "#1a3a6b" };
 }
 
-// ── Map pin ───────────────────────────────────────────────────────────────────
+// ── State 1: Welcome ──────────────────────────────────────────────────────────
 
-function MapPin() {
-  const COLOR = "#E8C84B";
-  return (
-    <View style={{ alignItems: "center" }}>
-      <View style={{
-        width: 22, height: 22, borderRadius: 11,
-        backgroundColor: COLOR,
-        alignItems: "center", justifyContent: "center",
-        shadowColor: COLOR, shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.5, shadowRadius: 4, elevation: 4,
-      }}>
-        <View style={{ width: 7, height: 7, borderRadius: 3.5, backgroundColor: "#1a3a6b" }} />
-      </View>
-      <View style={{
-        width: 0, height: 0,
-        borderLeftWidth: 6,  borderLeftColor:  "transparent",
-        borderRightWidth: 6, borderRightColor: "transparent",
-        borderTopWidth: 9,   borderTopColor:   COLOR,
-        marginTop: -1,
-      }} />
-    </View>
-  );
-}
-
-// ── Timeline node ─────────────────────────────────────────────────────────────
-
-const NODE_W      = 88;
-const CONNECTOR_W = 28;
-const NODE_TOTAL  = NODE_W + CONNECTOR_W; // 116 px per slot
-
-const LABEL_H        = 34;
-const LABEL_MB       = 6;
-const CIRCLE_BOX     = 32;
-const CIRCLE_CENTER_Y = LABEL_H + LABEL_MB + CIRCLE_BOX / 2; // 56
-
-function TimelineNode({
-  semester,
-  selected,
-  onPress,
-  isLast,
-  yearLabel,
-}: {
-  semester: Semester;
-  selected: boolean;
-  onPress: () => void;
-  isLast: boolean;
-  yearLabel: string | null;
-}) {
-  const isTransfer  = semester.term === "Transfer";
-  const parts       = semester.label.split(" ");
-  const season      = isTransfer ? "XFER" : (parts[0] ?? "");
-  const year        = isTransfer ? ""     : (parts[1] ?? "");
-  const isCompleted = semester.status === "completed";
-  const isCurrent   = semester.status === "current";
-  const isUpcoming  = semester.status === "upcoming";
-
-  const circleSize = selected ? 28 : 20;
-
-  // Completed → navy fill; Current → gold; Upcoming → white with navy border; Selected → navy
-  const circleBg =
-    isCurrent   ? "#E8C84B" :
-    isUpcoming  ? "#ffffff" :
-    (isCompleted || selected) ? "#1a3a6b" :
-    "#ffffff";
-
-  const circleBorder =
-    isCurrent   ? "#E8C84B" :
-    isUpcoming  ? "#1a3a6b" :
-    (isCompleted || selected) ? "#1a3a6b" :
-    "#d1d5db";
-
-  const textColor = selected ? "#1a3a6b" : (isCompleted || isCurrent) ? "#374151" : "#1a3a6b";
-
-  const lineColor =
-    isCompleted ? "#1a3a6b" :
-    isCurrent   ? "#E8C84B" :
-    "#1a3a6b";   // upcoming connector also navy so it's visible
-
-  const LINE_H = 3;
-
-  return (
-    <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
-      <TouchableOpacity
-        onPress={onPress}
-        activeOpacity={0.7}
-        style={{ alignItems: "center", width: NODE_W }}
-      >
-        <View style={{ height: LABEL_H, justifyContent: "flex-end", alignItems: "center", marginBottom: LABEL_MB }}>
-          {isCurrent ? (
-            <MapPin />
-          ) : yearLabel ? (
-            <Text style={{
-              color: "#1a3a6b", fontSize: 10, fontWeight: "800",
-              letterSpacing: 0.7, textTransform: "uppercase",
-            }}>
-              {yearLabel}
-            </Text>
-          ) : null}
-        </View>
-
-        <View style={{ width: CIRCLE_BOX, height: CIRCLE_BOX, alignItems: "center", justifyContent: "center" }}>
-          <View style={{
-            width: circleSize, height: circleSize, borderRadius: circleSize / 2,
-            backgroundColor: circleBg,
-            borderWidth: 2.5, borderColor: circleBorder,
-            alignItems: "center", justifyContent: "center",
-          }}>
-            {selected && (
-              <View style={{ width: 9, height: 9, borderRadius: 4.5, backgroundColor: isUpcoming ? "#1a3a6b" : "#ffffff" }} />
-            )}
-          </View>
-        </View>
-
-        <Text style={{ marginTop: 7, fontSize: 13, fontWeight: "600", color: textColor }}>
-          {season}
-        </Text>
-        <Text style={{ fontSize: 12, color: selected ? "#2a5298" : isUpcoming ? "#1a3a6b" : "#9ca3af", marginTop: 1 }}>
-          {year}
-        </Text>
-      </TouchableOpacity>
-
-      {!isLast && (
-        <View style={{
-          width: CONNECTOR_W,
-          height: LINE_H,
-          backgroundColor: lineColor,
-          borderRadius: LINE_H / 2,
-          marginTop: CIRCLE_CENTER_Y - LINE_H / 2,
-          opacity: isUpcoming ? 0.3 : 1,
-        }} />
-      )}
-    </View>
-  );
-}
-
-// ── Course row ────────────────────────────────────────────────────────────────
-
-function CourseRow({ course }: { course: TimelineCourse }) {
+function WelcomeState() {
   const router = useRouter();
-  const config = {
-    done:        { dot: "✓", dotColor: "text-done",     textColor: "text-gray-800", bg: "bg-green-50" },
-    in_progress: { dot: "→", dotColor: "text-progress", textColor: "text-gray-800", bg: "bg-amber-50" },
-    missing:     { dot: "○", dotColor: "text-gray-300", textColor: "text-gray-400", bg: "bg-white" },
-  }[course.status] ?? { dot: "○", dotColor: "text-gray-300", textColor: "text-gray-400", bg: "bg-white" };
+  return (
+    <View style={{ flex: 1, backgroundColor: "#1a3a6b", paddingHorizontal: 32, justifyContent: "center" }}>
+      <Text style={{
+        color: "#E8C84B", fontSize: 12, fontWeight: "800",
+        letterSpacing: 2.5, marginBottom: 20,
+      }}>
+        GRADGPS
+      </Text>
+      <Text style={{
+        color: "#ffffff", fontSize: 38, fontWeight: "900",
+        lineHeight: 44, marginBottom: 16,
+      }}>
+        Your Penn State degree, mapped.
+      </Text>
+      <Text style={{
+        color: "rgba(255,255,255,0.55)", fontSize: 15,
+        lineHeight: 23, marginBottom: 52,
+      }}>
+        Build your 4-year plan, track your progress, and find the best professors — all in one place.
+      </Text>
+      <TouchableOpacity
+        activeOpacity={0.85}
+        onPress={() => router.navigate("/major" as any)}
+        style={{
+          backgroundColor: "#E8C84B", borderRadius: 14,
+          paddingVertical: 17, alignItems: "center",
+        }}
+      >
+        <Text style={{ color: "#1a3a6b", fontSize: 16, fontWeight: "800" }}>Get started →</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
 
-  // Pool entries (e.g. "Elective pool") have no real course code — not tappable
+// ── State 2: Plan preview (major set, no transcript) ──────────────────────────
+
+function PlanPreviewState({
+  audit,
+  timeline,
+}: {
+  audit: AuditSummary;
+  timeline: TimelineData | null;
+}) {
+  const router = useRouter();
+  const preview = timeline?.semesters
+    .find((s) => s.status === "upcoming")
+    ?.courses.filter((c) => !c.is_pool)
+    .slice(0, 5) ?? [];
+
+  return (
+    <ScrollView
+      contentContainerStyle={{ paddingBottom: 48 }}
+      showsVerticalScrollIndicator={false}
+    >
+      {/* Major hero */}
+      <View style={{ backgroundColor: "#1a3a6b", paddingHorizontal: 24, paddingTop: 32, paddingBottom: 28 }}>
+        <Text style={{
+          color: "#E8C84B", fontSize: 11, fontWeight: "800",
+          letterSpacing: 1.2, marginBottom: 10,
+        }}>
+          YOUR MAJOR
+        </Text>
+        <Text style={{ color: "#ffffff", fontSize: 21, fontWeight: "800", lineHeight: 27 }}>
+          {audit.major}
+        </Text>
+        <Text style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 8 }}>
+          {audit.total} requirements to complete · {audit.missing} remaining
+        </Text>
+      </View>
+
+      <View style={{ paddingHorizontal: 16, paddingTop: 20 }}>
+        {/* Upload CTA card */}
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.navigate("/upload" as any)}
+          style={{
+            backgroundColor: "#ffffff", borderRadius: 18, padding: 22,
+            marginBottom: 20, borderWidth: 1, borderColor: "#f1f5f9",
+            shadowColor: "#1a3a6b", shadowOffset: { width: 0, height: 3 },
+            shadowOpacity: 0.08, shadowRadius: 10, elevation: 3,
+          }}
+        >
+          <Text style={{
+            color: "#1a3a6b", fontSize: 18, fontWeight: "800", marginBottom: 8,
+          }}>
+            Upload your transcript
+          </Text>
+          <Text style={{
+            color: "#64748b", fontSize: 13, lineHeight: 20, marginBottom: 20,
+          }}>
+            We'll map your completed courses and show you exactly what's left — and what to take next.
+          </Text>
+          <View style={{
+            alignSelf: "flex-start", backgroundColor: "#1a3a6b",
+            borderRadius: 10, paddingHorizontal: 16, paddingVertical: 9,
+          }}>
+            <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}>
+              Upload transcript →
+            </Text>
+          </View>
+        </TouchableOpacity>
+
+        {/* Course preview */}
+        {preview.length > 0 && (
+          <View>
+            <Text style={{
+              color: "#94a3b8", fontSize: 11, fontWeight: "700",
+              letterSpacing: 0.9, marginBottom: 12,
+            }}>
+              FIRST SEMESTER COURSES
+            </Text>
+            {preview.map((c, i) => (
+              <View
+                key={c.course_code}
+                style={{
+                  flexDirection: "row", alignItems: "center",
+                  paddingVertical: 13, paddingHorizontal: 16,
+                  backgroundColor: "#ffffff", borderRadius: 12,
+                  marginBottom: 8, borderWidth: 1, borderColor: "#f1f5f9",
+                  opacity: 0.5,
+                }}
+              >
+                <View style={{
+                  width: 8, height: 8, borderRadius: 4,
+                  backgroundColor: "#cbd5e1", marginRight: 12,
+                }} />
+                <Text style={{ color: "#374151", fontSize: 13, fontWeight: "700", flex: 1 }}>
+                  {c.course_code}
+                </Text>
+                {c.course_title ? (
+                  <Text style={{ color: "#94a3b8", fontSize: 12 }} numberOfLines={1}>
+                    {c.course_title}
+                  </Text>
+                ) : null}
+              </View>
+            ))}
+            <Text style={{
+              color: "#94a3b8", fontSize: 12, textAlign: "center",
+              marginTop: 8, fontStyle: "italic",
+            }}>
+              Upload your transcript to unlock your full plan
+            </Text>
+          </View>
+        )}
+      </View>
+    </ScrollView>
+  );
+}
+
+// ── State 3: Registration view ────────────────────────────────────────────────
+
+function CurrentSemesterStrip({ semester, credits }: { semester: Semester; credits: number }) {
+  const router   = useRouter();
+  const courses  = semester.courses.filter((c) => !c.is_pool);
+  const shown    = courses.slice(0, 3);
+  const extra    = courses.length - shown.length;
+
+  return (
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => router.navigate("/timeline" as any)}
+      style={{
+        backgroundColor: "#ffffff", borderRadius: 16,
+        paddingHorizontal: 18, paddingVertical: 14,
+        marginBottom: 14, borderWidth: 1, borderColor: "#f1f5f9",
+        shadowColor: "#1a3a6b", shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.06, shadowRadius: 6, elevation: 2,
+      }}
+    >
+      <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+        <View style={{ flex: 1 }}>
+          <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 8, gap: 8 }}>
+            <Text style={{ color: "#1a3a6b", fontSize: 15, fontWeight: "800" }}>
+              {semester.label}
+            </Text>
+            <View style={{
+              backgroundColor: "#fef3c7", borderRadius: 6,
+              paddingHorizontal: 8, paddingVertical: 2,
+            }}>
+              <Text style={{ color: "#92400e", fontSize: 10, fontWeight: "700" }}>In Progress</Text>
+            </View>
+          </View>
+          <Text style={{ color: "#94a3b8", fontSize: 12 }}>
+            {shown.map((c) => c.course_code).join(" · ")}
+            {extra > 0 ? ` · +${extra} more` : ""}
+          </Text>
+        </View>
+        <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
+          <Text style={{ color: "#1a3a6b", fontSize: 18, fontWeight: "800" }}>{credits}</Text>
+          <Text style={{ color: "#94a3b8", fontSize: 10 }}>credits</Text>
+        </View>
+      </View>
+    </TouchableOpacity>
+  );
+}
+
+function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
+  const router = useRouter();
+  const type   = courseType(course);
+
   if (course.is_pool) {
+    // Pools are not individually registerable — show as a placeholder
+    const needed = course.pool_needed_credits ?? course.pool_needed_courses ?? 0;
+    const unit   = course.pool_needed_credits != null ? "credits" : "courses";
     return (
-      <View className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}>
-        <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
-        <View className="flex-1 ml-3">
-          <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
+      <View style={{
+        flexDirection: "row", alignItems: "center",
+        paddingVertical: 14, paddingHorizontal: 18,
+        borderBottomWidth: 1, borderBottomColor: "#f8fafc",
+        opacity: 0.55,
+      }}>
+        <View style={{
+          width: 9, height: 9, borderRadius: 4.5,
+          borderWidth: 2, borderColor: "#cbd5e1", marginRight: 14,
+        }} />
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: "#64748b", fontSize: 13, fontWeight: "600" }}>
+            Elective Pool — {needed} {unit}
+          </Text>
+        </View>
+        <View style={{
+          backgroundColor: type.bg, borderRadius: 7,
+          paddingHorizontal: 9, paddingVertical: 4,
+        }}>
+          <Text style={{ color: type.color, fontSize: 10, fontWeight: "700" }}>{type.label}</Text>
         </View>
       </View>
     );
@@ -193,244 +266,214 @@ function CourseRow({ course }: { course: TimelineCourse }) {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.7}
+      activeOpacity={0.75}
       onPress={() => router.push(`/course/${encodeURIComponent(course.course_code)}` as any)}
-      className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
+      style={{
+        flexDirection: "row", alignItems: "center",
+        paddingVertical: 14, paddingHorizontal: 18,
+        borderBottomWidth: 1, borderBottomColor: "#f8fafc",
+      }}
     >
-      <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
-      <View className="flex-1 ml-3">
-        <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
+      {/* Unchecked circle — visual checklist feel */}
+      <View style={{
+        width: 20, height: 20, borderRadius: 10,
+        borderWidth: 2, borderColor: "#d1d9e6",
+        marginRight: 14, flexShrink: 0,
+      }} />
+
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
+          {course.course_code}
+        </Text>
         {course.course_title ? (
-          <Text className="text-gray-400 text-xs mt-0.5" numberOfLines={1}>{course.course_title}</Text>
+          <Text style={{ color: "#64748b", fontSize: 12, marginTop: 2 }} numberOfLines={1}>
+            {course.course_title}
+          </Text>
         ) : null}
-        <Text className="text-gray-400 text-xs mt-0.5">tap for ratings ›</Text>
       </View>
-      <View className="ml-3 items-end">
-        {course.grade ? (
-          <Text className="text-gray-600 text-sm font-bold">{course.grade}</Text>
-        ) : course.credits_earned > 0 ? (
-          <Text className="text-gray-400 text-xs">{course.credits_earned} cr</Text>
-        ) : null}
+
+      <View style={{ alignItems: "flex-end", gap: 6, marginLeft: 10 }}>
+        <View style={{
+          backgroundColor: type.bg, borderRadius: 7,
+          paddingHorizontal: 9, paddingVertical: 4,
+        }}>
+          <Text style={{ color: type.color, fontSize: 10, fontWeight: "700" }}>{type.label}</Text>
+        </View>
+        <Text style={{ color: "#94a3b8", fontSize: 11 }}>Tap for ratings</Text>
       </View>
     </TouchableOpacity>
   );
 }
 
-// ── Content panel ─────────────────────────────────────────────────────────────
-
-function ContentPanel({
-  semester,
-  refreshing,
-  onRefresh,
-}: {
-  semester: Semester;
-  refreshing: boolean;
-  onRefresh: () => void;
-}) {
-  const isCurrent  = semester.status === "current";
-  const isUpcoming = semester.status === "upcoming";
-
-  const statusLabel = isCurrent
-    ? "In Progress"
-    : isUpcoming
-    ? "Recommended"
-    : `${semester.credits} credits earned`;
-
-  const statusColor = isCurrent ? "text-progress" : isUpcoming ? "text-navy" : "text-done";
+function RegistrationSection({ semester, audit }: { semester: Semester; audit: AuditSummary }) {
+  const router  = useRouter();
+  const courses = semester.courses;
 
   return (
-    <View className="flex-1">
-      <View className="px-5 pt-4 pb-3 border-b border-gray-100 flex-row items-center justify-between">
-        <View>
-          <Text className="text-navy font-bold text-lg">{semester.label}</Text>
-          <Text className={`text-xs font-semibold mt-0.5 ${statusColor}`}>{statusLabel}</Text>
-        </View>
-        {isUpcoming && (
-          <View className="bg-blue-50 px-3 py-1 rounded-full border border-blue-100">
-            <Text className="text-navy text-xs font-semibold">~{semester.credits} cr</Text>
-          </View>
-        )}
+    <View style={{
+      backgroundColor: "#ffffff", borderRadius: 20,
+      borderWidth: 1, borderColor: "#f1f5f9",
+      shadowColor: "#1a3a6b", shadowOffset: { width: 0, height: 3 },
+      shadowOpacity: 0.07, shadowRadius: 10, elevation: 3,
+      overflow: "hidden",
+    }}>
+      {/* Section header */}
+      <View style={{ paddingHorizontal: 18, paddingTop: 20, paddingBottom: 16 }}>
+        <Text style={{
+          color: "#94a3b8", fontSize: 11, fontWeight: "700",
+          letterSpacing: 0.9, marginBottom: 6,
+        }}>
+          PLAN YOUR REGISTRATION
+        </Text>
+        <Text style={{ color: "#1a3a6b", fontSize: 21, fontWeight: "900" }}>
+          {semester.label}
+        </Text>
+        <Text style={{ color: "#64748b", fontSize: 13, marginTop: 4 }}>
+          {courses.filter((c) => !c.is_pool).length} courses recommended · ~{semester.credits} credits
+        </Text>
       </View>
 
-      <ScrollView
-        className="flex-1"
-        contentContainerStyle={{ padding: 16, paddingBottom: 40 }}
-        showsVerticalScrollIndicator={false}
-        refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a3a6b" />
-        }
+      {/* Divider */}
+      <View style={{ height: 1, backgroundColor: "#f1f5f9", marginBottom: 4 }} />
+
+      {/* Course list */}
+      {courses.map((c, i) => (
+        <RegistrationCourseRow key={`${c.course_code}_${i}`} course={c} />
+      ))}
+
+      {/* Footer */}
+      <TouchableOpacity
+        activeOpacity={0.75}
+        onPress={() => router.navigate("/timeline" as any)}
+        style={{
+          flexDirection: "row", justifyContent: "center", alignItems: "center",
+          paddingVertical: 16, borderTopWidth: 1, borderTopColor: "#f8fafc",
+          gap: 6,
+        }}
       >
-        {semester.courses.length === 0 ? (
-          <Text className="text-gray-300 text-center mt-6">No courses recorded</Text>
-        ) : (
-          semester.courses.map((c, i) => (
-            <CourseRow key={`${c.course_code}_${i}`} course={c} />
-          ))
-        )}
-      </ScrollView>
+        <Text style={{ color: "#2a5298", fontSize: 13, fontWeight: "700" }}>
+          View full degree plan
+        </Text>
+        <Text style={{ color: "#2a5298", fontSize: 13 }}>→</Text>
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+function AllDoneCard({ gradLabel }: { gradLabel: string | null }) {
+  return (
+    <View style={{
+      backgroundColor: "#1a3a6b", borderRadius: 20, padding: 28,
+      alignItems: "center",
+    }}>
+      <Text style={{ color: "#E8C84B", fontSize: 32, marginBottom: 12 }}>🎓</Text>
+      <Text style={{ color: "#ffffff", fontSize: 20, fontWeight: "800", marginBottom: 8, textAlign: "center" }}>
+        You're all set
+      </Text>
+      <Text style={{ color: "rgba(255,255,255,0.6)", fontSize: 14, textAlign: "center", lineHeight: 20 }}>
+        No more semesters to plan.
+        {gradLabel ? ` Estimated graduation: ${gradLabel}.` : ""}
+      </Text>
     </View>
   );
 }
 
 // ── Main screen ───────────────────────────────────────────────────────────────
 
-export default function TimelineScreen() {
-  const [data, setData]             = useState<TimelineData | null>(null);
-  const [loading, setLoading]       = useState(true);
-  const [error, setError]           = useState<string | null>(null);
-  const [refreshing, setRefreshing] = useState(false);
-  const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
-  const { userId } = useAuth();
-  const timelineScrollRef = useRef<ScrollView>(null);
+export default function HomeScreen() {
+  const { userId, name } = useAuth();
+  const router = useRouter();
 
-  const fetchTimeline = useCallback(async () => {
+  const [audit,      setAudit]      = useState<AuditSummary | null>(null);
+  const [timeline,   setTimeline]   = useState<TimelineData | null>(null);
+  const [loading,    setLoading]    = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
     try {
-      const timeline = await getTimeline(userId);
-      setData(prev => {
-        const isFirstLoad = prev === null;
-
-        // Auto-select term: current → last completed → first semester
-        const cur  = timeline.semesters.find((s) => s.status === "current");
-        const last = timeline.semesters.filter((s) => s.status === "completed").at(-1);
-        const defaultTerm = cur?.term ?? last?.term ?? timeline.semesters[0]?.term ?? null;
-
-        setSelectedTerm(existing => {
-          // Keep the user's selection if it still exists in the refreshed data
-          if (existing && timeline.semesters.some((s) => s.term === existing)) return existing;
-          return defaultTerm;
-        });
-
-        // Only auto-scroll on first load
-        if (isFirstLoad && defaultTerm) {
-          const idx = timeline.semesters.findIndex((s) => s.term === defaultTerm);
-          if (idx > 2) {
-            setTimeout(() => {
-              timelineScrollRef.current?.scrollTo({
-                x: Math.max(0, (idx - 1) * NODE_TOTAL),
-                animated: true,
-              });
-            }, 300);
-          }
-        }
-
-        return timeline;
-      });
-      setError(null);
-    } catch (e: any) {
-      const detail = e?.response?.data?.detail;
-      setError(typeof detail === "string" ? detail : "Could not load timeline. Is the backend running?");
+      const [a, t] = await Promise.all([
+        getAudit(userId).catch(() => null),
+        getTimeline(userId).catch(() => null),
+      ]);
+      setAudit(a);
+      setTimeline(t);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   }, [userId]);
 
-  // Fetch on mount and whenever userId changes (handles async AsyncStorage load)
-  useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
-  // Re-fetch whenever this screen gains focus (after upload, major change, etc.)
-  useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
+  useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
+  const onRefresh = useCallback(() => { setRefreshing(true); fetchData(); }, [fetchData]);
 
-  const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
-
-  // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <SafeAreaView className="flex-1 bg-white items-center justify-center" edges={["top","left","right"]}>
-        <ActivityIndicator size="large" color="#1a3a6b" />
-        <Text className="text-gray-400 mt-3 text-sm">Loading timeline…</Text>
-      </SafeAreaView>
-    );
-  }
-
-  // ── Error ────────────────────────────────────────────────────────────────
-  if (error) {
-    return (
-      <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
         <NavHeader />
-        <View className="flex-1 items-center justify-center px-8">
-          <Text className="text-gray-800 text-center font-semibold mb-6">{error}</Text>
-          <TouchableOpacity onPress={fetchTimeline} className="bg-navy px-6 py-3 rounded-xl">
-            <Text className="text-white font-bold">Retry</Text>
-          </TouchableOpacity>
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="#1a3a6b" />
         </View>
       </SafeAreaView>
     );
   }
 
-  if (!data) return null;
+  // ── State detection ───────────────────────────────────────────────────────
+  const hasMajor   = !!(audit?.major);
+  const hasCredits = !!(audit?.transcript_credits && audit.transcript_credits > 0);
 
-  const creditPct        = Math.min(100, Math.round((data.transcript_credits / 120) * 100));
-  const selectedSemester = data.semesters.find((s) => s.term === selectedTerm);
+  // State 1 — no major
+  if (!hasMajor) {
+    return (
+      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+        <WelcomeState />
+      </SafeAreaView>
+    );
+  }
 
-  const firstFaYear = data.semesters
-    .filter((s) => s.term.startsWith("FA"))
-    .reduce((min, s) => Math.min(min, parseInt(s.term.split(" ")[1], 10)), Infinity);
+  // State 2 — major picked, no transcript
+  if (!hasCredits) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
+        <NavHeader />
+        <PlanPreviewState audit={audit!} timeline={timeline} />
+      </SafeAreaView>
+    );
+  }
 
-  let prevYearIdx = -1;
-  const semestersWithLabel = data.semesters.map((sem) => {
-    if (sem.term === "Transfer") return { sem, yearLabel: null };
-    const rawIdx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
-    // Cap so "Senior" never repeats for 5th-year+ students
-    const idx = rawIdx > 0 ? Math.min(rawIdx, CLASS_YEAR_LABELS.length) : rawIdx;
-    const label = idx !== prevYearIdx ? classYearLabel(idx) : null;
-    prevYearIdx = idx;
-    return { sem, yearLabel: label };
-  });
+  // State 3 — fully set up
+  const currentSem = timeline?.semesters.find((s) => s.status === "current") ?? null;
+  const nextSem    = timeline?.semesters.find((s) => s.status === "upcoming") ?? null;
+  const upcoming   = timeline?.semesters.filter((s) => s.status === "upcoming") ?? [];
+  const gradLabel  = upcoming.length > 0 ? upcoming[upcoming.length - 1].label : null;
 
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
-      <View className="flex-1">
-        <NavHeader subtitle={data.major} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
+      <NavHeader />
+      <ScrollView
+        contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 8, paddingBottom: 48 }}
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#1a3a6b" />
+        }
+      >
+        <Text style={{
+          color: "#1a3a6b", fontSize: 24, fontWeight: "900",
+          marginBottom: 16, marginTop: 10, letterSpacing: -0.5,
+        }}>
+          {greeting(name)}
+        </Text>
 
-        {/* Credit progress strip */}
-        <View className="px-5 pt-4 pb-3 bg-white border-b border-gray-100">
-          <View className="flex-row items-end justify-between mb-2">
-            <View>
-              <Text className="text-navy font-bold text-2xl">{data.transcript_credits}</Text>
-              <Text className="text-gray-400 text-xs">credits earned</Text>
-            </View>
-            <Text className="text-gray-400 text-xs mb-1">{creditPct}% of 120</Text>
-            <View className="items-end">
-              <Text className="text-navy font-bold text-2xl">{120 - data.transcript_credits}</Text>
-              <Text className="text-gray-400 text-xs">remaining</Text>
-            </View>
-          </View>
-          <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
-            <View className="h-full bg-navy rounded-full" style={{ width: `${creditPct}%` }} />
-          </View>
-        </View>
-
-        {/* Horizontal timeline */}
-        <View className="border-b border-gray-100 bg-white">
-          <ScrollView
-            ref={timelineScrollRef}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8, alignItems: "center" }}
-          >
-            {semestersWithLabel.map(({ sem, yearLabel }, i) => (
-              <TimelineNode
-                key={sem.term}
-                semester={sem}
-                selected={sem.term === selectedTerm}
-                onPress={() => setSelectedTerm(sem.term)}
-                isLast={i === semestersWithLabel.length - 1}
-                yearLabel={yearLabel}
-              />
-            ))}
-          </ScrollView>
-        </View>
-
-        {/* Content area */}
-        {selectedSemester ? (
-          <ContentPanel semester={selectedSemester} refreshing={refreshing} onRefresh={onRefresh} />
-        ) : (
-          <View className="flex-1 items-center justify-center">
-            <Text className="text-gray-300">Select a semester above</Text>
-          </View>
+        {currentSem && (
+          <CurrentSemesterStrip semester={currentSem} credits={audit!.transcript_credits} />
         )}
-      </View>
+
+        {nextSem ? (
+          <RegistrationSection semester={nextSem} audit={audit!} />
+        ) : (
+          <AllDoneCard gradLabel={gradLabel} />
+        )}
+      </ScrollView>
     </SafeAreaView>
   );
 }

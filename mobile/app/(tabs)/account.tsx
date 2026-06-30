@@ -49,7 +49,9 @@ export default function AccountScreen() {
               {name ? name[0].toUpperCase() : "?"}
             </Text>
           </View>
-          <Text style={{ color: "#1e293b", fontSize: 20, fontWeight: "700" }}>{name ?? "Student"}</Text>
+          <Text style={{ color: "#1e293b", fontSize: 20, fontWeight: "700" }}>
+            {name ? name.replace(/\b\w/g, (c) => c.toUpperCase()) : "Student"}
+          </Text>
           {year && (
             <View style={{
               marginTop: 6, paddingHorizontal: 12, paddingVertical: 3,

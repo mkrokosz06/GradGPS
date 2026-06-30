@@ -29,8 +29,17 @@ export default function WelcomeScreen() {
           <Text style={styles.primaryBtnText}>Get Started</Text>
         </TouchableOpacity>
         <Text style={styles.legalNote}>
-          For Penn State students. Free during beta.
+          Free during beta.
         </Text>
+        <View style={styles.legalLinks}>
+          <TouchableOpacity onPress={() => router.push("/tos" as any)}>
+            <Text style={styles.legalLink}>Terms of Service</Text>
+          </TouchableOpacity>
+          <Text style={styles.legalDot}>·</Text>
+          <TouchableOpacity onPress={() => router.push("/privacy" as any)}>
+            <Text style={styles.legalLink}>Privacy Policy</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -84,6 +93,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   legalNote: {
+    color: "#cbd5e1",
+    fontSize: 12,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  legalLink: {
+    color: "#94a3b8",
+    fontSize: 12,
+    textDecorationLine: "underline",
+  },
+  legalDot: {
     color: "#cbd5e1",
     fontSize: 12,
   },

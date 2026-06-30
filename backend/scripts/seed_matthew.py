@@ -166,6 +166,143 @@ def patch_eti_catalog():
     print(f"  Fixed {paired} missing course pairs (BA<->dept-prefix equivalents).")
 
 
+def patch_phys_alternatives():
+    """
+    Fix catalog defect: PHYS 211 (calc-based sequence) and PHYS 250 (algebra-based sequence)
+    appear as both 'required' in the same requirement group for 39 program+group combos.
+    In reality, programs offer these as alternatives (students on the MATH 22 track take
+    PHYS 250; others take PHYS 211). This patches them to 'choose_one' pairs.
+
+    Pair IDs start at 600 (ETI patches use 580-583).
+    """
+    import re
+    from boto3.dynamodb.conditions import Attr
+
+    print("\nPatching PHYS 211 / PHYS 250 alternatives across all programs...")
+
+    _CAMPUS_RE = re.compile(r" at [\w\s]+ campus", re.IGNORECASE)
+
+    # Fetch all PHYS 211 and PHYS 250 rows
+    def scan_code(code):
+        resp = requirements_table.scan(FilterExpression=Attr("course_code").eq(code))
+        rows = resp["Items"]
+        while "LastEvaluatedKey" in resp:
+            resp = requirements_table.scan(
+                FilterExpression=Attr("course_code").eq(code),
+                ExclusiveStartKey=resp["LastEvaluatedKey"]
+            )
+            rows.extend(resp["Items"])
+        return rows
+
+    phys211_rows = scan_code("PHYS 211")
+    phys250_rows = scan_code("PHYS 250")
+
+    # Index by (program_name, requirement_group) -> row
+    from collections import defaultdict
+    by_pg_211 = {}
+    for r in phys211_rows:
+        key = (r["program_name"], r["requirement_group"])
+        by_pg_211[key] = r
+
+    by_pg_250 = {}
+    for r in phys250_rows:
+        key = (r["program_name"], r["requirement_group"])
+        by_pg_250[key] = r
+
+    # Find all combos where both exist in the same group
+    common_keys = set(by_pg_211.keys()) & set(by_pg_250.keys())
+
+    # Exclude gen ed pool (it's already choose_credits, no pairing needed)
+    # and skip campus-specific groups (they get filtered anyway)
+    pair_id = Decimal("600")
+    patched = 0
+    skipped_already = 0
+
+    for key in sorted(common_keys):
+        prog, group = key
+        if prog == "__GEN_ED__":
+            continue
+
+        row_211 = by_pg_211[key]
+        row_250 = by_pg_250[key]
+
+        # Skip if either is already paired
+        if row_211.get("pair_group_id") or row_250.get("pair_group_id"):
+            skipped_already += 1
+            continue
+
+        for row in (row_211, row_250):
+            requirements_table.update_item(
+                Key={"program_name": row["program_name"], "group_course": row["group_course"]},
+                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
+                ExpressionAttributeValues={":pid": pair_id, ":gt": "choose_one"},
+            )
+        pair_id += 1
+        patched += 1
+
+    print(f"  Patched {patched} PHYS 211/250 alternative pairs across programs.")
+    if skipped_already:
+        print(f"  Skipped {skipped_already} pairs (already patched).")
+
+
+def patch_choose_credits_option_groups():
+    """
+    Fix catalog defect: option groups named 'X Option (N credits)' where the scraper
+    captured each listed course as 'required', but the group is actually a choose_credits
+    pool (student picks enough courses to total N credits).
+
+    Detection: group name contains '(N credits)' or '(N-M credits)' AND the sum of
+    listed course credits exceeds N*1.4 (i.e., far more courses than could be required
+    given the credit cap).
+
+    Fixes: set group_type='choose_credits' and group_threshold=N for all rows in the group.
+    """
+    import re
+    from collections import defaultdict
+
+    print("\nPatching choose_credits option groups...")
+
+    _CR_RE = re.compile(r'\((\d+)(?:-(\d+))?\s+credits?\)', re.IGNORECASE)
+
+    resp = requirements_table.scan()
+    rows = resp["Items"]
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.scan(ExclusiveStartKey=resp["LastEvaluatedKey"])
+        rows.extend(resp["Items"])
+
+    by_pg: dict = defaultdict(list)
+    for r in rows:
+        key = (r["program_name"], r["requirement_group"])
+        by_pg[key].append(r)
+
+    patched_groups = 0
+    patched_rows = 0
+    skipped = 0
+
+    for (prog, group), group_rows in by_pg.items():
+        m = _CR_RE.search(group)
+        if not m:
+            continue
+        threshold = int(m.group(1))
+        total_cr = sum(float(r.get("credits", 3) or 3) for r in group_rows)
+        types = set(r.get("group_type", "") for r in group_rows)
+
+        if total_cr <= threshold * 1.4 or types != {"required"}:
+            skipped += 1
+            continue
+
+        for r in group_rows:
+            requirements_table.update_item(
+                Key={"program_name": r["program_name"], "group_course": r["group_course"]},
+                UpdateExpression="SET group_type = :gt, group_threshold = :thr",
+                ExpressionAttributeValues={":gt": "choose_credits", ":thr": Decimal(str(threshold))},
+            )
+            patched_rows += 1
+        patched_groups += 1
+
+    print(f"  Patched {patched_groups} option groups ({patched_rows} rows) to choose_credits.")
+
+
 def check_eti_requirements():
     """Check what requirement groups exist for ETI."""
     print(f"\nChecking ETI requirements in catalog...")
@@ -203,6 +340,8 @@ if __name__ == "__main__":
     seed_courses(courses)
 
     patch_eti_catalog()
+    patch_phys_alternatives()
+    patch_choose_credits_option_groups()
     row_count = check_eti_requirements()
     if row_count == 0:
         print("\n  *** ETI program NOT found in catalog! Run load_catalog.py first. ***")

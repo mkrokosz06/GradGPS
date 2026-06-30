@@ -57,15 +57,19 @@ export default function MajorScreen() {
     setPendingMajor(major);
     setLoadingSubplans(true);
     try {
-      const plans = await getSubplans(major);
+      let plans: string[] = [];
+      try {
+        plans = await getSubplans(major);
+      } catch {
+        // subplan check failed — proceed as if no subplans
+        plans = [];
+      }
       if (plans.length > 0) {
         setSubplans(plans);
         setScreen("subplan");
       } else {
         await saveMajor(major, null);
       }
-    } catch {
-      Alert.alert("Error", "Could not check subplans.");
     } finally {
       setLoadingSubplans(false);
     }

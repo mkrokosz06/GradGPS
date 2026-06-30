@@ -23,8 +23,13 @@ import re as _re
 # Schuylkill, Scranton, Shenango, York, World Campus, etc.
 _CAMPUS_RE = _re.compile(r" at [\w\s]+ campus", _re.IGNORECASE)
 
+# Identifies a named "option" group (e.g. "Forensic Chemistry Option (20 credits)")
+# but not common/all-options groups.
+_OPTION_RE = _re.compile(r"\boption\b", _re.IGNORECASE)
 
-def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
+
+def _filter_rows(rows: list[dict], subplan: str | None,
+                 taken_codes: set[str] | None = None) -> list[dict]:
     """
     Filter requirement rows to only those relevant to the student's subplan.
 
@@ -36,9 +41,9 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
       3. Suggested-plan duplicates — "Forensic Chemistry Option: ...at University Park Campus"
                                      Semester-grid duplicates of the real groups. Always dropped.
 
-    If no subplan is set, we drop only the suggested-plan duplicates (groups that
-    contain " at <campus>" or are "Suggested Academic Plan" sections) to avoid
-    double-counting.
+    If no subplan is set and multiple option groups exist, auto-selects the
+    best-matching option based on transcript overlap (taken_codes) to prevent
+    inflation from evaluating all options simultaneously.
     """
     filtered = []
     subplan_lower = subplan.lower() if subplan else None
@@ -48,15 +53,10 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
         gl    = group.lower()
 
         # ── Always drop campus-specific suggested-plan duplicate groups ──
-        # These match " at <any words> campus" for all 38+ PSU branch campuses.
         if _CAMPUS_RE.search(gl):
             continue
-        # Also drop "Suggested Academic Plan" groups (semester-grid duplicates
-        # used by some programs like HPA, HDFS, IT).
         if "suggested academic plan" in gl:
             continue
-        # Also drop the "MATH 22" variant groups (alternate track for students
-        # who took MATH 022 instead of MATH 140 — rare edge case for V1)
         if "math 22" in gl:
             continue
 
@@ -73,15 +73,54 @@ def _filter_rows(rows: list[dict], subplan: str | None) -> list[dict]:
         # ── Subplan selected: keep only groups that match it ──
         if subplan_lower in gl:
             filtered.append(row)
-            # (Groups from other subplans are implicitly excluded)
 
-    # Defensive fallback: if the subplan matched zero requirement groups (stale /
-    # mismatched subplan from a previous major), ignore it and return the full
-    # no-subplan filtered set so the audit still runs correctly.
+    # Defensive fallback: if the subplan matched zero requirement groups
     if subplan_lower and not filtered:
-        return _filter_rows(rows, None)
+        return _filter_rows(rows, None, taken_codes)
+
+    # ── Auto-select best option when no subplan set ──────────────────────────
+    # Programs with multiple named options (83+ programs like Biology, Integrative
+    # Science, Criminology) inflate done/credits counts when all options are
+    # evaluated simultaneously — the same course appears as "done" in every option.
+    # Pick the single option where the student has completed the most courses.
+    if not subplan_lower:
+        filtered = _pick_best_option(filtered, taken_codes or set())
 
     return filtered
+
+
+def _pick_best_option(rows: list[dict], taken_codes: set[str]) -> list[dict]:
+    """
+    If rows contain multiple named option groups, keep only the best-matching one.
+    Non-option rows (common/required groups) are always kept unchanged.
+    """
+    from collections import defaultdict
+
+    option_groups: dict[str, list[dict]] = defaultdict(list)
+    non_option: list[dict] = []
+
+    for row in rows:
+        g  = row.get("requirement_group", "")
+        gl = g.lower()
+        # A "real" option group has "option" in name but is not a common/all-options group
+        if _OPTION_RE.search(gl) and "all options" not in gl and "common" not in gl:
+            option_groups[g].append(row)
+        else:
+            non_option.append(row)
+
+    if len(option_groups) <= 1:
+        return rows  # nothing to collapse
+
+    # Score each option by how many of its course codes appear in the transcript
+    best_option = max(
+        option_groups,
+        key=lambda g: sum(
+            1 for r in option_groups[g]
+            if r.get("course_code", "").strip().upper() in taken_codes
+        ),
+    )
+
+    return non_option + option_groups[best_option]
 
 
 @router.get("")
@@ -114,14 +153,18 @@ def get_audit(user_id: str = Depends(get_user_id)):
     if not requirement_rows:
         raise HTTPException(status_code=404, detail=f"No requirements found for major: {major}")
 
-    # ── 3. Filter to the correct subplan ──────────────────────────────────────
-    requirement_rows = _filter_rows(requirement_rows, subplan)
-
-    # ── 4. Fetch student's transcript courses ─────────────────────────────────
+    # ── 3. Fetch student's transcript courses ─────────────────────────────────
     tx_resp = transcript_table.query(
         KeyConditionExpression=Key("user_id").eq(user_id)
     )
     transcript_courses = tx_resp.get("Items", [])
+
+    # ── 4. Filter to the correct subplan ──────────────────────────────────────
+    # Pass taken_codes so _filter_rows can auto-select the best option group
+    # when the student hasn't explicitly chosen a subplan (prevents inflation
+    # from 83+ multi-option programs counting the same courses multiple times).
+    taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
+    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes)
 
     # ── 5. Fetch gen ed requirements ──────────────────────────────────────────
     gen_ed_resp = requirements_table.query(
@@ -165,6 +208,8 @@ def get_subplans(major: str):
     Example: major="Forensic Science, B.S."
     Returns: ["Forensic Chemistry", "Forensic Molecular Biology"]
     """
+    if not major or not major.strip():
+        raise HTTPException(status_code=422, detail="major must not be empty.")
     resp = requirements_table.query(
         KeyConditionExpression=Key("program_name").eq(major),
         ProjectionExpression="requirement_group",
