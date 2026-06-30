@@ -264,10 +264,22 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
     );
   }
 
+  const pairCodes = course.course_code.includes(" or ")
+    ? course.course_code.split(" or ").map((s) => s.trim())
+    : null;
+
+  const handlePress = () => {
+    if (pairCodes) {
+      router.push(`/course/${encodeURIComponent(pairCodes[0])}?pair=${encodeURIComponent(pairCodes[1])}` as any);
+    } else {
+      router.push(`/course/${encodeURIComponent(course.course_code)}` as any);
+    }
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.75}
-      onPress={() => router.push(`/course/${encodeURIComponent(course.course_code)}` as any)}
+      onPress={handlePress}
       style={{
         flexDirection: "row", alignItems: "center",
         paddingVertical: 14, paddingHorizontal: 18,

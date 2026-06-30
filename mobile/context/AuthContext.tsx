@@ -28,14 +28,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     AsyncStorage.multiGet(["user_id", "user_name", "user_email", "onboarding_done"]).then((pairs) => {
       const map = Object.fromEntries(pairs.map(([k, v]) => [k, v]));
-      // Dev fallback: seed hardcoded test user so the app works without a sign-in flow.
-      const resolvedId = map["user_id"] ?? USER_ID;
+      const resolvedId = map["user_id"] ?? null;
       setUserId(resolvedId);
       setName(map["user_name"]  ?? null);
       setEmail(map["user_email"] ?? null);
-      // Mark onboarding done for the dev user so RootRedirector never
-      // bounces to an onboarding screen that does not exist yet.
-      setOnboardingDone(map["onboarding_done"] === "1" || resolvedId === USER_ID);
+      setOnboardingDone(map["onboarding_done"] === "1");
     }).finally(() => setLoading(false));
   }, []);
 

@@ -15,8 +15,6 @@ import { getTimeline, type TimelineCourse, type Semester, type TimelineData } fr
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const CLASS_YEAR_LABELS = ["Freshman", "Sophomore", "Junior", "Senior"];
-
 function getAcademicYearIndex(term: string, firstFaYear: number): number {
   if (term === "Transfer") return -1;
   const [season, yearStr] = term.split(" ");
@@ -26,10 +24,148 @@ function getAcademicYearIndex(term: string, firstFaYear: number): number {
   return year - firstFaYear;
 }
 
-function classYearLabel(idx: number): string | null {
-  if (idx <= 0) return null;
-  // Cap at "Senior" — 5th+ year students are still seniors (or super-seniors)
-  return CLASS_YEAR_LABELS[Math.min(idx - 1, CLASS_YEAR_LABELS.length - 1)];
+// ── Bracket types & helpers ───────────────────────────────────────────────────
+
+type BracketRole = "start" | "middle" | "end" | "single" | "none";
+
+interface BracketInfo {
+  role:        BracketRole;
+  label:       string;   // set only on start/single
+  spanWidthPx: number;   // pixel width of full bracket (start/single only)
+}
+
+const BRACKET_LINE_H  = 2;
+const BRACKET_TICK_H  = 12;
+const BRACKET_LABEL_H = 14;
+const BRACKET_CELL_H  = BRACKET_LABEL_H + BRACKET_LINE_H + BRACKET_TICK_H; // 28 px
+
+function getBracketLabel(idx: number): string {
+  if (idx === 1) return "Freshman";
+  if (idx === 2) return "Sophomore";
+  if (idx === 3) return "Junior";
+  if (idx === 4) return "Senior";
+  if (idx >= 5)  return `${idx}th Year`;
+  return "";
+}
+
+function computeBracketInfo(semesters: Semester[], firstFaYear: number): BracketInfo[] {
+  const result: BracketInfo[] = semesters.map(() => ({ role: "none", label: "", spanWidthPx: 0 }));
+
+  // Group FA/SP semesters by academic year index (Transfer + SU excluded)
+  const yearGroups = new Map<number, number[]>(); // yearIdx → [semesterIndex, ...]
+  for (let i = 0; i < semesters.length; i++) {
+    const sem = semesters[i];
+    if (sem.term === "Transfer") continue;
+    const season = sem.term.split(" ")[0];
+    if (season === "SU") continue;
+    const idx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
+    if (idx <= 0) continue;
+    const group = yearGroups.get(idx) ?? [];
+    group.push(i);
+    yearGroups.set(idx, group);
+  }
+
+  for (const [idx, positions] of yearGroups) {
+    const label        = getBracketLabel(idx);
+    const n            = positions.length;
+    // span in px: from center of first node to center of last node
+    const spanWidthPx  = (positions[n - 1] - positions[0]) * NODE_TOTAL;
+
+    if (n === 1) {
+      result[positions[0]] = { role: "single", label, spanWidthPx: 0 };
+    } else {
+      result[positions[0]]     = { role: "start",  label, spanWidthPx };
+      for (let i = 1; i < n - 1; i++) {
+        result[positions[i]]   = { role: "middle", label: "", spanWidthPx: 0 };
+      }
+      result[positions[n - 1]] = { role: "end",    label: "", spanWidthPx: 0 };
+    }
+  }
+
+  return result;
+}
+
+// ── Bracket cell ──────────────────────────────────────────────────────────────
+
+function BracketCell({ info }: { info: BracketInfo }) {
+  const { role, label, spanWidthPx } = info;
+  if (role === "none") return <View style={{ width: NODE_TOTAL, height: BRACKET_CELL_H }} />;
+
+  const centerX   = NODE_W / 2;   // 44 px — center of node within slot
+  const lineColor = "#cbd5e1";
+
+  // Horizontal line sits just below the label; ticks hang DOWN from it
+  const lineTop = BRACKET_LABEL_H;
+  // Ticks start AT the same Y as the line so they overlap → no seam at corner
+  const tickTop = BRACKET_LABEL_H;
+
+  // Horizontal line left/right bounds.
+  // For end/single: extend the line UNDER the tick (centerX → centerX + LINE_H)
+  // so the corner pixel is always covered.
+  const lineLeft  = (role === "end"   || role === "middle") ? 0
+                  : centerX;
+  const lineRight = (role === "start" || role === "middle") ? 0
+                  : (role === "end")    ? NODE_TOTAL - centerX - BRACKET_LINE_H
+                  : NODE_TOTAL - centerX;  // single: zero-width (just the tick)
+
+  return (
+    <View style={{ width: NODE_TOTAL, height: BRACKET_CELL_H }}>
+      {/* Year label — centered over full bracket span, or over the tick for single */}
+      {label ? (
+        <Text
+          numberOfLines={1}
+          style={{
+            position:      "absolute",
+            left:          role === "single" ? centerX - 40 : centerX,
+            width:         role === "single" ? 80 : Math.max(spanWidthPx, 70),
+            top:           0,
+            textAlign:     "center",
+            fontSize:      10,
+            fontWeight:    "700",
+            color:         "#94a3b8",
+            letterSpacing: 0.8,
+            textTransform: "uppercase",
+          }}
+        >
+          {label}
+        </Text>
+      ) : null}
+
+      {/* Horizontal bracket line */}
+      <View style={{
+        position:        "absolute",
+        left:            lineLeft,
+        right:           lineRight,
+        top:             lineTop,
+        height:          BRACKET_LINE_H,
+        backgroundColor: lineColor,
+      }} />
+
+      {/* Left cap — overlaps line top so corner is seamless (start / single) */}
+      {(role === "start" || role === "single") && (
+        <View style={{
+          position:        "absolute",
+          left:            centerX,
+          top:             tickTop,
+          width:           BRACKET_LINE_H,
+          height:          BRACKET_LINE_H + BRACKET_TICK_H,
+          backgroundColor: lineColor,
+        }} />
+      )}
+
+      {/* Right cap — overlaps line top so corner is seamless (end / single) */}
+      {(role === "end" || role === "single") && (
+        <View style={{
+          position:        "absolute",
+          left:            centerX,
+          top:             tickTop,
+          width:           BRACKET_LINE_H,
+          height:          BRACKET_LINE_H + BRACKET_TICK_H,
+          backgroundColor: lineColor,
+        }} />
+      )}
+    </View>
+  );
 }
 
 // ── Map pin ───────────────────────────────────────────────────────────────────
@@ -74,13 +210,11 @@ function TimelineNode({
   selected,
   onPress,
   isLast,
-  yearLabel,
 }: {
   semester: Semester;
   selected: boolean;
   onPress: () => void;
   isLast: boolean;
-  yearLabel: string | null;
 }) {
   const isTransfer  = semester.term === "Transfer";
   const parts       = semester.label.split(" ");
@@ -122,16 +256,7 @@ function TimelineNode({
         style={{ alignItems: "center", width: NODE_W }}
       >
         <View style={{ height: LABEL_H, justifyContent: "flex-end", alignItems: "center", marginBottom: LABEL_MB }}>
-          {isCurrent ? (
-            <MapPin />
-          ) : yearLabel ? (
-            <Text style={{
-              color: "#1a3a6b", fontSize: 10, fontWeight: "800",
-              letterSpacing: 0.7, textTransform: "uppercase",
-            }}>
-              {yearLabel}
-            </Text>
-          ) : null}
+          {isCurrent ? <MapPin /> : null}
         </View>
 
         <View style={{ width: CIRCLE_BOX, height: CIRCLE_BOX, alignItems: "center", justifyContent: "center" }}>
@@ -276,10 +401,22 @@ function CourseRow({ course }: { course: TimelineCourse }) {
     );
   }
 
+  const pairCodes = course.course_code.includes(" or ")
+    ? course.course_code.split(" or ").map((s) => s.trim())
+    : null;
+
+  const handlePress = () => {
+    if (pairCodes) {
+      router.push(`/course/${encodeURIComponent(pairCodes[0])}?pair=${encodeURIComponent(pairCodes[1])}` as any);
+    } else {
+      router.push(`/course/${encodeURIComponent(course.course_code)}` as any);
+    }
+  };
+
   return (
     <TouchableOpacity
       activeOpacity={0.7}
-      onPress={() => router.push(`/course/${encodeURIComponent(course.course_code)}` as any)}
+      onPress={handlePress}
       className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
     >
       <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
@@ -452,16 +589,7 @@ export default function TimelineScreen() {
     .filter((s) => s.term.startsWith("FA"))
     .reduce((min, s) => Math.min(min, parseInt(s.term.split(" ")[1], 10)), Infinity);
 
-  let prevYearIdx = -1;
-  const semestersWithLabel = data.semesters.map((sem) => {
-    if (sem.term === "Transfer") return { sem, yearLabel: null };
-    const rawIdx = firstFaYear === Infinity ? 0 : getAcademicYearIndex(sem.term, firstFaYear);
-    // Cap so "Senior" never repeats for 5th-year+ students
-    const idx = rawIdx > 0 ? Math.min(rawIdx, CLASS_YEAR_LABELS.length) : rawIdx;
-    const label = idx !== prevYearIdx ? classYearLabel(idx) : null;
-    prevYearIdx = idx;
-    return { sem, yearLabel: label };
-  });
+  const bracketInfos = computeBracketInfo(data.semesters, firstFaYear);
 
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
@@ -492,18 +620,29 @@ export default function TimelineScreen() {
             ref={timelineScrollRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 12, paddingBottom: 8, alignItems: "center" }}
+            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 8 }}
           >
-            {semestersWithLabel.map(({ sem, yearLabel }, i) => (
-              <TimelineNode
-                key={sem.term}
-                semester={sem}
-                selected={sem.term === selectedTerm}
-                onPress={() => setSelectedTerm(sem.term)}
-                isLast={i === semestersWithLabel.length - 1}
-                yearLabel={yearLabel}
-              />
-            ))}
+            <View>
+              {/* Bracket row — year grouping brackets above the dots */}
+              <View style={{ flexDirection: "row" }}>
+                {data.semesters.map((sem, i) => (
+                  <BracketCell key={sem.term + "_b"} info={bracketInfos[i]} />
+                ))}
+              </View>
+
+              {/* Nodes row */}
+              <View style={{ flexDirection: "row", alignItems: "flex-start" }}>
+                {data.semesters.map((sem, i) => (
+                  <TimelineNode
+                    key={sem.term}
+                    semester={sem}
+                    selected={sem.term === selectedTerm}
+                    onPress={() => setSelectedTerm(sem.term)}
+                    isLast={i === data.semesters.length - 1}
+                  />
+                ))}
+              </View>
+            </View>
           </ScrollView>
         </View>
 

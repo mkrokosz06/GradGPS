@@ -56,12 +56,14 @@ GEN_ED_ROWS = [
     # ════════════════════════════════════════════════════════════════════════
     # COMMUNICATION: EFFECTIVE SPEECH (choose one section)
     # ════════════════════════════════════════════════════════════════════════
+    # multi_category=True so these are NOT consumed after satisfying Effective
+    # Speech — PSU allows them to also satisfy GH: Humanities simultaneously.
     ("Communication: Effective Speech", "choose_one", None,
-     "CAS 100A", "Effective Speech", 3, "D", 1, False),
+     "CAS 100A", "Effective Speech", 3, "D", 1, True),
     ("Communication: Effective Speech", "choose_one", None,
-     "CAS 100B", "Effective Speech", 3, "D", 1, False),
+     "CAS 100B", "Effective Speech", 3, "D", 1, True),
     ("Communication: Effective Speech", "choose_one", None,
-     "CAS 100C", "Effective Speech", 3, "D", 1, False),
+     "CAS 100C", "Effective Speech", 3, "D", 1, True),
 
     # ════════════════════════════════════════════════════════════════════════
     # COMMUNICATION: WRITING (ENGL 15 or ENGL 30H)
@@ -256,6 +258,8 @@ GEN_ED_ROWS = [
      "EE 210",   "Electrical Engineering Fundamentals I", 3, "D", None, False),
     ("GN: Natural Sciences", "choose_credits", 6,
      "MATSE 100","Materials in Today's World", 3, "D", None, False),
+    ("GN: Natural Sciences", "choose_credits", 6,
+     "GEOSC 40", "Geology of National Parks", 3, "D", None, False),
     # Interdomain GN;GS
     ("GN: Natural Sciences", "choose_credits", 6,
      "GEOG 1",   "Human Geography", 3, "D", None, True),
@@ -338,7 +342,11 @@ GEN_ED_ROWS = [
     ("GA: Arts", "choose_credits", 3,
      "THEA 100", "Introduction to Theatre", 3, "D", None, False),
     ("GA: Arts", "choose_credits", 3,
+     "THEA 101", "Theatre Appreciation", 3, "D", None, False),
+    ("GA: Arts", "choose_credits", 3,
      "THEA 200", "Theatre and Drama", 3, "D", None, False),
+    ("GA: Arts", "choose_credits", 3,
+     "MUSIC 11", "Introduction to Music", 3, "D", None, False),
     ("GA: Arts", "choose_credits", 3,
      "PHOT 100", "Introduction to Photography", 3, "D", None, False),
     ("GA: Arts", "choose_credits", 3,
@@ -440,6 +448,8 @@ GEN_ED_ROWS = [
      "RELI 3",   "World Religions II", 3, "D", None, False),
     ("GH: Humanities", "choose_credits", 3,
      "RELI 100", "Introduction to Religion", 3, "D", None, False),
+    ("GH: Humanities", "choose_credits", 3,
+     "CAMS 45",  "Ancient Sport and Society", 3, "D", None, False),
     ("GH: Humanities", "choose_credits", 3,
      "CAMS 100", "Introduction to Classical Studies", 3, "D", None, False),
     ("GH: Humanities", "choose_credits", 3,
@@ -611,6 +621,8 @@ GEN_ED_ROWS = [
     ("GS: Social and Behavioral Sciences", "choose_credits", 3,
      "SOC 119",  "Social Dimensions of Information and Communication Technology", 3, "D", None, True),
     # Interdomain GS;IL
+    ("GS: Social and Behavioral Sciences", "choose_credits", 3,
+     "ANTH 140", "Peoples of the World", 3, "D", None, True),
     ("GS: Social and Behavioral Sciences", "choose_credits", 3,
      "GEOG 128", "World Regional Geography", 3, "D", None, True),
     ("GS: Social and Behavioral Sciences", "choose_credits", 3,
@@ -994,6 +1006,8 @@ GEN_ED_ROWS = [
     ("IL: International Cultures", "choose_credits", 3,
      "HIST 21",  "History of Western Civilization II", 3, "D", None, True),
     # Interdomain GS;IL
+    ("IL: International Cultures", "choose_credits", 3,
+     "ANTH 140", "Peoples of the World", 3, "D", None, True),
     ("IL: International Cultures", "choose_credits", 3,
      "GEOG 40",  "Environmental Geography", 3, "D", None, True),
 

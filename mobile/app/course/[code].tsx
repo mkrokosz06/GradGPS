@@ -220,7 +220,11 @@ function sortProfessors(profs: ProfessorRating[], key: SortKey): ProfessorRating
 
 export default function CourseDetailScreen() {
   const router = useRouter();
-  const { code } = useLocalSearchParams<{ code: string }>();
+  const { code, pair } = useLocalSearchParams<{ code: string; pair?: string }>();
+
+  // If a pair param exists, the user arrived from a choose-one slot
+  const pairOptions = pair ? [code ?? "", pair] : null;
+  const [selectedCode, setSelectedCode] = useState<string>(code ?? "");
 
   const [detail, setDetail]               = useState<CourseDetail | null>(null);
   const [detailLoading, setDetailLoading] = useState(true);
@@ -239,15 +243,23 @@ export default function CourseDetailScreen() {
     [professors, sortKey],
   );
 
+  // Reload detail + professors whenever selectedCode changes
   useEffect(() => {
-    if (!code) return;
-    getCourseDetail(code)
+    if (!selectedCode) return;
+    setDetail(null);
+    setDetailLoading(true);
+    setProfessors([]);
+    setAutoLoading(true);
+    setAutoError(false);
+    setHasSearched(false);
+    setSearchName("");
+
+    getCourseDetail(selectedCode)
       .then(setDetail)
       .catch(() => {})
       .finally(() => setDetailLoading(false));
 
-    // Auto-load professors from index
-    getProfessors(code)
+    getProfessors(selectedCode)
       .then(({ professors: profs }) => {
         setProfessors(profs);
         setAutoLoading(false);
@@ -256,16 +268,16 @@ export default function CourseDetailScreen() {
         setAutoError(true);
         setAutoLoading(false);
       });
-  }, [code]);
+  }, [selectedCode]);
 
   const runSearch = useCallback(async () => {
     const q = searchName.trim();
-    if (!q || !code) return;
+    if (!q || !selectedCode) return;
     setSearching(true);
     setSearchError(null);
     setHasSearched(true);
     try {
-      const results = await getProfessorByName(code, q);
+      const results = await getProfessorByName(selectedCode, q);
       setProfessors(results);
       if (results.length === 0) setSearchError(`No Penn State professors found for "${q}"`);
     } catch {
@@ -273,9 +285,7 @@ export default function CourseDetailScreen() {
     } finally {
       setSearching(false);
     }
-  }, [searchName, code]);
-
-  const displayCode = code ?? "";
+  }, [searchName, selectedCode]);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: "#fff" }} edges={["top", "left", "right"]}>
@@ -300,7 +310,7 @@ export default function CourseDetailScreen() {
             <Text style={{ fontSize: 18, color: "#1a3a6b", fontWeight: "600", marginTop: -1 }}>←</Text>
           </TouchableOpacity>
           <Text style={{ fontSize: 18, fontWeight: "700", color: "#1a3a6b", flex: 1 }}>
-            {displayCode}
+            {selectedCode}
           </Text>
         </View>
 
@@ -320,7 +330,7 @@ export default function CourseDetailScreen() {
                 </Text>
               ) : null}
               {detail.credits > 0 && (
-                <View style={{ flexDirection: "row" }}>
+                <View style={{ flexDirection: "row", marginBottom: detail.description ? 12 : 0 }}>
                   <View style={{ backgroundColor: "#dbeafe", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
                     <Text style={{ fontSize: 12, fontWeight: "700", color: "#1a3a6b" }}>
                       {detail.credits} credits
@@ -328,34 +338,71 @@ export default function CourseDetailScreen() {
                   </View>
                 </View>
               )}
+              {detail.description ? (
+                <Text style={{ fontSize: 13, color: "#64748b", lineHeight: 20 }}>
+                  {detail.description}
+                </Text>
+              ) : null}
             </View>
           ) : null}
 
-          {/* ── Rate My Professor ── */}
+          {/* ── Professor Ratings ── */}
           <View style={{ borderTopWidth: detail ? 1 : 0, borderTopColor: "#f3f4f6", paddingTop: detail ? 24 : 0 }}>
             <Text style={{ fontSize: 16, fontWeight: "800", color: "#1a3a6b", marginBottom: 4 }}>
-              Rate My Professor
+              Professor Ratings
             </Text>
+
+            {/* Course switcher — only shown for choose-one pairs */}
+            {pairOptions && (
+              <View style={{
+                flexDirection: "row", gap: 8,
+                marginBottom: 16, marginTop: 8,
+              }}>
+                {pairOptions.map((opt) => {
+                  const active = opt === selectedCode;
+                  return (
+                    <TouchableOpacity
+                      key={opt}
+                      onPress={() => setSelectedCode(opt)}
+                      style={{
+                        paddingHorizontal: 16, paddingVertical: 8,
+                        borderRadius: 20,
+                        backgroundColor: active ? "#1a3a6b" : "#f3f4f6",
+                        borderWidth: 1,
+                        borderColor: active ? "#1a3a6b" : "#e5e7eb",
+                      }}
+                    >
+                      <Text style={{
+                        fontSize: 13, fontWeight: "700",
+                        color: active ? "#fff" : "#6b7280",
+                      }}>
+                        {opt}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            )}
 
             {/* Auto-loaded professors */}
             {autoLoading ? (
               <View style={{ paddingVertical: 24, alignItems: "center" }}>
                 <ActivityIndicator color="#1a3a6b" />
                 <Text style={{ fontSize: 13, color: "#9ca3af", marginTop: 8 }}>
-                  Loading professors for {displayCode}…
+                  Loading professors for {selectedCode}…
                 </Text>
               </View>
             ) : professors.length > 0 && !hasSearched ? (
               <>
                 <Text style={{ fontSize: 13, color: "#9ca3af", marginBottom: 14 }}>
-                  Professor ratings for {displayCode}
+                  Professor ratings for {selectedCode}
                 </Text>
 
                 {/* Sort pills */}
                 <SortPills active={sortKey} onSelect={setSortKey} />
 
                 {sortedProfessors.map((prof) => (
-                  <ProfessorCard key={prof.id} prof={prof} courseCode={displayCode} />
+                  <ProfessorCard key={prof.id} prof={prof} courseCode={selectedCode} />
                 ))}
               </>
             ) : null}
@@ -368,7 +415,7 @@ export default function CourseDetailScreen() {
                   : autoError
                     ? "Couldn't load professors. Search by name:"
                     : !autoLoading && professors.length === 0
-                      ? `No professors found for ${displayCode}. Search by name:`
+                      ? `No professors found for ${selectedCode}. Search by name:`
                       : ""}
               </Text>
               <View style={{ flexDirection: "row", gap: 8, marginBottom: 20 }}>
@@ -417,7 +464,7 @@ export default function CourseDetailScreen() {
                     <SortPills active={sortKey} onSelect={setSortKey} />
                   )}
                   {sortedProfessors.map((prof) => (
-                    <ProfessorCard key={prof.id} prof={prof} courseCode={displayCode} />
+                    <ProfessorCard key={prof.id} prof={prof} courseCode={selectedCode} />
                   ))}
                 </>
               )}
