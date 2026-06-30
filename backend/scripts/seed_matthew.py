@@ -316,9 +316,9 @@ def patch_math_alternatives():
     bio_key = ("Biological Engineering, B.S.", "Common Requirements for the Major (All Options)")
     if bio_key in by_pg_250 and bio_key in by_pg_251:
         make_pair(by_pg_250[bio_key], by_pg_251[bio_key])
-        print("  Fixed Biological Engineering (both required → choose_one pair).")
+        print("  Fixed Biological Engineering (both required -> choose_one pair).")
     else:
-        print("  Biological Engineering: rows not found — skipping.")
+        print("  Biological Engineering: rows not found - skipping.")
 
     # 2. Industrial Engineering — MATH 250 required, MATH 251 absent → insert + pair
     ie_key = ("Industrial Engineering, B.S. (Engineering)", "Common Requirements for the Major (All Options)")
@@ -327,7 +327,7 @@ def patch_math_alternatives():
         make_pair(by_pg_250[ie_key], new_row)
         print("  Fixed Industrial Engineering (inserted MATH 251 + choose_one pair).")
     else:
-        print("  Industrial Engineering: already fixed or rows not found — skipping.")
+        print("  Industrial Engineering: already fixed or rows not found - skipping.")
 
     # 3. Mining Engineering — MATH 250 orphaned choose_one, MATH 251 absent
     mining_key = ("Mining Engineering, B.S.", "Requirements for the Major")
@@ -336,7 +336,7 @@ def patch_math_alternatives():
         make_pair(by_pg_250[mining_key], new_row)
         print("  Fixed Mining Engineering (inserted MATH 251 + choose_one pair).")
     else:
-        print("  Mining Engineering: already fixed or rows not found — skipping.")
+        print("  Mining Engineering: already fixed or rows not found - skipping.")
 
     # 4. Mathematics Minor — both choose_one but no pair_group_id
     minor_key = ("Mathematics, Minor (Science)", "Requirements for the Minor")
@@ -346,7 +346,7 @@ def patch_math_alternatives():
             make_pair(r250, r251)
             print("  Fixed Mathematics Minor (assigned pair_group_id to both choose_one rows).")
         else:
-            print("  Mathematics Minor: already paired — skipping.")
+            print("  Mathematics Minor: already paired - skipping.")
     else:
         print("  Mathematics Minor: rows not found — skipping.")
 
