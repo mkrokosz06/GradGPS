@@ -76,12 +76,12 @@ export default function OnboardingUploadScreen() {
               </View>
               <Text style={styles.successText}>Transcript uploaded</Text>
               <Text style={styles.successSub}>
-                Your degree timeline is ready.
+                Your degree plan is ready.
               </Text>
             </View>
 
             <TouchableOpacity style={[styles.primaryBtn, { marginTop: "auto" }]} onPress={finish} activeOpacity={0.85}>
-              <Text style={styles.primaryBtnText}>Go to My Timeline</Text>
+              <Text style={styles.primaryBtnText}>Go to Home</Text>
             </TouchableOpacity>
           </View>
         ) : (

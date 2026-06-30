@@ -68,118 +68,31 @@ function WelcomeState() {
   );
 }
 
-// ── State 2: Plan preview (major set, no transcript) ──────────────────────────
+// ── No-transcript banner (shown instead of CurrentSemesterStrip) ──────────────
 
-function PlanPreviewState({
-  audit,
-  timeline,
-}: {
-  audit: AuditSummary;
-  timeline: TimelineData | null;
-}) {
+function NoTranscriptBanner() {
   const router = useRouter();
-  const preview = timeline?.semesters
-    .find((s) => s.status === "upcoming")
-    ?.courses.filter((c) => !c.is_pool)
-    .slice(0, 5) ?? [];
-
   return (
-    <ScrollView
-      contentContainerStyle={{ paddingBottom: 48 }}
-      showsVerticalScrollIndicator={false}
+    <TouchableOpacity
+      activeOpacity={0.85}
+      onPress={() => router.navigate("/upload" as any)}
+      style={{
+        backgroundColor: "#fffbeb", borderRadius: 16,
+        paddingHorizontal: 18, paddingVertical: 14,
+        marginBottom: 14, borderWidth: 1, borderColor: "#fde68a",
+        flexDirection: "row", alignItems: "center", gap: 12,
+      }}
     >
-      {/* Major hero */}
-      <View style={{ backgroundColor: "#1a3a6b", paddingHorizontal: 24, paddingTop: 32, paddingBottom: 28 }}>
-        <Text style={{
-          color: "#E8C84B", fontSize: 11, fontWeight: "800",
-          letterSpacing: 1.2, marginBottom: 10,
-        }}>
-          YOUR MAJOR
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: "#92400e", fontSize: 13, fontWeight: "700", marginBottom: 2 }}>
+          Projected plan — no transcript
         </Text>
-        <Text style={{ color: "#ffffff", fontSize: 21, fontWeight: "800", lineHeight: 27 }}>
-          {audit.major}
-        </Text>
-        <Text style={{ color: "rgba(255,255,255,0.45)", fontSize: 12, marginTop: 8 }}>
-          {audit.total} requirements to complete · {audit.missing} remaining
+        <Text style={{ color: "#a16207", fontSize: 12, lineHeight: 17 }}>
+          Upload your transcript to track completed courses and personalize this timeline.
         </Text>
       </View>
-
-      <View style={{ paddingHorizontal: 16, paddingTop: 20 }}>
-        {/* Upload CTA card */}
-        <TouchableOpacity
-          activeOpacity={0.85}
-          onPress={() => router.navigate("/upload" as any)}
-          style={{
-            backgroundColor: "#ffffff", borderRadius: 18, padding: 22,
-            marginBottom: 20, borderWidth: 1, borderColor: "#f1f5f9",
-            shadowColor: "#1a3a6b", shadowOffset: { width: 0, height: 3 },
-            shadowOpacity: 0.08, shadowRadius: 10, elevation: 3,
-          }}
-        >
-          <Text style={{
-            color: "#1a3a6b", fontSize: 18, fontWeight: "800", marginBottom: 8,
-          }}>
-            Upload your transcript
-          </Text>
-          <Text style={{
-            color: "#64748b", fontSize: 13, lineHeight: 20, marginBottom: 20,
-          }}>
-            We'll map your completed courses and show you exactly what's left — and what to take next.
-          </Text>
-          <View style={{
-            alignSelf: "flex-start", backgroundColor: "#1a3a6b",
-            borderRadius: 10, paddingHorizontal: 16, paddingVertical: 9,
-          }}>
-            <Text style={{ color: "#ffffff", fontSize: 13, fontWeight: "700" }}>
-              Upload transcript →
-            </Text>
-          </View>
-        </TouchableOpacity>
-
-        {/* Course preview */}
-        {preview.length > 0 && (
-          <View>
-            <Text style={{
-              color: "#94a3b8", fontSize: 11, fontWeight: "700",
-              letterSpacing: 0.9, marginBottom: 12,
-            }}>
-              FIRST SEMESTER COURSES
-            </Text>
-            {preview.map((c, i) => (
-              <View
-                key={c.course_code}
-                style={{
-                  flexDirection: "row", alignItems: "center",
-                  paddingVertical: 13, paddingHorizontal: 16,
-                  backgroundColor: "#ffffff", borderRadius: 12,
-                  marginBottom: 8, borderWidth: 1, borderColor: "#f1f5f9",
-                  opacity: 0.5,
-                }}
-              >
-                <View style={{
-                  width: 8, height: 8, borderRadius: 4,
-                  backgroundColor: "#cbd5e1", marginRight: 12,
-                }} />
-                <Text style={{ color: "#374151", fontSize: 13, fontWeight: "700", flex: 1 }}>
-                  {c.course_code}
-                </Text>
-                {c.course_title ? (
-                  <Text style={{ color: "#94a3b8", fontSize: 12 }} numberOfLines={1}>
-                    {c.course_title}
-                  </Text>
-                ) : null}
-              </View>
-            ))}
-            <Text style={{
-              color: "#94a3b8", fontSize: 12, textAlign: "center",
-              marginTop: 8, fontStyle: "italic",
-            }}>
-              Upload your transcript to unlock your full plan
-            </Text>
-          </View>
-        )}
-      </View>
-    </ScrollView>
+      <Text style={{ color: "#92400e", fontSize: 16 }}>→</Text>
+    </TouchableOpacity>
   );
 }
 
@@ -235,9 +148,21 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
   const type   = courseType(course);
 
   if (course.is_pool) {
-    // Pools are not individually registerable — show as a placeholder
-    const needed = course.pool_needed_credits ?? course.pool_needed_courses ?? 0;
-    const unit   = course.pool_needed_credits != null ? "credits" : "courses";
+    // Single gen ed category slot (one per missing category)
+    const cats = course.gen_ed_categories;
+    const isGenEdSlot = cats && cats.length === 1
+      && course.pool_needed_credits == null
+      && course.pool_needed_courses == null;
+
+    let poolLabel: string;
+    if (isGenEdSlot) {
+      poolLabel = `Gen Ed — ${cats![0]}`;
+    } else {
+      const needed = course.pool_needed_credits ?? course.pool_needed_courses ?? 0;
+      const unit   = course.pool_needed_credits != null ? "credits" : "courses";
+      poolLabel = `Elective Pool — ${needed} ${unit}`;
+    }
+
     return (
       <View style={{
         flexDirection: "row", alignItems: "center",
@@ -251,7 +176,7 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
         }} />
         <View style={{ flex: 1 }}>
           <Text style={{ color: "#64748b", fontSize: 13, fontWeight: "600" }}>
-            Elective Pool — {needed} {unit}
+            {poolLabel}
           </Text>
         </View>
         <View style={{
@@ -431,8 +356,8 @@ export default function HomeScreen() {
   }
 
   // ── State detection ───────────────────────────────────────────────────────
-  const hasMajor   = !!(audit?.major);
-  const hasCredits = !!(audit?.transcript_credits && audit.transcript_credits > 0);
+  const hasMajor      = !!(audit?.major);
+  const hasTranscript = !!(audit?.transcript_credits && audit.transcript_credits > 0);
 
   // State 1 — no major
   if (!hasMajor) {
@@ -443,17 +368,7 @@ export default function HomeScreen() {
     );
   }
 
-  // State 2 — major picked, no transcript
-  if (!hasCredits) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
-        <NavHeader />
-        <PlanPreviewState audit={audit!} timeline={timeline} />
-      </SafeAreaView>
-    );
-  }
-
-  // State 3 — fully set up
+  // State 2 & 3 — major picked (with or without transcript)
   const currentSem = timeline?.semesters.find((s) => s.status === "current") ?? null;
   const nextSem    = timeline?.semesters.find((s) => s.status === "upcoming") ?? null;
   const upcoming   = timeline?.semesters.filter((s) => s.status === "upcoming") ?? [];
@@ -476,9 +391,11 @@ export default function HomeScreen() {
           {greeting(name)}
         </Text>
 
-        {currentSem && (
+        {hasTranscript && currentSem ? (
           <CurrentSemesterStrip semester={currentSem} credits={audit!.transcript_credits} />
-        )}
+        ) : !hasTranscript ? (
+          <NoTranscriptBanner />
+        ) : null}
 
         {nextSem ? (
           <RegistrationSection semester={nextSem} audit={audit!} />

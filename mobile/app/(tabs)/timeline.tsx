@@ -388,9 +388,13 @@ function CourseRow({ course }: { course: TimelineCourse }) {
         <Text className={`w-5 text-center text-sm font-bold mt-0.5 ${config.dotColor}`}>{config.dot}</Text>
         <View className="flex-1 ml-3">
           <Text className={`text-sm font-semibold ${config.textColor}`}>
-            {cats && cats.length > 0 ? "Elective" : course.course_code}
+            {cats && cats.length === 1
+              ? `Gen Ed — ${cats[0]}`
+              : cats && cats.length > 1
+              ? "Gen Ed Elective"
+              : course.course_code}
           </Text>
-          {cats && cats.map((cat, i) => (
+          {cats && cats.length > 1 && cats.map((cat, i) => (
             <Text key={i} className="text-gray-400 text-xs mt-0.5">{cat}</Text>
           ))}
           {!cats && course.course_title ? (

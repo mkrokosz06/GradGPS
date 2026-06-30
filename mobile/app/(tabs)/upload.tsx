@@ -12,16 +12,37 @@ import * as DocumentPicker from "expo-document-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
-import { uploadTranscript, type UploadResult } from "../../services/transcriptService";
+import {
+  uploadTranscript,
+  getTranscript,
+  deleteTranscript,
+  type UploadResult,
+  type TranscriptData,
+} from "../../services/transcriptService";
 
 export default function UploadScreen() {
   const { userId } = useAuth();
   const router = useRouter();
-  const [uploading, setUploading] = useState(false);
-  const [result, setResult]       = useState<UploadResult | null>(null);
 
-  // Clear stale upload result whenever this screen comes into focus.
-  useFocusEffect(useCallback(() => { setResult(null); }, []));
+  const [transcript, setTranscript] = useState<TranscriptData | null>(null);
+  const [loading,    setLoading]    = useState(true);
+  const [uploading,  setUploading]  = useState(false);
+  const [deleting,   setDeleting]   = useState(false);
+  const [result,     setResult]     = useState<UploadResult | null>(null);
+
+  // Fetch transcript state whenever screen comes into focus
+  useFocusEffect(useCallback(() => {
+    let active = true;
+    setResult(null);
+    setLoading(true);
+
+    getTranscript(userId!)
+      .then((data) => { if (active) setTranscript(data); })
+      .catch(() => { if (active) setTranscript({ has_transcript: false, courses_total: 0, terms: [] }); })
+      .finally(() => { if (active) setLoading(false); });
+
+    return () => { active = false; };
+  }, [userId]));
 
   async function pickAndUpload() {
     const picked = await DocumentPicker.getDocumentAsync({
@@ -37,7 +58,6 @@ export default function UploadScreen() {
     try {
       const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf");
       setResult(data);
-      // Navigate to timeline so it refetches fresh data with the new transcript.
       setTimeout(() => router.navigate("/(tabs)/" as any), 1500);
     } catch (e: any) {
       Alert.alert("Upload failed", e?.response?.data?.detail ?? "Something went wrong.");
@@ -46,8 +66,154 @@ export default function UploadScreen() {
     }
   }
 
+  function confirmDelete() {
+    Alert.alert(
+      "Delete transcript?",
+      "This will remove all your parsed courses. Your timeline will reset to a projected plan until you upload a new transcript.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: handleDelete },
+      ],
+    );
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      await deleteTranscript(userId!);
+      setTranscript({ has_transcript: false, courses_total: 0, terms: [] });
+      // Refresh the timeline too
+      router.navigate("/(tabs)/" as any);
+    } catch {
+      Alert.alert("Error", "Could not delete transcript. Please try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
+        <NavHeader subtitle="Transcript" />
+        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <ActivityIndicator size="large" color="#1a3a6b" />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // ── View mode: transcript exists ───────────────────────────────────────────
+  if (transcript?.has_transcript) {
+    return (
+      <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
+        <NavHeader subtitle="Transcript" />
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ padding: 24, paddingBottom: 60 }}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Header card */}
+          <View style={{
+            backgroundColor: "#1a3a6b", borderRadius: 20,
+            padding: 22, marginBottom: 24,
+          }}>
+            <Text style={{ color: "#E8C84B", fontSize: 11, fontWeight: "800", letterSpacing: 1.5, marginBottom: 8 }}>
+              YOUR TRANSCRIPT
+            </Text>
+            <Text style={{ color: "#ffffff", fontSize: 26, fontWeight: "900" }}>
+              {transcript.courses_total} courses
+            </Text>
+            <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 4 }}>
+              {transcript.terms.length} semester{transcript.terms.length !== 1 ? "s" : ""} on record
+            </Text>
+          </View>
+
+          {/* Course list by term */}
+          {transcript.terms.map((termGroup) => (
+            <View key={termGroup.term} style={{ marginBottom: 20 }}>
+              <Text style={{
+                color: "#94a3b8", fontSize: 11, fontWeight: "700",
+                letterSpacing: 0.9, marginBottom: 10,
+              }}>
+                {termGroup.label.toUpperCase()}
+              </Text>
+              <View style={{
+                backgroundColor: "#ffffff", borderRadius: 16,
+                borderWidth: 1, borderColor: "#f1f5f9",
+                overflow: "hidden",
+              }}>
+                {termGroup.courses.map((course, i) => (
+                  <View
+                    key={course.course_code}
+                    style={{
+                      flexDirection: "row", alignItems: "center",
+                      paddingVertical: 13, paddingHorizontal: 16,
+                      borderBottomWidth: i < termGroup.courses.length - 1 ? 1 : 0,
+                      borderBottomColor: "#f8fafc",
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
+                        {course.course_code}
+                      </Text>
+                    </View>
+                    <View style={{ alignItems: "flex-end", gap: 2 }}>
+                      <Text style={{ color: "#374151", fontSize: 13, fontWeight: "600" }}>
+                        {course.grade || "—"}
+                      </Text>
+                      <Text style={{ color: "#94a3b8", fontSize: 11 }}>
+                        {course.credits_earned} cr
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </View>
+            </View>
+          ))}
+
+          {/* Replace / Delete actions */}
+          <View style={{ gap: 12, marginTop: 8 }}>
+            <TouchableOpacity
+              onPress={pickAndUpload}
+              disabled={uploading || deleting}
+              activeOpacity={0.85}
+              style={{
+                backgroundColor: "#1a3a6b", borderRadius: 14,
+                paddingVertical: 15, alignItems: "center",
+              }}
+            >
+              <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>
+                Replace transcript
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              onPress={confirmDelete}
+              disabled={uploading || deleting}
+              activeOpacity={0.85}
+              style={{
+                backgroundColor: "#fff1f2", borderRadius: 14,
+                paddingVertical: 15, alignItems: "center",
+                borderWidth: 1, borderColor: "#fecdd3",
+              }}
+            >
+              {deleting ? (
+                <ActivityIndicator color="#e11d48" size="small" />
+              ) : (
+                <Text style={{ color: "#e11d48", fontSize: 14, fontWeight: "700" }}>
+                  Delete transcript
+                </Text>
+              )}
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+
+  // ── Upload mode: no transcript ─────────────────────────────────────────────
   return (
-    <SafeAreaView className="flex-1 bg-white" edges={["top","left","right"]}>
+    <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <NavHeader subtitle="Upload Transcript" />
       <ScrollView
         className="flex-1"
@@ -107,15 +273,12 @@ export default function UploadScreen() {
         {/* Result */}
         {result && (
           <View className="rounded-2xl border border-gray-200 overflow-hidden">
-            {/* Success header */}
             <View className="bg-green-50 px-5 py-4 border-b border-gray-100">
               <Text className="text-done font-bold text-base">Transcript uploaded</Text>
               <Text className="text-gray-400 text-xs mt-0.5">
                 {result.courses_parsed} courses parsed successfully
               </Text>
             </View>
-
-            {/* Stats */}
             <View className="flex-row">
               <StatBox label="Completed"   value={result.done}        color="#16a34a" />
               <View style={{ width: 1, backgroundColor: "#f3f4f6" }} />
@@ -127,12 +290,8 @@ export default function UploadScreen() {
                 </>
               )}
             </View>
-
-            {/* Footer note */}
             <View className="px-5 py-3 border-t border-gray-100">
-              <Text className="text-gray-400 text-xs">
-                Returning to timeline…
-              </Text>
+              <Text className="text-gray-400 text-xs">Returning to timeline…</Text>
             </View>
           </View>
         )}

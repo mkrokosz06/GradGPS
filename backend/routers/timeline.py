@@ -5,6 +5,10 @@ current in-progress semester, and future recommended semesters built from
 the remaining degree requirements.
 """
 
+import math
+import re
+from collections import defaultdict
+
 from fastapi import APIRouter, HTTPException, Depends
 from boto3.dynamodb.conditions import Key
 
@@ -174,6 +178,51 @@ def _collect_missing(audit_result: dict) -> list[dict]:
     return missing
 
 
+def _sort_and_spread(courses: list[dict]) -> list[dict]:
+    """
+    Order missing courses so that:
+      1. Lower course numbers come before higher ones
+         (100-level before 200 before 300 before 400).
+      2. Within each level tier, courses are round-robined by subject prefix
+         (CHEM, MATH, FRNSC, …) so the same department isn't stacked 3+ deep
+         in a single semester.
+      3. Pool entries (is_pool=True) are left at the very end in original order,
+         since they are elective/gen-ed placeholders without a level.
+    """
+    pools    = [c for c in courses if c.get("is_pool")]
+    regulars = [c for c in courses if not c.get("is_pool")]
+
+    def _level(code: str) -> int:
+        """Return the hundred-rounded course level: 'CHEM 202' → 200."""
+        m = re.search(r"(\d+)", code or "")
+        return (int(m.group(1)) // 100) * 100 if m else 0
+
+    def _subject(code: str) -> str:
+        """Return the subject prefix: 'CHEM 202' → 'CHEM'."""
+        m = re.match(r"^([A-Z]+)", (code or "").strip())
+        return m.group(1) if m else ""
+
+    # Group by level tier
+    tier_map: dict[int, list] = defaultdict(list)
+    for c in regulars:
+        tier_map[_level(c.get("course_code", ""))].append(c)
+
+    result: list[dict] = []
+    for tier in sorted(tier_map):
+        # Within each tier, round-robin by subject so no department clusters
+        subj_map: dict[str, list] = defaultdict(list)
+        for c in tier_map[tier]:
+            subj_map[_subject(c.get("course_code", ""))].append(c)
+        buckets = list(subj_map.values())
+        while any(buckets):
+            for bucket in buckets:
+                if bucket:
+                    result.append(bucket.pop(0))
+
+    result.extend(pools)
+    return result
+
+
 @router.get("")
 def get_timeline(user_id: str = Depends(get_user_id)):
     # ── 1. User ──────────────────────────────────────────────────────────────
@@ -282,9 +331,10 @@ def get_timeline(user_id: str = Depends(get_user_id)):
                    "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
         )
     audit_result = run_audit(requirement_rows, transcript_courses)
-    missing      = _collect_missing(audit_result)
+    missing      = _sort_and_spread(_collect_missing(audit_result))
 
-    # ── 4b. Gen ed audit → single pool entry if any categories incomplete ────
+    # ── 4b. Gen ed audit → one slot per incomplete category ─────────────────
+    gen_ed_slots: list[dict] = []
     gen_ed_resp = requirements_table.query(
         KeyConditionExpression=Key("program_name").eq("__GEN_ED__")
     )
@@ -298,27 +348,101 @@ def get_timeline(user_id: str = Depends(get_user_id)):
 
     if gen_ed_rows:
         gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
-        missing_cats = [
-            g["name"] for g in gen_ed_result.get("groups", [])
-            if not g.get("satisfied")
-        ]
-        if missing_cats:
-            missing.append({
-                "course_code":       "Gen Ed",
-                "course_title":      f"Incomplete: {', '.join(missing_cats)}",
-                "credits":           3,
-                "is_pool":           True,
-                "gen_ed_categories": missing_cats,
-            })
+        for group in gen_ed_result.get("groups", []):
+            if not group.get("satisfied"):
+                gen_ed_slots.append({
+                    "course_code":       group["name"],
+                    "course_title":      f"Choose a {group['name']} course",
+                    "credits":           3,
+                    "is_pool":           True,
+                    "gen_ed_categories": [group["name"]],
+                })
 
     # ── 5. Distribute missing courses into future semesters ──────────────────
+    # Interleave gen ed slots with major courses so each semester gets a mix
+    # (roughly 1-2 gen eds per semester rather than all at the end).
+    # Use slot-based scheduling: each item occupies 1+ slots depending on how
+    # many courses it represents.  Target COURSES_PER_SEM = 5 slots/semester.
     COURSES_PER_SEM = 5
     base_term = sorted_terms[-1] if sorted_terms else "SP 2026"
     future_term = _next_term(base_term)
 
-    chunks = [missing[i : i + COURSES_PER_SEM] for i in range(0, len(missing), COURSES_PER_SEM)]
+    def _item_slots(c: dict) -> int:
+        """Scheduling slots this item consumes (pools may span multiple slots)."""
+        if c.get("pool_needed_courses"):
+            return max(1, int(c["pool_needed_courses"]))
+        cr = float(c.get("credits", 3) or 3)
+        # Large choose_credits pools (e.g. 18 cr) spread across multiple slots
+        return max(1, round(cr / 3))
+
+    def _display_credits(c: dict) -> float:
+        """Estimated credits this item represents for the semester credit total."""
+        if c.get("pool_needed_courses"):
+            return 3.0 * int(c["pool_needed_courses"])
+        return float(c.get("credits", 3) or 3)
+
+    # For BS/BA degrees, if the catalogued requirements total less than 120 credits
+    # (open electives aren't listed in every catalog), add a free elective placeholder
+    # so the schedule reflects the full 4-year length.
+    if requirement_rows:
+        degree = requirement_rows[0].get("degree", "")
+        if degree in ("B.S.", "B.A.", "B.A.S.", "B.Mus.", "B.F.A."):
+            total_planned_cr = (
+                sum(_display_credits(c) for c in missing)
+                + 3.0 * len(gen_ed_slots)
+            )
+            if total_planned_cr < 120:
+                free_cr = int(120 - total_planned_cr)
+                missing.append({
+                    "course_code":        "Free Electives",
+                    "course_title":       f"Choose {free_cr} more elective credits",
+                    "credits":            free_cr,
+                    "is_pool":            True,
+                    "pool_needed_credits": free_cr,
+                })
+
+    n_major  = len(missing)
+    n_gen_ed = len(gen_ed_slots)
+
+    # Estimate semester count from total slots to size gen-ed cadence
+    total_slots = sum(_item_slots(c) for c in missing) + n_gen_ed
+    n_sems      = max(1, math.ceil(total_slots / COURSES_PER_SEM))
+
+    # Cap gen ed per semester at 2 so major courses aren't squeezed out
+    gen_ed_per_sem = min(2, math.ceil(n_gen_ed / n_sems)) if n_gen_ed else 0
+
+    mi, gi = 0, 0
+    chunks: list[list[dict]] = []
+    while mi < n_major or gi < n_gen_ed:
+        chunk: list[dict] = []
+        slots_used = 0
+        # How many gen eds are we adding this semester?
+        # Dynamically reduce major slots only by the gen eds actually available,
+        # so semesters stay full after gen ed is exhausted.
+        gen_eds_remaining = n_gen_ed - gi
+        gen_eds_this_sem  = min(gen_ed_per_sem, gen_eds_remaining)
+        avail_major       = COURSES_PER_SEM - gen_eds_this_sem
+        # Fill major courses up to avail_major slots
+        while mi < n_major:
+            c = missing[mi]
+            s = min(_item_slots(c), avail_major)  # single entry can't exceed a semester
+            if slots_used > 0 and slots_used + s > avail_major:
+                break
+            chunk.append(c)
+            slots_used += s
+            mi += 1
+        # Add gen ed slots (capped per semester)
+        gen_ed_added = 0
+        while gi < n_gen_ed and gen_ed_added < gen_ed_per_sem:
+            chunk.append(gen_ed_slots[gi])
+            gi += 1
+            gen_ed_added += 1
+        if chunk:
+            chunks.append(chunk)
+        else:
+            break  # safety valve
     for chunk in chunks:
-        est_credits = round(sum(float(c.get("credits", 3) or 3) for c in chunk), 1)
+        est_credits = round(sum(_display_credits(c) for c in chunk), 1)
         semesters.append({
             "term":    future_term,
             "label":   _term_label(future_term),

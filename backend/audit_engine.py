@@ -1016,15 +1016,20 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> d
         # A group may contain rows with different group_types (e.g. ETI Requirements
         # has both choose_one and choose_credits rows). Split and evaluate each
         # sub-type separately, then merge into one group result.
-        type_buckets: dict[str, list[dict]] = defaultdict(list)
+        # Key: (group_type, threshold) so that choose_credits/choose_courses rows
+        # with different thresholds become separate pools (e.g. Finance has an
+        # ENGL pool at 3cr and a FIN electives pool at 9cr in the same group).
+        type_buckets: dict[tuple, list[dict]] = defaultdict(list)
         for row in rows:
-            type_buckets[row.get("group_type", "required")].append(row)
+            gtype = row.get("group_type", "required")
+            thr_key = int(row["group_threshold"]) if gtype in ("choose_credits", "choose_courses") and row.get("group_threshold") else None
+            type_buckets[(gtype, thr_key)].append(row)
 
         if len(type_buckets) == 1:
             # Homogeneous — simple path
-            gtype     = next(iter(type_buckets))
-            threshold = group_meta[group_name]["group_threshold"]
-            result    = _eval_type(gtype, rows, taken, threshold)
+            (gtype, _) = next(iter(type_buckets))
+            threshold  = group_meta[group_name]["group_threshold"]
+            result     = _eval_type(gtype, rows, taken, threshold)
 
             d, ip, m = _pool_counts(gtype, result)
             total_done    += d
@@ -1053,15 +1058,9 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> d
             agg_done = agg_ip = agg_missing = 0
             agg_credits = 0.0
 
-            for gtype, bucket_rows in type_buckets.items():
-                # Threshold for choose_credits rows is stored per-row; use the first
-                thr = None
-                if gtype in ("choose_credits", "choose_courses"):
-                    for r in bucket_rows:
-                        if r.get("group_threshold"):
-                            thr = int(r["group_threshold"])
-                            break
-
+            for (gtype, thr), bucket_rows in type_buckets.items():
+                # thr is the pool threshold for choose_credits/choose_courses,
+                # or None for required/choose_one rows.
                 res = _eval_type(gtype, bucket_rows, taken, thr)
                 d, ip, m = _pool_counts(gtype, res)
                 agg_done    += d

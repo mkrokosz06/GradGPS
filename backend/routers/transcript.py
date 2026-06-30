@@ -1,6 +1,8 @@
 """
-POST /transcript/upload
-Accepts a PDF, parses it, stores courses to DynamoDB, uploads PDF to S3.
+Transcript endpoints:
+  POST /transcript/upload  — parse & store a PDF transcript
+  GET  /transcript         — return stored transcript courses grouped by term
+  DELETE /transcript       — delete all transcript courses and clear user record
 """
 
 import os
@@ -14,6 +16,126 @@ from deps import get_user_id
 router = APIRouter()
 
 S3_BUCKET = os.getenv("S3_BUCKET", "degreecheck-transcripts")
+
+_SEASON_ORDER  = {"SP": 0, "SU": 1, "FA": 2}
+_SEASON_LABELS = {"SP": "Spring", "SU": "Summer", "FA": "Fall"}
+
+
+def _term_key(term: str) -> tuple:
+    parts = term.split()
+    if len(parts) != 2:
+        return (9999, 99)
+    return (int(parts[1]), _SEASON_ORDER.get(parts[0], 99))
+
+
+def _term_label(term: str) -> str:
+    parts = term.split()
+    if len(parts) != 2:
+        return term
+    return f"{_SEASON_LABELS.get(parts[0], parts[0])} {parts[1]}"
+
+
+@router.get("")
+def get_transcript(user_id: str = Depends(get_user_id)):
+    """Return the user's stored transcript courses grouped by term."""
+    from boto3.dynamodb.conditions import Key as DKey
+
+    resp = transcript_table.query(KeyConditionExpression=DKey("user_id").eq(user_id))
+    courses = resp.get("Items", [])
+    while "LastEvaluatedKey" in resp:
+        resp = transcript_table.query(
+            KeyConditionExpression=DKey("user_id").eq(user_id),
+            ExclusiveStartKey=resp["LastEvaluatedKey"],
+        )
+        courses.extend(resp.get("Items", []))
+
+    if not courses:
+        return {"has_transcript": False, "courses_total": 0, "terms": []}
+
+    # Group by term; transfer credits get their own bucket
+    transfer = [c for c in courses if c.get("status") == "transfer"]
+    regular  = [c for c in courses if c.get("status") != "transfer"]
+
+    term_map: dict[str, list] = {}
+    for c in regular:
+        t = c.get("term") or "Unknown"
+        term_map.setdefault(t, []).append(c)
+
+    sorted_terms = sorted(term_map.keys(), key=_term_key)
+
+    terms = []
+    if transfer:
+        terms.append({
+            "term":  "Transfer",
+            "label": "Transfer Credits",
+            "courses": [
+                {
+                    "course_code":    c.get("course_code", ""),
+                    "grade":          "TR",
+                    "credits_earned": float(c.get("credits_earned", 0)),
+                    "status":         "transfer",
+                }
+                for c in transfer
+            ],
+        })
+
+    for t in sorted_terms:
+        terms.append({
+            "term":  t,
+            "label": _term_label(t),
+            "courses": [
+                {
+                    "course_code":    c.get("course_code", ""),
+                    "grade":          c.get("grade", ""),
+                    "credits_earned": float(c.get("credits_earned", 0)),
+                    "status":         c.get("status", "done"),
+                }
+                for c in term_map[t]
+            ],
+        })
+
+    return {
+        "has_transcript": True,
+        "courses_total":  len(courses),
+        "terms":          terms,
+    }
+
+
+@router.delete("")
+def delete_transcript(user_id: str = Depends(get_user_id)):
+    """Delete all transcript courses for the user and clear their transcript metadata."""
+    from boto3.dynamodb.conditions import Key as DKey
+
+    # Paginate and delete all courses
+    query_kwargs = {
+        "KeyConditionExpression": DKey("user_id").eq(user_id),
+        "ProjectionExpression": "user_id, course_code",
+    }
+    resp = transcript_table.query(**query_kwargs)
+    existing = list(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = transcript_table.query(**query_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+        existing.extend(resp.get("Items", []))
+
+    if existing:
+        with transcript_table.batch_writer() as batch:
+            for item in existing:
+                batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
+
+    # Clear transcript metadata on the user record
+    users_table.update_item(
+        Key={"user_id": user_id},
+        UpdateExpression="REMOVE transcript_parsed_at, transcript_s3_key",
+    )
+
+    # Best-effort S3 delete
+    try:
+        s3 = get_s3()
+        s3.delete_object(Bucket=S3_BUCKET, Key=f"transcripts/{user_id}/transcript.pdf")
+    except Exception:
+        pass
+
+    return {"status": "ok"}
 
 
 @router.post("/upload")
