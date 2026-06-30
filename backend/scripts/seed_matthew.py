@@ -245,107 +245,257 @@ def patch_phys_alternatives():
         print(f"  Skipped {skipped_already} pairs (already patched).")
 
 
-def patch_math_alternatives():
+def patch_known_alternatives():
     """
-    Fix MATH 250/251 catalog defects across all programs.
+    Fix choose-one alternative pairing defects across the entire catalog.
 
-    MATH 250 (3cr) and MATH 251 (4cr) cover the same differential equations content
-    and are interchangeable. The scraper inconsistently captured them as: both required
-    in the same group, only one present, or both choose_one but unpaired.
+    The scraper inconsistently captured known interchangeable course alternatives as:
+    both required in the same group (no pair), only one present (other absent), or
+    both choose_one but without a pair_group_id linking them.
 
-    Generic scan — for every (program, group) combination:
-      - Both present + unpaired: assign a shared pair_group_id, set both to choose_one
-      - Only MATH 250 present as required/orphaned choose_one: insert MATH 251, then pair
-      - choose_credits groups: skip (all courses are in a pool, no pairing needed)
+    Strategy per (program, group):
+      - 2+ courses present + unpaired -> assign shared pair_group_id, set to choose_one
+      - 1 course present + insert_missing=True -> insert absent alternatives, then pair
+      - choose_credits pools -> skip (pairing doesn't apply to credit pools)
+      - excluded combos -> skip (courses are genuinely both required there)
+      - already paired -> skip (idempotent)
 
-    Pair IDs start at 700 (ETI=580-583, PHYS=600+).
-    Idempotent: skips any row that already has a pair_group_id.
+    One full table scan is performed upfront; all filtering happens in Python.
+
+    Pair IDs:
+      ETI pairs:        580-583
+      PHYS 211/250:     600+
+      MATH 250/251:     700+   (already applied, will be skipped as already-paired)
+      This function:    800+
     """
-    from boto3.dynamodb.conditions import Attr
+    from collections import defaultdict
 
-    print("\nPatching MATH 250 / MATH 251 alternatives across all programs...")
+    print("\nPatching known course alternatives across all programs...")
 
-    def scan_code(code):
-        resp = requirements_table.scan(FilterExpression=Attr("course_code").eq(code))
-        rows = resp["Items"]
-        while "LastEvaluatedKey" in resp:
-            resp = requirements_table.scan(
-                FilterExpression=Attr("course_code").eq(code),
-                ExclusiveStartKey=resp["LastEvaluatedKey"]
-            )
-            rows.extend(resp["Items"])
-        return rows
+    # ── Define all known alternative groups ───────────────────────────────────
+    #
+    # Each entry:
+    #   codes         - list of course codes that are interchangeable (2 or 3)
+    #   insert_missing - if True, insert absent alternatives when only 1 is present
+    #   exclude        - fn(program_name, group_name) -> bool; True = skip this combo
+    #
+    # "MIXED" pairs (both sometimes required) use insert_missing=False and an
+    # exclude function to protect programs where both courses are genuinely needed.
 
-    math250_rows = scan_code("MATH 250")
-    math251_rows = scan_code("MATH 251")
+    GROUPS = [
+        # ── English / Writing ───────────────────────────────────────────────
+        dict(codes=["ENGL 202C", "ENGL 202D"],
+             insert_missing=True, exclude=None),
 
-    by_pg_250 = {(r["program_name"], r["requirement_group"]): r for r in math250_rows}
-    by_pg_251 = {(r["program_name"], r["requirement_group"]): r for r in math251_rows}
+        # ── Speech (3-way: A, B, C are all sections of the same course) ─────
+        dict(codes=["CAS 100A", "CAS 100B", "CAS 100C"],
+             insert_missing=True, exclude=None),
 
-    pair_id = Decimal("700")
-    patched = 0
+        # ── Statistics ──────────────────────────────────────────────────────
+        dict(codes=["STAT 200", "STAT 250"],
+             insert_missing=True, exclude=None),
+        dict(codes=["SCM 200",  "STAT 200"],
+             insert_missing=False, exclude=None),
+        dict(codes=["DS 200",   "STAT 200"],
+             insert_missing=True, exclude=None),
+
+        # ── Chemistry ───────────────────────────────────────────────────────
+        dict(codes=["CHEM 110", "CHEM 130"],
+             insert_missing=True, exclude=None),
+        dict(codes=["CHEM 101", "CHEM 130"],
+             insert_missing=True, exclude=None),
+        # Organic chem: MIXED — genuinely both required in Chemistry Teaching,
+        # Clinical Lab Science, and Data Sciences Nutrition tracks
+        dict(codes=["CHEM 202", "CHEM 210"],
+             insert_missing=False,
+             exclude=lambda p, g: (
+                 "Chemistry Teaching" in g or
+                 "Clinical Laboratory Science" in g or
+                 ("Data Sciences" in p and "Nutrition" in g)
+             )),
+
+        # ── Mathematics ─────────────────────────────────────────────────────
+        dict(codes=["MATH 110", "MATH 140"],
+             insert_missing=True, exclude=None),
+        dict(codes=["MATH 250", "MATH 251"],
+             insert_missing=True, exclude=None),
+        # MATH 230/231 MIXED: most engineering programs require both as a sequence;
+        # only minors and EET treat them as alternatives
+        dict(codes=["MATH 230", "MATH 231"],
+             insert_missing=False,
+             exclude=lambda p, g: "Meteorology" in p and "Common Requirements" in g),
+
+        # ── Accounting ──────────────────────────────────────────────────────
+        dict(codes=["ACCTG 201", "ACCTG 211"],
+             insert_missing=True, exclude=None),
+
+        # ── Computer Science ─────────────────────────────────────────────────
+        dict(codes=["CMPSC 121", "CMPSC 131"],
+             insert_missing=True, exclude=None),
+        dict(codes=["CMPSC 122", "CMPSC 132"],
+             insert_missing=True, exclude=None),
+        dict(codes=["CMPSC 200", "CMPSC 201"],
+             insert_missing=True, exclude=None),
+        dict(codes=["CMPSC 360", "MATH 311W"],
+             insert_missing=True, exclude=None),
+
+        # ── Business ────────────────────────────────────────────────────────
+        dict(codes=["MIS 204",   "MIS 250"],
+             insert_missing=True, exclude=None),
+        dict(codes=["BA 243",    "BLAW 243"],
+             insert_missing=False, exclude=None),
+        dict(codes=["AGBM 101",  "ECON 102"],
+             insert_missing=False, exclude=None),
+        # ECON MIXED: both required in Business Common Req, Management Common Req,
+        # Risk Management, Stats Actuarial, Criminology, lang+Business options,
+        # and Data Sciences Economics/Business Fundamentals groups
+        dict(codes=["ECON 102", "ECON 104"],
+             insert_missing=False,
+             exclude=lambda p, g: (
+                 ("Business, B.S." in p and "Common Requirements" in g) or
+                 ("Management, B.S." in p and "Common Requirements" in g) or
+                 "Risk Management" in p or
+                 ("Statistics, B.S." in p and "Actuarial" in g) or
+                 "Criminology" in p or
+                 (any(lang in p for lang in ["French", "German", "Spanish"]) and "Business" in g) or
+                 ("Data Sciences" in p and any(x in g for x in ["Economics", "Business Fundamentals"]))
+             )),
+
+        # ── Physics ─────────────────────────────────────────────────────────
+        dict(codes=["PHYS 211", "PHYS 250"],
+             insert_missing=True, exclude=None),
+        dict(codes=["PHYS 212", "PHYS 251"],
+             insert_missing=True, exclude=None),
+        dict(codes=["PHYS 150", "PHYS 250"],
+             insert_missing=True, exclude=None),
+
+        # ── Biology ─────────────────────────────────────────────────────────
+        dict(codes=["BIOL 222", "BIOL 322"],
+             insert_missing=True, exclude=None),
+
+        # ── Human Development / Psychology ───────────────────────────────────
+        dict(codes=["HDFS 229", "PSYCH 100"],
+             insert_missing=False, exclude=None),
+    ]
+
+    # ── One full table scan, filter in Python ────────────────────────────────
+    all_relevant_codes = set()
+    for grp in GROUPS:
+        all_relevant_codes.update(grp["codes"])
+
+    print(f"  Scanning catalog for {len(all_relevant_codes)} course codes...")
+    resp = requirements_table.scan()
+    all_rows = resp["Items"]
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.scan(ExclusiveStartKey=resp["LastEvaluatedKey"])
+        all_rows.extend(resp["Items"])
+
+    rows_by_code = defaultdict(list)
+    for row in all_rows:
+        if row.get("course_code") in all_relevant_codes:
+            rows_by_code[row["course_code"]].append(row)
+
+    # Build (program, group) -> row index per code
+    by_pg = {
+        code: {(r["program_name"], r["requirement_group"]): r for r in rows}
+        for code, rows in rows_by_code.items()
+    }
+
+    # Course info cache for insertion (title + credits from any existing row)
+    course_info = {
+        code: (rows[0].get("course_title", ""), rows[0].get("credits", Decimal("3")))
+        for code, rows in rows_by_code.items() if rows
+    }
+
+    # ── Apply each group ─────────────────────────────────────────────────────
+    pair_id = Decimal("800")
+    total_patched = 0
     skipped_already = 0
     skipped_pool = 0
+    skipped_excluded = 0
 
-    def make_pair(row_a, row_b):
-        nonlocal pair_id, patched
-        for row in (row_a, row_b):
+    def assign_pair(rows_to_update):
+        nonlocal pair_id, total_patched
+        for row in rows_to_update:
             requirements_table.update_item(
                 Key={"program_name": row["program_name"], "group_course": row["group_course"]},
                 UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
                 ExpressionAttributeValues={":pid": pair_id, ":gt": "choose_one"},
             )
         pair_id += 1
-        patched += 1
+        total_patched += 1
 
-    def insert_math251(template_row):
-        """Insert a MATH 251 row cloned from a MATH 250 row."""
+    def insert_course(template_row, code):
+        if code not in course_info or course_info[code][0] is None:
+            return None
+        title, credits = course_info[code]
         item = {k: v for k, v in template_row.items()}
-        item["course_code"]  = "MATH 251"
-        item["course_title"] = "Ordinary and Partial Differential Equations"
-        item["credits"]      = Decimal("4")
-        item["group_course"] = f"{template_row['requirement_group']}#MATH 251"
+        item["course_code"]  = code
+        item["course_title"] = title
+        item["credits"]      = credits
+        item["group_course"] = f"{template_row['requirement_group']}#{code}"
         item.pop("pair_group_id", None)
         requirements_table.put_item(Item=item)
         return item
 
-    # All (program, group) keys where MATH 250 appears
-    all_keys = set(by_pg_250.keys())
+    for grp in GROUPS:
+        codes        = grp["codes"]
+        insert_miss  = grp["insert_missing"]
+        exclude_fn   = grp.get("exclude")
+        grp_patched  = 0
 
-    for key in sorted(all_keys):
-        prog, group = key
-        if prog == "__GEN_ED__":
-            continue
+        # Union of all (program, group) keys where any code in this group appears
+        all_keys = set()
+        for code in codes:
+            all_keys.update(by_pg.get(code, {}).keys())
 
-        row_250 = by_pg_250[key]
+        for key in sorted(all_keys):
+            prog, group = key
+            if prog == "__GEN_ED__":
+                continue
 
-        # Skip choose_credits pools — all courses are valid options, no pairing needed
-        if row_250.get("group_type") == "choose_credits":
-            skipped_pool += 1
-            continue
+            if exclude_fn and exclude_fn(prog, group):
+                skipped_excluded += 1
+                continue
 
-        # Skip if already paired
-        if row_250.get("pair_group_id"):
-            skipped_already += 1
-            continue
+            present = {c: by_pg.get(c, {}).get(key) for c in codes}
+            present = {c: r for c, r in present.items() if r is not None}
 
-        if key in by_pg_251:
-            row_251 = by_pg_251[key]
-            # Skip if MATH 251 side already paired
-            if row_251.get("pair_group_id"):
+            # Skip if any row is already paired
+            if any(r.get("pair_group_id") for r in present.values()):
                 skipped_already += 1
                 continue
-            make_pair(row_250, row_251)
-        else:
-            # MATH 251 absent from this group — insert it then pair
-            new_row = insert_math251(row_250)
-            make_pair(row_250, new_row)
 
-    print(f"  Patched {patched} MATH 250/251 pairs across programs.")
+            # Skip choose_credits pools
+            if any(r.get("group_type") == "choose_credits" for r in present.values()):
+                skipped_pool += 1
+                continue
+
+            if len(present) >= 2:
+                assign_pair(list(present.values()))
+                grp_patched += 1
+            elif len(present) == 1 and insert_miss:
+                template = list(present.values())[0]
+                new_rows = [template]
+                for mc in [c for c in codes if c not in present]:
+                    nr = insert_course(template, mc)
+                    if nr:
+                        new_rows.append(nr)
+                if len(new_rows) >= 2:
+                    assign_pair(new_rows)
+                    grp_patched += 1
+
+        if grp_patched:
+            label = " / ".join(codes)
+            print(f"  {label}: {grp_patched} groups fixed.")
+
+    print(f"\n  Total: {total_patched} groups patched.")
     if skipped_already:
-        print(f"  Skipped {skipped_already} (already paired).")
+        print(f"  Skipped {skipped_already} already-paired.")
     if skipped_pool:
-        print(f"  Skipped {skipped_pool} choose_credits pool rows.")
+        print(f"  Skipped {skipped_pool} choose_credits pools.")
+    if skipped_excluded:
+        print(f"  Skipped {skipped_excluded} excluded (both-required) combos.")
 
 
 def patch_choose_credits_option_groups():
@@ -444,7 +594,7 @@ if __name__ == "__main__":
 
     patch_eti_catalog()
     patch_phys_alternatives()
-    patch_math_alternatives()
+    patch_known_alternatives()
     patch_choose_credits_option_groups()
     row_count = check_eti_requirements()
     if row_count == 0:
