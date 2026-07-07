@@ -1,0 +1,192 @@
+================================================================================
+GradGPS — SECURITY REMEDIATION PLAN
+Generated: 2026-07-02
+Source: Full-codebase security audit (backend auth/API, upload & PDF parsing,
+        secrets/config/dependencies, mobile app)
+================================================================================
+
+The fixes are sequenced by dependency. Most of the High/Critical findings
+collapse into ONE auth rebuild, and a few things are done first because they are
+cheap and unblock the rest.
+
+
+--------------------------------------------------------------------------------
+THE ONE DECISION TO MAKE FIRST
+--------------------------------------------------------------------------------
+Everything hinges on what "real authentication" looks like.
+
+The backend .env already stubs a GOOGLE_CLIENT_ID, so the intended path was
+almost certainly Google Sign-In (PSU issues Google Workspace accounts to every
+student — a natural fit). This plan assumes that.
+
+  RECOMMENDATION: Google OIDC.
+
+Alternative: email + password — means you own password hashing, reset flows, and
+email verification (more surface, more liability). If you choose this instead,
+only Phase 1 changes; the rest of the plan is unaffected.
+
+
+--------------------------------------------------------------------------------
+PHASE 0 — Cheap hardening, do immediately (~30 min, no behavior change)
+--------------------------------------------------------------------------------
+Independent of the auth rebuild and low-risk.
+
+  [ ] 1. Bump vulnerable deps — requirements.txt:
+         - python-jose      3.3.0 -> 3.4.0   (CVE-2024-33663 / 33664)
+         - python-multipart 0.0.9 -> 0.0.18  (multipart DoS)
+         - pdfplumber       0.11.2 -> latest (pdfminer.six advisories)
+         Then: pip install -r requirements.txt; smoke-test upload + audit.
+
+  [ ] 2. Lock down docker-compose.yml (lines 7, 14-16):
+         - Prefix ports with 127.0.0.1: so DynamoDB/MinIO aren't LAN-exposed.
+         - Move MinIO creds to ${MINIO_ROOT_USER} / ${MINIO_ROOT_PASSWORD}
+           sourced from .env.
+
+  [ ] 3. Pin CORS — main.py:16:
+         - Replace allow_origins=["*"] with an env-driven allowlist
+           (CORS_ORIGINS), defaulting to the dev origin locally.
+
+  [ ] 4. Stop leaking parser internals — transcript.py:155:
+         - Log the exception server-side; return a generic 422 message.
+
+  [ ] 5. Remove the bundled test ID:
+         - mobile/constants/api.ts:2 (USER_ID constant)
+         - AuthContext.tsx:3 (dead import)
+
+
+--------------------------------------------------------------------------------
+PHASE 1 — Real authentication (THE CORE)
+Fixes Criticals #1, #2 and Highs #7, #9, plus #13
+--------------------------------------------------------------------------------
+The big one. Everything else is downstream of "identity is a spoofable header."
+
+BACKEND:
+  [ ] 1. Verify tokens in deps.py:
+         Rewrite get_user_id into a dependency that reads
+         "Authorization: Bearer <token>", verifies the Google ID token
+         (signature, aud = client ID, exp), and returns the `sub` claim as the
+         canonical user_id. Never trust a client-supplied identity again.
+
+  [ ] 2. Decouple user_id from email — users.py:30-37:
+         Stop deriving IDs from email (kills enumeration/squatting, finding #12).
+         user_id becomes the verified Google `sub`. POST /users/create goes away
+         or becomes an authenticated "upsert my profile from my token" call.
+
+  [ ] 3. Sanitize the S3 key — transcript.py:192:
+         Even with a verified sub, validate against ^[A-Za-z0-9_-]+$ before using
+         it in the object key (finding #9).
+
+  [ ] 4. Gate /admin/* — admin.py:
+         Add an auth dependency plus an admin allowlist (env var of admin subs).
+         Currently wide-open to anonymous callers — second priority only to the
+         header fix.
+
+MOBILE:
+  [ ] 5. Wire Google Sign-In:
+         Add expo-auth-session / Google provider; signIn() in AuthContext.tsx
+         exchanges for an ID token instead of taking a raw uid.
+
+  [ ] 6. Store the token in SecureStore — AuthContext.tsx:40:
+         Move the token to expo-secure-store (Keychain/Keystore), not
+         AsyncStorage (finding #13). Name/email can stay in AsyncStorage.
+
+  [ ] 7. Send Authorization: Bearer:
+         Update services/api.ts and every *Service.ts to send the token header
+         instead of x-user-id.
+
+
+--------------------------------------------------------------------------------
+PHASE 2 — Upload hardening (Highs #4, #5)
+--------------------------------------------------------------------------------
+transcript.py:141-149:
+
+  [ ] 1. Reject before reading: check Content-Length and enforce a max
+         (e.g. 5 MB) -> 413.
+
+  [ ] 2. Validate file.filename is not None, then verify the %PDF- magic bytes
+         on the read content — not just the .endswith(".pdf") string.
+
+  [ ] 3. Cap parsed pages in transcript_parser.py (e.g. pdf.pages[:50]) and wrap
+         parsing in a timeout to defang PDF bombs.
+
+
+--------------------------------------------------------------------------------
+PHASE 3 — DoS / rate limiting (High #6)
+--------------------------------------------------------------------------------
+  [ ] 1. Add slowapi (or equivalent) with per-user/per-IP limits, tightest on
+         /audit, /timeline, /transcript/upload, and the scan-heavy /courses/*.
+
+  [ ] 2. courses.py:39-54: the full-table-scan-on-cache-miss + outbound
+         RMP/bulletin calls are the worst DoS lever — add a timeout budget on the
+         outbound scrapes and consider persisting the course cache so distinct-
+         code loops can't repeatedly force scans.
+
+
+--------------------------------------------------------------------------------
+PHASE 4 — Residual hardening (Low)
+--------------------------------------------------------------------------------
+  [ ] 1. pydantic.EmailStr on the user model.
+  [ ] 2. URL-encode the bulletin scrape input (courses.py:65).
+  [ ] 3. Add an explicit ENV=prod guard in db.py so a stray dev .env can't
+         silently point prod at localhost.
+
+
+--------------------------------------------------------------------------------
+SUGGESTED ORDER & WHY
+--------------------------------------------------------------------------------
+Phase 0 first (fast, removes free wins + CVE deps), then Phase 1 as the main
+event — it's the load-bearing fix and touches both backend and mobile, so it's
+the longest. Phases 2-4 are self-contained and can follow in any order, though
+Phase 2 is a good next step since it's small and closes an unauthenticated DoS.
+
+Nothing here changes local dev workflow until Phase 1's mobile changes land.
+Keep a dev bypass (env-gated) so you can still run against local without Google
+Sign-In.
+
+Rough effort:
+  Phase 0    ~30 min
+  Phase 1    the bulk (a full session: backend + mobile + testing Google flow)
+  Phases 2-4 ~1-2 hours each
+
+
+================================================================================
+APPENDIX — FINDINGS INDEX (severity / location)
+================================================================================
+CRITICAL
+  #1  Spoofable x-user-id header = no real auth ...... deps.py:8-12 (all routers)
+  #2  /admin/* has zero access control ............... admin.py (whole router)
+
+HIGH
+  #3  Wildcard CORS ................................... main.py:16
+  #4  No upload size limit / PDF-bomb DoS ............. transcript.py:149
+  #5  File-type check trusts filename only ........... transcript.py:146
+  #6  No rate limiting; full table scans ............. courses.py / audit / timeline
+  #7  Cleartext HTTP transport ....................... mobile/constants/api.ts:1
+  #8  Stale deps with known CVEs ..................... requirements.txt
+
+MEDIUM
+  #9  User-controlled S3 object key .................. transcript.py:192
+  #10 Weak MinIO creds + ports on 0.0.0.0 ............ docker-compose.yml:8,15-19
+  #11 Parser exception text echoed to client ......... transcript.py:155
+  #12 Email-derived user IDs (enumeration/squatting) . users.py:30-54
+  #13 PII / credential in unencrypted AsyncStorage ... AuthContext.tsx:29,40,50
+
+LOW / HARDENING
+  - Hardcoded test USER_ID bundled in JS ............. mobile/constants/api.ts:2
+  - Unencoded bulletin scrape input ................. courses.py:65
+  - file.filename None -> 500 ....................... transcript.py:146
+  - Missing EmailStr validation ..................... users.py
+  - No explicit ENV=prod guard ...................... db.py
+
+CLEAN (no action needed)
+  - DynamoDB access parameterized throughout (no NoSQL injection)
+  - No eval/exec/subprocess in request paths
+  - Transcript parser regexes are NOT ReDoS-vulnerable
+  - Mobile: no WebView/eval/dangerouslySetInnerHTML; no sensitive logging
+  - No real secrets committed (.env properly gitignored; dummy dev values only)
+
+NOTE: CLAUDE.md claims mobile auth is "already wired up" — it is NOT. AuthContext
+imports USER_ID but never uses it, and signIn() issues no token; the x-user-id
+header IS the entire auth model on both ends. That is the single most important
+thing to fix (collapses #1, #2, #7, #9, #13 into one project).
+================================================================================

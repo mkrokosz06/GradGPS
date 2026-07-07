@@ -69,7 +69,7 @@ export default function PrivacyPolicyScreen() {
   );
 }
 
-function Section({ title, children }: { title: string; children: string }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <View style={{ marginBottom: 24 }}>
       <Text style={styles.sectionTitle}>{title}</Text>

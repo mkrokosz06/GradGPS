@@ -1,12 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import * as Google from "expo-auth-session/providers/google";
+import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../../context/AuthContext";
 import { createUser } from "../../services/userService";
+import { GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "../../constants/api";
+
+// Completes the pending auth session when the browser redirects back (web).
+WebBrowser.maybeCompleteAuthSession();
+
+// Google OAuth is configured when at least the platform-relevant client id exists.
+const GOOGLE_CONFIGURED =
+  Platform.OS === "web" ? !!GOOGLE_WEB_CLIENT_ID : !!GOOGLE_IOS_CLIENT_ID;
 
 function StepDots({ step }: { step: number }) {
   return (
@@ -24,11 +34,51 @@ function StepDots({ step }: { step: number }) {
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { signIn } = useAuth();
+  const { signIn, signInWithIdToken } = useAuth();
 
   const [name,    setName]    = useState("");
   const [email,   setEmail]   = useState("");
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+
+  // Google Sign-In (expo-auth-session). Yields an OIDC ID token the backend
+  // verifies. Works on web + dev builds; Expo Go cannot complete this flow.
+  const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
+    webClientId: GOOGLE_WEB_CLIENT_ID || undefined,
+    iosClientId: GOOGLE_IOS_CLIENT_ID || undefined,
+    // Generic fallback so the hook doesn't throw on platforms whose client ID
+    // isn't configured yet (e.g. iOS in Expo Go — the button is hidden there,
+    // so this dummy value is never actually used to start a flow).
+    clientId: GOOGLE_WEB_CLIENT_ID || "unconfigured.apps.googleusercontent.com",
+  });
+
+  useEffect(() => {
+    if (!response) return;
+    if (response.type === "success") {
+      const idToken = (response.params as any)?.id_token;
+      if (!idToken) {
+        Alert.alert("Error", "Google did not return an ID token.");
+        setGoogleLoading(false);
+        return;
+      }
+      signInWithIdToken(idToken)
+        .then(() => router.push("/onboarding/major" as any))
+        .catch((e: any) => {
+          Alert.alert("Error", e?.response?.data?.detail ?? "Sign-in failed. Is the backend running?");
+        })
+        .finally(() => setGoogleLoading(false));
+    } else if (response.type === "error") {
+      Alert.alert("Error", "Google sign-in failed. Please try again.");
+      setGoogleLoading(false);
+    } else {
+      setGoogleLoading(false); // dismissed / cancelled
+    }
+  }, [response]);
+
+  function handleGoogle() {
+    setGoogleLoading(true);
+    promptAsync();
+  }
 
   async function handleContinue() {
     if (!name.trim())  { Alert.alert("Required", "Please enter your name."); return; }
@@ -58,6 +108,27 @@ export default function SignupScreen() {
 
           <Text style={styles.heading}>Let's get started</Text>
           <Text style={styles.sub}>Create your GradGPS account.</Text>
+
+          {GOOGLE_CONFIGURED && (
+            <>
+              <TouchableOpacity
+                style={[styles.googleBtn, (googleLoading || !request) && { opacity: 0.6 }]}
+                onPress={handleGoogle}
+                disabled={googleLoading || !request}
+                activeOpacity={0.85}
+              >
+                {googleLoading
+                  ? <ActivityIndicator color="#0f172a" />
+                  : <Text style={styles.googleBtnText}>Continue with Google</Text>}
+              </TouchableOpacity>
+
+              <View style={styles.dividerRow}>
+                <View style={styles.dividerLine} />
+                <Text style={styles.dividerText}>or</Text>
+                <View style={styles.dividerLine} />
+              </View>
+            </>
+          )}
 
           <View style={styles.fields}>
             <View style={styles.fieldGroup}>
@@ -123,4 +194,13 @@ const styles = StyleSheet.create({
     paddingVertical: 17, alignItems: "center",
   },
   primaryBtnText: { color: "#ffffff", fontSize: 16, fontWeight: "700" },
+  googleBtn: {
+    borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 16,
+    paddingVertical: 16, alignItems: "center", backgroundColor: "#ffffff",
+    marginBottom: 24,
+  },
+  googleBtnText: { color: "#0f172a", fontSize: 16, fontWeight: "700" },
+  dividerRow:  { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 24 },
+  dividerLine: { flex: 1, height: 1, backgroundColor: "#e2e8f0" },
+  dividerText: { fontSize: 12, color: "#94a3b8", fontWeight: "600" },
 });

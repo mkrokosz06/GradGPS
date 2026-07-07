@@ -1,22 +1,20 @@
-version: "3.8"
-
 services:
   dynamodb:
     image: amazon/dynamodb-local:latest
     container_name: degreecheck-dynamodb
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"       # bind to loopback only — not LAN-exposed
     command: ["-jar", "DynamoDBLocal.jar", "-sharedDb", "-inMemory"]
 
   s3:
     image: minio/minio:latest
     container_name: degreecheck-s3
     ports:
-      - "9000:9000"
-      - "9001:9001"       # MinIO web console
+      - "127.0.0.1:9000:9000"       # bind to loopback only — not LAN-exposed
+      - "127.0.0.1:9001:9001"       # MinIO web console
     environment:
-      MINIO_ROOT_USER: test
-      MINIO_ROOT_PASSWORD: testtest
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-test}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-testtest}
     command: server /data --console-address ":9001"
     volumes:
       - minio_data:/data

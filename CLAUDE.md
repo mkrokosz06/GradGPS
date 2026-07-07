@@ -16,10 +16,26 @@ docker-compose up -d   # starts DynamoDB local (port 8000) + MinIO S3 (port 9000
 cd backend
 python scripts/setup_tables.py    # create tables/buckets
 python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
-python scripts/seed_gen_ed.py     # load gen ed requirements
+python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
 python scripts/seed_matthew.py    # seed test user + transcript (also patches ETI catalog)
 ```
 `seed_matthew.py` accepts an optional PDF path: `python scripts/seed_matthew.py path/to/transcript.pdf`
+
+> **Gen ed data:** `rebuild_gen_ed.py` loads the eight knowledge-domain / quantification / cultures
+> pools (GA/GN/GH/GS/GHW/GQ/US/IL) from `scripts/gen_ed_courses.json` — authoritative data scraped
+> from the PSU bulletin — keeps the fixed Communication (Writing/Speech) choose-one groups from
+> `seed_gen_ed.py`, and writes one **Writing Across the Curriculum** rule (see below).
+> To refresh the underlying data from the live bulletin (~10 min), run
+> `python scripts/scrape_gen_ed_courses.py` first, then `rebuild_gen_ed.py`.
+> **Do not run `seed_gen_ed.py` directly** for the domain pools — its hand-authored course lists
+> have fabricated titles/attributes and are superseded (it now only supplies the fixed Communication groups).
+>
+> **Writing Across the Curriculum (WAC):** PSU requires 3 credits of writing-intensive (W/M/X/Y-suffixed)
+> coursework. This is a *designation*, not a course list, so it's modelled as a single
+> `group_type="writing_intensive"` requirement row (threshold 3), evaluated by
+> `audit_engine._eval_writing_intensive()` against the `is_writing` flag the transcript parser sets from
+> the course suffix (preserved through storage). The timeline also counts planned major W courses
+> (requirement codes ending in W/M/X/Y, e.g. `ETI 300W`) toward it.
 
 ### 3. Start the backend
 ```bash
@@ -117,8 +133,11 @@ MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable
 - Satisfied `choose_credits` pools are excluded entirely (skip the whole group)
 
 ### Auth (dev vs prod)
-- **Dev**: `USER_ID = "matthew-test-001"` in `constants/api.ts`. `AuthContext` uses this as fallback when AsyncStorage has no `user_id`. `onboardingDone` is force-set to `true` for the dev user.
-- **Prod**: Real auth will store `user_id` in AsyncStorage via `signIn()`. The redirect and onboarding flow are already wired up.
+- **Real auth**: Google/Apple OIDC ID tokens, verified in `backend/auth.py` (JWKS signature, aud, iss, exp). Canonical `user_id` = provider-scoped sub (`google:<sub>` / `apple:<sub>`). Client IDs in `backend/.env` (`GOOGLE_CLIENT_IDS`, `APPLE_CLIENT_IDS`). Mobile: `expo-auth-session` in `signup.tsx` → `signInWithIdToken()` in `AuthContext` → token in SecureStore (AsyncStorage on web) → axios interceptor sends `Authorization: Bearer`.
+- **Dev bypass**: `AUTH_DEV_BYPASS=1` in `backend/.env` accepts the legacy spoofable `x-user-id` header (and leaves `/admin/*` open + keeps legacy `POST /users/create` alive). This is how Expo Go on the phone works (test user `matthew-test-001`). NEVER set in prod.
+- **Google OAuth cannot run in Expo Go** (auth proxy removed in SDK 50) — test the Google flow in Expo web (`npx expo start --web`, client ID allows localhost:8081/8082) or a dev build. Apple Sign In requires a dev build + Apple Developer Program (not yet done).
+- **Known gap**: ID tokens expire after ~1 h → backend returns 401 and the user must sign in again. No refresh/session mechanism yet.
+- **Admin**: `/admin/*` gated by `require_admin` — open under dev bypass, else `ADMIN_USER_IDS` allowlist (comma-separated provider-scoped ids).
 
 ### Stale uvicorn processes (Windows)
 When running in WSL bash, multiple Python processes can bind to port 8080. If API changes aren't being picked up:

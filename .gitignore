@@ -41,3 +41,6 @@ desktop.ini
 
 # Docker volumes / local DB data
 data/
+
+# Claude Code local session state
+.claude/
