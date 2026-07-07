@@ -868,6 +868,7 @@ def _build_taken(transcript_courses: list[dict]) -> dict:
             "status":         c.get("status", "done"),
             "grade":          c.get("grade", ""),
             "credits_earned": float(c.get("credits_earned", 0)),
+            "is_writing":     bool(c.get("is_writing")),
         }
         taken[code] = entry
         for alias in _COURSE_ALIASES.get(code, []):
@@ -910,7 +911,8 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
             }
 
     # Sort groups: required/choose_one first so they claim courses before pools
-    PRIORITY = {"required": 0, "choose_one": 1, "choose_credits": 2, "choose_courses": 3}
+    PRIORITY = {"required": 0, "choose_one": 1, "choose_credits": 2,
+                "choose_courses": 3, "writing_intensive": 4}
     ordered_groups = sorted(
         groups_map.items(),
         key=lambda kv: PRIORITY.get(group_meta[kv[0]]["group_type"], 99)
@@ -931,9 +933,12 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
         # Mark courses this group consumed so later groups can't reuse them.
         # multi_category courses (interdomain / US / IL dual-designated) are
         # intentionally exempt — they satisfy two categories simultaneously.
-        for item in result["items"]:
-            if item.get("status") in ("done", "in_progress") and not item.get("multi_category"):
-                consumed.add(item["course_code"])
+        # Writing-intensive courses are exempt too: a W course counts toward the
+        # WAC requirement without being "used up" from its knowledge domain.
+        if gtype != "writing_intensive":
+            for item in result["items"]:
+                if item.get("status") in ("done", "in_progress") and not item.get("multi_category"):
+                    consumed.add(item["course_code"])
 
         d, ip, m = _pool_counts(gtype, result)
         total_done    += d
@@ -1123,7 +1128,7 @@ def _pool_counts(gtype: str, result: dict) -> tuple[int, int, int]:
     requirement slot — not one slot per pool item.  This prevents inflating
     the "missing" count with unchosen electives from a satisfied pool.
     """
-    if gtype in ("choose_credits", "choose_courses"):
+    if gtype in ("choose_credits", "choose_courses", "writing_intensive"):
         if result["satisfied"]:
             return 1, 0, 0
         elif result["in_progress"] > 0:
@@ -1132,6 +1137,48 @@ def _pool_counts(gtype: str, result: dict) -> tuple[int, int, int]:
             return 0, 0, 1
     # required / choose_one: individual item counts are already accurate
     return result["done"], result["in_progress"], result["missing"]
+
+
+def _eval_writing_intensive(taken: dict, threshold) -> dict:
+    """Writing Across the Curriculum: a minimum number of credits of
+    writing-intensive (W / M / X / Y suffixed) coursework. This is a course
+    *designation*, not a fixed list — any writing-flagged course on the
+    transcript counts. Writing courses are usually embedded in the major, so
+    they are NOT consumed from the gen-ed knowledge domains."""
+    thr = float(threshold) if threshold else 3.0
+    seen_ids: set[int] = set()
+    credits_earned = 0.0
+    done = ip = 0
+    items = []
+    for code, entry in taken.items():
+        if not entry.get("is_writing") or id(entry) in seen_ids:
+            continue
+        seen_ids.add(id(entry))
+        status = entry.get("status", "done")
+        cr     = float(entry.get("credits_earned", 0) or 0)
+        if status == "done":
+            credits_earned += cr
+            done += 1
+        elif status == "in_progress":
+            ip += 1
+        items.append({
+            "course_code":  code,
+            "course_title": "",
+            "credits":      cr,
+            "status":       status,
+            "grade":        entry.get("grade", ""),
+        })
+    satisfied = credits_earned >= thr
+    return {
+        "satisfied":      satisfied,
+        "credits_earned": round(min(credits_earned, thr), 1),
+        "credits_needed": round(max(0.0, thr - credits_earned), 1),
+        "threshold":      thr,
+        "done":           done,
+        "in_progress":    ip,
+        "missing":        0 if satisfied else 1,
+        "items":          items,
+    }
 
 
 # ── Exclusive dispatch helper (gen ed — cross-group course consumption) ──────
@@ -1143,6 +1190,9 @@ def _eval_type_exclusive(
     Same as _eval_type but skips courses already consumed by a previous group.
     A course is considered "available" only if its normalised code is not in consumed.
     """
+    if gtype == "writing_intensive":
+        return _eval_writing_intensive(taken, threshold)
+
     available_rows = []
     for row in rows:
         code = row.get("course_code", "").strip().upper()
@@ -1368,6 +1418,8 @@ def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
         return _eval_choose_credits(rows, taken, threshold)
     elif gtype == "choose_courses":
         return _eval_choose_courses(rows, taken, threshold)
+    elif gtype == "writing_intensive":
+        return _eval_writing_intensive(taken, threshold)
     else:
         return _eval_required(rows, taken)   # fallback
 

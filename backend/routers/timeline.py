@@ -52,6 +52,116 @@ def _next_term(term: str) -> str:
     return f"SP {year + 1}"
 
 
+def _preceding_summer(term: str) -> str:
+    """Summer term immediately before a given Fall/Spring term.
+    'FA 2028' → 'SU 2028'  (summer right before that fall)
+    'SP 2028' → 'SU 2027'  (summer of the prior calendar year)
+    """
+    parts = term.split()
+    if len(parts) != 2:
+        return "SU 2027"
+    season, year = parts[0], int(parts[1])
+    if season == "SP":
+        return f"SU {year - 1}"
+    return f"SU {year}"
+
+
+def _candidate_codes(course_code: str) -> list[str]:
+    """Split a (possibly paired) requirement code into its option codes.
+    'ENGL 202C or ENGL 202D' → ['ENGL 202C', 'ENGL 202D']; 'IST 210' → ['IST 210'].
+    """
+    raw = (course_code or "").strip().upper()
+    return [p.strip() for p in raw.split(" OR ") if p.strip()]
+
+
+def _strip_w(code: str) -> str:
+    """Strip a trailing Writing (W) designation so it matches the catalog's
+    base code: 'ETI 300W' → 'ETI 300'. Section letters (A/B/C) are preserved."""
+    m = re.match(r"^([A-Z]+ \d+)W$", (code or "").strip().upper())
+    return m.group(1) if m else (code or "").strip().upper()
+
+
+def _is_writing_code(code: str) -> bool:
+    """A requirement code carrying a Writing Across the Curriculum suffix
+    (W/M/X/Y), e.g. 'ETI 300W'. Section letters (A/B/C) don't count."""
+    return bool(re.search(r"\d[WXYM]$", (code or "").strip().upper()))
+
+
+def _is_internship(item: dict) -> bool:
+    """A required internship course (title says 'Internship', or PSU's 495 number)."""
+    if "INTERNSHIP" in (item.get("course_title") or "").upper():
+        return True
+    for cc in _candidate_codes(item.get("course_code", "")):
+        m = re.search(r"\b(\d{3})\b", cc)
+        if m and m.group(1) == "495":
+            return True
+    return False
+
+
+def _gen_ed_effectively_satisfied(group: dict, planned: list[dict]) -> bool:
+    """Whether a gen-ed category will be satisfied by the time the student
+    graduates — counting not just completed courses but also courses currently
+    in progress and future major courses already scheduled in the plan.
+
+    The base audit only credits *completed* courses, so a category the student
+    is actively taking (e.g. SOC 119 → US) or will cover via a required major
+    course (e.g. ENGL 202C → GWS) would otherwise generate a redundant slot.
+    """
+    if group.get("satisfied"):
+        return True
+
+    gtype     = group.get("group_type", "")
+    threshold = group.get("threshold") or 0
+    items     = group.get("items", [])
+    pool_codes = {_strip_w(it.get("course_code", "")) for it in items}
+    name_up    = (group.get("name") or "").upper()
+    is_gws     = name_up.startswith("GWS") or "WRITING ACROSS" in name_up
+
+    if gtype == "choose_credits":
+        have = float(group.get("credits_earned") or 0)
+        seen: set[str] = set()
+        for it in items:
+            code = it.get("course_code", "")
+            if it.get("status") == "in_progress" and code not in seen:
+                seen.add(code)
+                have += float(it.get("credits") or 3)
+        for c in planned:
+            if any(_strip_w(cc) in pool_codes for cc in _candidate_codes(c.get("course_code", ""))):
+                have += float(c.get("credits") or 3)
+        return have >= threshold
+
+    if gtype == "choose_courses":
+        have = int(group.get("done") or 0)
+        seen = set()
+        for it in items:
+            code = it.get("course_code", "")
+            if it.get("status") == "in_progress" and code not in seen:
+                seen.add(code)
+                have += 1
+        for c in planned:
+            cands = _candidate_codes(c.get("course_code", ""))
+            if any(_strip_w(cc) in pool_codes or (is_gws and cc.endswith("W")) for cc in cands):
+                have += 1
+        return have >= threshold
+
+    if gtype == "writing_intensive":
+        # Writing Across the Curriculum: 3 credits of W-designated coursework.
+        thr = threshold or 3
+        have = float(group.get("credits_earned") or 0)          # completed W credits
+        for it in items:                                         # in-progress W courses
+            if it.get("status") == "in_progress":
+                have += float(it.get("credits") or 3)
+        for c in planned:                                        # planned major W courses
+            if any(_is_writing_code(cc) for cc in _candidate_codes(c.get("course_code", ""))):
+                have += float(c.get("credits") or 3)
+        return have >= thr
+
+    if gtype == "choose_one":
+        return any(it.get("status") in ("done", "in_progress") for it in items)
+
+    return bool(group.get("satisfied"))
+
+
 def _collect_missing(audit_result: dict) -> list[dict]:
     """
     Flatten every missing course item out of the audit result.
@@ -349,10 +459,16 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     if gen_ed_rows:
         gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
         for group in gen_ed_result.get("groups", []):
-            if not group.get("satisfied"):
+            # Suppress a category if it will be covered by courses already
+            # in progress or by future major courses in the plan.
+            if not _gen_ed_effectively_satisfied(group, missing):
+                if group.get("group_type") == "writing_intensive":
+                    title = "Choose a writing-intensive (W) course"
+                else:
+                    title = f"Choose a {group['name']} course"
                 gen_ed_slots.append({
                     "course_code":       group["name"],
-                    "course_title":      f"Choose a {group['name']} course",
+                    "course_title":      title,
                     "credits":           3,
                     "is_pool":           True,
                     "gen_ed_categories": [group["name"]],
@@ -381,17 +497,58 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             return 3.0 * int(c["pool_needed_courses"])
         return float(c.get("credits", 3) or 3)
 
+    def _emit_semester(term: str, courses: list[dict]) -> dict:
+        """Build an upcoming-semester object from a list of missing items."""
+        return {
+            "term":    term,
+            "label":   _term_label(term),
+            "status":  "upcoming",
+            "credits": round(sum(_display_credits(c) for c in courses), 1),
+            "courses": [
+                {
+                    "course_code":         c.get("course_code", ""),
+                    "course_title":        c.get("course_title", ""),
+                    "credits_earned":      float(c.get("credits", 3) or 3),
+                    "status":              "missing",
+                    "grade":               "",
+                    "is_pool":             c.get("is_pool", False),
+                    "gen_ed_categories":   c.get("gen_ed_categories"),
+                    "pool_courses":        c.get("pool_courses"),
+                    "pool_needed_credits": c.get("pool_needed_credits"),
+                    "pool_needed_courses": c.get("pool_needed_courses"),
+                }
+                for c in courses
+            ],
+        }
+
     # For BS/BA degrees, if the catalogued requirements total less than 120 credits
     # (open electives aren't listed in every catalog), add a free elective placeholder
     # so the schedule reflects the full 4-year length.
     if requirement_rows:
         degree = requirement_rows[0].get("degree", "")
         if degree in ("B.S.", "B.A.", "B.A.S.", "B.Mus.", "B.F.A."):
+            # Credits the student has already banked or is currently earning
+            # (completed + in-progress + transfer). These all count toward the
+            # 120-credit degree total, so they must be included or the
+            # free-elective padding double-counts them.
+            earned_cr = sum(
+                # done courses report earned credits; in-progress ones aren't
+                # graded yet (earned = 0) and attempted credits aren't stored,
+                # so estimate the standard 3 credits per in-progress course.
+                float(c.get("credits_earned", 0)) if c.get("status") == "done"
+                else 3.0
+                for c in transcript_courses
+                if c.get("status") in ("done", "in_progress")
+            ) + sum(float(c.get("credits_earned", 0)) for c in transfer_courses)
             total_planned_cr = (
-                sum(_display_credits(c) for c in missing)
+                earned_cr
+                + sum(_display_credits(c) for c in missing)
                 + 3.0 * len(gen_ed_slots)
             )
-            if total_planned_cr < 120:
+            # Only pad if the gap is a meaningful course-sized chunk (≥3 cr);
+            # smaller remainders are just estimation noise (in-progress credits
+            # are approximated), not a real elective to schedule.
+            if total_planned_cr <= 117:
                 free_cr = int(120 - total_planned_cr)
                 missing.append({
                     "course_code":        "Free Electives",
@@ -400,6 +557,14 @@ def get_timeline(user_id: str = Depends(get_user_id)):
                     "is_pool":            True,
                     "pool_needed_credits": free_cr,
                 })
+
+    # Pull a required internship out of the normal course flow — it becomes its
+    # own dedicated summer term between junior and senior year (inserted below).
+    # (Extracted after the free-elective math above so its credits still count
+    # toward the 120-credit total.)
+    internship_items = [c for c in missing if _is_internship(c)]
+    if internship_items:
+        missing = [c for c in missing if not _is_internship(c)]
 
     n_major  = len(missing)
     n_gen_ed = len(gen_ed_slots)
@@ -441,30 +606,22 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             chunks.append(chunk)
         else:
             break  # safety valve
-    for chunk in chunks:
-        est_credits = round(sum(_display_credits(c) for c in chunk), 1)
-        semesters.append({
-            "term":    future_term,
-            "label":   _term_label(future_term),
-            "status":  "upcoming",
-            "credits": est_credits,
-            "courses": [
-                {
-                    "course_code":         c.get("course_code", ""),
-                    "course_title":        c.get("course_title", ""),
-                    "credits_earned":      float(c.get("credits", 3) or 3),
-                    "status":              "missing",
-                    "grade":               "",
-                    "is_pool":             c.get("is_pool", False),
-                    "gen_ed_categories":   c.get("gen_ed_categories"),
-                    "pool_courses":        c.get("pool_courses"),
-                    "pool_needed_credits": c.get("pool_needed_credits"),
-                    "pool_needed_courses": c.get("pool_needed_courses"),
-                }
-                for c in chunk
-            ],
-        })
+    # Place a required internship in its own summer term between junior and
+    # senior year: insert it right before the final two academic semesters.
+    internship_at = (len(chunks) - 2) if internship_items else -1
+    placed_internship = False
+
+    for idx, chunk in enumerate(chunks):
+        if internship_items and not placed_internship and idx >= max(0, internship_at):
+            semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+            placed_internship = True
+        semesters.append(_emit_semester(future_term, chunk))
         future_term = _next_term(future_term)
+
+    # No academic semesters ahead of the internship (short plans) — append it
+    # as a trailing summer term so it still appears.
+    if internship_items and not placed_internship:
+        semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(

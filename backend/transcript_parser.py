@@ -37,6 +37,11 @@ COURSE_PATTERN = re.compile(
 # Grades that mean "failed / not completed" — don't count as done
 FAILING_GRADES = {"F", "W", "WN", "XF"}
 
+# Hard cap on pages we will extract text from. Real PSU unofficial transcripts
+# run a handful of pages; a document with hundreds/thousands of pages is a PDF
+# bomb, not a transcript. Capping bounds worst-case parse cost.
+MAX_PAGES = 50
+
 
 def _normalise_code(code: str) -> str:
     """
@@ -69,7 +74,7 @@ def parse_transcript(pdf_bytes: bytes) -> list[dict]:
         status         str   "done" | "in_progress" | "transfer"
     """
     with pdfplumber.open(io.BytesIO(pdf_bytes)) as pdf:
-        pages_text = [page.extract_text() or "" for page in pdf.pages]
+        pages_text = [page.extract_text() or "" for page in pdf.pages[:MAX_PAGES]]
 
     full_text = "\n".join(pages_text)
     courses   = []
@@ -123,6 +128,9 @@ def parse_transcript(pdf_bytes: bytes) -> list[dict]:
             "credits_earned": earned,
             "term":           current_term,
             "status":         status,
+            # Writing Across the Curriculum designation: a W/M/X/Y suffix on the
+            # course number. Captured here because norm_code strips the W.
+            "is_writing":     bool(re.search(r"[WMXY]$", number.strip().upper())),
         }
 
         # If same normalised code seen before, keep the better one

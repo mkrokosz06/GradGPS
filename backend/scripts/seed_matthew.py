@@ -90,6 +90,7 @@ def seed_courses(courses):
                 "credits_earned": Decimal(str(c.get("credits_earned", 0))),
                 "term":           c.get("term", ""),
                 "status":         c.get("status", "done"),
+                "is_writing":     bool(c.get("is_writing")),
             }
             batch.put_item(Item=item)
 

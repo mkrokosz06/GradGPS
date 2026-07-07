@@ -37,25 +37,27 @@ BASE      = "https://bulletins.psu.edu"
 INDEX_URL = f"{BASE}/university-course-descriptions/undergraduate/"
 
 # All PSU gen ed attribute codes we care about
-GEN_ED_CODES = {"GA", "GN", "GH", "GS", "GHW", "US", "IL", "GWS"}
+GEN_ED_CODES = {"GA", "GN", "GH", "GS", "GHW", "GQ", "US", "IL", "GWS"}
 
-# Regex to find gen ed attribute codes in course text.
-# Matches "(GA)", "GA", "GN;GS", "GN, GS", "General Education: GN"
-# Captures one or more attribute codes.
-_ATTR_RE = re.compile(
-    r"""
-    (?:
-        (?:general\s+education|gen\.?\s*ed\.?)[:\s]+   # "General Education: " prefix
-        |
-        \(                                              # opening paren
-    )?
-    (GA|GN|GH|GWS|GHW|GS|US|IL)                       # first attribute code
-    (?:                                                 # optional additional codes
-        [;,\s/]+
-        (GA|GN|GH|GWS|GHW|GS|US|IL)
-    )*
-    """,
-    re.IGNORECASE | re.VERBOSE,
+# The PSU bulletin marks each designation in its own element as
+#   "General Education: Health and Wellness (GHW)"
+# A course may carry several such lines (e.g. an interdomain GH + GHW course).
+# We capture ONLY the parenthesised code that follows a "General Education:"
+# label — this avoids scooping up stray two-letter tokens from the prose,
+# which was the fatal flaw of the previous whole-text regex.
+_DESIGNATION_RE = re.compile(
+    r"General\s+Education:[^()\n]*?\(([A-Z]{2,3})\)",
+    re.IGNORECASE,
+)
+
+# The Cultures requirements (US / IL) are labelled WITHOUT the
+# "General Education:" prefix — e.g. "United States Cultures (US)",
+# "International Cultures (IL)". Captured separately so we don't have to
+# loosen the domain pattern (which would start matching "Bachelor of Arts:"
+# degree-requirement lines).
+_CULTURE_RE = re.compile(
+    r"(?:United\s+States|International)\s+Cultures\s*\((US|IL)\)",
+    re.IGNORECASE,
 )
 
 # Credit count pattern: "(3 credits)", "3 Credits", "(1-3)"
@@ -106,13 +108,10 @@ def get_all_departments() -> list[tuple[str, str]]:
 # ---------------------------------------------------------------------------
 
 def _extract_attrs(text: str) -> set[str]:
-    """Return all gen ed attribute codes found in text, uppercased."""
-    found = set()
-    for m in _ATTR_RE.finditer(text):
-        # The whole match may be like "GN;GS" — split on delimiters
-        segment = m.group(0)
-        for code in re.findall(r"\b(GA|GN|GH|GWS|GHW|GS|US|IL)\b", segment, re.IGNORECASE):
-            found.add(code.upper())
+    """Return the gen ed attribute codes the course is officially designated
+    with — read only from 'General Education: … (CODE)' labels."""
+    found = {m.group(1).upper() for m in _DESIGNATION_RE.finditer(text)}
+    found |= {m.group(1).upper() for m in _CULTURE_RE.finditer(text)}
     return found & GEN_ED_CODES
 
 
@@ -153,7 +152,9 @@ def scrape_department(dept_url: str) -> list[dict]:
         code_m = _CODE_RE.search(title_text)
         if not code_m:
             continue
-        course_code = f"{code_m.group(1)} {code_m.group(2)}"
+        # Normalise trailing W/H/N attribute suffixes to match transcript codes
+        # (e.g. "SOC 119N" → "SOC 119"), same rule as transcript_parser.
+        course_code = re.sub(r"[WHN]$", "", f"{code_m.group(1)} {code_m.group(2)}")
 
         # Strip the course code + number from title to get just the name
         title = _CODE_RE.sub("", title_text, count=1).strip(" :-–")
@@ -180,27 +181,26 @@ def scrape_department(dept_url: str) -> list[dict]:
 
 
 def _fallback_scrape(soup: BeautifulSoup) -> list[dict]:
-    """Scan full page text when .courseblock divs are absent."""
+    """Scan full page text when .courseblock divs are absent. Anchors on each
+    'General Education: … (CODE)' designation and grabs the nearest preceding
+    course code."""
     text = soup.get_text(" ", strip=True)
     results = []
-    for m in _ATTR_RE.finditer(text):
-        attrs = set()
-        for code in re.findall(r"\b(GA|GN|GH|GWS|GHW|GS|US|IL)\b", m.group(0), re.IGNORECASE):
-            attrs.add(code.upper())
-        attrs &= GEN_ED_CODES
-        if not attrs:
+    for m in _DESIGNATION_RE.finditer(text):
+        code = m.group(1).upper()
+        if code not in GEN_ED_CODES:
             continue
-        preceding = text[max(0, m.start() - 80):m.start()]
-        code_m = _CODE_RE.search(preceding)
-        if not code_m:
+        preceding = text[max(0, m.start() - 120):m.start()]
+        codes = _CODE_RE.findall(preceding)
+        if not codes:
             continue
-        course_code = f"{code_m.group(1)} {code_m.group(2)}"
+        course_code = f"{codes[-1][0]} {codes[-1][1]}"
         results.append({
             "code":           course_code,
             "title":          course_code,
             "credits":        3.0,
-            "attrs":          sorted(attrs),
-            "multi_category": len(attrs) > 1,
+            "attrs":          [code],
+            "multi_category": False,
         })
     return results
 
@@ -267,6 +267,7 @@ def save_csv(courses: dict[str, dict], path: Path):
 
 # Group thresholds and priority — kept here, not scraped (these are PSU policy)
 GROUP_META = {
+    "GQ":  ("GQ: Quantification",                "choose_credits", 6),
     "GA":  ("GA: Arts",                          "choose_credits", 3),
     "GN":  ("GN: Natural Sciences",              "choose_credits", 6),
     "GH":  ("GH: Humanities",                    "choose_credits", 3),
