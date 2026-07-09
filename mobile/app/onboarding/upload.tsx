@@ -7,7 +7,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as DocumentPicker from "expo-document-picker";
 import { useAuth } from "../../context/AuthContext";
-import { uploadTranscript } from "../../services/transcriptService";
+import { uploadTranscript, isOfficialAckError } from "../../services/transcriptService";
+import { LoadingOverlay } from "../../components/LoadingOverlay";
 
 function StepDots({ step }: { step: number }) {
   return (
@@ -30,6 +31,7 @@ export default function OnboardingUploadScreen() {
   const [uploading, setUploading] = useState(false);
   const [done,      setDone]      = useState(false);
   const [parsed,    setParsed]    = useState(0);
+  const [status,    setStatus]    = useState("Reading transcript…");
 
   async function pickAndUpload() {
     const picked = await DocumentPicker.getDocumentAsync({
@@ -37,16 +39,33 @@ export default function OnboardingUploadScreen() {
       copyToCacheDirectory: true,
     });
     if (picked.canceled || !picked.assets?.length) return;
+    await doUpload(picked.assets[0], false);
+  }
 
-    const file = picked.assets[0];
+  async function doUpload(file: DocumentPicker.DocumentPickerAsset, ack: boolean) {
+    setStatus(ack ? "Importing courses…" : "Reading transcript…");
     setUploading(true);
 
     try {
-      const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf");
+      const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf", ack);
       setParsed(data.courses_parsed);
       setDone(true);
     } catch (e: any) {
-      Alert.alert("Upload failed", e?.response?.data?.detail ?? "Something went wrong.");
+      // Official-transcript consent gate: warn, then re-upload with the ack flag.
+      if (isOfficialAckError(e)) {
+        Alert.alert(
+          "Official transcript detected",
+          "This looks like an OFFICIAL Penn State transcript. Official transcripts are meant for institutions - your unofficial transcript from LionPATH works just as well and is the recommended option.\n\nDo you want to use this file anyway?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Use it anyway", onPress: () => doUpload(file, true) },
+          ],
+        );
+        return;
+      }
+      // The 409 detail is an object; guard so we never render "[object Object]".
+      const detail = e?.response?.data?.detail;
+      Alert.alert("Upload failed", typeof detail === "string" ? detail : "Something went wrong.");
     } finally {
       setUploading(false);
     }
@@ -96,8 +115,8 @@ export default function OnboardingUploadScreen() {
               <Text style={styles.instructionTitle}>How to get your transcript</Text>
               <Text style={styles.instructionBody}>
                 1. Log in to LionPATH{"\n"}
-                2. Student Center → My Academics{"\n"}
-                3. Download Unofficial Transcript as PDF
+                2. Academic Records → View Advising Transcript{"\n"}
+                3. Save as PDF
               </Text>
             </View>
 
@@ -135,6 +154,7 @@ export default function OnboardingUploadScreen() {
           </View>
         )}
       </View>
+      <LoadingOverlay visible={uploading} label={status} />
     </SafeAreaView>
   );
 }

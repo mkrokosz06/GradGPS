@@ -12,10 +12,12 @@ import * as DocumentPicker from "expo-document-picker";
 import { useFocusEffect, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
+import { LoadingOverlay } from "../../components/LoadingOverlay";
 import {
   uploadTranscript,
   getTranscript,
   deleteTranscript,
+  isOfficialAckError,
   type UploadResult,
   type TranscriptData,
 } from "../../services/transcriptService";
@@ -29,6 +31,7 @@ export default function UploadScreen() {
   const [uploading,  setUploading]  = useState(false);
   const [deleting,   setDeleting]   = useState(false);
   const [result,     setResult]     = useState<UploadResult | null>(null);
+  const [status,     setStatus]     = useState("Reading transcript…");
 
   // Fetch transcript state whenever screen comes into focus
   useFocusEffect(useCallback(() => {
@@ -50,17 +53,34 @@ export default function UploadScreen() {
       copyToCacheDirectory: true,
     });
     if (picked.canceled || !picked.assets?.length) return;
+    await doUpload(picked.assets[0], false);
+  }
 
-    const file = picked.assets[0];
+  async function doUpload(file: DocumentPicker.DocumentPickerAsset, ack: boolean) {
+    setStatus(ack ? "Importing courses…" : "Reading transcript…");
     setUploading(true);
     setResult(null);
 
     try {
-      const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf");
+      const data = await uploadTranscript(userId!, file.uri, file.name ?? "transcript.pdf", ack);
       setResult(data);
       setTimeout(() => router.navigate("/(tabs)/" as any), 1500);
     } catch (e: any) {
-      Alert.alert("Upload failed", e?.response?.data?.detail ?? "Something went wrong.");
+      // Official-transcript consent gate: warn, then re-upload with the ack flag.
+      if (isOfficialAckError(e)) {
+        Alert.alert(
+          "Official transcript detected",
+          "This looks like an OFFICIAL Penn State transcript. Official transcripts are meant for institutions - your unofficial transcript from LionPATH works just as well and is the recommended option.\n\nDo you want to use this file anyway?",
+          [
+            { text: "Cancel", style: "cancel" },
+            { text: "Use it anyway", onPress: () => doUpload(file, true) },
+          ],
+        );
+        return;
+      }
+      // The 409 detail is an object; guard so we never render "[object Object]".
+      const detail = e?.response?.data?.detail;
+      Alert.alert("Upload failed", typeof detail === "string" ? detail : "Something went wrong.");
     } finally {
       setUploading(false);
     }
@@ -207,6 +227,7 @@ export default function UploadScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+        <LoadingOverlay visible={uploading} label={status} />
       </SafeAreaView>
     );
   }
@@ -225,8 +246,8 @@ export default function UploadScreen() {
           <Text className="text-navy font-bold text-sm mb-1">How to get your transcript</Text>
           <Text className="text-gray-500 text-xs leading-5">
             1. Log in to LionPATH{"\n"}
-            2. Go to Student Center → My Academics{"\n"}
-            3. Download your Unofficial Transcript as a PDF{"\n"}
+            2. Go to Academic Records → View Advising Transcript{"\n"}
+            3. Save it as a PDF{"\n"}
             4. Upload it below
           </Text>
         </View>
@@ -290,12 +311,18 @@ export default function UploadScreen() {
                 </>
               )}
             </View>
+            {result.parse_warning && (
+              <View className="px-5 py-3 border-t border-gray-100 bg-amber-50">
+                <Text style={{ color: "#b45309", fontSize: 12 }}>{result.parse_warning}</Text>
+              </View>
+            )}
             <View className="px-5 py-3 border-t border-gray-100">
               <Text className="text-gray-400 text-xs">Returning to timeline…</Text>
             </View>
           </View>
         )}
       </ScrollView>
+      <LoadingOverlay visible={uploading} label={status} />
     </SafeAreaView>
   );
 }

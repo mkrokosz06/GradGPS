@@ -8,11 +8,11 @@ Transcript endpoints:
 import os
 import asyncio
 import logging
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form
 from decimal import Decimal
 
 from db import transcript_table, users_table, get_s3
-from transcript_parser import parse_transcript
+from transcript_parser import detect_kind, parse_with_detection, official_parse_looks_bad
 from deps import get_user_id
 
 router = APIRouter()
@@ -25,6 +25,13 @@ MAX_UPLOAD_BYTES     = 5 * 1024 * 1024   # 5 MB — real transcripts are well un
 PDF_MAGIC            = b"%PDF-"           # every valid PDF begins with this
 PARSE_TIMEOUT_SECONDS = 20                # bound worst-case parse time (PDF bombs)
 _UPLOAD_CHUNK        = 64 * 1024
+
+# Official-transcript consent gate. When on, a detected official transcript is
+# blocked with a 409 until the client re-submits with acknowledge_official=true.
+# When off (shadow mode), detection + the official parser still run and log, but
+# never 409 — lets us validate the false-positive rate before the dialog goes
+# live. NEVER auto-enabled; opt in via backend/.env. See CLAUDE.md.
+OFFICIAL_DETECT = os.getenv("OFFICIAL_DETECT", "0") == "1"
 
 _SEASON_ORDER  = {"SP": 0, "SU": 1, "FA": 2}
 _SEASON_LABELS = {"SP": "Spring", "SU": "Summer", "FA": "Fall"}
@@ -115,7 +122,26 @@ def delete_transcript(user_id: str = Depends(get_user_id)):
     """Delete all transcript courses for the user and clear their transcript metadata."""
     from boto3.dynamodb.conditions import Key as DKey
 
-    # Paginate and delete all courses
+    # Defense in depth: this key must never traverse outside the user's prefix,
+    # even if deps.get_user_id's charset enforcement ever changes.
+    if "/" in user_id or ".." in user_id:
+        raise HTTPException(status_code=400, detail="Invalid user id.")
+
+    # 1. Delete the stored PDF FIRST. Our Privacy Policy promises that deleting a
+    #    transcript removes the stored PDF, so if object storage is unreachable we
+    #    must NOT report success. Fail loudly with the database left intact so the
+    #    user can retry cleanly. delete_object is idempotent — it does not error
+    #    when the key is already absent (e.g. no PDF was ever stored).
+    try:
+        get_s3().delete_object(Bucket=S3_BUCKET, Key=f"transcripts/{user_id}/transcript.pdf")
+    except Exception:
+        logger.exception("S3 transcript delete failed for user_id=%s", user_id)
+        raise HTTPException(
+            status_code=502,
+            detail="Could not delete your stored transcript file. Please try again.",
+        )
+
+    # 2. Delete all course rows (paginated).
     query_kwargs = {
         "KeyConditionExpression": DKey("user_id").eq(user_id),
         "ProjectionExpression": "user_id, course_code",
@@ -131,18 +157,15 @@ def delete_transcript(user_id: str = Depends(get_user_id)):
             for item in existing:
                 batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
 
-    # Clear transcript metadata on the user record
+    # 3. Clear transcript metadata on the user record (including official-consent
+    #    fields, so a later unofficial upload starts from a clean slate).
     users_table.update_item(
         Key={"user_id": user_id},
-        UpdateExpression="REMOVE transcript_parsed_at, transcript_s3_key",
+        UpdateExpression=(
+            "REMOVE transcript_parsed_at, transcript_s3_key, "
+            "transcript_kind, official_transcript_ack_at"
+        ),
     )
-
-    # Best-effort S3 delete
-    try:
-        s3 = get_s3()
-        s3.delete_object(Bucket=S3_BUCKET, Key=f"transcripts/{user_id}/transcript.pdf")
-    except Exception:
-        pass
 
     return {"status": "ok"}
 
@@ -151,6 +174,7 @@ def delete_transcript(user_id: str = Depends(get_user_id)):
 async def upload_transcript(
     request: Request,
     file: UploadFile = File(...),
+    acknowledge_official: bool = Form(False),
     user_id: str = Depends(get_user_id),
 ):
     # ── 0. Validate the upload before touching the parser ─────────────────────
@@ -183,10 +207,39 @@ async def upload_transcript(
     if not pdf_bytes.startswith(PDF_MAGIC):
         raise HTTPException(status_code=400, detail="File is not a valid PDF.")
 
-    # ── 1. Parse transcript (off the event loop, with a wall-clock bound) ──────
+    # ── 1. Detect kind (cheap first pass — no parsing yet) ─────────────────────
+    try:
+        detection, pages_text = await asyncio.wait_for(
+            asyncio.to_thread(detect_kind, pdf_bytes),
+            timeout=PARSE_TIMEOUT_SECONDS,
+        )
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=422, detail="Transcript could not be processed in time. Please upload a standard PSU transcript PDF.")
+    except Exception:
+        logger.exception("Transcript detection failed for user_id=%s", user_id)
+        raise HTTPException(status_code=422, detail="Could not read transcript. Make sure this is a PSU transcript PDF.")
+
+    kind = "official" if detection.is_official else "unofficial"
+    logger.info(
+        "official_detection user=%s kind=%s score=%d signals=%s ack=%s",
+        user_id, kind, detection.score, detection.signals, acknowledge_official,
+    )
+
+    # ── 1a. Official-transcript consent gate (before any parsing) ──────────────
+    # In shadow mode (OFFICIAL_DETECT off) we skip the gate but still parse+store.
+    if OFFICIAL_DETECT and detection.is_official and not acknowledge_official:
+        raise HTTPException(status_code=409, detail={
+            "code":             "official_transcript_detected",
+            "needs_official_ack": True,
+            "confidence":       detection.confidence,
+            "signals":          detection.signals,
+            "message":          "This looks like an official transcript. Confirm to proceed.",
+        })
+
+    # ── 1b. Parse with the matching parser (only now that we're proceeding) ────
     try:
         courses = await asyncio.wait_for(
-            asyncio.to_thread(parse_transcript, pdf_bytes),
+            asyncio.to_thread(parse_with_detection, pdf_bytes, detection, pages_text),
             timeout=PARSE_TIMEOUT_SECONDS,
         )
     except asyncio.TimeoutError:
@@ -195,6 +248,16 @@ async def upload_transcript(
         # Log the real error server-side; don't leak parser internals to the client.
         logger.exception("Transcript parse failed for user_id=%s", user_id)
         raise HTTPException(status_code=422, detail="Could not parse transcript. Make sure this is an unofficial PSU transcript PDF.")
+
+    # ── 1c. Trustworthiness safety net (official parser is single-sample-tuned) ─
+    # Refuse to store a garbled official parse; steer the user to the unofficial
+    # transcript, which the app handles reliably.
+    if detection.is_official and (not courses or official_parse_looks_bad(courses)):
+        raise HTTPException(status_code=422, detail=(
+            "We couldn't reliably read this official transcript's course list. "
+            "Please upload your unofficial transcript from LionPATH instead "
+            "(Student Center -> My Academics)."
+        ))
 
     if not courses:
         raise HTTPException(status_code=422, detail="No courses found in transcript. Make sure this is an unofficial PSU transcript PDF.")
@@ -239,25 +302,38 @@ async def upload_transcript(
     s3_key = f"transcripts/{user_id}/transcript.pdf"
     try:
         s3 = get_s3()
-        s3.put_object(Bucket=S3_BUCKET, Key=s3_key, Body=pdf_bytes, ContentType="application/pdf")
+        s3.put_object(
+            Bucket=S3_BUCKET, Key=s3_key, Body=pdf_bytes,
+            ContentType="application/pdf", Metadata={"transcript-kind": kind},
+        )
     except Exception as e:
         print(f"S3 upload warning: {e}")
 
-    # ── 4. Update user's transcript_parsed_at timestamp ───────────────────────
+    # ── 4. Update user's transcript metadata + official-consent audit trail ────
     from datetime import datetime, timezone
+    now_iso = datetime.now(timezone.utc).isoformat()
+    update_expr = "SET transcript_parsed_at = :ts, transcript_s3_key = :key, transcript_kind = :kind"
+    expr_values = {":ts": now_iso, ":key": s3_key, ":kind": kind}
+    if detection.is_official:
+        # Records that the user was warned and consented to use an official transcript.
+        update_expr += ", official_transcript_ack_at = :ack"
+        expr_values[":ack"] = now_iso
     users_table.update_item(
         Key={"user_id": user_id},
-        UpdateExpression="SET transcript_parsed_at = :ts, transcript_s3_key = :key",
-        ExpressionAttributeValues={
-            ":ts":  datetime.now(timezone.utc).isoformat(),
-            ":key": s3_key,
-        },
+        UpdateExpression=update_expr,
+        ExpressionAttributeValues=expr_values,
     )
 
-    return {
+    result = {
         "status":         "ok",
         "courses_parsed": len(courses),
         "done":           sum(1 for c in courses if c["status"] == "done"),
         "in_progress":    sum(1 for c in courses if c["status"] == "in_progress"),
         "transfer":       sum(1 for c in courses if c["status"] == "transfer"),
+        "transcript_kind": kind,
     }
+    if detection.is_official:
+        result["parse_warning"] = (
+            "Official transcripts are parsed best-effort - please double-check your course list."
+        )
+    return result

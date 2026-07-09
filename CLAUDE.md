@@ -59,7 +59,8 @@ Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants
 |------|---------|
 | `main.py` | FastAPI app, router registration, CORS, static files |
 | `audit_engine.py` | Core degree audit logic — `run_audit()` and `run_gen_ed_audit()` |
-| `transcript_parser.py` | Parses PSU unofficial transcript PDFs |
+| `transcript_parser.py` | Parses PSU transcript PDFs (unofficial + official). `parse_and_detect()` is the entry point |
+| `official_detector.py` | Scored heuristic that flags official transcripts (see below) |
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
 
@@ -138,6 +139,16 @@ MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable
 - **Google OAuth cannot run in Expo Go** (auth proxy removed in SDK 50) — test the Google flow in Expo web (`npx expo start --web`, client ID allows localhost:8081/8082) or a dev build. Apple Sign In requires a dev build + Apple Developer Program (not yet done).
 - **Known gap**: ID tokens expire after ~1 h → backend returns 401 and the user must sign in again. No refresh/session mechanism yet.
 - **Admin**: `/admin/*` gated by `require_admin` — open under dev bypass, else `ADMIN_USER_IDS` allowlist (comma-separated provider-scoped ids).
+
+### Official vs unofficial transcripts
+Students sometimes upload their **official** transcript instead of the unofficial LionPATH one. Official transcripts have a different layout that the plain-text parser mangles (validated against a real signed sample: 13 partly-wrong courses, every term `Unknown`). Handling:
+- **Detection** — `official_detector.detect_official(pdf_bytes, full_text)` returns a scored `OfficialDetection`. Byte anchor is `/ByteRange` + `adbe.pkcs7` (a certified PDF; **do not** test the spaced `/Type /Sig` — the real sample has `/Type/Sig` with no space) worth +4, plus the "OFFICIAL TRANSCRIPT" header (+3), registrar language (capped +2), and a `UNOFFICIAL` hard veto (−5). Threshold 4 → the signature bytes alone trigger.
+- **Dedicated official parser** — `parse_official_transcript()` exists because official transcripts are (a) two term-columns side by side, (b) overlaid with a diagonal "Copy of Transcript" watermark, (c) full-name terms ("Fall 2025"). It uses `page.extract_words()` with coordinates, drops watermark glyphs by **font size** (real text is 6–9 pt, watermark is 16–22 pt; threshold `_WATERMARK_MIN_SIZE`), splits words at the page mid-x into two columns, rebuilds lines per column, and normalizes full-name terms via `FULL_TERM_PATTERN`. `parse_and_detect()` routes to it when detection says official.
+- **Safety net** — `official_parse_looks_bad()` (too few courses, or >30% `Unknown` terms) makes the route return a 422 steering the user to their unofficial transcript rather than storing a garbled parse. The de-interleaver is tuned from a **single** sample — validate against more before trusting it broadly.
+- **Consent gate (single-endpoint 409)** — `POST /transcript/upload` takes an `acknowledge_official` form flag. When `OFFICIAL_DETECT=1` (in `backend/.env`) and an official transcript is detected without the flag, it returns **409** `{needs_official_ack: true, ...}`; the client warns the user and re-submits with `acknowledge_official=true`. `OFFICIAL_DETECT` unset = **shadow mode**: detection + official parsing still run and log, but never 409 (validates false-positive rate before the dialog goes live).
+- **Consent audit trail** — an acknowledged official upload writes `transcript_kind="official"` and `official_transcript_ack_at` to the user record (both cleared on DELETE / a later unofficial upload); S3 object gets `transcript-kind` metadata. Response adds `transcript_kind` and, for official, a `parse_warning`.
+- **Mobile** — `transcriptService.isOfficialAckError(e)` detects the 409; both `upload.tsx` screens show a consent `Alert` and re-upload on confirm. The error handler guards `typeof detail === "string"` because the 409 `detail` is an object (else `[object Object]`).
+- Tests: `backend/tests/test_official_detector.py` (runs under pytest or plain `python`; set `OFFICIAL_SAMPLE_PDF` to exercise the real-sample end-to-end test).
 
 ### Stale uvicorn processes (Windows)
 When running in WSL bash, multiple Python processes can bind to port 8080. If API changes aren't being picked up:
