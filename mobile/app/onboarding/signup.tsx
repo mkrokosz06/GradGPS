@@ -10,6 +10,7 @@ import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../../context/AuthContext";
 import { createUser } from "../../services/userService";
 import { GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "../../constants/api";
+import { TosModal } from "../../components/TosModal";
 
 // Completes the pending auth session when the browser redirects back (web).
 WebBrowser.maybeCompleteAuthSession();
@@ -34,12 +35,13 @@ function StepDots({ step }: { step: number }) {
 
 export default function SignupScreen() {
   const router = useRouter();
-  const { signIn, signInWithIdToken } = useAuth();
+  const { signIn, signInWithIdToken, signOut } = useAuth();
 
   const [name,    setName]    = useState("");
   const [email,   setEmail]   = useState("");
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [showTos, setShowTos] = useState(false);
 
   // Google Sign-In (expo-auth-session). Yields an OIDC ID token the backend
   // verifies. Works on web + dev builds; Expo Go cannot complete this flow.
@@ -62,7 +64,7 @@ export default function SignupScreen() {
         return;
       }
       signInWithIdToken(idToken)
-        .then(() => router.push("/onboarding/major" as any))
+        .then(() => setShowTos(true))
         .catch((e: any) => {
           Alert.alert("Error", e?.response?.data?.detail ?? "Sign-in failed. Is the backend running?");
         })
@@ -89,12 +91,22 @@ export default function SignupScreen() {
     try {
       const user = await createUser(name.trim(), email.trim().toLowerCase());
       await signIn(user.user_id, user.name, user.email);
-      router.push("/onboarding/major" as any);
+      setShowTos(true);
     } catch (e: any) {
       Alert.alert("Error", e?.response?.data?.detail ?? "Could not create account. Is the backend running?");
     } finally {
       setLoading(false);
     }
+  }
+
+  async function handleDeclineTos() {
+    setShowTos(false);
+    await signOut();
+  }
+
+  function handleAgreeTos() {
+    setShowTos(false);
+    router.push("/onboarding/major" as any);
   }
 
   return (
@@ -172,6 +184,7 @@ export default function SignupScreen() {
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
+      <TosModal visible={showTos} onAgree={handleAgreeTos} onDecline={handleDeclineTos} />
     </SafeAreaView>
   );
 }

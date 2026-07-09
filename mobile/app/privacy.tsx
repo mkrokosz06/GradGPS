@@ -16,14 +16,15 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: June 25, 2026</Text>
+        <Text style={styles.updated}>Last updated: July 9, 2026</Text>
 
         <Section title="1. What We Collect">
           When you use GradGPS, we collect:{"\n\n"}
           • Your name and a user identifier created at sign-up{"\n"}
           • Your selected major and subplan{"\n"}
-          • Academic data from your uploaded transcript: course codes, grades, credits earned, and enrollment terms{"\n\n"}
-          We do not collect your Google or Apple account password, Social Security Number, financial information, or any data beyond what is needed to provide the degree-planning service.
+          • Academic data parsed from your uploaded transcript: course codes, grades, credits earned, and enrollment terms{"\n"}
+          • A copy of the transcript PDF you upload, and — if you upload an official transcript — the date you acknowledged and consented to using it{"\n\n"}
+          We recommend uploading your unofficial transcript. If you upload an official transcript, the stored PDF may also contain additional identifiers printed on it, such as your student ID number, date of birth, or a partially masked Social Security Number. We only extract the academic data listed above; we never ask you for, or separately store, your Google or Apple account password, your full Social Security Number, or your financial information.
         </Section>
 
         <Section title="2. How We Use Your Information">
@@ -42,7 +43,7 @@ export default function PrivacyPolicyScreen() {
         </Section>
 
         <Section title="4. Data Storage">
-          Your profile and transcript data are stored securely in cloud databases (AWS DynamoDB). Transcript PDF files, if retained, are stored in encrypted object storage (AWS S3). Access is restricted to the GradGPS application.
+          Your profile and transcript data are stored securely in cloud databases (AWS DynamoDB). Uploaded transcript PDF files — whether unofficial or official — are stored in encrypted object storage (AWS S3). Access is restricted to the GradGPS application. Deleting your transcript in the app removes the stored PDF and its parsed course data.
         </Section>
 
         <Section title="5. Data Retention">

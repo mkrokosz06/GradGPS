@@ -13,7 +13,8 @@ function RootRedirector() {
   useEffect(() => {
     if (loading) return;
     const inOnboarding = pathname.startsWith("/onboarding");
-    if (!userId && !inOnboarding) {
+    const isPublicLegal = pathname === "/tos" || pathname === "/privacy";
+    if (!userId && !inOnboarding && !isPublicLegal) {
       router.replace("/onboarding" as any);
     } else if (userId && onboardingDone && inOnboarding) {
       router.replace("/" as any);

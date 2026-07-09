@@ -16,7 +16,7 @@ export default function TermsOfServiceScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: June 25, 2026</Text>
+        <Text style={styles.updated}>Last updated: July 9, 2026</Text>
 
         <Section title="1. Acceptance of Terms">
           By using GradGPS, you agree to these Terms of Service. If you do not agree, please do not use the app.
@@ -39,7 +39,7 @@ export default function TermsOfServiceScreen() {
         </Section>
 
         <Section title="6. Transcript Data">
-          You may upload an unofficial transcript PDF to GradGPS. By doing so, you grant us permission to parse and store the academic data contained in that transcript (course codes, grades, credits, and enrollment terms) solely for the purpose of providing the GradGPS service to you.
+          GradGPS is designed for your unofficial transcript, which we recommend using. You may also choose to upload an official transcript; because official transcripts are intended for institutional use and contain additional personal identifiers, the app will detect one and ask you to confirm before it is processed. By uploading either type, you confirm that the transcript is your own academic record, and you grant us permission to parse and store the academic data it contains (course codes, grades, credits, and enrollment terms), along with the uploaded PDF, solely for the purpose of providing the GradGPS service to you.
         </Section>
 
         <Section title="7. Limitation of Liability">
