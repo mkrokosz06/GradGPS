@@ -1,0 +1,95 @@
+{
+  "program_name": "Accounting, B.S. (Business)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/smeal-business/accounting-bs/",
+  "notes": {
+    "etm": "Entrance-to-Major courses (etm=true) must be completed before 59 cumulative credits.",
+    "grade": "Slots with min_grade require that grade or better.",
+    "gen_ed_distribution": "General gen-ed slots must collectively cover US (3), IL (3), and 6 inter-domain credits.",
+    "slot_types": "course | choose_one | gen_ed | pool | elective"
+  },
+  "semesters": [
+    {
+      "year": 1, "term_season": "FA", "credits": 15,
+      "slots": [
+        {"type": "course", "code": "PSU 6", "credits": 1},
+        {"type": "choose_one", "codes": ["MATH 110", "MATH 140", "SCM 200", "STAT 200"], "credits": 4, "gen_ed": "GQ", "etm": true, "min_grade": "C"},
+        {"type": "choose_one", "codes": ["ENGL 15", "ENGL 30H", "ESL 15", "ENGL 137H", "CAS 137H"], "credits": 3, "gen_ed": "GWS", "etm": true, "min_grade": "C"},
+        {"type": "pool", "ref": "world_language", "label": "World Language - Level One", "credits": 4}
+      ]
+    },
+    {
+      "year": 1, "term_season": "SP", "credits": 14,
+      "slots": [
+        {"type": "course", "code": "MGMT 301", "credits": 3, "etm": true, "min_grade": "C"},
+        {"type": "choose_one", "codes": ["SCM 200", "STAT 200", "MATH 110", "MATH 140"], "credits": 4, "gen_ed": "GQ", "etm": true, "min_grade": "C"},
+        {"type": "course", "code": "ECON 102", "credits": 3, "gen_ed": "GS"},
+        {"type": "gen_ed", "category": "US", "credits": 3},
+        {"type": "pool", "ref": "world_language", "label": "World Language - Level Two", "credits": 4}
+      ]
+    },
+    {
+      "year": 2, "term_season": "FA", "credits": 17,
+      "slots": [
+        {"type": "course", "code": "MKTG 301", "credits": 3, "etm": true, "min_grade": "C"},
+        {"type": "course", "code": "ACCTG 211", "credits": 4, "etm": true, "min_grade": "C"},
+        {"type": "course", "code": "ECON 104", "credits": 3},
+        {"type": "pool", "ref": "world_language", "label": "World Language - Level Three", "credits": 4},
+        {"type": "gen_ed", "category": "IL", "credits": 3}
+      ]
+    },
+    {
+      "year": 2, "term_season": "SP", "credits": 15,
+      "slots": [
+        {"type": "course", "code": "FIN 301", "credits": 3, "etm": true, "min_grade": "C"},
+        {"type": "course", "code": "SCM 301", "credits": 3},
+        {"type": "choose_one", "codes": ["CAS 100", "ENGL 138T", "CAS 138T"], "credits": 3, "gen_ed": "GWS", "etm": true},
+        {"type": "course", "code": "MIS 250", "credits": 3},
+        {"type": "gen_ed", "category": null, "credits": 3}
+      ]
+    },
+    {
+      "year": 3, "term_season": "FA", "credits": 15,
+      "slots": [
+        {"type": "course", "code": "ACCTG 471", "credits": 3, "min_grade": "C"},
+        {"type": "course", "code": "ACCTG 404", "credits": 3},
+        {"type": "course", "code": "ENGL 202D", "credits": 3, "min_grade": "C"},
+        {"type": "choose_one", "codes": ["BLAW 341", "BA 342"], "credits": 3},
+        {"type": "gen_ed", "category": null, "credits": 3}
+      ]
+    },
+    {
+      "year": 3, "term_season": "SP", "credits": 15,
+      "slots": [
+        {"type": "course", "code": "ACCTG 472", "credits": 3, "min_grade": "C"},
+        {"type": "course", "code": "ACCTG 405", "credits": 3, "min_grade": "C"},
+        {"type": "gen_ed", "category": "GN", "credits": 3},
+        {"type": "choose_one", "codes": ["BA 342", "BLAW 341"], "credits": 3},
+        {"type": "gen_ed", "category": null, "credits": 3}
+      ]
+    },
+    {
+      "year": 4, "term_season": "FA", "credits": 14,
+      "slots": [
+        {"type": "pool", "ref": "accounting_elective", "label": "ACCTG 403W or Accounting Elective", "codes": ["ACCTG 403W"], "credits": 3},
+        {"type": "pool", "ref": "accounting_elective", "label": "BA 411 or Accounting Elective", "codes": ["BA 411"], "credits": 3},
+        {"type": "pool", "ref": "business_breadth", "label": "Business Breadth Course", "credits": 3},
+        {"type": "gen_ed", "category": "GN", "credits": 3},
+        {"type": "elective", "label": "Elective", "credits": 2}
+      ]
+    },
+    {
+      "year": 4, "term_season": "SP", "credits": 15,
+      "slots": [
+        {"type": "pool", "ref": "accounting_elective", "label": "ACCTG 403W or Accounting Elective", "codes": ["ACCTG 403W"], "credits": 3},
+        {"type": "pool", "ref": "accounting_elective", "label": "BA 411 or Accounting Elective", "codes": ["BA 411"], "credits": 3},
+        {"type": "pool", "ref": "business_breadth", "label": "Business Breadth Course", "credits": 3},
+        {"type": "gen_ed", "category": null, "credits": 3},
+        {"type": "gen_ed", "category": null, "credits": 3}
+      ]
+    }
+  ]
+}
