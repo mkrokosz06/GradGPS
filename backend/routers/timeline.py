@@ -288,20 +288,16 @@ def _collect_missing(audit_result: dict) -> list[dict]:
     return missing
 
 
-def _sort_and_spread(courses: list[dict]) -> list[dict]:
+def _sort_named(courses: list[dict]) -> list[dict]:
     """
-    Order missing courses so that:
+    Order named (non-pool) missing courses so that:
       1. Lower course numbers come before higher ones
-         (100-level before 200 before 300 before 400).
+         (100-level before 200 before 300 before 400) — a rough prerequisite proxy.
       2. Within each level tier, courses are round-robined by subject prefix
          (CHEM, MATH, FRNSC, …) so the same department isn't stacked 3+ deep
          in a single semester.
-      3. Pool entries (is_pool=True) are left at the very end in original order,
-         since they are elective/gen-ed placeholders without a level.
+    Pool/placeholder entries are handled separately by _expand_pool and the packer.
     """
-    pools    = [c for c in courses if c.get("is_pool")]
-    regulars = [c for c in courses if not c.get("is_pool")]
-
     def _level(code: str) -> int:
         """Return the hundred-rounded course level: 'CHEM 202' → 200."""
         m = re.search(r"(\d+)", code or "")
@@ -314,7 +310,7 @@ def _sort_and_spread(courses: list[dict]) -> list[dict]:
 
     # Group by level tier
     tier_map: dict[int, list] = defaultdict(list)
-    for c in regulars:
+    for c in courses:
         tier_map[_level(c.get("course_code", ""))].append(c)
 
     result: list[dict] = []
@@ -329,8 +325,198 @@ def _sort_and_spread(courses: list[dict]) -> list[dict]:
                 if bucket:
                     result.append(bucket.pop(0))
 
-    result.extend(pools)
     return result
+
+
+# ── Pool expansion + credit-band packing (timeline Layer 1) ──────────────────
+#
+# A degree's remaining requirements include large "pools" — choose_credits /
+# choose_courses buckets and the free-elective pad — that carry many credits but
+# no single named course.  Historically each pool was emitted as ONE item at its
+# full credit weight and appended after every named course, so the scheduler
+# either dumped a 30-credit blob into a single semester or left the back half of
+# the plan empty.  _expand_pool breaks a pool into ~3-credit placeholder slots so
+# the packer can distribute it, and _build_future_semesters packs everything to a
+# realistic ~15-credit band with named courses spread across the whole plan.
+
+_TARGET_CREDITS = 15.0   # aim for a ~15-credit semester
+_MAX_CREDITS    = 18.0   # never push a semester past this
+_GEN_ED_PER_SEM = 2      # at most this many gen-ed placeholders per semester
+
+
+def _display_credits(c: dict) -> float:
+    """Credits this item contributes to a semester total.  After _expand_pool
+    every item (named course, gen-ed slot, or pool slot) carries a real per-slot
+    credit value, so this is just a safe read of `credits`."""
+    return float(c.get("credits", 3) or 3)
+
+
+def _expand_pool(entry: dict) -> list[dict]:
+    """Split a pool entry into ~3-credit placeholder slots the packer can spread
+    across semesters.  Non-pool entries pass through unchanged (single-item list).
+
+    Each emitted slot keeps the pool's identity and dropdown (`pool_courses`,
+    `gen_ed_categories`) so the mobile UI renders it exactly as before, but
+    carries only its own slice of the credits — so a 31-credit Free-Electives
+    pool becomes eleven schedulable slots instead of one 31-credit blob.
+    """
+    if not entry.get("is_pool"):
+        return [entry]
+
+    # choose_courses pools count courses, not credits → one ~3cr slot per course.
+    if entry.get("pool_needed_courses"):
+        n = max(1, int(entry["pool_needed_courses"]))
+        sizes = [3.0] * n
+    else:
+        # Credit-based pool (choose_credits / free electives) → split into
+        # 3-credit slots with a smaller final remainder.
+        if entry.get("pool_needed_credits") is not None:
+            total = float(entry["pool_needed_credits"])
+        else:
+            total = float(entry.get("credits") or 3)
+        if total <= 0:
+            return []
+        sizes = []
+        remaining = total
+        while remaining > 1e-6:
+            take = 3.0 if remaining >= 3.0 - 1e-9 else round(remaining, 2)
+            sizes.append(take)
+            remaining -= take
+
+    slots: list[dict] = []
+    for cr in sizes:
+        slot = dict(entry)
+        slot["credits"] = cr
+        crd = int(cr) if float(cr).is_integer() else cr
+        if entry.get("pool_needed_courses"):
+            slot["pool_needed_courses"] = 1
+        if entry.get("pool_needed_credits") is not None:
+            slot["pool_needed_credits"] = crd
+        # Re-label per slot so a split pool doesn't repeat the whole-pool credit
+        # count on every card (e.g. eleven cards each reading "Choose 31 credits").
+        if "elective" in (entry.get("course_title") or "").lower():
+            slot["course_title"] = f"Choose {crd} more elective credits"
+        elif entry.get("pool_needed_courses"):
+            slot["course_title"] = "Choose 1 more course"
+        else:
+            slot["course_title"] = f"Choose {crd} more credits"
+        slots.append(slot)
+    return slots
+
+
+def _slice_even(items: list, n: int) -> list[list]:
+    """Split a list into n contiguous groups, as evenly as possible, preserving
+    order.  18 items over 8 groups → sizes 2,2,2,3,2,2,2,3."""
+    if n <= 0:
+        return []
+    L = len(items)
+    return [items[(i * L) // n:((i + 1) * L) // n] for i in range(n)]
+
+
+def _emit_semester(term: str, courses: list[dict]) -> dict:
+    """Build an upcoming-semester object in the mobile-facing schema."""
+    return {
+        "term":    term,
+        "label":   _term_label(term),
+        "status":  "upcoming",
+        "credits": round(sum(_display_credits(c) for c in courses), 1),
+        "courses": [
+            {
+                "course_code":         c.get("course_code", ""),
+                "course_title":        c.get("course_title", ""),
+                "credits_earned":      float(c.get("credits", 3) or 3),
+                "status":              "missing",
+                "grade":               "",
+                "is_pool":             c.get("is_pool", False),
+                "gen_ed_categories":   c.get("gen_ed_categories"),
+                "pool_courses":        c.get("pool_courses"),
+                "pool_needed_credits": c.get("pool_needed_credits"),
+                "pool_needed_courses": c.get("pool_needed_courses"),
+            }
+            for c in courses
+        ],
+    }
+
+
+def _build_future_semesters(
+    named: list[dict],
+    gen_ed_slots: list[dict],
+    pool_slots: list[dict],
+    base_term: str,
+    internship_items: list[dict] | None = None,
+) -> list[dict]:
+    """Pack the remaining requirements into ~15-credit future semesters.
+
+    Named courses (the prereq-ordered spine) are spread evenly across the whole
+    plan so no semester is pure filler; gen-ed placeholders are capped per
+    semester; pool/elective slots top each semester up to the credit band.  A
+    required internship is lifted into its own summer term between junior and
+    senior year.
+    """
+    internship_items = internship_items or []
+    future_term = _next_term(base_term)
+
+    total_cr = sum(_display_credits(c) for c in (*named, *gen_ed_slots, *pool_slots))
+    n_sems = max(1, math.ceil(total_cr / _TARGET_CREDITS)) if total_cr else 0
+    named_alloc = _slice_even(named, n_sems)
+
+    # Even out the load: aim for total/n_sems credits per semester rather than a
+    # hard 15, so the final semester isn't left holding a small remainder.
+    target = min(_TARGET_CREDITS, total_cr / n_sems) if n_sems else _TARGET_CREDITS
+
+    gi = pi = 0
+
+    def _fill(chunk: list[dict], cr: float) -> float:
+        """Add gen-ed (capped) then pool slots to a chunk up to the credit band."""
+        nonlocal gi, pi
+        added_ge = 0
+        while gi < len(gen_ed_slots) and added_ge < _GEN_ED_PER_SEM and cr < target:
+            ic = _display_credits(gen_ed_slots[gi])
+            if chunk and cr + ic > _MAX_CREDITS:
+                break
+            chunk.append(gen_ed_slots[gi]); cr += ic; gi += 1; added_ge += 1
+        while pi < len(pool_slots) and cr < target:
+            ic = _display_credits(pool_slots[pi])
+            if chunk and cr + ic > _MAX_CREDITS:
+                break
+            chunk.append(pool_slots[pi]); cr += ic; pi += 1
+        return cr
+
+    chunks: list[list[dict]] = []
+    for s in range(n_sems):
+        chunk = list(named_alloc[s])
+        _fill(chunk, sum(_display_credits(c) for c in chunk))
+        chunks.append(chunk)
+
+    # Any gen-ed / pool slots that didn't fit the credit-sized plan → extra
+    # semesters (still balanced, still gen-ed capped).
+    while gi < len(gen_ed_slots) or pi < len(pool_slots):
+        chunk: list[dict] = []
+        _fill(chunk, 0.0)
+        if not chunk:  # safety valve — force progress on an oversized straggler
+            if gi < len(gen_ed_slots):
+                chunk.append(gen_ed_slots[gi]); gi += 1
+            elif pi < len(pool_slots):
+                chunk.append(pool_slots[pi]); pi += 1
+        chunks.append(chunk)
+
+    chunks = [c for c in chunks if c]
+
+    # Place a required internship in its own summer term between junior and
+    # senior year: right before the final two academic semesters.
+    semesters: list[dict] = []
+    internship_at = (len(chunks) - 2) if internship_items else -1
+    placed = False
+    for idx, chunk in enumerate(chunks):
+        if internship_items and not placed and idx >= max(0, internship_at):
+            semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+            placed = True
+        semesters.append(_emit_semester(future_term, chunk))
+        future_term = _next_term(future_term)
+    if internship_items and not placed:
+        semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+
+    return semesters
 
 
 @router.get("")
@@ -440,8 +626,10 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             detail=f"No requirements found for major: {major}. "
                    "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
         )
-    audit_result = run_audit(requirement_rows, transcript_courses)
-    missing      = _sort_and_spread(_collect_missing(audit_result))
+    audit_result  = run_audit(requirement_rows, transcript_courses)
+    collected     = _collect_missing(audit_result)
+    named_courses = _sort_named([c for c in collected if not c.get("is_pool")])
+    raw_pools     = [c for c in collected if c.get("is_pool")]
 
     # ── 4b. Gen ed audit → one slot per incomplete category ─────────────────
     gen_ed_slots: list[dict] = []
@@ -461,7 +649,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         for group in gen_ed_result.get("groups", []):
             # Suppress a category if it will be covered by courses already
             # in progress or by future major courses in the plan.
-            if not _gen_ed_effectively_satisfied(group, missing):
+            if not _gen_ed_effectively_satisfied(group, named_courses):
                 if group.get("group_type") == "writing_intensive":
                     title = "Choose a writing-intensive (W) course"
                 else:
@@ -474,56 +662,19 @@ def get_timeline(user_id: str = Depends(get_user_id)):
                     "gen_ed_categories": [group["name"]],
                 })
 
-    # ── 5. Distribute missing courses into future semesters ──────────────────
-    # Interleave gen ed slots with major courses so each semester gets a mix
-    # (roughly 1-2 gen eds per semester rather than all at the end).
-    # Use slot-based scheduling: each item occupies 1+ slots depending on how
-    # many courses it represents.  Target COURSES_PER_SEM = 5 slots/semester.
-    COURSES_PER_SEM = 5
+    # ── 5. Build future semesters ────────────────────────────────────────────
     base_term = sorted_terms[-1] if sorted_terms else "SP 2026"
-    future_term = _next_term(base_term)
 
-    def _item_slots(c: dict) -> int:
-        """Scheduling slots this item consumes (pools may span multiple slots)."""
-        if c.get("pool_needed_courses"):
-            return max(1, int(c["pool_needed_courses"]))
-        cr = float(c.get("credits", 3) or 3)
-        # Large choose_credits pools (e.g. 18 cr) spread across multiple slots
-        return max(1, round(cr / 3))
-
-    def _display_credits(c: dict) -> float:
-        """Estimated credits this item represents for the semester credit total."""
-        if c.get("pool_needed_courses"):
-            return 3.0 * int(c["pool_needed_courses"])
-        return float(c.get("credits", 3) or 3)
-
-    def _emit_semester(term: str, courses: list[dict]) -> dict:
-        """Build an upcoming-semester object from a list of missing items."""
-        return {
-            "term":    term,
-            "label":   _term_label(term),
-            "status":  "upcoming",
-            "credits": round(sum(_display_credits(c) for c in courses), 1),
-            "courses": [
-                {
-                    "course_code":         c.get("course_code", ""),
-                    "course_title":        c.get("course_title", ""),
-                    "credits_earned":      float(c.get("credits", 3) or 3),
-                    "status":              "missing",
-                    "grade":               "",
-                    "is_pool":             c.get("is_pool", False),
-                    "gen_ed_categories":   c.get("gen_ed_categories"),
-                    "pool_courses":        c.get("pool_courses"),
-                    "pool_needed_credits": c.get("pool_needed_credits"),
-                    "pool_needed_courses": c.get("pool_needed_courses"),
-                }
-                for c in courses
-            ],
-        }
+    # Expand every requirement pool (choose_credits / choose_courses) into
+    # ~3-credit placeholder slots so the packer can spread it across semesters
+    # instead of dumping it whole into one.
+    pool_slots: list[dict] = []
+    for p in raw_pools:
+        pool_slots.extend(_expand_pool(p))
 
     # For BS/BA degrees, if the catalogued requirements total less than 120 credits
-    # (open electives aren't listed in every catalog), add a free elective placeholder
-    # so the schedule reflects the full 4-year length.
+    # (open electives aren't listed in every catalog), add free-elective placeholder
+    # slots so the schedule reflects the full 4-year length.
     if requirement_rows:
         degree = requirement_rows[0].get("degree", "")
         if degree in ("B.S.", "B.A.", "B.A.S.", "B.Mus.", "B.F.A."):
@@ -542,7 +693,8 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             ) + sum(float(c.get("credits_earned", 0)) for c in transfer_courses)
             total_planned_cr = (
                 earned_cr
-                + sum(_display_credits(c) for c in missing)
+                + sum(_display_credits(c) for c in named_courses)
+                + sum(_display_credits(c) for c in pool_slots)
                 + 3.0 * len(gen_ed_slots)
             )
             # Only pad if the gap is a meaningful course-sized chunk (≥3 cr);
@@ -550,78 +702,27 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             # are approximated), not a real elective to schedule.
             if total_planned_cr <= 117:
                 free_cr = int(120 - total_planned_cr)
-                missing.append({
-                    "course_code":        "Free Electives",
-                    "course_title":       f"Choose {free_cr} more elective credits",
-                    "credits":            free_cr,
-                    "is_pool":            True,
+                pool_slots.extend(_expand_pool({
+                    "course_code":         "Free Electives",
+                    "course_title":        f"Choose {free_cr} more elective credits",
+                    "credits":             free_cr,
+                    "is_pool":             True,
                     "pool_needed_credits": free_cr,
-                })
+                }))
 
     # Pull a required internship out of the normal course flow — it becomes its
-    # own dedicated summer term between junior and senior year (inserted below).
-    # (Extracted after the free-elective math above so its credits still count
-    # toward the 120-credit total.)
-    internship_items = [c for c in missing if _is_internship(c)]
+    # own dedicated summer term between junior and senior year (inserted inside
+    # _build_future_semesters).  Extracted after the free-elective math above so
+    # its credits still count toward the 120-credit total.
+    internship_items = [c for c in named_courses if _is_internship(c)]
     if internship_items:
-        missing = [c for c in missing if not _is_internship(c)]
+        named_courses = [c for c in named_courses if not _is_internship(c)]
 
-    n_major  = len(missing)
-    n_gen_ed = len(gen_ed_slots)
-
-    # Estimate semester count from total slots to size gen-ed cadence
-    total_slots = sum(_item_slots(c) for c in missing) + n_gen_ed
-    n_sems      = max(1, math.ceil(total_slots / COURSES_PER_SEM))
-
-    # Cap gen ed per semester at 2 so major courses aren't squeezed out
-    gen_ed_per_sem = min(2, math.ceil(n_gen_ed / n_sems)) if n_gen_ed else 0
-
-    mi, gi = 0, 0
-    chunks: list[list[dict]] = []
-    while mi < n_major or gi < n_gen_ed:
-        chunk: list[dict] = []
-        slots_used = 0
-        # How many gen eds are we adding this semester?
-        # Dynamically reduce major slots only by the gen eds actually available,
-        # so semesters stay full after gen ed is exhausted.
-        gen_eds_remaining = n_gen_ed - gi
-        gen_eds_this_sem  = min(gen_ed_per_sem, gen_eds_remaining)
-        avail_major       = COURSES_PER_SEM - gen_eds_this_sem
-        # Fill major courses up to avail_major slots
-        while mi < n_major:
-            c = missing[mi]
-            s = min(_item_slots(c), avail_major)  # single entry can't exceed a semester
-            if slots_used > 0 and slots_used + s > avail_major:
-                break
-            chunk.append(c)
-            slots_used += s
-            mi += 1
-        # Add gen ed slots (capped per semester)
-        gen_ed_added = 0
-        while gi < n_gen_ed and gen_ed_added < gen_ed_per_sem:
-            chunk.append(gen_ed_slots[gi])
-            gi += 1
-            gen_ed_added += 1
-        if chunk:
-            chunks.append(chunk)
-        else:
-            break  # safety valve
-    # Place a required internship in its own summer term between junior and
-    # senior year: insert it right before the final two academic semesters.
-    internship_at = (len(chunks) - 2) if internship_items else -1
-    placed_internship = False
-
-    for idx, chunk in enumerate(chunks):
-        if internship_items and not placed_internship and idx >= max(0, internship_at):
-            semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
-            placed_internship = True
-        semesters.append(_emit_semester(future_term, chunk))
-        future_term = _next_term(future_term)
-
-    # No academic semesters ahead of the internship (short plans) — append it
-    # as a trailing summer term so it still appears.
-    if internship_items and not placed_internship:
-        semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+    semesters.extend(
+        _build_future_semesters(
+            named_courses, gen_ed_slots, pool_slots, base_term, internship_items,
+        )
+    )
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(

@@ -1,6 +1,6 @@
 # Timeline SAP Hybrid — Design & Implementation Plan
 
-**Status:** Layer 1 (pool expansion + credit-band packing) in progress in `timeline.py`; Layer 2 (SAP templates) not started
+**Status:** Layer 1 (pool expansion + credit-band packing) **implemented + tested** in `timeline.py` (`backend/tests/test_timeline_packing.py`); Layer 2 (SAP templates) not started
 **Scope:** University Park (main campus) majors only
 **Owner file:** `backend/routers/timeline.py` (audit engine untouched)
 
@@ -214,23 +214,33 @@ One authoritative UP-major list, shared by the scraper and `programs.py`.
 
 Each phase is independently shippable and leaves the app in a working state.
 
-### Phase 0 — Guardrails (½ day)
-- Add a golden-output test: snapshot the current Accounting no-transcript timeline so
-  Layer 1 changes are diffable.
-- Add a credit-balance assertion helper (every projected semester ∈ [12, 18] cr) to
-  reuse across phases.
+### Phase 0 — Guardrails ✅ DONE
+- Hermetic packing tests in `backend/tests/test_timeline_packing.py` (17 tests, run
+  under pytest or plain `python`) lock pool-expansion, even-slicing, credit-band, and
+  internship behavior — the regression guard for all later phases.
+- Baseline captured empirically via the real `get_timeline` code path (Accounting,
+  no transcript): back half was **6 / 34 / 3 cr** with a 31-cr Free-Electives blob.
 
-### Phase 1 — Layer 1 scheduling fix (2-3 days) ← **fixes the reported bug**
-1. Write `_expand_pool()`; route `_collect_missing` pools and the free-elective padding
-   through it (§4.1).
-2. Replace slot packing with the credit-band packer; retire `_item_slots` /
-   `_display_credits` slot math (§4.2).
-3. Interleave placeholders in `_sort_and_spread` (§4.3).
-4. Verify: Accounting + no transcript → 8 balanced semesters, no empty back half,
-   1.5-cr courses correct. Update the golden snapshot.
+### Phase 1 — Layer 1 scheduling fix ✅ DONE
+1. ✅ `_expand_pool()` splits every requirement pool + the free-elective pad into
+   ~3-cr placeholder slots (§4.1); per-slot relabel so cards don't repeat the whole-
+   pool credit figure.
+2. ✅ `_build_future_semesters()` replaces the slot packer with a credit-band packer;
+   `_item_slots` / `COURSES_PER_SEM` retired, `_display_credits` reads real credits (§4.2).
+3. ✅ `_sort_and_spread` → `_sort_named`; named courses spread across the whole plan via
+   `_slice_even`, gen-ed/pool fillers interleaved and gen-ed capped per semester (§4.3).
+4. ✅ Dynamic per-semester target (`total / n_sems`) evens out the tail.
 
-**Exit criteria:** every major's projected semesters sit in the 14-17 band; the back
-half shows a mix; no regression in already-good majors.
+**Result (Accounting, no transcript):** back half went from **6 / 34 / 3** to a clean
+**16 15 16 15 15 15 15 13**, total exactly 120 cr, named courses (incl. ACCTG 471/472)
+present in the final semester. Verified no regression on the real ETI test user and
+across Psychology / Mechanical Engineering / English / Kinesiology (1.5-cr courses
+correctly yield 15.5 / 12.5-cr semesters). Official-detector suite still green.
+
+> **Surfaced, out of Layer 1 scope:** majors with **no subplan selected** (e.g.
+> Psychology 221 cr, Kinesiology 142 cr) pull *every* option track in as required, so
+> the plan runs well past 120 cr / 8 semesters. Pre-existing audit/catalog behavior,
+> not introduced here — worth narrowing when a subplan is chosen.
 
 ### Phase 2 — UP-major list hardening (½ day)
 1. Flip `_is_branch_campus` → `_is_up_college` allowlist in `programs.py` (§6).
