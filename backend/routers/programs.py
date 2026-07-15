@@ -13,21 +13,55 @@ from deps import get_user_id
 
 router = APIRouter()
 
-# Branch-campus keywords that appear in parentheses in program names.
-# Any program whose name contains one of these is excluded — this app
-# is University Park (main campus) only.
-_BRANCH_CAMPUS_KEYWORDS = {
-    "capital", "brandywine", "dubois", "erie", "fayette",
-    "greater allegheny", "new kensington", "schuylkill",
-    "scranton", "shenango", "york", "university college",
-    "world campus", "commonwealth",
+# ── University Park scoping ──────────────────────────────────────────────────
+# This app is University Park (main campus) only.  Program names carry a
+# parenthetical qualifier ONLY to disambiguate an offering that exists at more
+# than one campus (e.g. "Accounting, B.S. (Business)" at UP vs
+# "Accounting, B.S. (Capital)" at Harrisburg).  The large majority of programs
+# have NO parenthetical at all and are UP by default — so this MUST stay a
+# denylist of non-UP campuses, not an allowlist of UP colleges (an allowlist
+# would wrongly drop every unqualified program).
+#
+# The campus list is kept EXHAUSTIVE — every Commonwealth/branch campus and its
+# common aliases, not just the ones currently in the catalog — so a future
+# re-scrape can't silently leak a campus we forgot to list.  `is_up_program()`
+# is the single authoritative definition of "a University Park program"; the SAP
+# scraper (see docs/timeline-sap-hybrid.md) imports it so the app and the
+# template set agree on exactly which majors are in scope.
+_NON_UP_CAMPUS_KEYWORDS = {
+    "abington", "altoona", "beaver", "berks", "brandywine", "dubois", "du bois",
+    "erie", "behrend", "fayette", "greater allegheny", "harrisburg", "capital",
+    "hazleton", "lehigh valley", "mont alto", "new kensington", "schuylkill",
+    "scranton", "worthington scranton", "shenango", "wilkes-barre", "york",
+    "great valley", "university college", "world campus", "commonwealth",
+}
+
+# The resident-instruction colleges at University Park.  A parenthetical drawn
+# from this set positively means UP.  Not used to filter (unqualified programs
+# have no college either) — it's the authoritative allowlist the SAP scraper
+# validates college paths against, and lets us assert a parenthetical is a known
+# college rather than an unrecognised (possibly new-campus) surprise.
+_UP_COLLEGE_QUALIFIERS = {
+    "agricultural sciences", "arts and architecture", "business",
+    "communications", "earth and mineral sciences", "education", "engineering",
+    "health and human development", "information sciences and technology",
+    "intercollege", "liberal arts", "nursing", "science", "k-12",
 }
 
 
-def _is_branch_campus(name: str) -> bool:
-    """Return True if program name has a branch-campus parenthetical suffix."""
+def is_up_program(name: str) -> bool:
+    """Whether a program is offered at University Park (this app's only scope).
+
+    Keeps every program EXCEPT those whose name carries a non-UP campus
+    parenthetical.  Unqualified names (the majority) and UP-college
+    parentheticals are kept; branch/Commonwealth/World Campus offerings are
+    dropped.  This is the shared UP-scope definition used by both the program
+    list and the SAP template pipeline.
+    """
     nl = name.lower()
-    return any(f"({kw})" in nl or f"({kw} " in nl for kw in _BRANCH_CAMPUS_KEYWORDS)
+    return not any(
+        f"({kw})" in nl or f"({kw} " in nl for kw in _NON_UP_CAMPUS_KEYWORDS
+    )
 
 
 # In-memory cache populated on first request — avoids a 10-page DynamoDB scan per search
@@ -47,10 +81,10 @@ def _load_all_programs() -> list[str]:
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
-    # Exclude __GEN_ED__ sentinel and branch-campus programs
+    # Exclude __GEN_ED__ sentinel and non-University-Park programs
     _programs_cache = sorted(
         n for n in all_names
-        if n != "__GEN_ED__" and not _is_branch_campus(n)
+        if n != "__GEN_ED__" and is_up_program(n)
     )
     return _programs_cache
 

@@ -195,18 +195,24 @@ scraper and the catalog will mismatch and matching breaks. Two notes from the ca
 scan (551 distinct programs; 487 pass the current filter; kept parentheticals are all
 UP colleges):
 
-- **Harden the filter.** `_is_branch_campus()` in `programs.py` is a **denylist** and
-  omits real campuses (`berks`, `abington`, `altoona`, `behrend`). It does **not** leak
-  today (those variants aren't in the loaded catalog), but a denylist silently passes
-  any campus you forgot. **Flip it to a positive allowlist of the ~12 UP resident
-  colleges** (Engineering, Liberal Arts, Science, HHD, IST, Business, Education,
-  Arts & Architecture, Ag Sciences, Earth & Mineral Sciences, Nursing, Communications,
-  plus Intercollege). The scan already gives us that list.
+- **Harden the filter (done — but NOT the way first planned).** A parenthetical scan of
+  the catalog corrected the earlier assumption: only **123 of 551** programs carry any
+  parenthetical, and **428 have none**. The parenthetical exists *only* to disambiguate
+  a program offered at more than one campus. So a positive "allowlist of UP colleges"
+  would wrongly **drop all 428 unqualified UP programs** — the denylist structure is
+  correct. The fix was to keep the denylist but make the campus list **exhaustive** (all
+  ~20 Commonwealth/branch campuses + aliases, not just the two — Capital, University
+  College — actually present), so a future re-scrape can't leak a campus. Zero behavior
+  change today (487 kept before and after); pure future-proofing. Implemented as
+  `is_up_program()` in `programs.py`, with `_UP_COLLEGE_QUALIFIERS` as the authoritative
+  UP-college list the SAP scraper validates college paths against. Tests:
+  `backend/tests/test_programs_scope.py`.
 - **Templates target majors, not all 487 programs.** The 487 is inflated by
   minors/certificates (no SAP). SAP-bearing degree majors ≈ **160-250** counting BA/BS
   and named options separately. Filter to bachelor's `degree` values.
 
-One authoritative UP-major list, shared by the scraper and `programs.py`.
+One authoritative UP-scope definition (`is_up_program`), shared by the scraper and
+`programs.py`.
 
 ---
 
@@ -242,12 +248,17 @@ correctly yield 15.5 / 12.5-cr semesters). Official-detector suite still green.
 > the plan runs well past 120 cr / 8 semesters. Pre-existing audit/catalog behavior,
 > not introduced here — worth narrowing when a subplan is chosen.
 
-### Phase 2 — UP-major list hardening (½ day)
-1. Flip `_is_branch_campus` → `_is_up_college` allowlist in `programs.py` (§6).
-2. Extract the UP-major list into one shared helper both the app and the (future)
-   scraper import.
-3. Test: the 487 filtered set is unchanged or *smaller* (no leaks); minors excluded
-   from the "SAP-eligible majors" view.
+### Phase 2 — UP scope hardening ✅ DONE
+1. ✅ Data check reversed the plan: an allowlist would drop 428 unqualified UP programs,
+   so kept the denylist and made the campus list **exhaustive** (§6).
+2. ✅ `is_up_program()` in `programs.py` is the single shared UP-scope predicate; the SAP
+   scraper will import it. `_UP_COLLEGE_QUALIFIERS` documents the authoritative UP-college
+   set for scraper path validation.
+3. ✅ Verified 487 kept before and after (no leaks, nothing UP wrongly dropped). Tests in
+   `backend/tests/test_programs_scope.py` (5 tests, incl. campuses not in the catalog).
+
+> **Still TODO for Phase 3:** the "SAP-eligible majors" view (filter the 487 to bachelor's
+> `degree` values, excluding minors/certificates) — deferred to where the scraper needs it.
 
 ### Phase 3 — Accounting proof-of-concept (3-4 days)
 1. Scrape the Accounting SAP → one `plan_templates` JSON (typed slots, §5.1).
