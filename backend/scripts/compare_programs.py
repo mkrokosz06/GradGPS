@@ -1,6 +1,11 @@
+import os
+
 import openpyxl
 
-wb = openpyxl.load_workbook('PSU_Major_Requirements.xlsx', read_only=True)
+# Repo root (two levels up from backend/scripts/) holds the Excel catalog
+_EXCEL_PATH = os.path.join(os.path.dirname(__file__), "..", "..", "PSU_Major_Requirements.xlsx")
+
+wb = openpyxl.load_workbook(_EXCEL_PATH, read_only=True)
 ws = wb['All Requirements']
 headers = [cell.value for cell in next(ws.iter_rows(min_row=1, max_row=1))]
 college_idx = headers.index('college')

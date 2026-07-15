@@ -71,6 +71,7 @@ Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants
 | `timeline.py` | `/timeline` | Academic timeline (past + future semesters) |
 | `transcript.py` | `/transcript` | PDF upload, parse, store |
 | `programs.py` | `/programs` | Major search/select |
+| `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
 | `users.py` | `/users` | User profile |
 | `admin.py` | `/admin` | Admin utilities |
 

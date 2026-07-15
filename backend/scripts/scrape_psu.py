@@ -467,7 +467,9 @@ def write_txt(df, path):
 # ── MAIN ─────────────────────────────────────────────────────────────────────
 
 def main():
-    output_dir = r"C:\Users\mkrok\OneDrive\Desktop\Ai Advisng"
+    # Repo root (two levels up from backend/scripts/) — load_catalog.py reads the
+    # Excel output from there
+    output_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
 
     print("=" * 60)
     print("Penn State Major Requirements Scraper")

@@ -68,8 +68,9 @@ Launching exclusively at **Penn State University Park**. Free during beta. B2C.
 │   └── scripts/
 │       ├── setup_tables.py        # Create DynamoDB tables + S3 bucket
 │       ├── load_catalog.py        # Load 31k PSU requirement rows
-│       ├── seed_gen_ed.py         # Load gen ed requirements
-│       └── seed_matthew.py        # Seed test user + transcript + catalog patches
+│       ├── rebuild_gen_ed.py      # Load gen ed requirements (scraped bulletin data)
+│       ├── seed_matthew.py        # Seed test user + transcript + catalog patches
+│       └── scrape_psu.py          # Original bulletin scraper → PSU_Major_Requirements.xlsx
 └── mobile/
     ├── app/
     │   ├── _layout.tsx            # Root Stack + AuthProvider
@@ -112,7 +113,7 @@ Data is in-memory — run these after every Docker restart:
 cd backend
 python scripts/setup_tables.py    # create tables/buckets
 python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
-python scripts/seed_gen_ed.py     # load gen ed requirements
+python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
 python scripts/seed_matthew.py    # seed test user + transcript
 ```
 
@@ -156,6 +157,25 @@ For each requirement group in the student's major:
 
 ---
 
+## Authentication
+
+Real sign-in via Google/Apple OIDC — ID tokens are verified in `backend/auth.py`
+(JWKS signature, audience, issuer, expiry) and the canonical `user_id` is the
+provider-scoped subject (`google:<sub>` / `apple:<sub>`). In dev,
+`AUTH_DEV_BYPASS=1` in `backend/.env` accepts the legacy `x-user-id` header
+(how Expo Go works with the test user). Never set the bypass in prod.
+See CLAUDE.md § Auth for details.
+
+## Official Transcripts
+
+Students sometimes upload their **official** transcript instead of the
+unofficial LionPATH one. The backend detects these (`official_detector.py`),
+parses them with a dedicated parser, and gates storage behind a consent dialog
+(409 + `acknowledge_official` re-submit). See
+[`docs/official-transcript-handling.md`](docs/official-transcript-handling.md).
+
+---
+
 ## API Endpoints
 
 | Method | Endpoint | Description |
@@ -183,7 +203,7 @@ For each requirement group in the student's major:
 
 ## Roadmap
 
-- **Auth** — real sign-in flow (replacing hardcoded dev user)
+- **Session refresh** — ID tokens expire after ~1 h; add a refresh/session mechanism
 - **Deploy** — AWS backend + EAS Build for App Store / Google Play
 - **Multi-school** — expand scraper and parser to other universities
 - **Prerequisite warnings** — flag deep chains so students know what to take first

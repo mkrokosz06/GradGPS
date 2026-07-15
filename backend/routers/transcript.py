@@ -307,7 +307,7 @@ async def upload_transcript(
             ContentType="application/pdf", Metadata={"transcript-kind": kind},
         )
     except Exception as e:
-        print(f"S3 upload warning: {e}")
+        logger.warning("S3 upload failed for %s: %s", s3_key, e)
 
     # ── 4. Update user's transcript metadata + official-consent audit trail ────
     from datetime import datetime, timezone
