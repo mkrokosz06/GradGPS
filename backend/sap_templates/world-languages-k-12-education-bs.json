@@ -1,0 +1,290 @@
+{
+  "program_name": "World Languages (K-12) Education, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 127.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/world-languages-k-12-education-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 201",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HDFS 229",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "HDFS 239",
+            "PSYCH 412"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 331",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 316",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 295",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WLED 300",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 332",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 351",
+            "FR 352"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WLED 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 495B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 417",
+            "FR 418"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 402Y",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WLED 399A",
+            "FR 440"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 401",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 137",
+            "FR 138N",
+            "FR 139"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 430",
+            "FR 458",
+            "FR 470"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WLED 412W",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 403B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 495C",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495E",
+          "credits": 15.0
+        }
+      ]
+    }
+  ]
+}

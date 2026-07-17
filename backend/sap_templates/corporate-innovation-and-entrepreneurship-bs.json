@@ -1,0 +1,300 @@
+{
+  "program_name": "Corporate Innovation and Entrepreneurship, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/smeal-business/corporate-innovation-entrepreneurship-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSU 6",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 110",
+            "MATH 140",
+            "SCM 200",
+            "STAT 200"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ECON 102",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language - Level One (4th credit level)",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MGMT 301",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "SCM 200",
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language - Level Two (8th credit level)",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "US",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MKTG 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ACCTG 211",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ECON 104",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language - Level Three (12th credit level)",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "IL",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FIN 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SCM 301",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MIS 250",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MGMT 425",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MGMT 453",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202D",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BLAW 341",
+            "BA 342"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MGMT 457W",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "MGMT 3XX or MGMT 4XX - CIENT Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BA 342",
+            "BLAW 341"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "MGMT 4XX - CIENT Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "business_breadth",
+          "label": "Business Breadth Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "business_breadth",
+          "label": "Business Breadth Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "MGMT 4XX - CIENT Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "business_breadth",
+          "label": "Business Breadth Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

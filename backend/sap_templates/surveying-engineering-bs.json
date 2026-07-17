@@ -1,0 +1,309 @@
+{
+  "program_name": "Surveying Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 128.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/surveying-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSU 8",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 230",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 201",
+            "CMPSC 200"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 121",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 214",
+          "credits": 2.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "SUR 122",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 132",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SUR 221",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 213",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 241",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 361",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SUR 222",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 373W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 341",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 352",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 381",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SUR 441",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 455",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 421",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "SUR 362 , 424 , or IE 302 (Technical Elective)",
+          "credits": 3.0,
+          "codes": [
+            "SUR 362",
+            "SUR 424",
+            "IE 302"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SUR 471",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SUR 482",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "SUR 432 or 313 (Technical Elective)",
+          "credits": 3.0,
+          "codes": [
+            "SUR 432",
+            "SUR 313"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,357 @@
+{
+  "program_name": "Plant Sciences, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/plant-sciences-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PLANT 150S",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 22",
+            "MATH 26",
+            "MATH 41",
+            "MATH 110",
+            "MATH 140",
+            "MATH 40"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGRO 28",
+            "HORT 101"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "AGECO 295",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 102",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "AGECO 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PLANT 200",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 14",
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 240",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGECO 122",
+            "AGECO 144",
+            "AGECO 154",
+            "AGECO 496",
+            "AGECO 134"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENT 313",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENT 314",
+            "ENT 316"
+          ],
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 402",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AG 160",
+            "GEOG 30N",
+            "PHIL 13",
+            "PHIL 103",
+            "PHIL 132"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGECO 457",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PPEM 405",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 222",
+            "HORT 407"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGRO 423",
+            "AGRO 425",
+            "HORT 202",
+            "HORT 315",
+            "HORT 431",
+            "HORT 432",
+            "HORT 433",
+            "SOILS 418"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SOILS 401",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGRO 423",
+            "AGRO 425",
+            "HORT 202",
+            "HORT 315",
+            "HORT 431",
+            "HORT 432",
+            "HORT 433",
+            "SOILS 418"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGECO 438",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "AGECO 495",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGRO 410W",
+            "HORT 412W",
+            "SOILS 412W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PLANT 461",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 4.0
+        }
+      ]
+    }
+  ]
+}

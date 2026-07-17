@@ -1,0 +1,427 @@
+{
+  "program_name": "Music Education, B.M.E.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.M.E.",
+  "total_credits": 129.5,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/music-education-bme/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 121",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 131",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 40",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 116",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 15A",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "EDPSY 10",
+            "EDPSY 11",
+            "EDPSY 14"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 112",
+          "credits": 0.5
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 122",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 132",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 162",
+          "credits": 2.0,
+          "gen_ed": "IL"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 151",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 153",
+            "MUSIC 154"
+          ],
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 221",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 262",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PSYCH 100",
+            "HDFS 229",
+            "HDFS 239"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 153",
+            "MUSIC 154"
+          ],
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 222",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 261",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 295A",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 332",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 152",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 270",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0,
+          "gen_ed": "GH"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 181",
+            "MUSIC 267",
+            "MUSIC 420"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 266",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 341",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 395A",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 345",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 366",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 395B",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 101",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "SPLED 403A",
+            "SPLED 403B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 441W",
+            "MUSIC 442W",
+            "MUSIC 443W",
+            "MUSIC 444W",
+            "MUSIC 445W",
+            "MUSIC 446W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 495",
+          "credits": 12.0
+        }
+      ]
+    }
+  ]
+}

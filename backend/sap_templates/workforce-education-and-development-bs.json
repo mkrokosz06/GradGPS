@@ -1,0 +1,309 @@
+{
+  "program_name": "Workforce Education and Development, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 121.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/workforce-education-development-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 101",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 1",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 105",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 441",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 207W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 442",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 106",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 323",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 413",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 445",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 450",
+            "STS 245Z"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 495C",
+          "credits": 10.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "WFED 395A",
+            "WFED 395B",
+            "WFED 395C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

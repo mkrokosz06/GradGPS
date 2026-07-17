@@ -1,0 +1,311 @@
+{
+  "program_name": "Theatre, B.F.A.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.F.A.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/theatre-bfa/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 1S",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 130",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 131",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 150",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 289",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 15A",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 120",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 200",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 251",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 252",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 260",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 253",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 146",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 250",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 261",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 460",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 270",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 464",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 454",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 465",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 461",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 280",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 459",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 434",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "THEA 481",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 285",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 489",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

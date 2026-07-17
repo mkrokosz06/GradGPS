@@ -1,0 +1,295 @@
+{
+  "program_name": "Agricultural and Extension Education, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 132.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/agricultural-extension-education-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "AG 150",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 220W",
+            "BIOL 230W",
+            "BIOL 240W"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 130",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AGRO 28",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AGBM 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WFED 413",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 311",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ANSC 201",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "INTAG 100N",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 414",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 295",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 349",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AEE 412",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 413",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 295",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 350",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFED 450",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AEE 313",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "AEE 495",
+          "credits": 10.0
+        }
+      ]
+    }
+  ]
+}

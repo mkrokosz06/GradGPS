@@ -1,0 +1,390 @@
+{
+  "program_name": "Architectural Engineering, B.A.E.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.A.E.",
+  "total_credits": 160.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/architectural-engineering-bae/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 124",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARTH 202N",
+          "credits": 3.0,
+          "gen_ed": "GA"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 211L"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 221",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 130A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 250",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 213",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 222",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 240",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 130B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 213",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 212",
+            "PHYS 212L"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 308",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "AE 309",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 310",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ME 201",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 311",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 372",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ARCH 100",
+            "LARCH 60"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GA"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 404",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 441",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "AE 475",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 441",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MGMT 326",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 405",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "AE 472",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 476",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 477",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 401",
+            "IE 424"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 5,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 473",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 481W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CE 209",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 5,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 482",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        }
+      ]
+    }
+  ]
+}

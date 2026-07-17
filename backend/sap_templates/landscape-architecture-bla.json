@@ -1,0 +1,317 @@
+{
+  "program_name": "Landscape Architecture, B.L.A.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.L.A.",
+  "total_credits": 139.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/landscape-architecture-bla/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 60",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 115",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 125",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 145",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 155",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 116",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 156",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 215",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 235",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 245",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 255",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 216",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 246",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 256",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 276",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 336",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 315",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 335",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 365W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 414",
+          "credits": 5.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 236",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 375",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 386",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 499A",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 499B",
+          "credits": 5.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 499D",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language (Recommended) or Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 414",
+          "credits": 5.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 424",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 5,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LARCH 414",
+          "credits": 5.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

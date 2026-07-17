@@ -1,0 +1,317 @@
+{
+  "program_name": "Computer Science, B.S. (Engineering)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 127.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/computer-science-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 121",
+            "CMPSC 131"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 150N",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 122",
+            "CMPSC 132"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 221",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 230",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 222",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 360",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPEN 270",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 315",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 320",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 465",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 318",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 316",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 461",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 319",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 483W",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "CMPSC/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

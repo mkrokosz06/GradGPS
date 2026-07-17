@@ -1,0 +1,315 @@
+{
+  "program_name": "Environmental Systems Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 128.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/environmental-systems-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140G"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "EMSC 100S",
+            "CAS 100"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141G"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GEOSC 1",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 160",
+            "GEOG 260"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 202",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "EME 210",
+            "ENGL 202C"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 106",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EME 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EME 460",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOSC 452",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 370",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 400",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MNPR 301",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "EME 210"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EGEE 470",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 406",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EME 303",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 412",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENVSE 404W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 427",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 450",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENVSE 480",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 470",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENVSE 408",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

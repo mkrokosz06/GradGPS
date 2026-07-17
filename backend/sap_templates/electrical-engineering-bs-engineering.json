@@ -1,0 +1,338 @@
+{
+  "program_name": "Electrical Engineering, B.S. (Engineering)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 127.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/electrical-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "EE 8",
+            "EE 9"
+          ],
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 211L",
+            "PHYS 211R"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 121",
+            "CMPSC 131"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 212",
+            "PHYS 212L",
+            "PHYS 212R"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPEN 270",
+            "CMPEN 271",
+            "CMPEN 275"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 122",
+            "CMPSC 132"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EE 210",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 250",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EE 200",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EE 310",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 230",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 214",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 330",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EE 340",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EE 350",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 300W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE/CMPEN 300-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 300"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE/CMPEN 300-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 300"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 403W",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE/CMPEN 300/400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 300"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE/CMPEN 400-Level Elective",
+          "credits": 3.0,
+          "codes": [
+            "CMPEN 400"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}
