@@ -1,9 +1,10 @@
 # Timeline SAP Hybrid — Design & Implementation Plan
 
 **Status:** Layer 1 (credit-band packing) live for all majors. Layer 2 (SAP hybrid) live
-for **Accounting** only — template + match + reflow wired into `get_timeline`,
-template-presence gated, Layer 1 fallback everywhere else. Phases 0-3 done; Phase 4
-(scraper generalization to more majors) not started.
+for **Accounting + Marketing** — template + match + reflow wired into `get_timeline`,
+template-presence gated, Layer 1 fallback everywhere else. Phases 0-3 + 4a done
+(deterministic scraper + validation gate); Phase 4b (scaling the template set to the
+full UP major list) remaining.
 **Scope:** University Park (main campus) majors only
 **Owner file:** `backend/routers/timeline.py` (audit engine untouched)
 
@@ -291,13 +292,31 @@ merges → the official plan is reproduced exactly.
 off-sequence student reflows to a valid, balanced plan. Tests: reflow cases in
 `test_timeline_packing.py`, match cases in `test_sap_schedule.py`.
 
-### Phase 4 — Scraper generalization (1 week)
-1. Generalize the Accounting scraper into a generic SAP parser + per-college footnote
-   maps (Engineering ETM gates / tiered technical electives are the hard cases).
-2. Add auto-validation gating per template: credits sum to the degree total, N
-   semesters, every slot typed, every `fixed_course` exists in the catalog.
-3. Run across all ~160-250 UP majors; a clean generic pass likely auto-covers ~70%
-   (~110-175 majors). Log every template that fails validation.
+### Phase 4a — Scraper + validation gate ✅ DONE
+1. ✅ `scripts/scrape_sap.py` — a **deterministic** parser of the bulletin's CourseLeaf
+   `table.sc_plangrid` (NOT an LLM extraction, which mis-split credits). Each `<td>`'s
+   `header` attribute pins its exact year/term, so placement is exact. Classifies
+   courses / choose_one (merging linked + plain-text codes) / gen-ed (`(N)`→GN) /
+   world-language / business-breadth / departmental-elective / free-elective pools.
+2. ✅ Validation gate before write: structure, grand-total credits, and opt-in catalog
+   cross-check of pinned courses. A bad scrape never goes live.
+3. ✅ Proven on three programs: **Accounting** + **Marketing** pass and are written (both
+   now live); **Psychology** correctly rejected (pins `LA 83`, absent from catalog).
+   The deterministic parse also **corrected** the hand-encoded Accounting template
+   (ECON 102 → Y1 Fall, the bulletin's real 15/14 split).
+
+**Parser findings that generalize:** codes can be plain text, links, or shorthand
+(`30H` = ENGL 30H) — merge all sources; `NXX` wildcards (`MKTG 4XX`) mark elective
+pools; bulletin dashes/nbsp need normalizing. Tests: `test_scrape_sap.py`.
+
+### Phase 4b — Scale to the UP major set (remaining)
+1. Grow the `PROGRAMS` list toward the ~160-250 UP majors (URLs are predictable per
+   college path). A clean generic pass likely auto-covers ~70%; the gate flags the rest.
+2. Hard cases still to handle in the parser: Engineering ETM gates / tiered technical
+   electives, options/subplans with their own SAP pages, and programs whose scraped
+   codes need equivalence/section reconciliation to the catalog (the gate surfaces these).
+3. Hand-review + fix the flagged minority; each passing template is additive and
+   risk-isolated by the template-presence gate.
 
 ### Phase 5 — Hand-review the tail + rollout (ongoing, bounded)
 1. Hand-review the flagged minority (~50-75, mostly Engineering + heavy-option majors).
