@@ -1,6 +1,9 @@
 # Timeline SAP Hybrid — Design & Implementation Plan
 
-**Status:** Layer 1 (pool expansion + credit-band packing) **implemented + tested** in `timeline.py` (`backend/tests/test_timeline_packing.py`); Layer 2 (SAP templates) not started
+**Status:** Layer 1 (credit-band packing) live for all majors. Layer 2 (SAP hybrid) live
+for **Accounting** only — template + match + reflow wired into `get_timeline`,
+template-presence gated, Layer 1 fallback everywhere else. Phases 0-3 done; Phase 4
+(scraper generalization to more majors) not started.
 **Scope:** University Park (main campus) majors only
 **Owner file:** `backend/routers/timeline.py` (audit engine untouched)
 
@@ -260,17 +263,33 @@ correctly yield 15.5 / 12.5-cr semesters). Official-detector suite still green.
 > **Still TODO for Phase 3:** the "SAP-eligible majors" view (filter the 487 to bachelor's
 > `degree` values, excluding minors/certificates) — deferred to where the scraper needs it.
 
-### Phase 3 — Accounting proof-of-concept (3-4 days)
-1. Scrape the Accounting SAP → one `plan_templates` JSON (typed slots, §5.1).
-2. Implement `_match_template` (§5.2) and `_reflow` (§5.3) behind a feature flag; wire
-   the fallback (§5.4).
-3. Validate the generated Accounting plan against the official published SAP:
-   credit totals per semester, prerequisite order, all requirement buckets present
-   (World Language 12 cr, Business Breadth 6 cr, PSU 6, etc.).
-4. Fix the ECON 102/104 mis-pairing surfaced during comparison.
+### Phase 3 — Accounting proof-of-concept ✅ DONE
+1. ✅ Accounting SAP hand-encoded as a template (3a) — deferred the general scraper to
+   Phase 4; the match/reflow *engine* was the real risk, not scraping.
+2. ✅ `match_template` (`sap_schedule.py`, 3b) + `_reflow_template` (`timeline.py`, 3c),
+   wired into `get_timeline` with the Layer 1 fallback (§5.4).
+3. ✅ Validated against the official SAP: no-transcript Accounting reproduces the
+   published plan **exactly** (PSU 6, World Language 12cr, Business Breadth 6cr, the
+   2cr elective, ETM ordering, gen-ed distribution — all present, all in order,
+   totalling 120). A partial student's finished courses drop and the light Year-1
+   remnants merge forward into a balanced, shifted plan.
 
-**Exit criteria:** Accounting hybrid output matches the official SAP structure; a
-transfer/off-sequence student still reflows to a valid, balanced plan.
+**No feature flag (per decision):** the SAP path activates purely on template
+*presence*. Only Accounting has a template, so only Accounting changes; every other
+major runs the unchanged Layer 1 packer (verified byte-identical on the ETI test user).
+
+**Reflow design:** preserve the template's prerequisite-valid semester groupings, drop
+satisfied slots, then **merge-forward only light fragments** (< `_MERGE_MIN` = 10 cr) a
+partial student leaves behind. An on-track student's semesters are all full → nothing
+merges → the official plan is reproduced exactly.
+
+> **Deferred (not blocking):** the ECON 102/104 mis-pairing noted earlier is a
+> Layer 1 / catalog issue and doesn't affect the SAP path (the template pins ECON 102
+> and ECON 104 as separate courses in their correct semesters).
+
+**Exit criteria met:** Accounting hybrid matches the official SAP structure; an
+off-sequence student reflows to a valid, balanced plan. Tests: reflow cases in
+`test_timeline_packing.py`, match cases in `test_sap_schedule.py`.
 
 ### Phase 4 — Scraper generalization (1 week)
 1. Generalize the Accounting scraper into a generic SAP parser + per-college footnote

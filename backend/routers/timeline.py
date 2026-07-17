@@ -16,6 +16,8 @@ from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
 from routers.audit import _filter_rows
 from deps import get_user_id
+from plan_templates import load_template
+from sap_schedule import build_taken_set, build_gen_ed_satisfied, match_template
 
 router = APIRouter()
 
@@ -342,6 +344,7 @@ def _sort_named(courses: list[dict]) -> list[dict]:
 _TARGET_CREDITS = 15.0   # aim for a ~15-credit semester
 _MAX_CREDITS    = 18.0   # never push a semester past this
 _GEN_ED_PER_SEM = 2      # at most this many gen-ed placeholders per semester
+_MERGE_MIN      = 10.0   # SAP reflow: a semester lighter than this is merged forward
 
 
 def _display_credits(c: dict) -> float:
@@ -519,6 +522,159 @@ def _build_future_semesters(
     return semesters
 
 
+def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
+    """Reflow matched SAP-template slots into future semesters.
+
+    Unsatisfied slots keep the template's ordering and per-semester groupings —
+    the published plan is already prerequisite-sequenced and credit-balanced —
+    while satisfied slots (already in the transcript) drop out and later
+    semesters shift earlier to fill the gap.  For a student with no transcript
+    this reproduces the official plan exactly; a partially-complete student sees
+    their remaining semesters pulled forward.  A required internship is lifted
+    into its own summer term between junior and senior year.
+    """
+    future_term = _next_term(base_term)
+
+    # Group unsatisfied items by their template semester, preserving order.
+    groups: list[list[dict]] = []
+    cur_idx: object = object()   # sentinel so the first slot always opens a group
+    for r in records:
+        if r["satisfied"]:
+            continue
+        if r["sem_index"] != cur_idx:
+            groups.append([])
+            cur_idx = r["sem_index"]
+        groups[-1].append(r["item"])
+    groups = [g for g in groups if g]
+
+    # Internship → its own summer term between junior and senior year.
+    internship_items = [it for g in groups for it in g if _is_internship(it)]
+    if internship_items:
+        groups = [[it for it in g if not _is_internship(it)] for g in groups]
+        groups = [g for g in groups if g]
+
+    # Merge-forward only the LIGHT fragments a partially-complete student leaves
+    # behind (a semester left with < _MERGE_MIN credits after finished courses
+    # drop out).  An on-track / no-transcript student's template semesters are
+    # all full, so nothing merges and the published plan is reproduced exactly.
+    def _cr(g):
+        return sum(_display_credits(it) for it in g)
+
+    merged: list[list[dict]] = []
+    for g in groups:
+        if merged and (_cr(merged[-1]) < _MERGE_MIN or _cr(g) < _MERGE_MIN) \
+                and _cr(merged[-1]) + _cr(g) <= _MAX_CREDITS:
+            merged[-1].extend(g)
+        else:
+            merged.append(list(g))
+    groups = merged
+
+    semesters: list[dict] = []
+    internship_at = (len(groups) - 2) if internship_items else -1
+    placed = False
+    for idx, g in enumerate(groups):
+        if internship_items and not placed and idx >= max(0, internship_at):
+            semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+            placed = True
+        semesters.append(_emit_semester(future_term, g))
+        future_term = _next_term(future_term)
+    if internship_items and not placed:
+        semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+
+    return semesters
+
+
+def _build_layer1_future(
+    audit_result: dict,
+    gen_ed_result: dict,
+    requirement_rows: list[dict],
+    transcript_courses: list[dict],
+    transfer_courses: list[dict],
+    base_term: str,
+) -> list[dict]:
+    """Layer 1 fallback: build future semesters from the audit alone (no SAP
+    template) with the credit-band packer.  Used for every major that doesn't
+    have a plan template."""
+    collected     = _collect_missing(audit_result)
+    named_courses = _sort_named([c for c in collected if not c.get("is_pool")])
+    raw_pools     = [c for c in collected if c.get("is_pool")]
+
+    # Gen ed → one slot per still-incomplete category.
+    gen_ed_slots: list[dict] = []
+    for group in gen_ed_result.get("groups", []):
+        # Suppress a category if it will be covered by courses already in
+        # progress or by future major courses in the plan.
+        if not _gen_ed_effectively_satisfied(group, named_courses):
+            if group.get("group_type") == "writing_intensive":
+                title = "Choose a writing-intensive (W) course"
+            else:
+                title = f"Choose a {group['name']} course"
+            gen_ed_slots.append({
+                "course_code":       group["name"],
+                "course_title":      title,
+                "credits":           3,
+                "is_pool":           True,
+                "gen_ed_categories": [group["name"]],
+            })
+
+    # Expand every requirement pool (choose_credits / choose_courses) into
+    # ~3-credit placeholder slots so the packer can spread it across semesters
+    # instead of dumping it whole into one.
+    pool_slots: list[dict] = []
+    for p in raw_pools:
+        pool_slots.extend(_expand_pool(p))
+
+    # For BS/BA degrees, if the catalogued requirements total less than 120 credits
+    # (open electives aren't listed in every catalog), add free-elective placeholder
+    # slots so the schedule reflects the full 4-year length.
+    if requirement_rows:
+        degree = requirement_rows[0].get("degree", "")
+        if degree in ("B.S.", "B.A.", "B.A.S.", "B.Mus.", "B.F.A."):
+            # Credits the student has already banked or is currently earning
+            # (completed + in-progress + transfer). These all count toward the
+            # 120-credit degree total, so they must be included or the
+            # free-elective padding double-counts them.
+            earned_cr = sum(
+                # done courses report earned credits; in-progress ones aren't
+                # graded yet (earned = 0) and attempted credits aren't stored,
+                # so estimate the standard 3 credits per in-progress course.
+                float(c.get("credits_earned", 0)) if c.get("status") == "done"
+                else 3.0
+                for c in transcript_courses
+                if c.get("status") in ("done", "in_progress")
+            ) + sum(float(c.get("credits_earned", 0)) for c in transfer_courses)
+            total_planned_cr = (
+                earned_cr
+                + sum(_display_credits(c) for c in named_courses)
+                + sum(_display_credits(c) for c in pool_slots)
+                + 3.0 * len(gen_ed_slots)
+            )
+            # Only pad if the gap is a meaningful course-sized chunk (≥3 cr);
+            # smaller remainders are just estimation noise (in-progress credits
+            # are approximated), not a real elective to schedule.
+            if total_planned_cr <= 117:
+                free_cr = int(120 - total_planned_cr)
+                pool_slots.extend(_expand_pool({
+                    "course_code":         "Free Electives",
+                    "course_title":        f"Choose {free_cr} more elective credits",
+                    "credits":             free_cr,
+                    "is_pool":             True,
+                    "pool_needed_credits": free_cr,
+                }))
+
+    # Pull a required internship out of the normal course flow — it becomes its
+    # own dedicated summer term between junior and senior year (inserted inside
+    # _build_future_semesters).  Extracted after the free-elective math above so
+    # its credits still count toward the 120-credit total.
+    internship_items = [c for c in named_courses if _is_internship(c)]
+    if internship_items:
+        named_courses = [c for c in named_courses if not _is_internship(c)]
+
+    return _build_future_semesters(
+        named_courses, gen_ed_slots, pool_slots, base_term, internship_items,
+    )
+
+
 @router.get("")
 def get_timeline(user_id: str = Depends(get_user_id)):
     # ── 1. User ──────────────────────────────────────────────────────────────
@@ -626,13 +782,9 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             detail=f"No requirements found for major: {major}. "
                    "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
         )
-    audit_result  = run_audit(requirement_rows, transcript_courses)
-    collected     = _collect_missing(audit_result)
-    named_courses = _sort_named([c for c in collected if not c.get("is_pool")])
-    raw_pools     = [c for c in collected if c.get("is_pool")]
+    audit_result = run_audit(requirement_rows, transcript_courses)
 
-    # ── 4b. Gen ed audit → one slot per incomplete category ─────────────────
-    gen_ed_slots: list[dict] = []
+    # ── 4b. Gen ed audit (used by both the SAP-template and Layer 1 paths) ──
     gen_ed_resp = requirements_table.query(
         KeyConditionExpression=Key("program_name").eq("__GEN_ED__")
     )
@@ -643,86 +795,30 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             ExclusiveStartKey=gen_ed_resp["LastEvaluatedKey"]
         )
         gen_ed_rows.extend(gen_ed_resp.get("Items", []))
-
-    if gen_ed_rows:
-        gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
-        for group in gen_ed_result.get("groups", []):
-            # Suppress a category if it will be covered by courses already
-            # in progress or by future major courses in the plan.
-            if not _gen_ed_effectively_satisfied(group, named_courses):
-                if group.get("group_type") == "writing_intensive":
-                    title = "Choose a writing-intensive (W) course"
-                else:
-                    title = f"Choose a {group['name']} course"
-                gen_ed_slots.append({
-                    "course_code":       group["name"],
-                    "course_title":      title,
-                    "credits":           3,
-                    "is_pool":           True,
-                    "gen_ed_categories": [group["name"]],
-                })
+    gen_ed_result = (
+        run_gen_ed_audit(gen_ed_rows, transcript_courses) if gen_ed_rows else {"groups": []}
+    )
 
     # ── 5. Build future semesters ────────────────────────────────────────────
     base_term = sorted_terms[-1] if sorted_terms else "SP 2026"
 
-    # Expand every requirement pool (choose_credits / choose_courses) into
-    # ~3-credit placeholder slots so the packer can spread it across semesters
-    # instead of dumping it whole into one.
-    pool_slots: list[dict] = []
-    for p in raw_pools:
-        pool_slots.extend(_expand_pool(p))
-
-    # For BS/BA degrees, if the catalogued requirements total less than 120 credits
-    # (open electives aren't listed in every catalog), add free-elective placeholder
-    # slots so the schedule reflects the full 4-year length.
-    if requirement_rows:
-        degree = requirement_rows[0].get("degree", "")
-        if degree in ("B.S.", "B.A.", "B.A.S.", "B.Mus.", "B.F.A."):
-            # Credits the student has already banked or is currently earning
-            # (completed + in-progress + transfer). These all count toward the
-            # 120-credit degree total, so they must be included or the
-            # free-elective padding double-counts them.
-            earned_cr = sum(
-                # done courses report earned credits; in-progress ones aren't
-                # graded yet (earned = 0) and attempted credits aren't stored,
-                # so estimate the standard 3 credits per in-progress course.
-                float(c.get("credits_earned", 0)) if c.get("status") == "done"
-                else 3.0
-                for c in transcript_courses
-                if c.get("status") in ("done", "in_progress")
-            ) + sum(float(c.get("credits_earned", 0)) for c in transfer_courses)
-            total_planned_cr = (
-                earned_cr
-                + sum(_display_credits(c) for c in named_courses)
-                + sum(_display_credits(c) for c in pool_slots)
-                + 3.0 * len(gen_ed_slots)
-            )
-            # Only pad if the gap is a meaningful course-sized chunk (≥3 cr);
-            # smaller remainders are just estimation noise (in-progress credits
-            # are approximated), not a real elective to schedule.
-            if total_planned_cr <= 117:
-                free_cr = int(120 - total_planned_cr)
-                pool_slots.extend(_expand_pool({
-                    "course_code":         "Free Electives",
-                    "course_title":        f"Choose {free_cr} more elective credits",
-                    "credits":             free_cr,
-                    "is_pool":             True,
-                    "pool_needed_credits": free_cr,
-                }))
-
-    # Pull a required internship out of the normal course flow — it becomes its
-    # own dedicated summer term between junior and senior year (inserted inside
-    # _build_future_semesters).  Extracted after the free-elective math above so
-    # its credits still count toward the 120-credit total.
-    internship_items = [c for c in named_courses if _is_internship(c)]
-    if internship_items:
-        named_courses = [c for c in named_courses if not _is_internship(c)]
-
-    semesters.extend(
-        _build_future_semesters(
-            named_courses, gen_ed_slots, pool_slots, base_term, internship_items,
+    # SAP hybrid: if this major has a published-plan template, follow it (ordered,
+    # prerequisite-sequenced, complete to 120 cr) and reflow the student's real
+    # state onto it.  Every major WITHOUT a template falls back to the Layer 1
+    # credit-band packer, exactly as before — so only templated majors change.
+    template = load_template(major, subplan)
+    if template:
+        records = match_template(
+            template,
+            build_taken_set(transcript_courses),
+            build_gen_ed_satisfied(gen_ed_result),
         )
-    )
+        semesters.extend(_reflow_template(records, base_term))
+    else:
+        semesters.extend(_build_layer1_future(
+            audit_result, gen_ed_result, requirement_rows,
+            transcript_courses, transfer_courses, base_term,
+        ))
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(

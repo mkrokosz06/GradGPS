@@ -20,11 +20,15 @@ from routers.timeline import (
     _slice_even,
     _sort_named,
     _build_future_semesters,
+    _reflow_template,
     _display_credits,
     _TARGET_CREDITS,
     _MAX_CREDITS,
     _GEN_ED_PER_SEM,
+    _MERGE_MIN,
 )
+from plan_templates import load_template
+from sap_schedule import build_taken_set, match_template
 
 
 # ── _expand_pool ─────────────────────────────────────────────────────────────
@@ -203,6 +207,57 @@ def test_internship_gets_its_own_summer_term():
 
 def test_empty_inputs_produce_no_semesters():
     assert _build_future_semesters([], [], [], "SP 2026") == []
+
+
+# ── _reflow_template (SAP hybrid path) ───────────────────────────────────────
+
+ACCTG = "Accounting, B.S. (Business)"
+
+
+def _scheduled_order(sems):
+    return [c["course_code"] for s in sems for c in s["courses"]]
+
+
+def test_reflow_no_transcript_reproduces_template():
+    # On-track / no-transcript: every template semester is full, so nothing
+    # merges and reflow reproduces the published plan exactly (same count,
+    # same per-semester groupings), in order, totalling 120 credits.
+    tpl = load_template(ACCTG)
+    records = match_template(tpl, taken=set())
+    sems = _reflow_template(records, "SP 2026")
+    assert len(sems) == len(tpl["semesters"])
+    for out_sem, tpl_sem in zip(sems, tpl["semesters"]):
+        assert len(out_sem["courses"]) == len(tpl_sem["slots"])
+    assert len(_scheduled_order(sems)) == len(records)          # nothing dropped
+    assert abs(sum(s["credits"] for s in sems) - 120) < 0.01
+    order = _scheduled_order(sems)
+    assert order.index("PSU 6") < order.index("ACCTG 472")      # order preserved
+    assert sems[0]["term"] == "FA 2026"                         # SP 2026 → FA 2026
+
+
+def test_reflow_no_semester_over_band():
+    tpl = load_template(ACCTG)
+    sems = _reflow_template(match_template(tpl, taken=set()), "SP 2026")
+    for s in sems:
+        assert s["credits"] <= _MAX_CREDITS, f"{s['term']} = {s['credits']}cr"
+
+
+def test_reflow_drops_satisfied_and_merges_light_fragments():
+    # A partial student whose finished courses are scattered across early
+    # template semesters: those courses drop, and the light remnants merge
+    # forward so no scheduled semester is a tiny fragment.
+    tpl = load_template(ACCTG)
+    done = ["PSU 6", "MATH 140", "ENGL 15", "MGMT 301", "ECON 102",
+            "ACCTG 211", "MKTG 301", "FIN 301"]
+    taken = build_taken_set([{"course_code": c, "status": "done"} for c in done])
+    sems = _reflow_template(match_template(tpl, taken), "SP 2026")
+    scheduled = set(_scheduled_order(sems))
+    for c in done:
+        assert c not in scheduled
+    assert sum(s["credits"] for s in sems) < 120
+    # No interior semester left as a tiny fragment (last may hold a remainder).
+    for s in sems[:-1]:
+        assert s["credits"] >= _MERGE_MIN, f"{s['term']} = {s['credits']}cr fragment"
 
 
 # ── Tiny runner so this works without pytest installed ──────────────────────
