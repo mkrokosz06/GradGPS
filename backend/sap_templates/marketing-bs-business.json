@@ -1,10 +1,10 @@
 {
-  "program_name": "Accounting, B.S. (Business)",
+  "program_name": "Marketing, B.S. (Business)",
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
   "total_credits": 120.0,
-  "source": "https://bulletins.psu.edu/undergraduate/colleges/smeal-business/accounting-bs/",
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/smeal-business/marketing-bs/",
   "scraped": true,
   "semesters": [
     {
@@ -162,13 +162,17 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "ACCTG 471",
+          "type": "choose_one",
+          "codes": [
+            "MKTG 330",
+            "MKTG 342"
+          ],
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "ACCTG 404",
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "MKTG 4XX - Marketing Elective",
           "credits": 3.0
         },
         {
@@ -197,18 +201,23 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "ACCTG 472",
+          "type": "choose_one",
+          "codes": [
+            "MKTG 342",
+            "MKTG 330"
+          ],
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "ACCTG 405",
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "MKTG 4XX - Marketing Elective",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": "GN",
+          "type": "pool",
+          "ref": "business_breadth",
+          "label": "Business Breadth Course",
           "credits": 3.0
         },
         {
@@ -234,25 +243,21 @@
         {
           "type": "pool",
           "ref": "major_elective",
-          "label": "ACCTG 403W (or ACCTG 4XX - Accounting Elective)",
+          "label": "MKTG 450W (or MKTG 4XX - Marketing Elective)",
           "credits": 3.0,
           "codes": [
-            "ACCTG 403W"
-          ]
-        },
-        {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BA 411 (or ACCTG 4XX - Accounting Elective)",
-          "credits": 3.0,
-          "codes": [
-            "BA 411"
+            "MKTG 450W"
           ]
         },
         {
           "type": "pool",
           "ref": "business_breadth",
           "label": "Business Breadth Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
@@ -275,19 +280,10 @@
         {
           "type": "pool",
           "ref": "major_elective",
-          "label": "ACCTG 403W (or ACCTG 4XX - Accounting Elective)",
+          "label": "MKTG 450W (or MKTG 4XX - Marketing Elective)",
           "credits": 3.0,
           "codes": [
-            "ACCTG 403W"
-          ]
-        },
-        {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BA 411 (or ACCTG 4XX - Accounting Elective)",
-          "credits": 3.0,
-          "codes": [
-            "BA 411"
+            "MKTG 450W"
           ]
         },
         {
@@ -304,6 +300,11 @@
         {
           "type": "gen_ed",
           "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
           "credits": 3.0
         }
       ]

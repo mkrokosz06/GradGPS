@@ -44,3 +44,6 @@ data/
 
 # Claude Code local session state
 .claude/
+
+# SAP scraper fetch cache
+backend/scripts/.sap_cache/
