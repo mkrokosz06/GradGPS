@@ -1,10 +1,11 @@
 # Timeline SAP Hybrid — Design & Implementation Plan
 
 **Status:** Layer 1 (credit-band packing) live for all majors. Layer 2 (SAP hybrid) live
-for **Accounting + Marketing** — template + match + reflow wired into `get_timeline`,
-template-presence gated, Layer 1 fallback everywhere else. Phases 0-3 + 4a done
-(deterministic scraper + validation gate); Phase 4b (scaling the template set to the
-full UP major list) remaining.
+for **178 UP majors** — 85% of the 208 UP bachelor-degree programs — via templates
+scraped from the bulletin, with match + reflow wired into `get_timeline`,
+template-presence gated, and the Layer 1 packer as fallback for the rest. Phases 0-4b
+done. Remaining tail: 3 SAP pages that don't parse (single-column grid variant ×2,
+one 96cr accelerated program) + ~27 bachelor's with no published SAP.
 **Scope:** University Park (main campus) majors only
 **Owner file:** `backend/routers/timeline.py` (audit engine untouched)
 
@@ -309,14 +310,33 @@ off-sequence student reflows to a valid, balanced plan. Tests: reflow cases in
 (`30H` = ENGL 30H) — merge all sources; `NXX` wildcards (`MKTG 4XX`) mark elective
 pools; bulletin dashes/nbsp need normalizing. Tests: `test_scrape_sap.py`.
 
-### Phase 4b — Scale to the UP major set (remaining)
-1. Grow the `PROGRAMS` list toward the ~160-250 UP majors (URLs are predictable per
-   college path). A clean generic pass likely auto-covers ~70%; the gate flags the rest.
-2. Hard cases still to handle in the parser: Engineering ETM gates / tiered technical
-   electives, options/subplans with their own SAP pages, and programs whose scraped
-   codes need equivalence/section reconciliation to the catalog (the gate surfaces these).
-3. Hand-review + fix the flagged minority; each passing template is additive and
-   risk-isolated by the template-presence gate.
+### Phase 4b — Scale to the UP major set ✅ DONE
+1. ✅ `scrape_sap.py --all` discovers every UP program page from the bulletin **sitemap**
+   (branch campuses excluded via the college-path allowlist), scrapes those with a plan
+   grid, and matches each to its exact catalog `program_name` via the **page title**
+   (which carries the college parenthetical, so the only 3-way collision — Data Sciences —
+   self-disambiguates). Name matching was **100%** (0 unmatched).
+2. ✅ **178 majors templated and live** — 85% of the 208 UP bachelor-degree programs. All
+   178 resolve to real catalog majors, 0 duplicates.
+3. ✅ The bulk pass drove four parser/gate fixes (header-exact credit pairing; no
+   0-credit slots; fraction-based catalog check so language/area-studies majors aren't
+   falsely rejected; sanity gate skips associate degrees, allows 5-year 170cr degrees).
+
+**Coverage math (actual):** 459 UP program pages → 278 no SAP grid (minors/certs/info) →
+181 SAP-bearing bachelor's pages → **178 pass the gate**, 3 tail cases fall back to Layer 1
+(2 single-column grid variants, 1 accelerated 96cr program). The template-presence gate
+means every non-templated major keeps its exact Layer 1 behavior.
+
+> **Re-running:** `python scripts/scrape_sap.py --all --dry-run` (parse + validate, no
+> write) then drop `--dry-run` to write. Pages cache under `scripts/.sap_cache/`. A new
+> catalog year is a re-scrape; the gate re-flags anything that drifts.
+
+### Phase 4c — Remaining polish (optional, not blocking)
+1. The single-column CourseLeaf grid variant (`yearN undefinedcodecol`) — 2 programs.
+2. Options/subplans that have their own distinct SAP pages (currently one template per
+   base major; subplan-specific plans would key on `subplan`).
+3. Engineering ETM-gate / tiered-technical-elective annotations are captured as pools
+   today; richer modelling (secondary list scrapes) would sharpen those majors.
 
 ### Phase 5 — Hand-review the tail + rollout (ongoing, bounded)
 1. Hand-review the flagged minority (~50-75, mostly Engineering + heavy-option majors).
