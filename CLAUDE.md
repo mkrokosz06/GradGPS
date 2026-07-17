@@ -61,8 +61,13 @@ Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants
 | `audit_engine.py` | Core degree audit logic — `run_audit()` and `run_gen_ed_audit()` |
 | `transcript_parser.py` | Parses PSU transcript PDFs (unofficial + official). `parse_and_detect()` is the entry point |
 | `official_detector.py` | Scored heuristic that flags official transcripts (see below) |
+| `plan_templates.py` | Loads/validates Suggested Academic Plan (SAP) JSON templates from `sap_templates/` (see below) |
+| `sap_schedule.py` | SAP match stage — `match_template()` decides which template slots the student has already satisfied (pure, DB-free) |
+| `rmp_client.py` | RateMyProfessors lookup client (used by the `/courses` router) |
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
+
+SAP templates live as JSON under `backend/sap_templates/` (currently `accounting-bs-business.json`, `marketing-bs-business.json`).
 
 #### Routers
 | Router | Prefix | Purpose |
@@ -129,10 +134,32 @@ The scraper captured both the calc-based sequence (PHYS 211) and algebra-based s
 MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable across all programs. `patch_math_alternatives()` in `seed_matthew.py` (pair IDs 700+) generically scans every `(program, group)` where MATH 250 appears and pairs it with MATH 251, inserting a MATH 251 row where absent. Skips `choose_credits` pools (no pairing needed) and already-paired rows (idempotent).
 
 ### Timeline semester projection
-- `COURSES_PER_SEM = 5` courses per future semester
-- Summer is skipped (`_next_term` jumps SP→FA, FA→next SP)
-- Satisfied `choose_one` pairs are excluded via `pair_status` check
-- Satisfied `choose_credits` pools are excluded entirely (skip the whole group)
+
+The timeline has **two paths**, both in `routers/timeline.py`:
+
+**SAP-template path (preferred, for majors with a published plan).** If `load_template(major, subplan)` finds a Suggested Academic Plan template, the timeline follows it — see the SAP section below.
+
+**Layer 1 credit-band packer (fallback, every un-templated major).** `_build_layer1_future()` builds future semesters from the audit alone:
+- Packs each semester to a realistic credit **band** (`_TARGET_CREDITS = 15`, never past `_MAX_CREDITS = 18`) instead of a fixed course count — this replaced the old `COURSES_PER_SEM = 5` scheme (`be9495c`).
+- `_expand_pool()` splits large `choose_credits` / free-elective pools into ~3-credit placeholder slots so the packer can spread them across the whole plan instead of dumping one big blob into a single semester. Each slot keeps the pool's identity/dropdown for the mobile UI.
+- At most `_GEN_ED_PER_SEM = 2` gen-ed placeholders per semester.
+- Summer is skipped (`_next_term` jumps SP→FA, FA→next SP).
+- Satisfied `choose_one` pairs excluded via `pair_status`; satisfied `choose_credits` pools excluded entirely.
+
+### Suggested Academic Plans (SAP hybrid)
+For University Park majors with a published PSU bulletin plan, the timeline reflows the student's real state against the official, prerequisite-sequenced, credit-balanced plan instead of packing from scratch. Design doc: `docs/timeline-sap-hybrid.md`.
+
+**Pipeline** (all in `routers/timeline.py` around the audit call):
+1. `load_template(major, subplan)` (`plan_templates.py`) returns the SAP JSON, preferring an exact subplan match but falling back to the subplan-less base plan. `None` → fall back to the Layer 1 packer, so **only templated majors change behavior**.
+2. `build_taken_set()` + `build_gen_ed_satisfied()` (`sap_schedule.py`) derive a taken-set (with course equivalences, e.g. IST→ETI) and per-gen-ed-category satisfaction from live audit/transcript data. **The audit engine stays the source of truth** — SAP only supplies order, completeness, and credit balance.
+3. `match_template()` walks the template in order and marks each slot satisfied or not. `consumed` prevents one taken course from satisfying two slots. Un-anchored pools (world language, free electives) are never auto-satisfied (a known PoC limitation).
+4. `_reflow_template()` drops satisfied slots (transcript history) and pulls later semesters forward to fill the gap. A no-transcript student reproduces the official plan exactly; a partially-complete student sees remaining semesters pulled earlier. Light leftover fragments (< `_MERGE_MIN = 10` cr) merge forward; a required internship is lifted into its own summer term between junior and senior year.
+
+**Template schema & authoring.** Slot types: `course`, `choose_one`, `gen_ed`, `pool`, `elective` (`VALID_SLOT_TYPES` in `plan_templates.py`). `validate_template()` does structural + **grand-total** credit checks only — per-semester `credits` are advisory because PSU bulletin SAPs are frequently internally inconsistent per-semester but correct at the 120-credit total.
+
+**Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live.
+
+**University Park scoping.** `is_up_program()` in `routers/programs.py` is the single authoritative definition of "a UP program" — a **denylist** of non-UP campus keywords (fail-safe: a re-scrape can't silently leak a campus we forgot to allowlist). SAP templates are UP-only.
 
 ### Auth (dev vs prod)
 - **Real auth**: Google/Apple OIDC ID tokens, verified in `backend/auth.py` (JWKS signature, aud, iss, exp). Canonical `user_id` = provider-scoped sub (`google:<sub>` / `apple:<sub>`). Client IDs in `backend/.env` (`GOOGLE_CLIENT_IDS`, `APPLE_CLIENT_IDS`). Mobile: `expo-auth-session` in `signup.tsx` → `signInWithIdToken()` in `AuthContext` → token in SecureStore (AsyncStorage on web) → axios interceptor sends `Authorization: Bearer`.
