@@ -4,7 +4,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
-import { getAudit, type AuditSummary } from "../../services/auditService";
+import { getAudit, getCachedAudit, type AuditSummary } from "../../services/auditService";
 
 function classYear(credits: number): string {
   if (credits < 30)  return "Freshman";
@@ -15,11 +15,15 @@ function classYear(credits: number): string {
 
 export default function AccountScreen() {
   const { userId, name, email, signOut } = useAuth();
-  const [audit, setAudit] = useState<AuditSummary | null>(null);
+  const [audit, setAudit] = useState<AuditSummary | null>(
+    () => (userId ? getCachedAudit(userId) : null),
+  );
 
   useFocusEffect(
     useCallback(() => {
-      if (!userId) return;
+      if (!userId) { setAudit(null); return; }
+      // Show the last known audit immediately, then refresh in the background.
+      setAudit(getCachedAudit(userId));
       getAudit(userId).then(setAudit).catch(() => {});
     }, [userId]),
   );
