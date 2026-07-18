@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
@@ -199,6 +200,7 @@ function MapPin() {
 const NODE_W      = 88;
 const CONNECTOR_W = 28;
 const NODE_TOTAL  = NODE_W + CONNECTOR_W; // 116 px per slot
+const TIMELINE_PAD_H = 24; // must match the ScrollView contentContainerStyle paddingHorizontal
 
 const LABEL_H        = 34;
 const LABEL_MB       = 6;
@@ -508,6 +510,21 @@ export default function TimelineScreen() {
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const { userId } = useAuth();
   const timelineScrollRef = useRef<ScrollView>(null);
+  const timelineViewportW = useRef(0);
+  const timelineContentW  = useRef(0);
+
+  // Scroll the strip so dot `index` sits centered in the viewport; near the
+  // edges the clamp leaves it as close to center as the content allows.
+  const centerOnDot = useCallback((index: number) => {
+    if (index < 0) return;
+    const viewportW = timelineViewportW.current || Dimensions.get("window").width;
+    const dotCenter = TIMELINE_PAD_H + index * NODE_TOTAL + NODE_W / 2;
+    const maxX = timelineContentW.current > 0
+      ? Math.max(0, timelineContentW.current - viewportW)
+      : Infinity; // not measured yet — native scrollTo clamps to bounds anyway
+    const x = Math.min(Math.max(0, dotCenter - viewportW / 2), maxX);
+    timelineScrollRef.current?.scrollTo({ x, animated: true });
+  }, []);
 
   const fetchTimeline = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -530,13 +547,8 @@ export default function TimelineScreen() {
         // Only auto-scroll on first load
         if (isFirstLoad && defaultTerm) {
           const idx = timeline.semesters.findIndex((s) => s.term === defaultTerm);
-          if (idx > 2) {
-            setTimeout(() => {
-              timelineScrollRef.current?.scrollTo({
-                x: Math.max(0, (idx - 1) * NODE_TOTAL),
-                animated: true,
-              });
-            }, 300);
+          if (idx >= 0) {
+            setTimeout(() => centerOnDot(idx), 300);
           }
         }
 
@@ -550,7 +562,7 @@ export default function TimelineScreen() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [userId]);
+  }, [userId, centerOnDot]);
 
   // Fetch on mount and whenever userId changes (handles async AsyncStorage load)
   useEffect(() => { fetchTimeline(); }, [fetchTimeline]);
@@ -624,7 +636,9 @@ export default function TimelineScreen() {
             ref={timelineScrollRef}
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 24, paddingTop: 10, paddingBottom: 8 }}
+            contentContainerStyle={{ paddingHorizontal: TIMELINE_PAD_H, paddingTop: 10, paddingBottom: 8 }}
+            onLayout={(e) => { timelineViewportW.current = e.nativeEvent.layout.width; }}
+            onContentSizeChange={(w) => { timelineContentW.current = w; }}
           >
             <View>
               {/* Bracket row — year grouping brackets above the dots */}
@@ -641,7 +655,7 @@ export default function TimelineScreen() {
                     key={sem.term}
                     semester={sem}
                     selected={sem.term === selectedTerm}
-                    onPress={() => setSelectedTerm(sem.term)}
+                    onPress={() => { setSelectedTerm(sem.term); centerOnDot(i); }}
                     isLast={i === data.semesters.length - 1}
                   />
                 ))}
