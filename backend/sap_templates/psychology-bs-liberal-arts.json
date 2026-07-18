@@ -1,0 +1,311 @@
+{
+  "program_name": "Psychology, B.S. (Liberal Arts)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 126.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/psychology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LA 83",
+          "credits": 1.5
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 2XX Level (Group A, B, C or Additional)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": "GS",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "PSYCH 200"
+          ],
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 2XX Level (Group A, B, C or Additional)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "IL",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LA 283",
+          "credits": 1.5
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 105",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 2XX Level (Group A, B, C or Additional)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "US",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 2XX Level (Group A, B, C or Additional)",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 4XX Level Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 4XX Level Course",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PSYCH 301W",
+            "PSYCH 300"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 4XX Level Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202A",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "PSYCH 4XX Level Course",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 490",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 1.0
+        }
+      ]
+    }
+  ]
+}

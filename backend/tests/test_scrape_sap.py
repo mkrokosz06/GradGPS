@@ -94,6 +94,67 @@ def test_classify_business_breadth_and_world_language():
     assert _classify("World Language - Level Two (8th credit level)", [], 4)["ref"] == "world_language"
 
 
+# Single-column variant: one column per YEAR (no Fall/Spring), header
+# "yearN undefinedcodecol", with a per-year plangridsum total row.
+_FIXTURE_SINGLE = """
+<table class="sc_plangrid">
+<thead><tr class="plangridyear firstrow"><th id="year0" colspan="1">First Year</th>
+  <th id="year0" class="hourscol">Credits</th></tr></thead>
+<tbody>
+<tr><td class="codecol" header="year0 undefinedcodecol"><a onclick="return showCourse(this, 'PSU 6');">PSU 6</a></td>
+    <td class="hourscol" header="year0 undefinedhourscol">1</td></tr>
+<tr><td class="codecol" header="year0 undefinedcodecol"><a onclick="return showCourse(this, 'MATH 140');">MATH 140</a> (GQ)</td>
+    <td class="hourscol" header="year0 undefinedhourscol">4</td></tr>
+<tr><td class="codecol" header="year0 undefinedcodecol"><a onclick="return showCourse(this, 'CHEM 110');">CHEM 110</a></td>
+    <td class="hourscol" header="year0 undefinedhourscol">3</td></tr>
+<tr><td class="codecol" header="year0 undefinedcodecol"><a onclick="return showCourse(this, 'ENGL 15');">ENGL 15</a></td>
+    <td class="hourscol" header="year0 undefinedhourscol">3</td></tr>
+<tr><td class="codecol" header="year0 undefinedcodecol">General Education Course (US)</td>
+    <td class="hourscol" header="year0 undefinedhourscol">3</td></tr>
+<tr><td class="codecol" header="year0 undefinedcodecol">World Language - Level One</td>
+    <td class="hourscol" header="year0 undefinedhourscol">4</td></tr>
+<tr class="plangridsum"><td></td><td class="hourscol" header="year0 undefinedhourscol">18</td></tr>
+</tbody></table>
+"""
+
+
+def test_summer_term2_is_labeled_summer():
+    # A year with a Summer column (Term2) — the summer course must be tagged SU,
+    # not collapsed into a duplicate Fall.
+    html = """
+    <table class="sc_plangrid"><tbody>
+    <tr><td class="codecol" header="year2 year2_Term0_codecol">
+          <a onclick="return showCourse(this, 'ETI 300');">ETI 300</a></td>
+        <td class="hourscol" header="year2 year2_Term0_hourscol">3</td></tr>
+    <tr><td class="codecol" header="year2 year2_Term1_codecol">
+          <a onclick="return showCourse(this, 'ETI 302');">ETI 302</a></td>
+        <td class="hourscol" header="year2 year2_Term1_hourscol">3</td></tr>
+    <tr><td class="codecol" header="year2 year2_Term2_codecol">
+          <a onclick="return showCourse(this, 'IST 495');">IST 495</a></td>
+        <td class="hourscol" header="year2 year2_Term2_hourscol">1</td></tr>
+    </tbody></table>
+    """
+    sems = parse_plangrid(html)
+    seasons = {s["term_season"] for s in sems}
+    assert seasons == {"FA", "SP", "SU"}
+    su = next(s for s in sems if s["term_season"] == "SU")
+    assert su["slots"][0]["code"] == "IST 495" and su["credits"] == 1
+
+
+def test_single_column_year_splits_into_two_semesters():
+    sems = parse_plangrid(_FIXTURE_SINGLE)
+    assert len(sems) == 2
+    assert [s["term_season"] for s in sems] == ["FA", "SP"]
+    assert all(s["year"] == 1 for s in sems)
+    # The year's 6 courses are split across the two semesters (none lost, none
+    # duplicated), and the per-year plangridsum row (18) is NOT parsed as a slot.
+    assert sum(len(s["slots"]) for s in sems) == 6
+    assert round(sum(s["credits"] for s in sems), 1) == 18.0
+    # Balanced-ish split preserving order: PSU 6 lands in the Fall half.
+    assert sems[0]["slots"][0].get("code") == "PSU 6"
+    assert 8 <= sems[0]["credits"] <= 13
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items())
              if k.startswith("test_") and callable(v)]

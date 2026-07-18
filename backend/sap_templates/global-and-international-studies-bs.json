@@ -1,0 +1,310 @@
+{
+  "program_name": "Global and International Studies, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/global-international-studies-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GLIS 101N",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LA 83",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GLIS 102N",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 21",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LA 283",
+          "credits": 1.5
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 100",
+            "STAT 200",
+            "SOC 207",
+            "PSYCH 200"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "4XX Level Major Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "4XX Level Major Course",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "4XX Level Major Course",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GLIS 400Y",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "4XX Level Major Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "4XX Level Related Area Course",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

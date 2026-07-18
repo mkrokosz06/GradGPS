@@ -1,0 +1,277 @@
+{
+  "program_name": "Philosophy, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/philosophy-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LA 83",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LA 283",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHIL 12",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 4.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 4.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

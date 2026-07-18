@@ -1,0 +1,304 @@
+{
+  "program_name": "Nursing, B.S.N.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.N.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/nursing/nursing-bsn/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 161",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 162",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 100",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 163",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 164",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "HDFS 129",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 251",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 130",
+            "CHEM 110",
+            "CHEM 111"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 106",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 107",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 250",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 251",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "SOC 1",
+            "SOC 5"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 225",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 230",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NURS 305",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 301",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 310",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 350",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NURS 200W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 302",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 306",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 320",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NURS 405A",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 450A",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 415",
+          "credits": 4.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NURS 450B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 405B",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 420",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NURS 480",
+          "credits": 2.0
+        }
+      ]
+    }
+  ]
+}

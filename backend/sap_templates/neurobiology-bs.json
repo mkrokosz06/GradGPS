@@ -1,0 +1,344 @@
+{
+  "program_name": "Neurobiology, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 122.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/neurobiology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 114",
+            "BIOL 115",
+            "BIOL 116"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 137H"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "CAS 137H",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 230W",
+            "BIOL 234",
+            "BIOL 235W",
+            "BIOL 236W"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140B",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "General Education Course (GWS) (ENGL/CAS 138H) or General Education Course or Elective",
+          "credits": 3.0,
+          "codes": [
+            "CAS 138H"
+          ]
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 222",
+            "BIOL 161",
+            "BIOL 162"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 250",
+            "STAT 200",
+            "STAT 240"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 210",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BBH 203",
+            "PSYCH 260"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 322",
+            "BIOL 161",
+            "BIOL 162"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 213",
+          "credits": 2.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BIOL/BBH 469 (or BIOL 4XX (Group A))",
+          "credits": 3.0,
+          "codes": [
+            "BIOL 469",
+            "BBH 469"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "PHYS 250",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BMB 211",
+            "BMB 401"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 469",
+            "BIOL 470",
+            "BBH 469"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 251",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BIOL 470 (or BIOL 4XX (Group A))",
+          "credits": 3.0,
+          "codes": [
+            "BIOL 470"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BIOL 4XX (Group B)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BIOL 4XX (Group C)",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BIOL 4XX (Group D)",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
+            "CAS 138T"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

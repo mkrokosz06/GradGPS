@@ -1,0 +1,316 @@
+{
+  "program_name": "Nuclear Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 129.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/nuclear-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "NUCE 297",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 200",
+            "CMPSC 201"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 213",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 230",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 214",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "NUCE 301",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 309",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 310W",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 321",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 315",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 316",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 302",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 322",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 450",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUCE 403",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 420",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 430",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUCE 451",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUCE 431W",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

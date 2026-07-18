@@ -1,0 +1,288 @@
+{
+  "program_name": "Energy and Sustainability Policy, B.A.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.A.",
+  "total_credits": 121.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/energy-sustainability-policy-ba/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMSC 302",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "CAS 100",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language level 1",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PLSC 1",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "GEOG 30N",
+          "credits": 3.0,
+          "gen_ed": "IL"
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EGEE 120",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "EGEE 102",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "EMSC 240N",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language level 2",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ECON 102",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "ECON 104",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "EBF 200",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "METEO 3",
+            "METEO 101"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GEOG 469",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PLSC 490",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language level 3",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "METEO 469",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202D",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "GEOG 432",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "EGEE 299",
+            "EGEE 495"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EME 444",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EGEE 401",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GEOG 438W",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EME 466",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

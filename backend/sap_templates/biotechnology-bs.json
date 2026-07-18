@@ -1,0 +1,305 @@
+{
+  "program_name": "Biotechnology, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biotechnology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MICRB 202",
+            "MICRB 203"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 251",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 202",
+            "CHEM 210"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 250",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 252",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 203",
+            "CHEM 212",
+            "CHEM 213"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 250",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOTC 489",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 421W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOTC 459",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 221",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 442",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 322",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOTC 416",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOTC 479",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOTC 400",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 410",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOTC 400",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 5.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

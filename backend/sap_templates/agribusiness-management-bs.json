@@ -1,0 +1,313 @@
+{
+  "program_name": "Agribusiness Management, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/agribusiness-management-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 170",
+            "RSOC 11",
+            "SOC 1"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 102"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AGBM 102",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AGSC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AGBM 106",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ACCTG 211",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGBM 338",
+          "credits": 3.0,
+          "gen_ed": "IL"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "SCM 200",
+            "STAT 200"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGBM 302",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ECON 104",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGBM 320",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MKTG 301",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "IST 110",
+            "MIS 204",
+            "MIS 250",
+            "SRA 111"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202D",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AGBM 308W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FIN 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MGMT 301",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 400",
+            "AGBM 495A",
+            "AGBM 495B",
+            "AGBM 496"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BA 243",
+            "BLAW 243",
+            "BA 342",
+            "BLAW 341"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SCM 301",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 400",
+            "AGBM 495A",
+            "AGBM 495B",
+            "AGBM 496"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 407",
+            "AGBM 408"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 2.0
+        }
+      ]
+    }
+  ]
+}

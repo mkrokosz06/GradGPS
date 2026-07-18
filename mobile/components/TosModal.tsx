@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity, Modal, StyleSheet } from "react-native";
-import { useRouter } from "expo-router";
+import { useRouter, useFocusEffect } from "expo-router";
 
 /**
  * Blocking "I agree to the Terms" modal shown right after account creation
@@ -17,19 +17,35 @@ export function TosModal({
 }) {
   const router = useRouter();
 
+  // A native Modal renders above the whole navigator, so a pushed legal page
+  // would load underneath it. Hide the modal while the user reads the page and
+  // bring it back when this screen regains focus — the gate itself stays.
+  const [viewingLegal, setViewingLegal] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      setViewingLegal(false);
+    }, [])
+  );
+
+  function openLegal(path: string) {
+    setViewingLegal(true);
+    router.push(path as any);
+  }
+
   return (
-    <Modal visible={visible} transparent animationType="fade" statusBarTranslucent>
+    <Modal visible={visible && !viewingLegal} transparent animationType="fade" statusBarTranslucent>
       <View style={styles.backdrop}>
         <View style={styles.card}>
           <Text style={styles.title}>Before you continue</Text>
           <Text style={styles.body}>
             GradGPS is a student-built planning tool and is not official academic advising.
             By continuing, you agree to our{" "}
-            <Text style={styles.link} onPress={() => router.push("/tos" as any)}>
+            <Text style={styles.link} onPress={() => openLegal("/tos")}>
               Terms of Service
             </Text>{" "}
             and{" "}
-            <Text style={styles.link} onPress={() => router.push("/privacy" as any)}>
+            <Text style={styles.link} onPress={() => openLegal("/privacy")}>
               Privacy Policy
             </Text>
             .

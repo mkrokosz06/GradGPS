@@ -1,0 +1,310 @@
+{
+  "program_name": "African Studies, B.A.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.A.",
+  "total_credits": 126.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/african-studies-ba/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AFR 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LA 83",
+          "credits": 1.5
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language Level 1",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AFR 105",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language Level 2",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AFR 191",
+            "HIST 191"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language Level 3",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AFR 192",
+            "HIST 192"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LA 283",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Major Course from Additional Course List AFR 4XX",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "AFR 4XX",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Major Course from Additional Course List AFR 4XX",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Major Course from Additional Course List AFR 4XX",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

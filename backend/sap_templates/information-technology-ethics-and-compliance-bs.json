@@ -1,0 +1,302 @@
+{
+  "program_name": "Information Technology Ethics and Compliance, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/information-sciences-technology/information-technology-ethics-compliance-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IEC 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "IST 140",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SRA 111",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IEC 200",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 22",
+          "credits": 3.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "IST 130",
+          "credits": 3.0,
+          "gen_ed": "GA"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 210",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "DS 200"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CYBER 221",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IST 234N",
+          "credits": 3.0,
+          "gen_ed": "GH"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SRA 231",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHIL 107",
+            "PHIL 119"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GH"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "IST 235",
+          "credits": 3.0,
+          "gen_ed": "US"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IEC 300",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ETI 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ETI 302",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOC 3",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 431",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IST 432",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IEC 320W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SU",
+      "credits": 1.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 495",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "DS 435",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IST 452",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IST 489",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 440W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SRA 471",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IST 402",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Application Focus Area 4XX",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

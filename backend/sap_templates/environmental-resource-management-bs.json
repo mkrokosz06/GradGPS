@@ -1,0 +1,316 @@
+{
+  "program_name": "Environmental Resource Management, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 121.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/environmental-resource-management-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 102"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ERM 151",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "CAS 137H",
+            "ENGL 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 111",
+            "MATH 141"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 220W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 102",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 138T",
+            "ENGL 138T"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 240",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 202",
+            "CHEM 210"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 250"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 260",
+            "GEOG 160"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ERM 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ASM 327",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOSC 303",
+            "GEOSC 1"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CED 201",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ERM 300",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ERM 412",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 450",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ERM 413W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

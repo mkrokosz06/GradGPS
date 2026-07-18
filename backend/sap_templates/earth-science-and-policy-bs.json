@@ -1,0 +1,341 @@
+{
+  "program_name": "Earth Science and Policy, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/earth-science-policy-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOSC 1",
+            "GEOSC 20"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 83",
+            "MATH 110",
+            "MATH 140",
+            "MATH 140G"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "EMSC 100S",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 111",
+            "MATH 141",
+            "MATH 141G"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Elective (2 cr needed if schedule MATH 111)",
+          "credits": 3.0,
+          "codes": [
+            "MATH 111"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "PLSC 1",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 250"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "ECON 102",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "BIOL 114",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "BIOL 115",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHIL 118",
+            "PHIL 133N",
+            "METEO 133N"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GH"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 126",
+            "GEOG 326"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOSC 201",
+            "GEOSC 202",
+            "GEOSC 203",
+            "GEOSC 204"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CED 201",
+            "EBF 200"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOSC 201",
+            "GEOSC 202",
+            "GEOSC 203",
+            "GEOSC 204"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GEOG 364",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EARTH 402",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EARTH 400",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EARTH 495",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 401",
+            "GEOSC 210",
+            "EME 210",
+            "EBF 472"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOSC 450",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

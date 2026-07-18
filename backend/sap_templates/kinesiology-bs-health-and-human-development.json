@@ -1,0 +1,279 @@
+{
+  "program_name": "Kinesiology, B.S. (Health and Human Development)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/health-human-development/kinesiology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KINES 101",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 26",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 250",
+            "SCM 200"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KINES 200",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 295B",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 321",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KINES 201",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 250",
+            "PHYS 150"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 345",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 267",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 341",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 350",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 367",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 368",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 401",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 360",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 456",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KINES 366",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 395A",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 400",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 464",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "KINES 468W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KINES 495A",
+          "credits": 12.0
+        }
+      ]
+    }
+  ]
+}

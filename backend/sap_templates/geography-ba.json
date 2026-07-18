@@ -1,0 +1,294 @@
+{
+  "program_name": "Geography, B.A.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.A.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/geography-ba/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMSC 100S",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language level 1",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 210",
+            "GEOG 220",
+            "GEOG 230",
+            "GEOG 260"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 4.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language Level 2",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 220",
+            "GEOG 210",
+            "GEOG 230",
+            "GEOG 260"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language Level 3",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 230",
+            "GEOG 210",
+            "GEOG 220",
+            "GEOG 260"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 260",
+            "GEOG 210",
+            "GEOG 220",
+            "GEOG 230"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 364",
+            "GEOG 308"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOG 390",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOG 301",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOG 493",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 4.0
+        }
+      ]
+    }
+  ]
+}

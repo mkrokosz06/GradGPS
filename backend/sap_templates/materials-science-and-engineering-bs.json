@@ -1,0 +1,353 @@
+{
+  "program_name": "Materials Science and Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 138.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/materials-science-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140G"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "EMSC 100S",
+            "CAS 100"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "IL",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141G"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATSE 112",
+            "CHEM 112"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATSE 219",
+            "CMPSC 200"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 202",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATSE 203",
+            "ENGL 202C"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATSE 400",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 430",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 436",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 460",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "US",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATSE 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 413",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 419",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 492W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATSE 462",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 19.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "IE 424",
+            "STAT 401"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATSE 493W",
+            "MATSE 494W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATSE 493W",
+            "MATSE 494W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

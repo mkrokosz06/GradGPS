@@ -1,0 +1,337 @@
+{
+  "program_name": "Architecture, B.Arch.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.Arch.",
+  "total_credits": 165.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/architecture-barch/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 121",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 131",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ARTH 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 15A",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 122",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 132",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ARTH 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "AE 210",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 203",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 210",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 231",
+          "credits": 6.0
+        },
+        {
+          "type": "course",
+          "code": "AE 421",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "AE 422",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 204",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 232",
+          "credits": 6.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 311W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 380",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ARCH 317",
+            "ARCH 312"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 331",
+          "credits": 6.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 332",
+          "credits": 6.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 381",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 480",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 491",
+          "credits": 6.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 499A",
+          "credits": 6.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 499B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 499C",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 5,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 451",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ARCH 491",
+          "credits": 6.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 5,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ARCH 492H",
+          "credits": 6.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

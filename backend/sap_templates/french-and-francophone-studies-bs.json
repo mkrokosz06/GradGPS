@@ -1,0 +1,305 @@
+{
+  "program_name": "French and Francophone Studies, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/french-francophone-studies-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 1",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 138T"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "LA 83",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 2",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 3",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "US",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 201",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 202",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LA 283",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 316",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 331",
+            "FR 332",
+            "FR 351",
+            "FR 352"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 401",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 332",
+            "FR 331",
+            "FR 351",
+            "FR 352"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 351",
+            "FR 331",
+            "FR 332",
+            "FR 352"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 402Y",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202B",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 430",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

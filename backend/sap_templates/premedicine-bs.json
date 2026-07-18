@@ -1,0 +1,330 @@
+{
+  "program_name": "Premedicine, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/premedicine-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 114",
+            "BIOL 115"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140B",
+            "MATH 140"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 230W",
+            "BIOL 234",
+            "BIOL 235W"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141B",
+            "MATH 141"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 210",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HPA 101",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 250"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "SOC 1",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "STAT 250",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 240W",
+            "BIOL 244",
+            "BIOL 245W"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 212",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 212",
+            "PHYS 251"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 213W",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHIL 432",
+            "BIOET 432"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 213",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 214",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 472",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 473",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 251",
+          "credits": 3.0,
+          "gen_ed": "GHW"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202D"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

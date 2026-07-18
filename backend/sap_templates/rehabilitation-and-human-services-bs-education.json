@@ -1,0 +1,278 @@
+{
+  "program_name": "Rehabilitation and Human Services, B.S. (Education)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 113.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/rehabilitation-human-services-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CI 185",
+            "SOC 1"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 300",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ANTH 21",
+            "BIOL 133",
+            "BIOL 110",
+            "BIOL 141",
+            "BISC 1",
+            "BISC 2",
+            "BISC 3",
+            "BISC 4"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PSYCH 212",
+            "HDFS 239",
+            "EDPSY 10"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 270",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOC 119N",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RHS 302",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "EDPSY 101",
+            "STAT 100",
+            "STAT 200"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 303",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 401",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 400W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 402",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RHS 403",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RHS 493",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 6.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RHS 495A",
+          "credits": 6.0
+        }
+      ]
+    }
+  ]
+}

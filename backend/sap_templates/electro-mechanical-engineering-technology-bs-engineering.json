@@ -1,0 +1,313 @@
+{
+  "program_name": "Electro-Mechanical Engineering Technology, B.S. (Engineering)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 132.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/electro-mechanical-engineering-technology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 105",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 26",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "PSU 8",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMET 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 117",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 120",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MET 111",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMET 222",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EGT 114",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "EET 275",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "IET 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 121",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 114",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EET 118",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 225",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "MATH 250",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EET 212W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 230",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 326",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 211",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMET 215",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 325",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 330",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 351",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "STS 233",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMET 405",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 410",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EMET 403",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "IET 333",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMET 440",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,326 @@
+{
+  "program_name": "Civil Engineering, B.S. (Engineering)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 127.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/civil-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CE 100S",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 211L",
+            "PHYS 211R"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GEOSC 1",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 212",
+            "PHYS 212L",
+            "PHYS 212R"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 200",
+            "CMPSC 201"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 213",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "IE 424",
+            "STAT 401"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CE 310",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 332",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 336",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 340",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 360",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CE 321",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 335",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CE 337",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CE 370",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

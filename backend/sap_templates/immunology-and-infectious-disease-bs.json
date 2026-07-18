@@ -1,0 +1,312 @@
+{
+  "program_name": "Immunology and Infectious Disease, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 126.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/immunology-infectious-disease-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "VBSC 50",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 220W",
+            "BIOL 240W"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 230W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 250",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 210",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
+            "CAS 100"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "VBSC 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 213",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 201",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 401",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MICRB 410",
+            "VBSC 410"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 240",
+            "STAT 200",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 202",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 402",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "VBSC 444",
+            "HPA 440"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "VBSC 435",
+            "VBSC 445",
+            "VBSC 451"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "VBSC 435",
+            "VBSC 445",
+            "VBSC 451"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "VBSC 418",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "VBSC 432",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "VBSC 448W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

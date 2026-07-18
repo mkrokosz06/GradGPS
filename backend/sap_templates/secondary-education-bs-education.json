@@ -1,0 +1,304 @@
+{
+  "program_name": "Secondary Education, B.S. (Education)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 125.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/secondary-education-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141B",
+            "STAT 200"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        },
+        {
+          "type": "course",
+          "code": "BIOL 220W",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 230W",
+            "BMB 251",
+            "BMB 252"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 295",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "HDFS 239",
+            "PSYCH 412"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 240W",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 250",
+            "PHYS 211"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 251",
+            "PHYS 212"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 427",
+            "ANTH 21",
+            "ANTH 460",
+            "GEOSC 204",
+            "GEOSC 424"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BMB 211",
+            "BMB 401",
+            "BMB 402",
+            "CHEM 202",
+            "CHEM 203",
+            "CHEM 210",
+            "CHEM 212",
+            "CHEM 213"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SCIED 411W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 300",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 403B",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BMB 211",
+            "BMB 401",
+            "BMB 402",
+            "CHEM 202",
+            "CHEM 203",
+            "CHEM 210",
+            "CHEM 212",
+            "CHEM 213"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SCIED 412",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 495C",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 300",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495E",
+          "credits": 15.0
+        }
+      ]
+    }
+  ]
+}

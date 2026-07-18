@@ -1,0 +1,303 @@
+{
+  "program_name": "Graphic Design, B.Des.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.Des.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/graphic-design-bdes/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15",
+            "ENGL 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GD 1S",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "GD 101",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 110",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GD 107",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 115N",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GD 201",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 210",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GD 211",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GD 202W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GD 207",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GD 307",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GD 300",
+            "GD 315",
+            "GD 320",
+            "GD 400"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 308",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "GD 495",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SU",
+      "credits": 1.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "GD 495",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "GD 300",
+            "GD 315",
+            "GD 320",
+            "GD 400"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 407",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 495",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "GD 300",
+            "GD 315",
+            "GD 320",
+            "GD 400"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "GD 409",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

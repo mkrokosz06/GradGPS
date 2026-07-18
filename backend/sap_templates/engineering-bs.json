@@ -1,0 +1,324 @@
+{
+  "program_name": "Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 127.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSU 8",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 200",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "EE 210",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 213",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ME 300",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 314",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EME 303",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ME 345",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGR 350",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 214",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "course",
+          "code": "EGEE 302",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "NUCE 401 (Engrg. Tech. Elective)",
+          "credits": 3.0,
+          "codes": [
+            "NUCE 401"
+          ]
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EE 485",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EGEE 437 (Engrg. Tech. Elective)",
+          "credits": 3.0,
+          "codes": [
+            "EGEE 437"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EGEE 438 (Engrg. Tech. Elective)",
+          "credits": 3.0,
+          "codes": [
+            "EGEE 438"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EGEE 441 (Engrg. Tech. Elective)",
+          "credits": 3.0,
+          "codes": [
+            "EGEE 441"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "ENGR 490W",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EE 488 (Engrg. Tech. Elective)",
+          "credits": 3.0,
+          "codes": [
+            "EE 488"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "EGEE 420",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGR 491W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

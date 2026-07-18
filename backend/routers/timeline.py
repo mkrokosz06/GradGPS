@@ -525,61 +525,55 @@ def _build_future_semesters(
 def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
     """Reflow matched SAP-template slots into future semesters.
 
-    Unsatisfied slots keep the template's ordering and per-semester groupings —
-    the published plan is already prerequisite-sequenced and credit-balanced —
-    while satisfied slots (already in the transcript) drop out and later
-    semesters shift earlier to fill the gap.  For a student with no transcript
-    this reproduces the official plan exactly; a partially-complete student sees
-    their remaining semesters pulled forward.  A required internship is lifted
-    into its own summer term between junior and senior year.
+    Unsatisfied slots keep the template's ordering, per-semester groupings, AND
+    each semester's own season (Fall / Spring / Summer) — the published plan is
+    already prerequisite-sequenced, credit-balanced, and correctly places summer
+    terms (internships, field camps).  Satisfied slots (in the transcript) drop
+    out and later semesters shift earlier.  For a student with no transcript this
+    reproduces the official plan exactly, summers included.
     """
-    future_term = _next_term(base_term)
+    def _cr(items):
+        return sum(_display_credits(it) for it in items)
 
-    # Group unsatisfied items by their template semester, preserving order.
-    groups: list[list[dict]] = []
+    # Group unsatisfied items by their template semester, preserving order and
+    # carrying the template semester's season.
+    groups: list[list] = []   # each: [season, [items]]
     cur_idx: object = object()   # sentinel so the first slot always opens a group
     for r in records:
         if r["satisfied"]:
             continue
         if r["sem_index"] != cur_idx:
-            groups.append([])
+            groups.append([r.get("season") or "FA", []])
             cur_idx = r["sem_index"]
-        groups[-1].append(r["item"])
-    groups = [g for g in groups if g]
+        groups[-1][1].append(r["item"])
+    groups = [g for g in groups if g[1]]
 
-    # Internship → its own summer term between junior and senior year.
-    internship_items = [it for g in groups for it in g if _is_internship(it)]
-    if internship_items:
-        groups = [[it for it in g if not _is_internship(it)] for g in groups]
-        groups = [g for g in groups if g]
-
-    # Merge-forward only the LIGHT fragments a partially-complete student leaves
-    # behind (a semester left with < _MERGE_MIN credits after finished courses
-    # drop out).  An on-track / no-transcript student's template semesters are
-    # all full, so nothing merges and the published plan is reproduced exactly.
-    def _cr(g):
-        return sum(_display_credits(it) for it in g)
-
-    merged: list[list[dict]] = []
-    for g in groups:
-        if merged and (_cr(merged[-1]) < _MERGE_MIN or _cr(g) < _MERGE_MIN) \
-                and _cr(merged[-1]) + _cr(g) <= _MAX_CREDITS:
-            merged[-1].extend(g)
+    # Merge-forward only the LIGHT Fall/Spring fragments a partially-complete
+    # student leaves behind (< _MERGE_MIN credits after finished courses drop).
+    # Summer terms are intentionally small (a lone internship) and never merged,
+    # and an on-track / no-transcript student's full semesters never merge — so
+    # the published plan is reproduced exactly.
+    merged: list[list] = []
+    for season, items in groups:
+        prev = merged[-1] if merged else None
+        if (prev and prev[0] != "SU" and season != "SU"
+                and (_cr(prev[1]) < _MERGE_MIN or _cr(items) < _MERGE_MIN)
+                and _cr(prev[1]) + _cr(items) <= _MAX_CREDITS):
+            prev[1].extend(items)
         else:
-            merged.append(list(g))
+            merged.append([season, list(items)])
     groups = merged
 
+    # Assign real calendar terms, following each semester's own season so a
+    # summer term lands in summer (not collapsed into the next Fall).
     semesters: list[dict] = []
-    internship_at = (len(groups) - 2) if internship_items else -1
-    placed = False
-    for idx, g in enumerate(groups):
-        if internship_items and not placed and idx >= max(0, internship_at):
-            semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
-            placed = True
-        semesters.append(_emit_semester(future_term, g))
-        future_term = _next_term(future_term)
-    if internship_items and not placed:
-        semesters.append(_emit_semester(_preceding_summer(future_term), internship_items))
+    cursor = base_term
+    for season, items in groups:
+        if season == "SU":
+            cursor = _preceding_summer(_next_term(cursor))   # the summer after `cursor`
+        else:
+            cursor = _next_term(cursor)                      # next Fall/Spring
+        semesters.append(_emit_semester(cursor, items))
 
     return semesters
 

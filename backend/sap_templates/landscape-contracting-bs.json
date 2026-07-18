@@ -1,0 +1,311 @@
+{
+  "program_name": "Landscape Contracting, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/landscape-contracting-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HORT 101",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PLANT 150S",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 14",
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 26",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LARCH 60",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 127",
+            "BIOL 110"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "SPAN 1",
+            "SPAN 2",
+            "SPAN 105"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BA 250",
+            "BA 304",
+            "HORT 455"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 137",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 120",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ACCTG 211",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 220",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ART 20",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 101",
+            "CHEM 130"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 138",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 269",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 270",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "TURF 100",
+            "TURF 235"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HORT 464",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 408",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PLANT 217",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENT 313",
+            "ENT 314",
+            "HORT 238",
+            "PPEM 300",
+            "PPEM 318"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202D",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HORT 466",
+          "credits": 5.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 131",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 410W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BLAW 243",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HORT 368",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "HORT 468",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MKTG 220",
+            "BA 303"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

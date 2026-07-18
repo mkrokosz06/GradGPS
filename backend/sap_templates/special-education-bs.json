@@ -1,0 +1,272 @@
+{
+  "program_name": "Special Education, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/special-education-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 200",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "EDPSY 10",
+            "EDPSY 11"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0,
+          "gen_ed": "GH"
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 395W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 401",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 410",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 415",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 418",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 425",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 404",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 412",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 454",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 495E",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 409A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 409B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 409C",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 495G",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 495D",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 495F",
+          "credits": 12.0
+        }
+      ]
+    }
+  ]
+}

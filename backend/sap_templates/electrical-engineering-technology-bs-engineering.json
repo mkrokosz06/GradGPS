@@ -1,0 +1,379 @@
+{
+  "program_name": "Electrical Engineering Technology, B.S. (Engineering)",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 154.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/electrical-engineering-technology-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPSC 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 105",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 22",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 26",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSU 8",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CMPET 117",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 120",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "EET 114",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EET 118",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 150",
+            "PHYS 250",
+            "PHYS 211"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 151",
+            "PHYS 251",
+            "PHYS 212"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 212W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 213W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "EET 311",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 22.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 312",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CMPET 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 212W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EET 213W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ENGR 320Y",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 22.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EET 331",
+          "credits": 4.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective CMPET 401 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "CMPET 401"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective CMPET 402 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "CMPET 402"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "System Elective EET 433 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 433"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Electronics Elective EET 413 (even years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 413"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective EET 409 (even years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 409"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EET 419",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGR 320Y",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "EET 400-Level Elective",
+          "credits": 4.0,
+          "codes": [
+            "EET 400"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 21.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EET 420W",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective CMPET 401 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "CMPET 401"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective CMPET 402 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "CMPET 402"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "System Elective EET 433 (odd years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 433"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Electronics Elective EET 413 (even years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 413"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "GEET Technical Elective EET 409 (even years)",
+          "credits": 3.0,
+          "codes": [
+            "EET 409"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

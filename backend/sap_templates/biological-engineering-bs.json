@@ -1,0 +1,336 @@
+{
+  "program_name": "Biological Engineering, B.S.",
+  "subplan": null,
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 129.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/engineering/biological-engineering-bs/",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BE 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "course",
+          "code": "EDSGN 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141E"
+          ],
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "course",
+          "code": "EMCH 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EMCH 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EMCH 213",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ME 300",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BE 301",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BE 308",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BE 391",
+          "credits": 2.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CE 360",
+            "ME 320"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 240",
+            "STAT 250",
+            "STAT 318",
+            "STAT 401",
+            "STAT 418",
+            "IE 424"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BE 302",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "BE 305",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BE 392",
+          "credits": 2.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BE 303",
+            "BE 306",
+            "BE 307"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BE 303",
+            "BE 306",
+            "BE 307"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BE 404",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BE 460W",
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BE 4XX-Biological Engineering Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BE 466W",
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "BE 4XX-Biological Engineering Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}
