@@ -150,7 +150,12 @@ def parse_plangrid(html: str) -> list[dict]:
     def _yt(td):
         header = td.get("header", "") or " ".join(td.get("headers", []) or [])
         m = re.search(r"year(\d+)_Term(\d+)", header)
-        return (int(m.group(1)), int(m.group(2))) if m else None
+        if m:
+            return (int(m.group(1)), int(m.group(2)))
+        # Single-column variant: one column per YEAR, header "yearN undefinedcodecol"
+        # (no Fall/Spring split). Use term = -1 as a "whole year" marker.
+        m = re.search(r"year(\d+)\s+undefined", header)
+        return (int(m.group(1)), -1) if m else None
 
     sems: dict[tuple[int, int], list[dict]] = {}
     for tr in table.select("tbody tr"):
@@ -181,16 +186,32 @@ def parse_plangrid(html: str) -> list[dict]:
             slot = _classify(text, _cell_codes(td, text), credits)
             sems.setdefault(yt, []).append(slot)
 
-    seasons = {0: "FA", 1: "SP"}
-    out = []
-    for (year, term) in sorted(sems):
-        out.append({
-            "year": year + 1,
-            "term_season": seasons.get(term, "FA"),
-            "credits": round(sum(float(s.get("credits", 0) or 0) for s in sems[(year, term)]), 1),
-            "slots": sems[(year, term)],
-        })
-    return out
+    def _cr(s):
+        return float(s.get("credits", 0) or 0)
+
+    def _emit(year, term, slots):
+        return {"year": year + 1, "term_season": {0: "FA", 1: "SP"}.get(term, "FA"),
+                "credits": round(sum(_cr(s) for s in slots), 1), "slots": slots}
+
+    # Single-column (year-level) plan: split each year's ordered course list into
+    # two ~half-credit Fall/Spring semesters, preserving order.
+    if any(term == -1 for (year, term) in sems):
+        out = []
+        for year in sorted({y for (y, _) in sems}):
+            slots = sems[(year, -1)]
+            half = sum(_cr(s) for s in slots) / 2
+            acc, fall, spring = 0.0, [], []
+            for s in slots:
+                if acc < half:
+                    fall.append(s); acc += _cr(s)
+                else:
+                    spring.append(s)
+            for term, group in ((0, fall), (1, spring)):
+                if group:
+                    out.append(_emit(year, term, group))
+        return out
+
+    return [_emit(year, term, sems[(year, term)]) for (year, term) in sorted(sems)]
 
 
 _SITEMAP = "https://bulletins.psu.edu/sitemap.xml"
