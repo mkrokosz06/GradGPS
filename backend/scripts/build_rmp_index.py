@@ -12,6 +12,7 @@ Table written: rmp_professor_courses
 """
 
 import asyncio
+import json
 import re
 import sys
 import os
@@ -29,6 +30,13 @@ from db import get_dynamodb
 SCHOOL_ID = "U2Nob29sLTc1OA=="   # Penn State (School-758)
 RMP_GRAPHQL = "https://www.ratemyprofessors.com/graphql"
 TABLE_NAME  = "rmp_professor_courses"
+
+# Pagination checkpoint — lets a rate-limited run resume instead of restarting.
+# Deleted automatically on a clean, complete crawl.
+CHECKPOINT_PATH = os.path.join(os.path.dirname(__file__), ".rmp_index_checkpoint.json")
+
+# Escalating sleeps for HTTP 429 before giving up on a request
+RETRY_SLEEPS = [10, 30, 60, 120, 300]
 
 HEADERS = {
     "User-Agent":    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
@@ -127,12 +135,14 @@ query GetTeacherCourses($id: ID!) {
 # ---------------------------------------------------------------------------
 
 async def _gql(client: httpx.AsyncClient, query: str, variables: dict) -> dict:
-    """Execute one GraphQL request, retrying once on HTTP 429."""
+    """Execute one GraphQL request, backing off on HTTP 429 (10s→300s)."""
     payload = {"query": query, "variables": variables}
     resp = await client.post(RMP_GRAPHQL, json=payload, headers=HEADERS, timeout=15)
-    if resp.status_code == 429:
-        print("  [rate-limit] sleeping 5 s then retrying …")
-        await asyncio.sleep(5)
+    for sleep_s in RETRY_SLEEPS:
+        if resp.status_code != 429:
+            break
+        print(f"  [rate-limit] sleeping {sleep_s} s then retrying …", flush=True)
+        await asyncio.sleep(sleep_s)
         resp = await client.post(RMP_GRAPHQL, json=payload, headers=HEADERS, timeout=15)
     resp.raise_for_status()
     return resp.json()
@@ -225,13 +235,41 @@ def write_professor_courses(
 
 
 # ---------------------------------------------------------------------------
+# Checkpoint
+# ---------------------------------------------------------------------------
+
+def load_checkpoint() -> dict | None:
+    try:
+        with open(CHECKPOINT_PATH) as f:
+            return json.load(f)
+    except (OSError, json.JSONDecodeError):
+        return None
+
+
+def save_checkpoint(after: str | None, page_num: int, professors: int, entries: int) -> None:
+    with open(CHECKPOINT_PATH, "w") as f:
+        json.dump(
+            {"after": after, "page_num": page_num,
+             "professors": professors, "entries": entries},
+            f,
+        )
+
+
+def clear_checkpoint() -> None:
+    try:
+        os.remove(CHECKPOINT_PATH)
+    except OSError:
+        pass
+
+
+# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
 async def main() -> None:
-    print("Fetching all PSU professors from RateMyProfessors…")
+    print("Fetching all PSU professors from RateMyProfessors…", flush=True)
     print(f"School ID: {SCHOOL_ID}")
-    print(f"Writing to DynamoDB table: {TABLE_NAME}\n")
+    print(f"Writing to DynamoDB table: {TABLE_NAME}\n", flush=True)
 
     db    = get_dynamodb()
     table = db.Table(TABLE_NAME)
@@ -241,15 +279,32 @@ async def main() -> None:
     page_num         = 0
     after: str | None = None
 
+    ckpt = load_checkpoint()
+    if ckpt:
+        after            = ckpt.get("after")
+        page_num         = int(ckpt.get("page_num") or 0)
+        total_professors = int(ckpt.get("professors") or 0)
+        total_entries    = int(ckpt.get("entries") or 0)
+        print(f"[resume] checkpoint found — resuming after page {page_num} "
+              f"({total_professors} professors, {total_entries} pairs)\n", flush=True)
+
     async with httpx.AsyncClient() as client:
         while True:
             page_num += 1
 
-            # --- fetch one page of professors ---
-            try:
-                professors, has_next, end_cursor = await fetch_professor_page(client, after)
-            except Exception as exc:
-                print(f"[page-err] page {page_num}: {exc} — aborting pagination")
+            # --- fetch one page of professors (retry the whole page on failure) ---
+            professors = None
+            for attempt in range(3):
+                try:
+                    professors, has_next, end_cursor = await fetch_professor_page(client, after)
+                    break
+                except Exception as exc:
+                    print(f"[page-err] page {page_num} attempt {attempt + 1}: {exc}", flush=True)
+                    await asyncio.sleep(60)
+            if professors is None:
+                print(f"[abort] page {page_num} failed repeatedly — checkpoint saved, "
+                      f"rerun to resume", flush=True)
+                save_checkpoint(after, page_num - 1, total_professors, total_entries)
                 break
 
             if not professors:
@@ -282,18 +337,22 @@ async def main() -> None:
             if page_num % 5 == 0:
                 print(
                     f"  [progress] page {page_num} | professors so far: {total_professors}"
-                    f" | pairs written: {total_entries}"
+                    f" | pairs written: {total_entries}",
+                    flush=True,
                 )
 
             if not has_next:
+                clear_checkpoint()
                 break
 
             after = end_cursor
-            await asyncio.sleep(0.3)  # be polite to the RMP servers
+            save_checkpoint(after, page_num, total_professors, total_entries)
+            await asyncio.sleep(1.0)  # be polite to the RMP servers
 
     print(
         f"\nDone. Indexed {total_entries} professor-course pairs"
-        f" across {total_professors} professors."
+        f" across {total_professors} professors.",
+        flush=True,
     )
 
 

@@ -18,7 +18,11 @@ python scripts/setup_tables.py    # create tables/buckets
 python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
 python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
 python scripts/seed_matthew.py    # seed test user + transcript (also patches ETI catalog)
+python scripts/build_rmp_index.py # rebuild RateMyProfessors course→professor index (~20-40 min)
 ```
+> **RMP index:** `/courses/{code}/professors` reads the `rmp_professor_courses` table. If it's
+> empty (wiped by a Docker restart), the app shows no professors for any course — rebuild with
+> `build_rmp_index.py` above.
 `seed_matthew.py` accepts an optional PDF path: `python scripts/seed_matthew.py path/to/transcript.pdf`
 
 > **Gen ed data:** `rebuild_gen_ed.py` loads the eight knowledge-domain / quantification / cultures
