@@ -770,7 +770,13 @@ def get_timeline(user_id: str = Depends(get_user_id)):
 
     taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
     requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes)
-    if not requirement_rows:
+
+    # A published-plan template renders the timeline on its own (it uses the
+    # transcript + gen-ed audit, not the major's requirement rows), so a major
+    # with a template but thin/empty catalog requirements must NOT 404 — only a
+    # major with neither is a real dead end.
+    template = load_template(major, subplan)
+    if not requirement_rows and not template:
         raise HTTPException(
             status_code=404,
             detail=f"No requirements found for major: {major}. "
@@ -800,7 +806,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # prerequisite-sequenced, complete to 120 cr) and reflow the student's real
     # state onto it.  Every major WITHOUT a template falls back to the Layer 1
     # credit-band packer, exactly as before — so only templated majors change.
-    template = load_template(major, subplan)
+    # (`template` was loaded above, before the requirement-rows 404 check.)
     if template:
         records = match_template(
             template,
