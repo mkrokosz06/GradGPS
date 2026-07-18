@@ -19,6 +19,54 @@ import {
   type ProfessorRating,
 } from "../../services/courseService";
 
+// ── Description (first 2 sentences + expand) ─────────────────────────────────
+
+function splitSentences(text: string): string[] {
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+  // Split on sentence-ending punctuation followed by whitespace + a capital letter
+  // (or end of string). Keeps abbreviations like "U.S." from over-splitting when
+  // the next token isn't capitalized as a new sentence.
+  const parts = trimmed.match(/[^.!?]+[.!?]+(?:\s+|$)|[^.!?]+$/g);
+  if (!parts) return [trimmed];
+  return parts.map((s) => s.trim()).filter(Boolean);
+}
+
+function CourseDescription({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const sentences = useMemo(() => splitSentences(text), [text]);
+  const needsExpand = sentences.length > 2;
+  const preview = sentences.slice(0, 2).join(" ");
+
+  // Reset when navigating to a different course's description
+  useEffect(() => {
+    setExpanded(false);
+  }, [text]);
+
+  return (
+    <View>
+      <Text style={{ fontSize: 13, color: "#64748b", lineHeight: 20 }}>
+        {expanded || !needsExpand ? text : preview}
+      </Text>
+      {needsExpand ? (
+        <TouchableOpacity
+          onPress={() => setExpanded((e) => !e)}
+          activeOpacity={0.7}
+          hitSlop={{ top: 8, bottom: 8, left: 4, right: 4 }}
+          style={{ marginTop: 6, flexDirection: "row", alignItems: "center" }}
+        >
+          <Text style={{ fontSize: 12, color: "#94a3b8", marginRight: 4 }}>
+            {expanded ? "▾" : "▸"}
+          </Text>
+          <Text style={{ fontSize: 13, fontWeight: "600", color: "#1a3a6b" }}>
+            {expanded ? "Show less" : "Read more"}
+          </Text>
+        </TouchableOpacity>
+      ) : null}
+    </View>
+  );
+}
+
 // ── Rating bar ────────────────────────────────────────────────────────────────
 
 function RatingBar({ value, max = 5 }: { value: number; max?: number }) {
@@ -339,9 +387,7 @@ export default function CourseDetailScreen() {
                 </View>
               )}
               {detail.description ? (
-                <Text style={{ fontSize: 13, color: "#64748b", lineHeight: 20 }}>
-                  {detail.description}
-                </Text>
+                <CourseDescription text={detail.description} />
               ) : null}
             </View>
           ) : null}
