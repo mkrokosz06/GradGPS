@@ -466,7 +466,30 @@ def write_txt(df, path):
 
 # ── MAIN ─────────────────────────────────────────────────────────────────────
 
-def main():
+def main(argv=None):
+    import argparse
+
+    parser = argparse.ArgumentParser(description="Scrape PSU bulletin → PSU_Major_Requirements.xlsx")
+    parser.add_argument(
+        "--program",
+        action="append",
+        default=[],
+        help="Only scrape programs whose name contains this substring (repeatable). "
+             "Example: --program 'Enterprise Technology'",
+    )
+    parser.add_argument(
+        "--max",
+        type=int,
+        default=0,
+        help="Stop after N University Park programs (0 = no limit)",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="List matching programs and exit without scraping requirements",
+    )
+    args = parser.parse_args(argv)
+
     # Repo root (two levels up from backend/scripts/) — load_catalog.py reads the
     # Excel output from there
     output_dir = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", ".."))
@@ -480,10 +503,25 @@ def main():
         print("No programs found.")
         return
 
+    if args.program:
+        needles = [n.lower() for n in args.program]
+        programs = [
+            p for p in programs
+            if any(n in p["name"].lower() for n in needles)
+        ]
+        print(f"  Filtered to {len(programs)} programs matching {args.program!r}")
+
+    if args.dry_run:
+        for p in programs:
+            print(f"  - {p['name']}  ({p['college']})")
+        print(f"Total: {len(programs)}")
+        return
+
     all_rows    = []
     all_summary = []
 
     skipped = 0
+    up_scraped = 0
     for i, prog in enumerate(programs, 1):
         print(f"[{i:>3}/{len(programs)}] {prog['name'][:65]}", end="", flush=True)
         rows, meta = scrape_program_requirements(prog)
@@ -497,8 +535,13 @@ def main():
 
         all_rows.extend(rows)
         all_summary.append(meta)
+        up_scraped += 1
         print(f"  OK {len(rows)} courses")
         time.sleep(0.35)
+
+        if args.max and up_scraped >= args.max:
+            print(f"\nReached --max {args.max} University Park programs")
+            break
 
     print(f"\nSkipped {skipped} non-University Park programs")
 

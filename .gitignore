@@ -15,6 +15,10 @@ build/
 *.env
 # Keep the example template
 !.env.example
+!agents/runtime/.env.example
+
+# GradGPS local agent work products
+agents/.work/
 
 # Large data files
 PSU_Major_Requirements.xlsx

@@ -1,0 +1,2 @@
+# Dev / agent test dependencies (not required for uvicorn runtime)
+pytest>=8.0.0
