@@ -1,11 +1,11 @@
 # Timeline SAP Hybrid — Design & Implementation Plan
 
 **Status:** Layer 1 (credit-band packing) live for all majors. Layer 2 (SAP hybrid) live
-for **178 UP majors** — 85% of the 208 UP bachelor-degree programs — via templates
+for **180 UP majors** — 87% of the 208 UP bachelor-degree programs — via templates
 scraped from the bulletin, with match + reflow wired into `get_timeline`,
-template-presence gated, and the Layer 1 packer as fallback for the rest. Phases 0-4b
-done. Remaining tail: 3 SAP pages that don't parse (single-column grid variant ×2,
-one 96cr accelerated program) + ~27 bachelor's with no published SAP.
+template-presence gated, and the Layer 1 packer as fallback for the rest. Phases 0-4c
+done (incl. single-column grid support). Remaining tail: 1 SAP page that doesn't fit
+(Premedical-Medical, a 96cr accelerated program) + ~27 bachelor's with no published SAP.
 **Scope:** University Park (main campus) majors only
 **Owner file:** `backend/routers/timeline.py` (audit engine untouched)
 
@@ -331,12 +331,14 @@ means every non-templated major keeps its exact Layer 1 behavior.
 > write) then drop `--dry-run` to write. Pages cache under `scripts/.sap_cache/`. A new
 > catalog year is a re-scrape; the gate re-flags anything that drifts.
 
-### Phase 4c — Remaining polish (optional, not blocking)
-1. The single-column CourseLeaf grid variant (`yearN undefinedcodecol`) — 2 programs.
+### Phase 4c — Remaining polish
+1. ✅ Single-column CourseLeaf grid variant (`yearN undefinedcodecol`) — parser detects it
+   and splits each year's ~30cr course list into two ~15cr Fall/Spring semesters.
+   Recovered Energy and Sustainability Policy (B.A. + B.S.).
 2. Options/subplans that have their own distinct SAP pages (currently one template per
-   base major; subplan-specific plans would key on `subplan`).
+   base major; subplan-specific plans would key on `subplan`). *(open)*
 3. Engineering ETM-gate / tiered-technical-elective annotations are captured as pools
-   today; richer modelling (secondary list scrapes) would sharpen those majors.
+   today; richer modelling (secondary list scrapes) would sharpen those majors. *(open)*
 
 ### Phase 5 — Hand-review the tail + rollout (ongoing, bounded)
 1. Hand-review the flagged minority (~50-75, mostly Engineering + heavy-option majors).
