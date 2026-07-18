@@ -190,7 +190,11 @@ def parse_plangrid(html: str) -> list[dict]:
         return float(s.get("credits", 0) or 0)
 
     def _emit(year, term, slots):
-        return {"year": year + 1, "term_season": {0: "FA", 1: "SP"}.get(term, "FA"),
+        # Term index → season. CourseLeaf plans that include a summer term use
+        # Term2 (Fall=0, Spring=1, Summer=2); mislabeling it Fall creates a
+        # duplicate-Fall semester and dumps the summer internship/field course
+        # into a phantom Fall.
+        return {"year": year + 1, "term_season": {0: "FA", 1: "SP", 2: "SU"}.get(term, "FA"),
                 "credits": round(sum(_cr(s) for s in slots), 1), "slots": slots}
 
     # Single-column (year-level) plan: split each year's ordered course list into

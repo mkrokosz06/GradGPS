@@ -242,6 +242,27 @@ def test_reflow_no_semester_over_band():
         assert s["credits"] <= _MAX_CREDITS, f"{s['term']} = {s['credits']}cr"
 
 
+def test_reflow_places_summer_term_in_summer():
+    # A template semester tagged SU (e.g. a summer internship) must land in a
+    # real summer term between the surrounding Fall/Spring — not collapse into
+    # the next Fall, and not be merged away despite being light.
+    records = [
+        {"sem_index": 0, "season": "FA", "satisfied": False,
+         "item": {"course_code": "A", "credits": 15}},
+        {"sem_index": 1, "season": "SP", "satisfied": False,
+         "item": {"course_code": "B", "credits": 15}},
+        {"sem_index": 2, "season": "SU", "satisfied": False,
+         "item": {"course_code": "INTERN 495", "credits": 1}},
+        {"sem_index": 3, "season": "FA", "satisfied": False,
+         "item": {"course_code": "C", "credits": 15}},
+    ]
+    sems = _reflow_template(records, "SP 2026")
+    assert [s["term"] for s in sems] == ["FA 2026", "SP 2027", "SU 2027", "FA 2027"]
+    # The light summer term survives (not merged) and holds only the internship.
+    su = [s for s in sems if s["term"].startswith("SU")]
+    assert len(su) == 1 and [c["course_code"] for c in su[0]["courses"]] == ["INTERN 495"]
+
+
 def test_reflow_drops_satisfied_and_merges_light_fragments():
     # A partial student whose finished courses are scattered across early
     # template semesters: those courses drop, and the light remnants merge

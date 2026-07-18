@@ -118,6 +118,29 @@ _FIXTURE_SINGLE = """
 """
 
 
+def test_summer_term2_is_labeled_summer():
+    # A year with a Summer column (Term2) — the summer course must be tagged SU,
+    # not collapsed into a duplicate Fall.
+    html = """
+    <table class="sc_plangrid"><tbody>
+    <tr><td class="codecol" header="year2 year2_Term0_codecol">
+          <a onclick="return showCourse(this, 'ETI 300');">ETI 300</a></td>
+        <td class="hourscol" header="year2 year2_Term0_hourscol">3</td></tr>
+    <tr><td class="codecol" header="year2 year2_Term1_codecol">
+          <a onclick="return showCourse(this, 'ETI 302');">ETI 302</a></td>
+        <td class="hourscol" header="year2 year2_Term1_hourscol">3</td></tr>
+    <tr><td class="codecol" header="year2 year2_Term2_codecol">
+          <a onclick="return showCourse(this, 'IST 495');">IST 495</a></td>
+        <td class="hourscol" header="year2 year2_Term2_hourscol">1</td></tr>
+    </tbody></table>
+    """
+    sems = parse_plangrid(html)
+    seasons = {s["term_season"] for s in sems}
+    assert seasons == {"FA", "SP", "SU"}
+    su = next(s for s in sems if s["term_season"] == "SU")
+    assert su["slots"][0]["code"] == "IST 495" and su["credits"] == 1
+
+
 def test_single_column_year_splits_into_two_semesters():
     sems = parse_plangrid(_FIXTURE_SINGLE)
     assert len(sems) == 2
