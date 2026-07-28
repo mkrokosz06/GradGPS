@@ -116,6 +116,19 @@ def build_gen_ed_satisfied(gen_ed_result: dict) -> dict[str, bool]:
     return out
 
 
+def build_used_codes(*audit_results: dict) -> set[str]:
+    """Base codes of every course an audit consumed (major and/or gen-ed result).
+    Surplus detection subtracts these so a course that filled a requirement the
+    template doesn't itemize can't also count toward a free-elective slot."""
+    used: set[str] = set()
+    for res in audit_results:
+        for g in (res or {}).get("groups", []):
+            for item in g.get("items", []):
+                if item.get("status") in ("done", "in_progress"):
+                    used.add(_base(item.get("course_code", "")))
+    return used
+
+
 # ── Slot → schedulable timeline item ─────────────────────────────────────────
 
 def _dedupe_crosslisted(codes: list[str]) -> list[str]:
@@ -176,12 +189,85 @@ def slot_to_item(slot: dict) -> dict:
             "pool_needed_credits": int(credits) if float(credits).is_integer() else credits}
 
 
+# ── Un-anchored pools & free electives ───────────────────────────────────────
+
+# PSU world-language subject codes (PSU-specific — add to the multi-school rework
+# list).  Deliberately conservative: a dept missing here just leaves the slot
+# scheduled (today's behavior), while a wrong entry would falsely satisfy it.
+_WORLD_LANGUAGE_DEPTS = {
+    "ARAB", "ASL", "CHNS", "FR", "GER", "GREEK", "HEBR", "IT", "JAPNS", "KOR",
+    "LATIN", "PORT", "RUS", "SPAN", "UKR",
+}
+
+
+def _dept(course: dict) -> str:
+    return _norm(course.get("course_code", "")).split(" ")[0]
+
+
+def _course_credits(course: dict) -> float:
+    return float(course.get("credits_earned") or course.get("credits") or 3)
+
+
+def _leftover_courses(transcript_courses: list[dict], consumed: set[str],
+                      used_codes: set[str]) -> list[dict]:
+    """Transcript courses neither a template slot nor an audit consumed — the
+    surplus available for world-language slots and free electives."""
+    claimed = consumed | used_codes
+    out = []
+    for c in transcript_courses:
+        if c.get("status") not in ("done", "in_progress"):
+            continue
+        toks = _equivalents(c.get("course_code", ""))
+        if any(_codes_match(t, u) for t in toks for u in claimed):
+            continue
+        out.append(c)
+    return out
+
+
+def _assign_world_language(records: list[dict], leftovers: list[dict]) -> None:
+    """Satisfy un-anchored world-language pool slots, one leftover language
+    course per slot in plan order.  A language requirement is one language's
+    sequence, so only the dept the student has the most courses in is used
+    (most courses, then alphabetical, for determinism)."""
+    slots = [r for r in records if not r["satisfied"]
+             and r["slot"].get("type") == "pool"
+             and r["slot"].get("ref") == "world_language"]
+    by_dept: dict[str, list[dict]] = {}
+    for c in leftovers:
+        if _dept(c) in _WORLD_LANGUAGE_DEPTS:
+            by_dept.setdefault(_dept(c), []).append(c)
+    if not slots or not by_dept:
+        return
+    dept = sorted(by_dept, key=lambda d: (-len(by_dept[d]), d))[0]
+    for rec, course in zip(slots, by_dept[dept]):
+        rec["satisfied"], rec["item"] = True, None
+        rec["matched_code"] = _norm(course.get("course_code", ""))
+        leftovers.remove(course)   # its credits can't also count as elective
+
+
+def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
+    """Satisfy free-elective slots from the surplus-credit pool, in plan order.
+    Purely credit-count based: any unclaimed course is by definition a free
+    elective, whatever its dept."""
+    pool = sum(_course_credits(c) for c in leftovers)
+    for rec in records:
+        if rec["satisfied"] or rec["slot"].get("type") != "elective":
+            continue
+        need = float(rec["slot"].get("credits", 3) or 3)
+        if pool + 1e-9 >= need:
+            pool -= need
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = f"{need:g} surplus credits"
+
+
 # ── Match ────────────────────────────────────────────────────────────────────
 
 def match_template(
     template: dict,
     taken: set[str],
     gen_ed_satisfied: dict[str, bool] | None = None,
+    transcript_courses: list[dict] | None = None,
+    used_codes: set[str] | None = None,
 ) -> list[dict]:
     """Walk the template in order and produce one record per slot:
 
@@ -196,9 +282,13 @@ def match_template(
         reports that category met.  A general (category-less) gen-ed slot is never
         pre-satisfied (there's no single course to point at).
       * pool with anchor `codes` (e.g. an accounting elective anchored ACCTG 403W)
-        — satisfied if an anchor is taken.  Un-anchored pools (world language,
-        business breadth) and electives are always scheduled — the transcript
-        doesn't let us detect their completion cheaply (a known PoC limitation).
+        — satisfied if an anchor is taken.
+      * world-language pools and free electives (only when `transcript_courses`
+        is passed) — satisfied from LEFTOVER courses: transcript courses neither
+        a template slot nor an audit (`used_codes`, see build_used_codes)
+        consumed.  Language slots take one leftover course from a
+        `_WORLD_LANGUAGE_DEPTS` dept each; elective slots draw on the surplus
+        credit pool.  Other un-anchored pools (business breadth) stay scheduled.
     """
     gen_ed_satisfied = gen_ed_satisfied or {}
     consumed: set[str] = set()
@@ -219,7 +309,7 @@ def match_template(
             cat = slot.get("category")
             if cat and gen_ed_satisfied.get(_norm(cat)):
                 satisfied, matched = True, cat
-        # elective: never auto-satisfied
+        # elective / un-anchored world_language: the leftover pass below
 
         records.append({
             "sem_index":   si,
@@ -230,5 +320,10 @@ def match_template(
             "slot":        slot,
             "item":        None if satisfied else slot_to_item(slot),
         })
+
+    if transcript_courses:
+        leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
+        _assign_world_language(records, leftovers)
+        _assign_electives(records, leftovers)
 
     return records

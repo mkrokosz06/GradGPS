@@ -19,6 +19,7 @@ from sap_schedule import (
     _codes_match,
     build_taken_set,
     build_gen_ed_satisfied,
+    build_used_codes,
     is_taken,
     match_template,
     slot_to_item,
@@ -122,6 +123,80 @@ def test_gen_ed_category_satisfaction():
     # A different category isn't affected.
     il_slots = [r for r in recs if r["slot"].get("category") == "IL"]
     assert il_slots and all(not r["satisfied"] for r in il_slots)
+
+
+# ── match_template: un-anchored pools & free electives ───────────────────────
+
+def _wl_tpl():
+    """Two world-language slots + one free elective + one required course."""
+    return {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "course", "code": "ACCTG 211", "credits": 4},
+        {"type": "pool", "ref": "world_language", "label": "World Language - Level One", "credits": 4},
+        {"type": "pool", "ref": "world_language", "label": "World Language - Level Two", "credits": 4},
+        {"type": "elective", "label": "Elective", "credits": 3},
+    ]}]}
+
+
+def test_world_language_satisfied_from_leftover_language_courses():
+    courses = [{"course_code": "SPAN 1", "status": "done", "credits_earned": 4},
+               {"course_code": "SPAN 2", "status": "done", "credits_earned": 4}]
+    recs = match_template(_wl_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, True]
+    assert {r["matched_code"] for r in wl} == {"SPAN 1", "SPAN 2"}
+    # Language courses were claimed by the WL slots — none left for the elective.
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert not elec["satisfied"]
+
+
+def test_world_language_uses_single_majority_dept():
+    # One GER course + one SPAN course: only the majority dept's sequence counts,
+    # so exactly one WL slot is satisfied (SPAN 1 + SPAN 2 beat GER 1).
+    courses = [{"course_code": "SPAN 1", "status": "done", "credits_earned": 4},
+               {"course_code": "SPAN 2", "status": "done", "credits_earned": 4},
+               {"course_code": "GER 1", "status": "done", "credits_earned": 4}]
+    recs = match_template(_wl_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert {r["matched_code"] for r in wl if r["satisfied"]} == {"SPAN 1", "SPAN 2"}
+    # The stray GER course becomes surplus and covers the 3-cr elective.
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert elec["satisfied"]
+
+
+def test_electives_satisfied_by_surplus_not_by_used_courses():
+    # PHIL 103 was consumed by the gen-ed audit (used_codes) → not surplus;
+    # KINES 61 (1cr) is surplus but under the 3-cr slot → stays scheduled.
+    courses = [{"course_code": "ACCTG 211", "status": "done", "credits_earned": 4},
+               {"course_code": "PHIL 103", "status": "done", "credits_earned": 3},
+               {"course_code": "KINES 61", "status": "done", "credits_earned": 1}]
+    recs = match_template(_wl_tpl(), build_taken_set(courses),
+                          transcript_courses=courses,
+                          used_codes={"PHIL 103"})
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert not elec["satisfied"]
+    # Without the used_codes exclusion the 3-cr PHIL course would cover it.
+    recs = match_template(_wl_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert elec["satisfied"] and elec["matched_code"] == "3 surplus credits"
+
+
+def test_no_transcript_courses_param_keeps_old_behavior():
+    courses = [{"course_code": "SPAN 1", "status": "done", "credits_earned": 4}]
+    recs = match_template(_wl_tpl(), build_taken_set(courses))
+    assert all(not r["satisfied"] for r in recs
+               if r["slot"].get("ref") == "world_language" or r["slot"]["type"] == "elective")
+
+
+def test_build_used_codes_collects_done_and_in_progress():
+    audit = {"groups": [{"items": [
+        {"course_code": "PHIL 103", "status": "done"},
+        {"course_code": "ART 20", "status": "in_progress"},
+        {"course_code": "MUSIC 5", "status": "missing"},
+    ]}]}
+    assert build_used_codes(audit, None) == {"PHIL 103", "ART 20"}
 
 
 # ── slot_to_item shaping ─────────────────────────────────────────────────────

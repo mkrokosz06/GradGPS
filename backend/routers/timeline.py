@@ -17,7 +17,8 @@ from audit_engine import run_audit, run_gen_ed_audit
 from routers.audit import _filter_rows
 from deps import get_user_id
 from plan_templates import load_template
-from sap_schedule import build_taken_set, build_gen_ed_satisfied, match_template
+from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
+                          build_used_codes, match_template)
 
 router = APIRouter()
 
@@ -812,6 +813,8 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             template,
             build_taken_set(transcript_courses),
             build_gen_ed_satisfied(gen_ed_result),
+            transcript_courses=transcript_courses,
+            used_codes=build_used_codes(audit_result, gen_ed_result),
         )
         semesters.extend(_reflow_template(records, base_term))
     else:
