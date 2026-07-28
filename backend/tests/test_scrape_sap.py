@@ -118,6 +118,54 @@ _FIXTURE_SINGLE = """
 """
 
 
+# Smeal-style mirrored family cells: '(MATH 110 or MATH 140) or (SCM 200 or
+# STAT 200)' repeated once per family across Fall/Spring, suggested family first.
+_FIXTURE_FAMILIES = """
+<table class="sc_plangrid"><tbody>
+<tr>
+  <td class="codecol" header="year0 year0_Term0_codecol">(MATH 110 or MATH 140) or (SCM 200 or STAT 200) (GQ)<sup>1,2</sup></td>
+  <td class="hourscol" header="year0 year0_Term0_hourscol">4</td>
+  <td class="codecol" header="year0 year0_Term1_codecol">(SCM 200 or STAT 200) or (MATH 110 or MATH 140) (GQ)<sup>1,2</sup></td>
+  <td class="hourscol" header="year0 year0_Term1_hourscol">4</td>
+</tr>
+</tbody></table>
+"""
+
+
+def test_mirrored_family_cells_narrow_to_one_family_each():
+    sems = parse_plangrid(_FIXTURE_FAMILIES)
+    fa, sp = _sem(sems, "FA"), _sem(sems, "SP")
+    math, stats = fa["slots"][0], sp["slots"][0]
+    # Each occurrence keeps only its first-listed (suggested) family.
+    assert math["type"] == "choose_one" and math["codes"] == ["MATH 110", "MATH 140"]
+    assert stats["type"] == "choose_one" and stats["codes"] == ["SCM 200", "STAT 200"]
+    assert math["gen_ed"] == stats["gen_ed"] == "GQ"
+    assert math["credits"] == stats["credits"] == 4
+    # The interim families key never reaches the template.
+    assert "families" not in math and "families" not in stats
+
+
+def test_lone_multi_family_cell_stays_flat():
+    # One occurrence of a two-family cell = a genuine 4-way choice; never narrowed.
+    html = """
+    <table class="sc_plangrid"><tbody>
+    <tr><td class="codecol" header="year0 year0_Term0_codecol">(MATH 110 or MATH 140) or (SCM 200 or STAT 200) (GQ)</td>
+        <td class="hourscol" header="year0 year0_Term0_hourscol">4</td></tr>
+    </tbody></table>
+    """
+    slot = parse_plangrid(html)[0]["slots"][0]
+    assert set(slot["codes"]) == {"MATH 110", "MATH 140", "SCM 200", "STAT 200"}
+    assert "families" not in slot
+
+
+def test_partial_parenthesization_stays_flat():
+    # '(A or B) or C' — the groups don't partition the code list; don't guess.
+    slot = _classify("(MATH 110 or MATH 140) or STAT 200",
+                     ["MATH 110", "MATH 140", "STAT 200"], 4)
+    assert slot["type"] == "choose_one"
+    assert slot.get("families") is None
+
+
 def test_summer_term2_is_labeled_summer():
     # A year with a Summer column (Term2) — the summer course must be tagged SU,
     # not collapsed into a duplicate Fall.

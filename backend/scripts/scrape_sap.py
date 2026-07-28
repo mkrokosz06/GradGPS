@@ -96,6 +96,59 @@ def _cell_codes(td, text: str) -> list[str]:
     return out
 
 
+_PAREN_RE = re.compile(r"\(([^()]+)\)")
+
+
+def _family_groups(text: str, codes: list[str]) -> list[list[str]] | None:
+    """Ordered course-code families from a '(A or B) or (C or D)' cell, else None.
+
+    Smeal-style plans parenthesize alternative FAMILIES when one slot offers a
+    pick per family across mirrored semesters — '(MATH 110 or MATH 140) or
+    (SCM 200 or STAT 200)', with the semester's suggested family listed first.
+    Only trusted when the parenthesized groups partition the cell's full code
+    list exactly (a partial parenthesization returns None)."""
+    fams: list[list[str]] = []
+    for m in _PAREN_RE.finditer(text):
+        grp = [f"{c.group(1)} {c.group(2)}" for c in _CODE_RE.finditer(m.group(1))]
+        if grp:
+            fams.append(grp)
+    if len(fams) < 2:
+        return None
+    flat = [c for f in fams for c in f]
+    if len(flat) != len(set(flat)) or set(flat) != {c.upper() for c in codes}:
+        return None
+    return fams
+
+
+def _narrow_family_slots(semesters: list[dict]) -> None:
+    """Split mirrored multi-family choose_one slots into one family per slot.
+
+    A multi-family cell means 'take one course from EACH family, one family per
+    semester, in either order' — the bulletin repeats the cell once per family.
+    Left flat, the slots are wrong two ways: the UI shows the same 4-way choice
+    twice, and the matcher would let two courses from ONE family (MATH 110 +
+    MATH 140) satisfy both slots, never scheduling the other family.
+
+    When a family-set's occurrence count equals its family count and each
+    occurrence leads with a different family, narrow each slot to its
+    first-listed family (semester 1 shows 'MATH 110 or MATH 140', semester 2
+    'SCM 200 or STAT 200').  Any other shape — a one-off multi-family cell, a
+    miscount — keeps the flat code list rather than guessing."""
+    groups: dict[frozenset, list[dict]] = {}
+    for sem in semesters:
+        for slot in sem.get("slots", []):
+            if slot.get("families"):
+                key = frozenset(frozenset(f) for f in slot["families"])
+                groups.setdefault(key, []).append(slot)
+    for key, slots in groups.items():
+        firsts = [frozenset(s["families"][0]) for s in slots]
+        if len(slots) == len(key) and set(firsts) == key:
+            for s in slots:
+                s["codes"] = s["families"][0]
+        for s in slots:
+            del s["families"]
+
+
 def _detect_gened(text: str) -> str | None:
     for m in re.finditer(r"\(([A-Z]{1,3})\)", text):
         tok = m.group(1)
@@ -126,6 +179,9 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
         return {"type": "gen_ed", "category": gened, "credits": credits}
     if len(codes) >= 2:
         slot = {"type": "choose_one", "codes": codes, "credits": credits}
+        fams = _family_groups(text, codes)
+        if fams:
+            slot["families"] = fams   # interim; consumed by _narrow_family_slots
         if gened:
             slot["gen_ed"] = gened
         return slot
@@ -213,9 +269,11 @@ def parse_plangrid(html: str) -> list[dict]:
             for term, group in ((0, fall), (1, spring)):
                 if group:
                     out.append(_emit(year, term, group))
-        return out
+    else:
+        out = [_emit(year, term, sems[(year, term)]) for (year, term) in sorted(sems)]
 
-    return [_emit(year, term, sems[(year, term)]) for (year, term) in sorted(sems)]
+    _narrow_family_slots(out)
+    return out
 
 
 _SITEMAP = "https://bulletins.psu.edu/sitemap.xml"

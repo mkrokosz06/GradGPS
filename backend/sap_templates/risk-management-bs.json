@@ -21,9 +21,7 @@
           "type": "choose_one",
           "codes": [
             "MATH 110",
-            "MATH 140",
-            "SCM 200",
-            "STAT 200"
+            "MATH 140"
           ],
           "credits": 4.0,
           "gen_ed": "GQ"
@@ -67,9 +65,7 @@
           "type": "choose_one",
           "codes": [
             "SCM 200",
-            "STAT 200",
-            "MATH 110",
-            "MATH 140"
+            "STAT 200"
           ],
           "credits": 4.0,
           "gen_ed": "GQ"
