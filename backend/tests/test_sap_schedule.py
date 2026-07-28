@@ -140,6 +140,25 @@ def test_slot_to_item_shapes():
     assert " or " in choose["course_code"]
 
 
+def test_choose_one_label_drops_crosslisted_twin():
+    # ENGL 137H / CAS 137H are one cross-listed course — show it once. The full
+    # code list still drives matching, so a CAS 137H transcript satisfies the slot.
+    item = slot_to_item({"type": "choose_one", "credits": 3,
+                         "codes": ["ENGL 15", "ENGL 30H", "ESL 15", "ENGL 137H", "CAS 137H"]})
+    assert item["course_code"] == "ENGL 15 or ENGL 30H or ESL 15 or ENGL 137H"
+
+
+def test_choose_one_label_keeps_coincidental_number_matches():
+    # Non-adjacent same-number codes (and same-dept section variants) are
+    # different courses — never collapsed.
+    item = slot_to_item({"type": "choose_one", "credits": 3,
+                         "codes": ["AGECO 122", "EGEE 101", "METEO 122"]})
+    assert item["course_code"] == "AGECO 122 or EGEE 101 or METEO 122"
+    item = slot_to_item({"type": "choose_one", "credits": 3,
+                         "codes": ["CAS 100A", "CAS 100B", "CAS 100C"]})
+    assert item["course_code"] == "CAS 100A or CAS 100B or CAS 100C"
+
+
 def test_build_gen_ed_satisfied_maps_category_tokens():
     result = {"groups": [
         {"name": "US: United States Cultures", "satisfied": True},

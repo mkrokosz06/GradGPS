@@ -118,9 +118,25 @@ def build_gen_ed_satisfied(gen_ed_result: dict) -> dict[str, bool]:
 
 # ── Slot → schedulable timeline item ─────────────────────────────────────────
 
+def _dedupe_crosslisted(codes: list[str]) -> list[str]:
+    """Drop the later of two ADJACENT codes sharing an identical catalog
+    number+suffix under different depts (ENGL 137H / CAS 137H) — one cross-listed
+    course printed under both subject codes.  Adjacency guards against
+    coincidental number matches in long elective lists (AGECO 122 vs METEO 122).
+    Display-only: match_template still consumes the slot's full code list."""
+    out: list[str] = []
+    for c in codes:
+        parts, prev = c.split(" "), out[-1].split(" ") if out else None
+        if (prev and len(parts) == 2 and len(prev) == 2
+                and parts[1] == prev[1] and parts[0] != prev[0]):
+            continue
+        out.append(c)
+    return out
+
+
 def _choose_one_label(codes: list[str]) -> str:
     # Mobile CourseRow splits on ' or ' for pair routing; keep it readable.
-    return " or ".join(codes) if codes else ""
+    return " or ".join(_dedupe_crosslisted(codes)) if codes else ""
 
 
 def slot_to_item(slot: dict) -> dict:
