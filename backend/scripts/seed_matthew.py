@@ -635,6 +635,11 @@ if __name__ == "__main__":
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()
+
+    sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+    from fix_junk_titles import fix_junk_titles
+    fix_junk_titles()
+
     row_count = check_eti_requirements()
     if row_count == 0:
         print("\n  *** ETI program NOT found in catalog! Run load_catalog.py first. ***")
