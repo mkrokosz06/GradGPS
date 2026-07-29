@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from deps import require_admin
-from routers import audit, transcript, programs, timeline, admin, users, courses, session
+from routers import audit, transcript, programs, timeline, admin, users, courses, session, support
 
 app = FastAPI(title="DegreeCheck API", version="0.1.0")
 
@@ -20,6 +20,11 @@ _default_origins = "http://localhost:8081,http://localhost:8082,http://localhost
 _cors_origins = [
     o.strip() for o in os.getenv("CORS_ORIGINS", _default_origins).split(",") if o.strip()
 ]
+# The marketing site's contact form posts here from the browser — always allow
+# it, independent of whatever CORS_ORIGINS is set to in the environment.
+for _site in ("https://gradgps.com", "https://www.gradgps.com"):
+    if _site not in _cors_origins:
+        _cors_origins.append(_site)
 
 app.add_middleware(
     CORSMiddleware,
@@ -37,6 +42,7 @@ app.include_router(admin.router,      prefix="/admin",       tags=["Admin"],
                    dependencies=[Depends(require_admin)])
 app.include_router(courses.router,    prefix="/courses",     tags=["Courses"])
 app.include_router(session.router,    prefix="/auth",        tags=["Auth"])
+app.include_router(support.router,    prefix="/support",     tags=["Support"])
 
 # Serve static assets (admin dashboard HTML)
 _static = Path(__file__).parent / "static"

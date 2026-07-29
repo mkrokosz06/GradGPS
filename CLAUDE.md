@@ -113,6 +113,7 @@ SAP templates live as JSON under `backend/sap_templates/` (currently `accounting
 | `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
 | `users.py` | `/users` | User profile |
 | `admin.py` | `/admin` | Admin utilities |
+| `support.py` | `/support` | Support/contact form (mobile app + gradgps.com). Emails `SUPPORT_EMAIL` via SES with the sender as Reply-To; unset `SUPPORT_EMAIL` (local dev) = log only. No auth required (website form is anonymous); in-memory rate limit + honeypot field. SES setup: identity `mkrokosz06@gmail.com` verified, `ses:SendEmail` on the App Runner role (`GradGPSSupportSES` inline policy). |
 
 #### DynamoDB tables
 | Table | PK | SK | Contents |
@@ -136,6 +137,7 @@ Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
 - `app/(tabs)/upload.tsx` — Transcript upload
 - `app/(tabs)/major.tsx` — Major + subplan selection (two-step flow)
 - `app/(tabs)/account.tsx` — Account / audit summary
+- `app/(tabs)/support.tsx` — Contact-support form (posts to `/support/contact`)
 - `app/onboarding/` — Onboarding flow (welcome → signup → major → upload)
 
 #### Key components & context

@@ -19,6 +19,7 @@ export default function Layout() {
       <Tabs.Screen name="upload"   options={{ title: "Upload" }} />
       <Tabs.Screen name="major"    options={{ title: "Major" }} />
       <Tabs.Screen name="account"  options={{ title: "Account" }} />
+      <Tabs.Screen name="support"  options={{ title: "Support" }} />
     </Tabs>
   );
 }

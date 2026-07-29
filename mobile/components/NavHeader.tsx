@@ -14,6 +14,7 @@ const ALL_ITEMS = [
   { label: "Upload Transcript", route: "/upload",    match: ["/upload"] },
   { label: "Change Major",      route: "/major",     match: ["/major"] },
   { label: "Account",           route: "/account",   match: ["/account"] },
+  { label: "Contact Support",   route: "/support",   match: ["/support"] },
 ];
 
 export function NavHeader({ subtitle }: { subtitle?: string }) {
