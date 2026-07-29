@@ -81,10 +81,10 @@ def _load_all_programs() -> list[str]:
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
-    # Exclude __GEN_ED__ sentinel and non-University-Park programs
+    # Exclude sentinel rows (__GEN_ED__, __CROSSLISTINGS__) and non-UP programs
     _programs_cache = sorted(
         n for n in all_names
-        if n != "__GEN_ED__" and is_up_program(n)
+        if not n.startswith("__") and is_up_program(n)
     )
     return _programs_cache
 

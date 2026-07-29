@@ -11,7 +11,9 @@ from collections import defaultdict
 
 GRADE_ORDER = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"]
 
-_EQUIVALENCE_PAIRS: list[tuple[str, str]] = [
+# Prefix renames are institutional policy (not bulletin scrape output) and are
+# always in effect regardless of where the scraped cross-listings come from.
+_MANUAL_RENAME_PAIRS: list[tuple[str, str]] = [
     # ── IST → ETI renames (effective Fall 2025) ──────────────────────────────
     # Official IST advising doc: "course content has not changed; ONLY the prefix."
     ("IST 301", "ETI 301"),
@@ -31,6 +33,12 @@ _EQUIVALENCE_PAIRS: list[tuple[str, str]] = [
     ("IST 456", "CYBER 456"),
     # ── SRA → CYBER rename (effective Fall 2025) ─────────────────────────────
     ("SRA 221", "CYBER 221"),
+]
+
+# Bundled snapshot of the PSU bulletin cross-listings scrape. Used only when
+# the live __CROSSLISTINGS__ item in DynamoDB is absent/unreachable (fresh
+# local dev, tests) — monthly_refresh.py keeps the DynamoDB copy current.
+_BUNDLED_CROSSLISTINGS: list[tuple[str, str]] = [
     # ── PSU bulletin cross-listings (813 pairs, scraped from bulletins.psu.edu) ─
     ("AA 160N", "LHR 160N"),  # AA 160N: The Virtual Transformational Leadership Development Experienc...
     ("AA 193N", "ENGL 193N"),  # AA 193N: The Craft of Comics 3 Credits AA 193N The Craft of Comics 3 C...
@@ -846,6 +854,30 @@ _EQUIVALENCE_PAIRS: list[tuple[str, str]] = [
     ("THEA 407W", "WMNST 407W"),  # Enforced Prerequisite at Enrollment:
     ("WFED 405", "ENGR 405"),  # Enforced Prerequisite at Enrollment:
 ]
+
+
+def _load_scraped_crosslistings() -> list[tuple[str, str]]:
+    """
+    Live cross-listings from the __CROSSLISTINGS__ item in the requirements
+    table (written by scripts/monthly_refresh.py — source patching does not
+    survive container deploys). Any failure falls back to the bundled snapshot.
+    """
+    try:
+        from db import requirements_table
+        item = requirements_table.get_item(
+            Key={"program_name": "__CROSSLISTINGS__", "group_course": "pairs"}
+        ).get("Item")
+        pairs = item and item.get("pairs")
+        if pairs:
+            return [(str(a), str(b)) for a, b in pairs]
+    except Exception:
+        pass  # no DB reachable (tests, fresh local dev)
+    return _BUNDLED_CROSSLISTINGS
+
+
+_EQUIVALENCE_PAIRS: list[tuple[str, str]] = (
+    _MANUAL_RENAME_PAIRS + _load_scraped_crosslistings()
+)
 
 
 # Build bidirectional lookup at module load: code → [equivalent codes]
