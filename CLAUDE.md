@@ -69,10 +69,11 @@ reseed ritual). The container runs under IAM role `GradGPSAppRunnerInstance` (no
 keys); App Runner auto-deploys the `:latest` tag (~2 min). Triggers only on `backend/**` paths.
 The Dockerfile pins `python:3.12-slim` — the pinned pandas 2.2.2 has no Python 3.13 wheels.
 
-**Running seed/maintenance scripts against prod** (credentials live in `~/.aws/credentials`;
-blank vars beat `.env` because `load_dotenv` doesn't override existing env):
+**Running seed/maintenance scripts against prod** — auth is IAM Identity Center SSO (no access
+keys exist). First `aws sso login --profile gradgps` (valid ~8 h), then run with the profile;
+blank vars beat `.env` because `load_dotenv` doesn't override existing env:
 ```bash
-DYNAMODB_ENDPOINT= S3_ENDPOINT= AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= python scripts/<script>.py
+AWS_PROFILE=gradgps DYNAMODB_ENDPOINT= S3_ENDPOINT= AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= python scripts/<script>.py
 ```
 For prod catalog seeding use `scripts/apply_catalog_patches.py` (patches without the test user),
 not `seed_matthew.py`.
