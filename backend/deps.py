@@ -19,6 +19,7 @@ import logging
 from fastapi import Header, HTTPException
 
 from auth import verify_id_token, TokenVerificationError
+from sessions import SESSION_PREFIX, resolve_session
 
 logger = logging.getLogger(__name__)
 
@@ -46,10 +47,16 @@ def get_current_user(
         scheme, _, token = authorization.partition(" ")
         if scheme.lower() != "bearer" or not token.strip():
             raise HTTPException(status_code=401, detail="Invalid Authorization header. Expected: Bearer <token>.")
-        try:
-            claims = verify_id_token(token.strip())
-        except TokenVerificationError as e:
-            raise HTTPException(status_code=401, detail=str(e))
+        token = token.strip()
+        if token.startswith(SESSION_PREFIX):
+            claims = resolve_session(token)
+            if claims is None:
+                raise HTTPException(status_code=401, detail="Session expired. Please sign in again.")
+        else:
+            try:
+                claims = verify_id_token(token)
+            except TokenVerificationError as e:
+                raise HTTPException(status_code=401, detail=str(e))
         if not _USER_ID_RE.match(claims["user_id"]):
             # Provider subs should always pass; belt-and-suspenders.
             logger.error("Verified sub failed charset check: %r", claims["user_id"])

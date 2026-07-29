@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
 from deps import require_admin
-from routers import audit, transcript, programs, timeline, admin, users, courses
+from routers import audit, transcript, programs, timeline, admin, users, courses, session
 
 app = FastAPI(title="DegreeCheck API", version="0.1.0")
 
@@ -36,6 +36,7 @@ app.include_router(users.router,      prefix="/users",       tags=["Users"])
 app.include_router(admin.router,      prefix="/admin",       tags=["Admin"],
                    dependencies=[Depends(require_admin)])
 app.include_router(courses.router,    prefix="/courses",     tags=["Courses"])
+app.include_router(session.router,    prefix="/auth",        tags=["Auth"])
 
 # Serve static assets (admin dashboard HTML)
 _static = Path(__file__).parent / "static"

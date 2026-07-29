@@ -139,4 +139,36 @@ except dynamodb.exceptions.ResourceInUseException:
     print("Table already exists: rmp_professor_courses")
 
 
+# ── 6. sessions ──────────────────────────────────────────────────────────────
+# PK: token_hash (SHA-256 of the opaque session token — raw token never stored)
+# expires_at is a TTL attribute; sessions.py also enforces expiry at read time
+# because TTL deletion can lag.
+
+try:
+    dynamodb.create_table(
+        TableName="sessions",
+        KeySchema=[
+            {"AttributeName": "token_hash", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "token_hash", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    print("Created table: sessions")
+    dynamodb.get_waiter("table_exists").wait(TableName="sessions")
+except dynamodb.exceptions.ResourceInUseException:
+    print("Table already exists: sessions")
+
+try:
+    dynamodb.update_time_to_live(
+        TableName="sessions",
+        TimeToLiveSpecification={"Enabled": True, "AttributeName": "expires_at"},
+    )
+    print("TTL enabled on sessions.expires_at")
+except Exception as e:
+    # Already enabled, or local DynamoDB quirk — read-time expiry still enforces.
+    print(f"TTL note: {e}")
+
+
 print("\nAll tables and buckets ready.")
