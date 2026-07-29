@@ -257,13 +257,25 @@ def scrape_program_requirements(program):
 
                 course_code = f"{code_match.group(1)} {code_match.group(2)}"
 
-                # Course title: usually second cell, cleaned
-                title = cell_texts[1] if len(cell_texts) > 1 else cell_texts[0]
-                title = re.sub(r"\b[A-Z]{2,6}\s{0,2}\d{3}[A-Z]?\b", "", title).strip(" –—/-or")
-                title = re.sub(r"\s{2,}", " ", title).strip()
-                if not title:
-                    title = cell_texts[0]
-                    title = re.sub(r"\b[A-Z]{2,6}\s{0,2}\d{3}[A-Z]?\b", "", title).strip()
+                # Course title: first cell after the code cell that is not a
+                # credits value. Rows come in two layouts — [code, title, credits]
+                # and [code+title combined, credits]; blindly taking cell 1 wrote
+                # the credits cell ("3", "1-0") as the title in the second layout.
+                def _clean_title(text: str) -> str:
+                    t = re.sub(r"\b[A-Z]{2,6}\s{0,2}\d{3}[A-Z]?\b", "", text).strip(" –—/-or")
+                    return re.sub(r"\s{2,}", " ", t).strip()
+
+                _credit_cell = re.compile(r"^\d+(?:\.\d+)?(?:\s*[–—-]\s*\d+(?:\.\d+)?)?$")
+
+                title = ""
+                for ct in cell_texts[1:]:
+                    if _credit_cell.match(ct.strip()):
+                        continue
+                    title = _clean_title(ct)
+                    if title:
+                        break
+                if not title or _credit_cell.match(title):
+                    title = _clean_title(cell_texts[0])
                     title = re.sub(r"^\s*or\s*", "", title, flags=re.I).strip()
 
                 # Credits

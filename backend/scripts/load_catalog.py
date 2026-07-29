@@ -2,12 +2,19 @@
 Loads PSU_Major_Requirements.xlsx into the DynamoDB requirements table.
 Safe to re-run — uses batch_writer which upserts (overwrites) existing items.
 
+Refuses to load a spreadsheet whose junk-title rate exceeds 40% (the
+signature of a broken scrape) unless --force is given; fix_junk_titles.py
+repairs the residual junk after loading either way. The legacy 2025 xlsx
+(scraped before the scrape_psu.py title fix) sits at 36.5%; files produced
+by the fixed scraper should be in the single digits.
+
 Usage:
-    python scripts/load_catalog.py
+    python scripts/load_catalog.py [--force]
 """
 
 import sys, os, math
 sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import boto3
 import pandas as pd
@@ -33,6 +40,18 @@ df = df.fillna("")
 
 total = len(df)
 print(f"Rows to load: {total}")
+
+# ── Junk-title guardrail ──────────────────────────────────────────────────────
+from fix_junk_titles import _is_junk
+
+junk_count = int(df["course_title"].map(_is_junk).sum())
+junk_pct = 100 * junk_count / max(total, 1)
+if junk_count:
+    print(f"WARNING: {junk_count} rows ({junk_pct:.1f}%) have junk course titles "
+          f"(credit values scraped as titles). fix_junk_titles.py repairs these post-load.")
+if junk_pct > 40 and "--force" not in sys.argv:
+    sys.exit("ABORTING: junk-title rate exceeds 40% — this looks like a broken scrape. "
+             "Re-run scrape_psu.py (title misparse was fixed) or pass --force to load anyway.")
 
 def clean(val):
     """Convert pandas value to a DynamoDB-safe type."""
