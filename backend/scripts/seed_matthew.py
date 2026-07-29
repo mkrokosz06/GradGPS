@@ -402,11 +402,49 @@ def patch_known_alternatives():
         for code, rows in rows_by_code.items()
     }
 
-    # Course info cache for insertion (title + credits from any existing row)
-    course_info = {
-        code: (rows[0].get("course_title", ""), rows[0].get("credits", Decimal("3")))
-        for code, rows in rows_by_code.items() if rows
-    }
+    # Course info cache for insertion (title + credits). The catalog contains
+    # junk titles (credit ranges like "1-0" imported as course_title), and scan
+    # order is arbitrary — picking rows[0] made inserted-row titles
+    # nondeterministic (caught as a local-vs-prod audit diff on ACCTG 201).
+    # Pick the most common non-junk title instead.
+    import re as _re
+    from collections import Counter
+
+    _junk_title = lambda t: not t or _re.fullmatch(r"[\d\s./-]*", str(t).strip()) is not None
+
+    course_info = {}
+    for code, rows in rows_by_code.items():
+        if not rows:
+            continue
+        good = [str(r["course_title"]).strip() for r in rows
+                if not _junk_title(r.get("course_title"))]
+        if good:
+            title = Counter(good).most_common(1)[0][0]
+            credits = next((r.get("credits") for r in rows
+                            if str(r.get("course_title", "")).strip() == title
+                            and r.get("credits") is not None), Decimal("3"))
+        else:
+            title   = rows[0].get("course_title", "")
+            credits = rows[0].get("credits", Decimal("3"))
+        course_info[code] = (title, credits)
+
+    # Repair junk titles on existing rows for these codes (fixes rows inserted
+    # by earlier runs of this patch that inherited a junk title).
+    repaired = 0
+    for code, rows in rows_by_code.items():
+        best = course_info.get(code, ("",))[0]
+        if _junk_title(best):
+            continue
+        for r in rows:
+            if _junk_title(r.get("course_title")):
+                requirements_table.update_item(
+                    Key={"program_name": r["program_name"], "group_course": r["group_course"]},
+                    UpdateExpression="SET course_title = :t",
+                    ExpressionAttributeValues={":t": best},
+                )
+                repaired += 1
+    if repaired:
+        print(f"  Repaired {repaired} junk course titles.")
 
     # ── Apply each group ─────────────────────────────────────────────────────
     pair_id = Decimal("800")
