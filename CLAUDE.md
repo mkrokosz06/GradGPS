@@ -52,7 +52,30 @@ python -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
 cd mobile
 npx expo start
 ```
-Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants/api.ts`.
+Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants/api.ts`
+(LAN fallback in dev; production bundles read `EXPO_PUBLIC_API_BASE` from `mobile/.env.production`).
+
+---
+
+## Production (AWS)
+
+Live backend: **https://kjn2ysmnjr.us-east-1.awsapprunner.com** — App Runner service
+`gradgps-backend` (us-east-1, account 209855137345), real DynamoDB + S3 (persistent — no
+reseed ritual). The container runs under IAM role `GradGPSAppRunnerInstance` (no keys) with
+`AUTH_DEV_BYPASS` **off**: only real Google OIDC tokens work; `x-user-id` → 401.
+
+**Deploying backend changes:** push to `main`. `.github/workflows/deploy-backend.yml` builds
+`backend/Dockerfile` and pushes to ECR via OIDC role `GradGPSGitHubActions` (no stored AWS
+keys); App Runner auto-deploys the `:latest` tag (~2 min). Triggers only on `backend/**` paths.
+The Dockerfile pins `python:3.12-slim` — the pinned pandas 2.2.2 has no Python 3.13 wheels.
+
+**Running seed/maintenance scripts against prod** (credentials live in `~/.aws/credentials`;
+blank vars beat `.env` because `load_dotenv` doesn't override existing env):
+```bash
+DYNAMODB_ENDPOINT= S3_ENDPOINT= AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= python scripts/<script>.py
+```
+For prod catalog seeding use `scripts/apply_catalog_patches.py` (patches without the test user),
+not `seed_matthew.py`.
 
 ---
 

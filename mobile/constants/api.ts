@@ -1,4 +1,9 @@
-export const API_BASE = "http://192.168.1.228:8080";
+// Dev (Expo Go / `expo start`): falls back to the laptop's LAN IP + local backend,
+// which runs with AUTH_DEV_BYPASS. Production builds (`eas build`, `expo export`)
+// load .env.production, where EXPO_PUBLIC_API_BASE points at the AWS backend —
+// real Google auth only there (prod rejects x-user-id).
+export const API_BASE =
+  process.env.EXPO_PUBLIC_API_BASE ?? "http://192.168.1.228:8080";
 
 // Google OAuth client IDs (from Google Cloud console → Credentials).
 // Web client ID is used for Expo web; iOS client ID is used once the app
