@@ -77,6 +77,12 @@ DYNAMODB_ENDPOINT= S3_ENDPOINT= AWS_ACCESS_KEY_ID= AWS_SECRET_ACCESS_KEY= python
 For prod catalog seeding use `scripts/apply_catalog_patches.py` (patches without the test user),
 not `seed_matthew.py`.
 
+**Monthly refresh cron:** EventBridge Scheduler `gradgps-monthly-refresh` (1st of month, 2 AM ET)
+runs `scripts/monthly_refresh.py` as an ECS Fargate task (cluster `gradgps`, same backend image,
+logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into the
+`__CROSSLISTINGS__` DynamoDB item, rebuilds the RMP index, and bounces App Runner via
+`APP_RUNNER_SERVICE_ARN` so the running service reloads the pairs.
+
 ---
 
 ## Architecture
