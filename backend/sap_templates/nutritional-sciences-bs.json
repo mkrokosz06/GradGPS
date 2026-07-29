@@ -243,8 +243,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "NUTR 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "NUTR",
+          "level": 400,
+          "label": "NUTR 400-Level Course",
           "credits": 3.0
         },
         {

@@ -166,6 +166,15 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
         return {"type": "pool", "ref": "world_language", "label": text, "credits": credits}
     if "business breadth" in low:
         return {"type": "pool", "ref": "business_breadth", "label": "Business Breadth Course", "credits": credits}
+    # A department level-selection placeholder — "EDTHP 400 Level Selection",
+    # "PLSC 400-Level" — means pick ANY course in that department at that level.
+    # Without this branch the code regex reduces it to a literal course ("PLSC
+    # 400", which may not even exist) repeated once per semester it appears in.
+    m = re.search(r"\b([A-Z]{2,5})\s+(\d{3})[\s-]*[Ll]evel\b", text)
+    if m:
+        dept, level = m.group(1), int(m.group(2))
+        return {"type": "pool", "ref": "dept_level", "dept": dept, "level": level,
+                "label": f"{dept} {level}-Level Course", "credits": credits}
     # A departmental elective pool: a "NXX" course-number wildcard (ACCTG 4XX,
     # MKTG 4XX) or a "<Dept> Elective" label, optionally anchored by a real course.
     if re.search(r"\b\d?XX\b", text) or ("elective" in low and codes):

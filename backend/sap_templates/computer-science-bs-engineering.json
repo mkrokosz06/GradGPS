@@ -227,30 +227,27 @@
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "gen_ed",
@@ -271,30 +268,27 @@
       "slots": [
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "CMPSC/CMPEN 400-Level Elective",
-          "credits": 3.0,
-          "codes": [
-            "CMPEN 400"
-          ]
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
+          "credits": 3.0
         },
         {
           "type": "gen_ed",

@@ -231,26 +231,19 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "COMM 437",
-            "COMM 438",
-            "COMM 448",
-            "COMM 400"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "COMM 439",
-            "COMM 440",
-            "COMM 443",
-            "COMM 444",
-            "COMM 445",
-            "COMM 446",
-            "COMM 400"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {
@@ -282,32 +275,19 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "COMM 437A",
-            "COMM 438",
-            "COMM 439",
-            "COMM 440",
-            "COMM 444",
-            "COMM 445",
-            "COMM 446",
-            "COMM 449",
-            "COMM 400"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "COMM 437A",
-            "COMM 438",
-            "COMM 439",
-            "COMM 440",
-            "COMM 444",
-            "COMM 445",
-            "COMM 446",
-            "COMM 400"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {

@@ -172,8 +172,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "MATH 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MATH",
+          "level": 400,
+          "label": "MATH 400-Level Course",
           "credits": 3.0
         },
         {
@@ -207,8 +210,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "MATH 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MATH",
+          "level": 400,
+          "label": "MATH 400-Level Course",
           "credits": 3.0
         },
         {
@@ -229,8 +235,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "PHYS 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PHYS",
+          "level": 400,
+          "label": "PHYS 400-Level Course",
           "credits": 3.0
         },
         {
@@ -264,8 +273,11 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "course",
-          "code": "PHYS 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PHYS",
+          "level": 400,
+          "label": "PHYS 400-Level Course",
           "credits": 3.0
         },
         {

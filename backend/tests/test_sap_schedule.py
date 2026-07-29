@@ -165,6 +165,38 @@ def test_world_language_uses_single_majority_dept():
     assert elec["satisfied"]
 
 
+def _dept_level_tpl():
+    """Two PLSC 400-level selection slots + one free elective."""
+    return {"semesters": [{"year": 4, "term_season": "FA", "slots": [
+        {"type": "pool", "ref": "dept_level", "dept": "PLSC", "level": 400,
+         "label": "PLSC 400-Level Course", "credits": 3},
+        {"type": "pool", "ref": "dept_level", "dept": "PLSC", "level": 400,
+         "label": "PLSC 400-Level Course", "credits": 3},
+        {"type": "elective", "label": "Elective", "credits": 3},
+    ]}]}
+
+
+def test_dept_level_satisfied_from_leftover_dept_courses():
+    # One 400-level PLSC course fills ONE slot; the 100-level course doesn't
+    # match the level, so it falls through to the elective surplus pool.
+    courses = [{"course_code": "PLSC 412", "status": "done", "credits_earned": 3},
+               {"course_code": "PLSC 14", "status": "done", "credits_earned": 3}]
+    recs = match_template(_dept_level_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    dl = [r for r in recs if r["slot"].get("ref") == "dept_level"]
+    assert [r["satisfied"] for r in dl] == [True, False]
+    assert dl[0]["matched_code"] == "PLSC 412"
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert elec["satisfied"]   # PLSC 14 credits became surplus
+
+
+def test_dept_level_item_title_names_dept_and_level():
+    item = slot_to_item({"type": "pool", "ref": "dept_level", "dept": "PLSC",
+                         "level": 400, "label": "PLSC 400-Level Course", "credits": 3})
+    assert item["is_pool"] and item["course_title"] == "Choose a 400-level PLSC course"
+    assert item["course_code"] == "PLSC 400-Level Course"
+
+
 def test_electives_satisfied_by_surplus_not_by_used_courses():
     # PHIL 103 was consumed by the gen-ed audit (used_codes) → not surplus;
     # KINES 61 (1cr) is surplus but under the 3-cr slot → stays scheduled.

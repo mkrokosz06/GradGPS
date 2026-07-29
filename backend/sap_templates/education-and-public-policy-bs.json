@@ -174,8 +174,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "EDTHP 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "EDTHP",
+          "level": 400,
+          "label": "EDTHP 400-Level Course",
           "credits": 3.0
         },
         {
@@ -214,8 +217,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "EDTHP 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "EDTHP",
+          "level": 400,
+          "label": "EDTHP 400-Level Course",
           "credits": 3.0
         },
         {
@@ -243,8 +249,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "EDTHP 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "EDTHP",
+          "level": 400,
+          "label": "EDTHP 400-Level Course",
           "credits": 3.0
         },
         {
@@ -283,8 +292,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "EDTHP 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "EDTHP",
+          "level": 400,
+          "label": "EDTHP 400-Level Course",
           "credits": 3.0
         },
         {

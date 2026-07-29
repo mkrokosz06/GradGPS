@@ -94,6 +94,19 @@ def test_classify_business_breadth_and_world_language():
     assert _classify("World Language - Level Two (8th credit level)", [], 4)["ref"] == "world_language"
 
 
+def test_classify_dept_level_selection_is_pool_not_course():
+    # "EDTHP 400 Level Selection" means ANY 400-level EDTHP course — the code
+    # regex sees "EDTHP 400", which must not become a pinned course slot.
+    slot = _classify("EDTHP 400 Level Selection", ["EDTHP 400"], 3)
+    assert slot == {"type": "pool", "ref": "dept_level", "dept": "EDTHP",
+                    "level": 400, "label": "EDTHP 400-Level Course", "credits": 3}
+    # Hyphenated bulletin variant ("PLSC 400-Level", footnote sup already stripped).
+    slot = _classify("PLSC 400-Level", ["PLSC 400"], 3)
+    assert slot["type"] == "pool" and slot["dept"] == "PLSC" and slot["level"] == 400
+    # A plain pinned course must still classify as a course.
+    assert _classify("EDTHP 400", ["EDTHP 400"], 3)["type"] == "course"
+
+
 # Single-column variant: one column per YEAR (no Fall/Spring), header
 # "yearN undefinedcodecol", with a per-year plangridsum total row.
 _FIXTURE_SINGLE = """

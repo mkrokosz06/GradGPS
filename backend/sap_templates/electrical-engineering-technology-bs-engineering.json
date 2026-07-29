@@ -289,12 +289,11 @@
         },
         {
           "type": "pool",
-          "ref": "major_elective",
-          "label": "EET 400-Level Elective",
-          "credits": 4.0,
-          "codes": [
-            "EET 400"
-          ]
+          "ref": "dept_level",
+          "dept": "EET",
+          "level": 400,
+          "label": "EET 400-Level Course",
+          "credits": 4.0
         },
         {
           "type": "gen_ed",

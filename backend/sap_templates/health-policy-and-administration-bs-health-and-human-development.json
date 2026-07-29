@@ -192,8 +192,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "HPA 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "HPA",
+          "level": 400,
+          "label": "HPA 400-Level Course",
           "credits": 3.0
         },
         {
@@ -236,8 +239,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "HPA 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "HPA",
+          "level": 400,
+          "label": "HPA 400-Level Course",
           "credits": 3.0
         },
         {
@@ -268,8 +274,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "HPA 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "HPA",
+          "level": 400,
+          "label": "HPA 400-Level Course",
           "credits": 3.0
         },
         {

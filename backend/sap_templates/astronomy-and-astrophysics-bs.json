@@ -164,8 +164,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "ASTRO 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "ASTRO",
+          "level": 400,
+          "label": "ASTRO 400-Level Course",
           "credits": 3.0
         },
         {
@@ -196,8 +199,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "ASTRO 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "ASTRO",
+          "level": 400,
+          "label": "ASTRO 400-Level Course",
           "credits": 3.0
         },
         {
@@ -231,8 +237,11 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "course",
-          "code": "ASTRO 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "ASTRO",
+          "level": 400,
+          "label": "ASTRO 400-Level Course",
           "credits": 3.0
         },
         {
@@ -274,13 +283,19 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "ASTRO 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "ASTRO",
+          "level": 400,
+          "label": "ASTRO 400-Level Course",
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "CMPEN 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "CMPEN",
+          "level": 400,
+          "label": "CMPEN 400-Level Course",
           "credits": 3.0
         },
         {

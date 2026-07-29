@@ -154,8 +154,11 @@
           "credits": 1.5
         },
         {
-          "type": "course",
-          "code": "PLSC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PLSC",
+          "level": 400,
+          "label": "PLSC 400-Level Course",
           "credits": 3.0
         },
         {
@@ -181,8 +184,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "PLSC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PLSC",
+          "level": 400,
+          "label": "PLSC 400-Level Course",
           "credits": 3.0
         },
         {
@@ -219,8 +225,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "PLSC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PLSC",
+          "level": 400,
+          "label": "PLSC 400-Level Course",
           "credits": 3.0
         },
         {
@@ -251,8 +260,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "PLSC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "PLSC",
+          "level": 400,
+          "label": "PLSC 400-Level Course",
           "credits": 3.0
         },
         {

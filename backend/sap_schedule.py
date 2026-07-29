@@ -177,8 +177,11 @@ def slot_to_item(slot: dict) -> dict:
                 "credits": credits, "is_pool": True, "gen_ed_categories": None}
 
     if t == "pool":
+        title = f"Choose {int(credits)} credit(s)"
+        if slot.get("ref") == "dept_level" and slot.get("dept"):
+            title = f"Choose a {slot.get('level', 400)}-level {slot['dept']} course"
         return {"course_code": slot.get("label", "Requirement"),
-                "course_title": f"Choose {int(credits)} credit(s)",
+                "course_title": title,
                 "credits": credits, "is_pool": True,
                 "pool_needed_credits": int(credits) if float(credits).is_integer() else credits,
                 "pool_ref": slot.get("ref")}
@@ -245,6 +248,32 @@ def _assign_world_language(records: list[dict], leftovers: list[dict]) -> None:
         leftovers.remove(course)   # its credits can't also count as elective
 
 
+def _course_number(course: dict) -> int:
+    m = re.search(r"\b(\d{1,3})", _norm(course.get("course_code", "")))
+    return int(m.group(1)) if m else 0
+
+
+def _assign_dept_level(records: list[dict], leftovers: list[dict]) -> None:
+    """Satisfy department level-selection pool slots ("PLSC 400-Level") from
+    leftover courses in that department at that level (400 covers 400-499),
+    one course per slot in plan order."""
+    for rec in records:
+        slot = rec["slot"]
+        if (rec["satisfied"] or slot.get("type") != "pool"
+                or slot.get("ref") != "dept_level" or not slot.get("dept")):
+            continue
+        level = int(slot.get("level") or 0)
+        hit = next(
+            (c for c in leftovers
+             if _dept(c) == slot["dept"] and level <= _course_number(c) < level + 100),
+            None,
+        )
+        if hit:
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = _norm(hit.get("course_code", ""))
+            leftovers.remove(hit)   # its credits can't also count as elective
+
+
 def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
     """Satisfy free-elective slots from the surplus-credit pool, in plan order.
     Purely credit-count based: any unclaimed course is by definition a free
@@ -283,12 +312,14 @@ def match_template(
         pre-satisfied (there's no single course to point at).
       * pool with anchor `codes` (e.g. an accounting elective anchored ACCTG 403W)
         — satisfied if an anchor is taken.
-      * world-language pools and free electives (only when `transcript_courses`
-        is passed) — satisfied from LEFTOVER courses: transcript courses neither
-        a template slot nor an audit (`used_codes`, see build_used_codes)
-        consumed.  Language slots take one leftover course from a
-        `_WORLD_LANGUAGE_DEPTS` dept each; elective slots draw on the surplus
-        credit pool.  Other un-anchored pools (business breadth) stay scheduled.
+      * world-language pools, dept level-selection pools ("PLSC 400-Level"), and
+        free electives (only when `transcript_courses` is passed) — satisfied
+        from LEFTOVER courses: transcript courses neither a template slot nor an
+        audit (`used_codes`, see build_used_codes) consumed.  Language slots take
+        one leftover course from a `_WORLD_LANGUAGE_DEPTS` dept each; dept-level
+        slots take one leftover course from their dept at their level; elective
+        slots draw on the surplus credit pool.  Other un-anchored pools
+        (business breadth) stay scheduled.
     """
     gen_ed_satisfied = gen_ed_satisfied or {}
     consumed: set[str] = set()
@@ -324,6 +355,7 @@ def match_template(
     if transcript_courses:
         leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
         _assign_world_language(records, leftovers)
+        _assign_dept_level(records, leftovers)
         _assign_electives(records, leftovers)
 
     return records

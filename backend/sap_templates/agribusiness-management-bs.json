@@ -233,13 +233,11 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "AGBM 400",
-            "AGBM 495A",
-            "AGBM 495B",
-            "AGBM 496"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "AGBM",
+          "level": 400,
+          "label": "AGBM 400-Level Course",
           "credits": 3.0
         },
         {
@@ -275,13 +273,11 @@
       "credits": 12.5,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "AGBM 400",
-            "AGBM 495A",
-            "AGBM 495B",
-            "AGBM 496"
-          ],
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "AGBM",
+          "level": 400,
+          "label": "AGBM 400-Level Course",
           "credits": 3.0
         },
         {

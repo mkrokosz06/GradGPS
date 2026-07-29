@@ -165,8 +165,11 @@
           "credits": 2.0
         },
         {
-          "type": "course",
-          "code": "SOC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "SOC",
+          "level": 400,
+          "label": "SOC 400-Level Course",
           "credits": 3.0
         },
         {
@@ -234,8 +237,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "SOC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "SOC",
+          "level": 400,
+          "label": "SOC 400-Level Course",
           "credits": 3.0
         },
         {
@@ -261,8 +267,11 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "course",
-          "code": "SOC 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "SOC",
+          "level": 400,
+          "label": "SOC 400-Level Course",
           "credits": 3.0
         },
         {

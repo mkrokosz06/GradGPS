@@ -165,8 +165,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "COMM 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {
@@ -192,8 +195,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "COMM 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {
@@ -262,8 +268,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "COMM 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "COMM",
+          "level": 400,
+          "label": "COMM 400-Level Course",
           "credits": 3.0
         },
         {

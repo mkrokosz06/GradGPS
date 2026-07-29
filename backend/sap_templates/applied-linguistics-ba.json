@@ -136,8 +136,11 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "APLNG 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "APLNG",
+          "level": 400,
+          "label": "APLNG 400-Level Course",
           "credits": 3.0
         },
         {
@@ -169,13 +172,19 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "course",
-          "code": "APLNG 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "APLNG",
+          "level": 400,
+          "label": "APLNG 400-Level Course",
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "APLNG 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "APLNG",
+          "level": 400,
+          "label": "APLNG 400-Level Course",
           "credits": 3.0
         },
         {
@@ -228,8 +237,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "APLNG 400",
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "APLNG",
+          "level": 400,
+          "label": "APLNG 400-Level Course",
           "credits": 3.0
         },
         {
