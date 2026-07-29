@@ -1,8 +1,9 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { setAuthToken } from "../services/api";
+import { setAuthToken, setOnUnauthorized } from "../services/api";
 import { getStoredToken, storeToken, clearToken } from "../services/tokenStorage";
 import { upsertMe } from "../services/userService";
+import { createSession, revokeSession } from "../services/authService";
 
 type AuthState = {
   userId:             string | null;
@@ -31,11 +32,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [onboardingDone, setOnboardingDone] = useState(false);
   const [loading,        setLoading]        = useState(true);
 
+  // Backend says the session is gone (revoked/expired past the 30-day window):
+  // clear local state so RootRedirector routes back to sign-in.
+  useEffect(() => {
+    setOnUnauthorized(() => {
+      clearToken();
+      setAuthToken(null);
+      AsyncStorage.multiRemove(["user_id", "user_name", "user_email", "onboarding_done"]);
+      setUserId(null); setName(null); setEmail(null); setOnboardingDone(false);
+    });
+    return () => setOnUnauthorized(null);
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
-        // Restore a stored ID token first so the api interceptor is armed
-        // before any authenticated calls fire.
+        // Restore the stored session token first so the api interceptor is
+        // armed before any authenticated calls fire.
         const token = await getStoredToken();
         if (token) setAuthToken(token);
 
@@ -60,17 +73,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   /**
-   * Real sign-in. Stores the ID token (SecureStore on native), arms the
-   * Bearer interceptor, then upserts the profile — the backend answers with
-   * the canonical provider-scoped user_id (e.g. "google:1234...").
-   *
-   * Note: Google ID tokens expire after ~1 hour; the backend will start
-   * returning 401 after that and the user must sign in again. A proper
-   * session/refresh mechanism is a follow-up.
+   * Real sign-in. Exchanges the ~1 h Google/Apple ID token for a backend
+   * session token (30-day sliding expiry), stores that (SecureStore on
+   * native), arms the Bearer interceptor, then upserts the profile — the
+   * backend answers with the canonical provider-scoped user_id.
    */
   async function signInWithIdToken(idToken: string) {
-    await storeToken(idToken);
-    setAuthToken(idToken);
+    const session = await createSession(idToken);
+    await storeToken(session.session_token);
+    setAuthToken(session.session_token);
     try {
       const user = await upsertMe();
       await AsyncStorage.multiSet([
@@ -80,7 +91,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       ]);
       setUserId(user.user_id); setName(user.name ?? null); setEmail(user.email ?? null);
     } catch (e) {
-      // Roll back a half-completed sign-in so we don't strand a bad token.
+      // Roll back a half-completed sign-in so we don't strand a dead session.
+      await revokeSession();
       await clearToken();
       setAuthToken(null);
       throw e;
@@ -93,6 +105,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
+    await revokeSession(); // best-effort server-side revoke while the token is still armed
     await clearToken();
     setAuthToken(null);
     await AsyncStorage.multiRemove(["user_id", "user_name", "user_email", "onboarding_done"]);

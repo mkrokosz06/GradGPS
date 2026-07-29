@@ -25,4 +25,23 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+// ── Session expiry handling ──────────────────────────────────────────────────
+// AuthContext registers a callback that clears local auth state, sending the
+// user back through sign-in. Only fires when a real token was attached (a 401
+// in the dev x-user-id flow means something else) and never for the session
+// exchange itself (a bad Google token there is handled by the sign-in screen).
+let onUnauthorized: (() => void) | null = null;
+
+export function setOnUnauthorized(cb: (() => void) | null) {
+  onUnauthorized = cb;
+}
+
+api.interceptors.response.use(undefined, (error) => {
+  const isSessionExchange = error?.config?.url?.includes("/auth/session");
+  if (error?.response?.status === 401 && authToken && !isSessionExchange) {
+    onUnauthorized?.();
+  }
+  return Promise.reject(error);
+});
+
 export default api;

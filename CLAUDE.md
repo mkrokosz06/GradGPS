@@ -192,7 +192,12 @@ For University Park majors with a published PSU bulletin plan, the timeline refl
 - **Real auth**: Google/Apple OIDC ID tokens, verified in `backend/auth.py` (JWKS signature, aud, iss, exp). Canonical `user_id` = provider-scoped sub (`google:<sub>` / `apple:<sub>`). Client IDs in `backend/.env` (`GOOGLE_CLIENT_IDS`, `APPLE_CLIENT_IDS`). Mobile: `expo-auth-session` in `signup.tsx` → `signInWithIdToken()` in `AuthContext` → token in SecureStore (AsyncStorage on web) → axios interceptor sends `Authorization: Bearer`.
 - **Dev bypass**: `AUTH_DEV_BYPASS=1` in `backend/.env` accepts the legacy spoofable `x-user-id` header (and leaves `/admin/*` open + keeps legacy `POST /users/create` alive). This is how Expo Go on the phone works (test user `matthew-test-001`). NEVER set in prod.
 - **Google OAuth cannot run in Expo Go** (auth proxy removed in SDK 50) — test the Google flow in Expo web (`npx expo start --web`, client ID allows localhost:8081/8082) or a dev build. Apple Sign In requires a dev build + Apple Developer Program (not yet done).
-- **Known gap**: ID tokens expire after ~1 h → backend returns 401 and the user must sign in again. No refresh/session mechanism yet.
+- **Sessions**: the mobile app exchanges the ~1 h ID token for a server-issued opaque session token
+  (`POST /auth/session` → `sess_*`, stored SHA-256-hashed in the `sessions` table, 30-day sliding
+  expiry via DynamoDB TTL + read-time check in `sessions.py`). `get_current_user` resolves `sess_*`
+  bearers from the table; other bearers still get full OIDC verification. `DELETE /auth/session` =
+  sign-out. A 401 with a token armed auto-clears mobile auth state (`setOnUnauthorized` in
+  `services/api.ts`) and routes back to sign-in.
 - **Admin**: `/admin/*` gated by `require_admin` — open under dev bypass, else `ADMIN_USER_IDS` allowlist (comma-separated provider-scoped ids).
 
 ### Official vs unofficial transcripts
