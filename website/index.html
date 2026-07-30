@@ -126,8 +126,9 @@
   .rm-flag { font-family: var(--display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; fill: var(--progress); }
   .rm-dest { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; fill: var(--navy); }
 
+  #rm-svg, #rm-title, #rm-meta { transition: opacity 0.3s ease; }
   @media (prefers-reduced-motion: no-preference) {
-    .rm-traveled { stroke-dasharray: 620; stroke-dashoffset: 620; animation: draw 1.6s ease-out 0.2s forwards; }
+    .rm-traveled { animation: draw 1.6s ease-out 0.2s forwards; }
     @keyframes draw { to { stroke-dashoffset: 0; } }
     .rm-pulse { animation: pulse 2.2s ease-out 1.8s infinite; transform-origin: center; transform-box: fill-box; }
     @keyframes pulse { 0% { opacity: 0.55; transform: scale(0.6); } 70% { opacity: 0; transform: scale(1.7); } 100% { opacity: 0; } }
@@ -312,64 +313,10 @@
     <div class="wrap">
       <div class="routemap-card">
         <div class="routemap-head">
-          <span class="t">Route: Enterprise Technology Integration, B.S.</span>
-          <span class="m">82 / 120 CR &middot; ETA MAY 2028</span>
+          <span class="t" id="rm-title">Route: Enterprise Technology Integration, B.S.</span>
+          <span class="m" id="rm-meta">82 / 120 CR &middot; ETA MAY 2027</span>
         </div>
-        <svg viewBox="0 0 980 220" role="img" aria-label="A route from Fall 2024 to graduation in May 2028: three semesters completed, Spring 2026 in progress, three semesters planned">
-          <!-- traveled route -->
-          <path class="rm-traveled" d="M 30 158 H 215 L 290 118 H 455" fill="none" stroke="#1a3a6b" stroke-width="5" stroke-linecap="round"/>
-          <!-- route ahead -->
-          <path d="M 455 118 H 520 L 595 78 H 800 L 872 40" fill="none" stroke="#2a5298" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 11" opacity="0.75"/>
-
-          <!-- completed stops -->
-          <g>
-            <circle cx="85" cy="158" r="9" fill="#16a34a"/>
-            <path d="M 81 158 l 3 3 l 5.5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <text class="rm-label" x="85" y="188" text-anchor="middle">Fall 2024</text>
-            <text class="rm-sub" x="85" y="204" text-anchor="middle">16 cr</text>
-          </g>
-          <g>
-            <circle cx="180" cy="158" r="9" fill="#16a34a"/>
-            <path d="M 176 158 l 3 3 l 5.5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <text class="rm-label" x="180" y="188" text-anchor="middle">Spring 2025</text>
-            <text class="rm-sub" x="180" y="204" text-anchor="middle">15 cr</text>
-          </g>
-          <g>
-            <circle cx="345" cy="118" r="9" fill="#16a34a"/>
-            <path d="M 341 118 l 3 3 l 5.5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            <text class="rm-label" x="345" y="148" text-anchor="middle">Fall 2025</text>
-            <text class="rm-sub" x="345" y="164" text-anchor="middle">15 cr</text>
-          </g>
-
-          <!-- current stop -->
-          <g>
-            <circle class="rm-pulse" cx="455" cy="118" r="14" fill="none" stroke="#d97706" stroke-width="3"/>
-            <circle cx="455" cy="118" r="9" fill="#fff" stroke="#d97706" stroke-width="3.5"/>
-            <text class="rm-flag" x="455" y="86" text-anchor="middle">YOU ARE HERE</text>
-            <text class="rm-label" x="455" y="148" text-anchor="middle">Spring 2026</text>
-            <text class="rm-sub" x="455" y="164" text-anchor="middle">in progress &middot; 15 cr</text>
-          </g>
-
-          <!-- planned stops -->
-          <g>
-            <circle cx="650" cy="78" r="8" fill="#fff" stroke="#9ca3af" stroke-width="3"/>
-            <text class="rm-label" x="650" y="108" text-anchor="middle">Fall 2026</text>
-            <text class="rm-sub" x="650" y="124" text-anchor="middle">planned</text>
-          </g>
-          <g>
-            <circle cx="760" cy="78" r="8" fill="#fff" stroke="#9ca3af" stroke-width="3"/>
-            <text class="rm-label" x="760" y="108" text-anchor="middle">Spring 2027</text>
-            <text class="rm-sub" x="760" y="124" text-anchor="middle">planned</text>
-          </g>
-
-          <!-- destination pin -->
-          <g>
-            <path d="M 890 8 c -11.5 0 -20 8.5 -20 19 c 0 13 20 32 20 32 s 20 -19 20 -32 c 0 -10.5 -8.5 -19 -20 -19 z" fill="#1a3a6b"/>
-            <circle cx="890" cy="27" r="7.5" fill="#fff"/>
-            <text class="rm-dest" x="890" y="92" text-anchor="middle">GRADUATION</text>
-            <text class="rm-sub" x="890" y="108" text-anchor="middle">May 2028</text>
-          </g>
-        </svg>
+        <svg id="rm-svg" viewBox="0 0 980 220" role="img" aria-label="Example degree route"></svg>
       </div>
     </div>
   </section>
@@ -594,6 +541,130 @@
       submit.disabled = false;
     });
   });
+})();
+</script>
+
+<script>
+(function () {
+  // Rotating hero route map — one of four example students, random start.
+  var XS = [85, 180, 345, 455, 650, 760];
+  var YS = [158, 158, 118, 118, 78, 78];
+  // Full route polyline from start to the destination pin.
+  var PTS = [[30, 158], [215, 158], [290, 118], [520, 118], [595, 78], [800, 78], [872, 40]];
+
+  var SCENARIOS = [
+    {
+      major: "Enterprise Technology Integration, B.S.",
+      credits: "82 / 120", eta: "MAY 2027", pinDate: "May 2027", cur: 3,
+      stops: [["Fall 2024", "16 cr"], ["Spring 2025", "15 cr"], ["Fall 2025", "15 cr"],
+              ["Spring 2026", "in progress · 15 cr"], ["Fall 2026", "planned"], ["Spring 2027", "planned"]]
+    },
+    {
+      major: "Marketing, B.S.",
+      credits: "24 / 120", eta: "MAY 2028", pinDate: "May 2028", cur: 1,
+      stops: [["Fall 2025", "17 cr"], ["Spring 2026", "in progress · 16 cr"], ["Fall 2026", "planned"],
+              ["Spring 2027", "planned"], ["Fall 2027", "planned"], ["Spring 2028", "planned"]]
+    },
+    {
+      major: "Accounting, B.S.",
+      credits: "94 / 120", eta: "DEC 2026", pinDate: "Dec 2026", cur: 4,
+      stops: [["Spring 2024", "15 cr"], ["Fall 2024", "16 cr"], ["Spring 2025", "17 cr"],
+              ["Fall 2025", "15 cr"], ["Spring 2026", "in progress · 15 cr"], ["Fall 2026", "planned"]]
+    },
+    {
+      major: "Psychology, B.S.",
+      credits: "31 / 120", eta: "DEC 2027", pinDate: "Dec 2027", cur: 2,
+      stops: [["Spring 2025", "16 cr"], ["Fall 2025", "15 cr"], ["Spring 2026", "in progress · 15 cr"],
+              ["Fall 2026", "planned"], ["Spring 2027", "planned"], ["Fall 2027", "planned"]]
+    }
+  ];
+
+  var svg = document.getElementById("rm-svg");
+  var title = document.getElementById("rm-title");
+  var meta = document.getElementById("rm-meta");
+  if (!svg || !title || !meta) return;
+  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function pathD(points) {
+    return points.map(function (p, i) { return (i ? "L " : "M ") + p[0] + " " + p[1]; }).join(" ");
+  }
+
+  // Split the route polyline at the current stop (always on a horizontal segment).
+  function splitAt(k) {
+    var cx = XS[k], cy = YS[k];
+    var trav = [PTS[0]], i = 1;
+    for (; i < PTS.length; i++) {
+      var prev = PTS[i - 1], pt = PTS[i];
+      if (prev[1] === cy && pt[1] === cy && prev[0] <= cx && cx <= pt[0]) {
+        trav.push([cx, cy]);
+        break;
+      }
+      trav.push(pt);
+    }
+    return { trav: trav, ahead: [[cx, cy]].concat(PTS.slice(i)) };
+  }
+
+  function stopMarkup(k, s) {
+    var x = XS[k], y = YS[k];
+    var label = '<text class="rm-label" x="' + x + '" y="' + (y + 30) + '" text-anchor="middle">' + s.stops[k][0] + "</text>" +
+                '<text class="rm-sub" x="' + x + '" y="' + (y + 46) + '" text-anchor="middle">' + s.stops[k][1] + "</text>";
+    if (k < s.cur) {
+      return "<g><circle cx=\"" + x + "\" cy=\"" + y + "\" r=\"9\" fill=\"#16a34a\"/>" +
+        '<path d="M ' + (x - 4) + " " + y + ' l 3 3 l 5.5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
+        label + "</g>";
+    }
+    if (k === s.cur) {
+      return '<g><circle class="rm-pulse" cx="' + x + '" cy="' + y + '" r="14" fill="none" stroke="#d97706" stroke-width="3"/>' +
+        '<circle cx="' + x + '" cy="' + y + '" r="9" fill="#fff" stroke="#d97706" stroke-width="3.5"/>' +
+        '<text class="rm-flag" x="' + x + '" y="' + (y - 32) + '" text-anchor="middle">YOU ARE HERE</text>' +
+        label + "</g>";
+    }
+    return '<g><circle cx="' + x + '" cy="' + y + '" r="8" fill="#fff" stroke="#9ca3af" stroke-width="3"/>' + label + "</g>";
+  }
+
+  function render(s) {
+    var split = splitAt(s.cur);
+    var parts = [
+      '<path class="rm-traveled" d="' + pathD(split.trav) + '" fill="none" stroke="#1a3a6b" stroke-width="5" stroke-linecap="round"/>',
+      '<path d="' + pathD(split.ahead) + '" fill="none" stroke="#2a5298" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 11" opacity="0.75"/>'
+    ];
+    for (var k = 0; k < s.stops.length; k++) parts.push(stopMarkup(k, s));
+    parts.push(
+      '<g><path d="M 890 8 c -11.5 0 -20 8.5 -20 19 c 0 13 20 32 20 32 s 20 -19 20 -32 c 0 -10.5 -8.5 -19 -20 -19 z" fill="#1a3a6b"/>' +
+      '<circle cx="890" cy="27" r="7.5" fill="#fff"/>' +
+      '<text class="rm-dest" x="890" y="92" text-anchor="middle">GRADUATION</text>' +
+      '<text class="rm-sub" x="890" y="108" text-anchor="middle">' + s.pinDate + "</text></g>"
+    );
+    svg.innerHTML = parts.join("");
+    svg.setAttribute("aria-label",
+      "Example route for " + s.major + ": " + s.cur + " semesters completed, one in progress, graduating " + s.pinDate);
+    title.textContent = "Route: " + s.major;
+    meta.textContent = s.credits + " CR · ETA " + s.eta;
+    if (!reduced) {
+      var trav = svg.querySelector(".rm-traveled");
+      var len = Math.ceil(trav.getTotalLength());
+      trav.style.strokeDasharray = len;
+      trav.style.strokeDashoffset = len;
+    }
+  }
+
+  var i = Math.floor(Math.random() * SCENARIOS.length);
+  render(SCENARIOS[i]);
+
+  if (!reduced) {
+    setInterval(function () {
+      svg.style.opacity = "0";
+      title.style.opacity = "0";
+      meta.style.opacity = "0";
+      setTimeout(function () {
+        i = (i + 1) % SCENARIOS.length;
+        render(SCENARIOS[i]);
+        svg.style.opacity = "1";
+        title.style.opacity = "1";
+        meta.style.opacity = "1";
+      }, 320);
+    }, 8000);
+  }
 })();
 </script>
 
