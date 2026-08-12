@@ -29,7 +29,7 @@ export default function WelcomeScreen() {
           <Text style={styles.primaryBtnText}>Get Started</Text>
         </TouchableOpacity>
         <Text style={styles.legalNote}>
-          Free during beta.
+          Free for students.
         </Text>
         <View style={styles.legalLinks}>
           <TouchableOpacity onPress={() => router.push("/tos" as any)}>

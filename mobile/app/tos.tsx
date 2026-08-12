@@ -23,7 +23,7 @@ export default function TermsOfServiceScreen() {
         </Section>
 
         <Section title="2. Description of Service">
-          GradGPS is an academic planning tool that helps college students track their degree progress, visualize their academic timeline, and explore professor ratings. It is a student-built tool and is provided free of charge during its beta period.
+          GradGPS is an academic planning tool that helps college students track their degree progress, visualize their academic timeline, and explore professor ratings. It is a student-built tool and is provided free of charge.
         </Section>
 
         <Section title="3. Not Official Academic Advising">

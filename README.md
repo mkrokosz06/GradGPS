@@ -2,7 +2,7 @@
 
 AI-powered degree advisor for Penn State students. Upload your transcript, pick your major, and get an instant audit of every requirement — done, in progress, or missing — plus a projected semester-by-semester timeline to graduation.
 
-Launching exclusively at **Penn State University Park**. Free during beta. B2C.
+Launching exclusively at **Penn State University Park**. Free for students.
 
 ---
 
