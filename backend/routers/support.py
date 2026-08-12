@@ -53,9 +53,12 @@ class ContactBody(BaseModel):
 def _client_key(request: Request, user_id: str | None) -> str:
     if user_id:
         return f"user:{user_id}"
-    # App Runner terminates TLS and forwards the caller IP in X-Forwarded-For.
+    # App Runner terminates TLS and appends the real caller IP to the RIGHT of any
+    # client-supplied X-Forwarded-For. Take the rightmost (trusted) hop — the
+    # leftmost is attacker-controlled and would let a spoofer rotate the rate-limit
+    # key freely. Falls back to the socket peer if the header is absent.
     fwd = request.headers.get("x-forwarded-for", "")
-    ip = fwd.split(",")[0].strip() or (request.client.host if request.client else "unknown")
+    ip = fwd.split(",")[-1].strip() or (request.client.host if request.client else "unknown")
     return f"ip:{ip}"
 
 
