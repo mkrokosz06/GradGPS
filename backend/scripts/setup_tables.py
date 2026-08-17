@@ -171,4 +171,26 @@ except Exception as e:
     print(f"TTL note: {e}")
 
 
+# ── 7. school_requests ───────────────────────────────────────────────────────
+# PK: school_key  (canonical slug from charlie.normalize_school, or "unmatched-*")
+# One row per canonical school. Charlie accumulates votes here (atomic ADD) so
+# every spelling of a school lands on the same row. Stores aliases_seen,
+# optional notify_emails, and the last feasibility-triage readiness report.
+
+try:
+    dynamodb.create_table(
+        TableName="school_requests",
+        KeySchema=[
+            {"AttributeName": "school_key", "KeyType": "HASH"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "school_key", "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    print("Created table: school_requests")
+except dynamodb.exceptions.ResourceInUseException:
+    print("Table already exists: school_requests")
+
+
 print("\nAll tables and buckets ready.")

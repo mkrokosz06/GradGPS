@@ -114,6 +114,7 @@ SAP templates live as JSON under `backend/sap_templates/` (currently `accounting
 | `users.py` | `/users` | User profile |
 | `admin.py` | `/admin` | Admin utilities |
 | `support.py` | `/support` | Support/contact form (mobile app + gradgps.com). Emails `SUPPORT_EMAIL` via SES with the sender as Reply-To; unset `SUPPORT_EMAIL` (local dev) = log only. No auth required (website form is anonymous); in-memory rate limit + honeypot field. SES setup: identity `mkrokosz06@gmail.com` verified, `ses:SendEmail` on the App Runner role (`GradGPSSupportSES` inline policy). |
+| `charlie.py` | `/charlie` | **Charlie** — the "add my school" agent (multi-school demand funnel + onboarding scout). Public `POST /charlie/request` captures + normalizes a school name (aliases → one canonical row, votes accumulate); admin endpoints rank demand and run **feasibility triage** (`run_triage` → readiness report). Core logic in `backend/charlie.py` (+ `charlie_schools.json` seed roster); founder dashboard at `/charlie/dashboard` (`static/charlie.html`). **Not autonomous** — never adds a school without a human. Design: `docs/charlie.md`. |
 
 #### DynamoDB tables
 | Table | PK | SK | Contents |
@@ -121,6 +122,7 @@ SAP templates live as JSON under `backend/sap_templates/` (currently `accounting
 | `requirements` | `program_name` | `group_course` | All PSU major + gen ed requirements |
 | `users` | `user_id` | — | User profile (major, subplan, timestamps) |
 | `transcript_courses` | `user_id` | `course_code` | Parsed transcript courses |
+| `school_requests` | `school_key` | — | Charlie's per-canonical-school demand rows (votes, aliases_seen, notify_emails, last readiness report) |
 
 #### Gen ed
 Gen ed requirements are stored under `program_name = "__GEN_ED__"` in the requirements table. `run_gen_ed_audit()` enforces cross-group exclusivity (a course can only satisfy one gen ed category) with an exception for interdomain/multi-category courses (`multi_category=True`).

@@ -1,0 +1,41 @@
+{
+  "_comment": "Charlie's seed roster for alias→canonical resolution. Only PSU carries sis/catalog_platform/rmp_school_id (verified). For every other school those stay null on purpose — Charlie's feasibility triage (or a human) fills them in; fabricating an SIS vendor would be worse than 'unknown'. Domains are used by triage to probe the school's catalog. 'aliases' are matched case/punctuation-insensitively; keep acronyms here (they are matched EXACTLY, never fuzzily, to avoid osu/asu-style collisions). Note 'penn' is deliberately NOT an alias of either Penn State or UPenn — it's genuinely ambiguous.",
+  "schools": [
+    {
+      "key": "penn-state",
+      "name": "Penn State",
+      "aliases": ["pennsylvania state university", "penn state university", "psu", "penn st", "happy valley", "penn state university park", "psu university park", "nittany lions"],
+      "domain": "psu.edu",
+      "sis": "LionPATH",
+      "catalog_url": "https://bulletins.psu.edu/",
+      "catalog_platform": "CourseLeaf",
+      "rmp_school_id": "U2Nob29sLTc1OA=="
+    },
+    { "key": "ohio-state", "name": "Ohio State University", "aliases": ["ohio state", "osu", "the ohio state university", "tosu", "buckeyes"], "domain": "osu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-michigan", "name": "University of Michigan", "aliases": ["michigan", "umich", "u of m", "u-m", "university of michigan ann arbor", "wolverines"], "domain": "umich.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "michigan-state", "name": "Michigan State University", "aliases": ["michigan state", "msu", "spartans"], "domain": "msu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "upenn", "name": "University of Pennsylvania", "aliases": ["upenn", "u penn", "university of pennsylvania", "penn quakers", "wharton"], "domain": "upenn.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "pitt", "name": "University of Pittsburgh", "aliases": ["pitt", "upitt", "university of pittsburgh", "pittsburgh", "panthers"], "domain": "pitt.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "temple", "name": "Temple University", "aliases": ["temple", "temple university", "owls"], "domain": "temple.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "rutgers", "name": "Rutgers University", "aliases": ["rutgers", "rutgers university", "scarlet knights"], "domain": "rutgers.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "uc-berkeley", "name": "UC Berkeley", "aliases": ["berkeley", "cal", "uc berkeley", "university of california berkeley", "ucb", "golden bears"], "domain": "berkeley.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "ucla", "name": "UCLA", "aliases": ["ucla", "university of california los angeles", "bruins"], "domain": "ucla.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "ut-austin", "name": "University of Texas at Austin", "aliases": ["ut austin", "ut", "university of texas", "university of texas at austin", "texas", "longhorns"], "domain": "utexas.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "texas-am", "name": "Texas A&M University", "aliases": ["texas a and m", "texas am", "tamu", "texas a&m", "aggies"], "domain": "tamu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-florida", "name": "University of Florida", "aliases": ["florida", "uf", "university of florida", "gators"], "domain": "ufl.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-georgia", "name": "University of Georgia", "aliases": ["georgia", "uga", "university of georgia", "bulldogs"], "domain": "uga.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "uiuc", "name": "University of Illinois Urbana-Champaign", "aliases": ["uiuc", "illinois", "u of i", "university of illinois", "university of illinois urbana champaign", "fighting illini"], "domain": "illinois.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "uw-madison", "name": "University of Wisconsin-Madison", "aliases": ["wisconsin", "uw madison", "uw-madison", "university of wisconsin", "university of wisconsin madison", "badgers"], "domain": "wisc.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-washington", "name": "University of Washington", "aliases": ["udub", "u dub", "university of washington", "uw seattle", "huskies"], "domain": "washington.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "arizona-state", "name": "Arizona State University", "aliases": ["arizona state", "asu", "sun devils"], "domain": "asu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-arizona", "name": "University of Arizona", "aliases": ["arizona", "u of a", "university of arizona", "wildcats"], "domain": "arizona.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "purdue", "name": "Purdue University", "aliases": ["purdue", "purdue university", "boilermakers"], "domain": "purdue.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "indiana-university", "name": "Indiana University Bloomington", "aliases": ["indiana", "iu", "indiana university", "indiana university bloomington", "hoosiers"], "domain": "indiana.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-minnesota", "name": "University of Minnesota", "aliases": ["minnesota", "umn", "u of m minnesota", "university of minnesota", "golden gophers"], "domain": "umn.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "university-of-maryland", "name": "University of Maryland", "aliases": ["maryland", "umd", "university of maryland", "terps", "terrapins"], "domain": "umd.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "virginia-tech", "name": "Virginia Tech", "aliases": ["virginia tech", "vt", "vpi", "hokies"], "domain": "vt.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "unc-chapel-hill", "name": "UNC Chapel Hill", "aliases": ["unc", "north carolina", "chapel hill", "unc chapel hill", "university of north carolina", "tar heels"], "domain": "unc.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "nc-state", "name": "North Carolina State University", "aliases": ["nc state", "ncsu", "north carolina state", "wolfpack"], "domain": "ncsu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null },
+    { "key": "nyu", "name": "New York University", "aliases": ["nyu", "new york university", "violets"], "domain": "nyu.edu", "sis": null, "catalog_url": null, "catalog_platform": null, "rmp_school_id": null }
+  ]
+}
