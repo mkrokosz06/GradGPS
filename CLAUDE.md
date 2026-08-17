@@ -101,7 +101,7 @@ logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into th
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
 
-SAP templates live as JSON under `backend/sap_templates/` (currently `accounting-bs-business.json`, `marketing-bs-business.json`).
+SAP templates live as JSON under `backend/sap_templates/` (~180 University Park majors, e.g. `accounting-bs-business.json`, `marketing-bs-business.json`).
 
 #### Routers
 | Router | Prefix | Purpose |
@@ -128,12 +128,13 @@ Gen ed requirements are stored under `program_name = "__GEN_ED__"` in the requir
 ---
 
 ### Mobile (`mobile/`)
-Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
+Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 
 #### Navigation
 - `app/_layout.tsx` — root Stack + `AuthProvider`. `RootRedirector` bounces unauthenticated users to `/onboarding`.
 - `app/(tabs)/_layout.tsx` — **Tabs layout with tab bar hidden** (`tabBarStyle: { display: "none" }`). Do NOT change this to Stack — it breaks `router.navigate()` between sibling screens. Navigation is via the hamburger menu in `NavHeader`.
-- `app/(tabs)/index.tsx` — Timeline screen (main screen)
+- `app/(tabs)/index.tsx` — Home screen (main screen: greeting + current/next-semester registration dashboard)
+- `app/(tabs)/timeline.tsx` — Full academic timeline screen
 - `app/(tabs)/upload.tsx` — Transcript upload
 - `app/(tabs)/major.tsx` — Major + subplan selection (two-step flow)
 - `app/(tabs)/account.tsx` — Account / audit summary
@@ -144,10 +145,10 @@ Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
 | File | Purpose |
 |------|---------|
 | `components/NavHeader.tsx` | Top bar with hamburger side-menu. Routes use `router.navigate()`. |
-| `context/AuthContext.tsx` | Auth state. In dev, falls back to hardcoded `USER_ID` from `constants/api.ts` when AsyncStorage is empty. |
+| `context/AuthContext.tsx` | Auth state. Real path exchanges an OIDC token for a session (`signInWithIdToken`); a legacy dev `signIn(uid, name, email)` seeds the `x-user-id` model against `AUTH_DEV_BYPASS` backends. |
 | `services/api.ts` | Base axios instance (uses `API_BASE`) |
 | `services/*Service.ts` | Typed wrappers for each backend endpoint |
-| `constants/api.ts` | `API_BASE` (device IP:8080) and `USER_ID` (hardcoded dev user) |
+| `constants/api.ts` | `API_BASE` (device IP:8080, or `EXPO_PUBLIC_API_BASE` in prod) and the Google OAuth client IDs |
 
 ---
 
@@ -166,8 +167,8 @@ Expo SDK 54, Expo Router v3, NativeWind (Tailwind).
 **PHYS 211 / PHYS 250 physics sequence alternatives (32 programs):**
 The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
 
-**MATH 250 / MATH 251 differential equations alternatives:**
-MATH 250 (3cr) and MATH 251 (4cr) cover the same content and are interchangeable across all programs. `patch_math_alternatives()` in `seed_matthew.py` (pair IDs 700+) generically scans every `(program, group)` where MATH 250 appears and pairs it with MATH 251, inserting a MATH 251 row where absent. Skips `choose_credits` pools (no pairing needed) and already-paired rows (idempotent).
+**Known course alternatives across the catalog (`patch_known_alternatives()`):**
+A single generic pass in `seed_matthew.py` (pair IDs 800+) fixes choose-one pairing defects for a table of known interchangeable course groups — MATH 250/251 (diff eq), MATH 110/140, the CAS 100 sections, STAT/SCM/DS options, chemistry, CMPSC, and business alternatives among them. Per `(program, group)` it pairs 2+ unpaired courses into a shared `pair_group_id`, optionally inserts an absent alternative (`insert_missing`), skips `choose_credits` pools and `exclude`d combos (where both courses are genuinely required), and skips already-paired rows (idempotent).
 
 ### Timeline semester projection
 

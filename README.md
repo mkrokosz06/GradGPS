@@ -32,7 +32,7 @@ Launching exclusively at **Penn State University Park**. Free for students.
 
 | Layer | Technology |
 |-------|-----------|
-| Mobile | React Native 0.81 + Expo SDK 54 + Expo Router v3 |
+| Mobile | React Native 0.81 + Expo SDK 54 + Expo Router v6 |
 | Styling | NativeWind v4 (Tailwind for React Native) |
 | Backend | Python + FastAPI |
 | Database | AWS DynamoDB (DynamoDB Local in dev) |
@@ -115,7 +115,9 @@ python scripts/setup_tables.py    # create tables/buckets
 python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
 python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
 python scripts/seed_matthew.py    # seed test user + transcript
+python scripts/build_rmp_index.py # rebuild RateMyProfessors course→professor index (~20-40 min)
 ```
+> Without the RMP index, `/courses/:code/professors` returns no professors for any course.
 
 ### 3. Start the backend
 ```bash

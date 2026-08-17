@@ -3,7 +3,7 @@
 Tests here exercise real FastAPI routes via `fastapi.testclient.TestClient` (or httpx)
 against the local stack: `docker-compose up -d` + seeded tables. They are slower than
 unit tests and may be skipped in environments without Docker
-(`pytest.mark.skipif` on a reachability check).
+(`pytest.skip` on a reachability check).
 
 ## Existing
 

@@ -142,6 +142,8 @@ Returns the same dict shape as `parse_transcript` (`course_code`, `raw_code`, `g
 1. **Word-level extraction.** Use `page.extract_words()` (not `extract_text()`) to get tokens with `x0`, `x1`, `top` coordinates. Pre-joined lines are exactly what corrupts across columns.
 2. **Determine the column split — inspect the sample first.** Run `extract_words()` on the real sample and inspect the distribution of word `x0` values (there should be two clusters). Find the real boundary by clustering `x0` into two groups (e.g. simple 1-D k-means, or the largest gap in a sorted `x0` histogram). **Do NOT hardcode a pixel value blindly** — derive it, then assign each word to left/right column by comparing `x0` to the boundary. (Risk (b): the boundary may shift between students.)
 3. **Watermark strip (heuristic — tune on sample).** The "Copy of Transcript" watermark tokens are isolated **single-character** words stacked vertically in a **narrow x band**. Filter out word tokens where `len(text.strip()) == 1` AND the token falls in the watermark x-band AND participates in a vertical stack (multiple single-char tokens at similar `x0`, increasing `top`). Detect the band from that stack, not a magic constant. Remove these tokens before line reconstruction. Comment that this is heuristic and sample-tuned.
+
+   > **As shipped (differs from this proposal):** the implemented `parse_official_transcript` strips the watermark by **font size**, not by an x-band/single-char stack. It calls `page.filter()` to drop every `char` object at or above `_WATERMARK_MIN_SIZE = 12.0` pt (real course text is 6–9 pt; the watermark glyphs are ~16.7–22.2 pt), then rebuilds words from what survives (`transcript_parser.py:69-73, 244-249`). Simpler and more robust than the x-band stack heuristic.
 4. **Reconstruct lines per column.** Within each column, group surviving words by rounded `top` (e.g. `round(top / 2)` to absorb jitter), sort each group by `x0`, join with spaces. This yields clean single-course lines.
 5. **Match courses.** Run the existing `COURSE_PATTERN` against each reconstructed per-column line; reuse `_normalise_code`, status logic, and `is_writing` detection unchanged.
 6. **Term parsing.** Track the current term using **`FULL_TERM_PATTERN`** (Step 2) mapped via `_FULL_SEASON` to internal "FA 2025". Terms appear per column, so track term **per column** as you walk that column's lines.
@@ -149,7 +151,7 @@ Returns the same dict shape as `parse_transcript` (`course_code`, `raw_code`, `g
 
 #### 3b. `parse_and_detect(pdf_bytes) -> tuple[list[dict], OfficialDetection]`
 
-Single entry point used by the router. Extracts text once, detects, then picks the parser:
+Detect-then-parse in one call. Extracts text once, detects, then picks the parser:
 
 ```python
 from official_detector import detect_official, OfficialDetection
@@ -164,6 +166,8 @@ def parse_and_detect(pdf_bytes: bytes) -> tuple[list[dict], OfficialDetection]:
         courses = parse_transcript(pdf_bytes, pages_text=pages_text)
     return courses, detection
 ```
+
+> **As shipped:** `parse_and_detect` exists but is a **convenience wrapper for the CLI/tests** — it is NOT what the router calls. The upload route needs to return the consent-gate 409 *before* doing any parsing work, so the shipped code splits the two steps into `detect_kind(pdf_bytes) -> (detection, pages_text)` (cheap: extract text + classify, no course parsing) and `parse_with_detection(pdf_bytes, detection, pages_text) -> list[dict]` (runs the matching parser). `parse_and_detect` just chains those two. See `transcript_parser.py:291-327`.
 
 #### 3c. Trustworthiness safety net (Risk (b) — mandatory)
 
@@ -208,18 +212,24 @@ print([(x['course_code'], x['term']) for x in c])"
    ```python
    OFFICIAL_DETECT = os.getenv("OFFICIAL_DETECT", "0") == "1"
    ```
-3. **Replace** the current parse call with `parse_and_detect` (keep the existing `TimeoutError` / broad-`except` → 422 wrappers):
+3. **Replace** the current parse call. **As shipped, this is split in two so the 409 gate can fire before any parsing** (see box below): first `detect_kind` (cheap classify), then — only after the gate — `parse_with_detection` (keep the existing `TimeoutError` / broad-`except` → 422 wrappers on both):
    ```python
-   from transcript_parser import parse_and_detect, official_parse_looks_bad
-   courses, detection = await asyncio.wait_for(
-       asyncio.to_thread(parse_and_detect, pdf_bytes),
+   from transcript_parser import detect_kind, parse_with_detection, official_parse_looks_bad
+   detection, pages_text = await asyncio.wait_for(
+       asyncio.to_thread(detect_kind, pdf_bytes),
+       timeout=PARSE_TIMEOUT_SECONDS,
+   )
+   # ... 409 consent gate here (step 5), BEFORE parsing ...
+   courses = await asyncio.wait_for(
+       asyncio.to_thread(parse_with_detection, pdf_bytes, detection, pages_text),
        timeout=PARSE_TIMEOUT_SECONDS,
    )
    ```
-4. **Always log** (shadow mode observes without acting):
+   > **Gate-before-parse (as shipped):** the original plan below parses first and gates afterward. The shipped route reorders these: it detects, logs, **raises the 409 before parsing**, and only parses if the upload is proceeding. This avoids wasting parse work on a rejected official upload. The steps below are otherwise accurate.
+4. **Always log** (shadow mode observes without acting). As shipped, the line logs the derived `kind` string rather than the raw bool:
    ```python
-   logger.info("official_detection user=%s score=%d official=%s signals=%s ack=%s",
-               user_id, detection.score, detection.is_official, detection.signals, acknowledge_official)
+   logger.info("official_detection user=%s kind=%s score=%d signals=%s ack=%s",
+               user_id, kind, detection.score, detection.signals, acknowledge_official)
    ```
 5. **409 consent gate** — only when the flag is on:
    ```python

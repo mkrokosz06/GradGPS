@@ -140,7 +140,15 @@ Each semester slot is one of:
 The template is the **backbone** (order + completeness + credit balance). It is **not**
 the source of truth for what a given student still needs — that stays the audit engine.
 
-### 5.2 Matching pass — new `_match_template(template, audit_result, gen_ed_result)`
+> **As shipped (differs from this proposal):** templates are **JSON files** on disk under
+> `backend/sap_templates/*.json`, not a DynamoDB table — loaded and `lru_cache`d by
+> `load_template(program_name, subplan)` in `plan_templates.py` (which matches on
+> `program_name`, prefers an exact `subplan`, else the subplan-less base template). The
+> shipped **slot types** are `VALID_SLOT_TYPES = {course, choose_one, gen_ed, pool, elective}`
+> — i.e. `fixed_course`→`course`, `requirement_pool`→`pool`, plus `choose_one` and `elective`
+> added during scraping. Catalog-year is not part of the key today.
+
+### 5.2 Matching pass — new `match_template(...)` (shipped in `sap_schedule.py`)
 
 Walk the template in order. For each slot, ask the **audit engine** (unchanged) whether
 it's already satisfied for this student:
@@ -154,7 +162,7 @@ it's already satisfied for this student:
 Output: an ordered list of scheduled + placeholder items with a *desired* semester
 index from the template.
 
-### 5.3 Reflow — new `_reflow(matched_items, current_term)`
+### 5.3 Reflow — new `_reflow_template(records, base_term)` (shipped in `timeline.py`)
 
 A real student rarely matches the template exactly (transfer credits, off-sequence
 courses, a retake). After matching, **reflow**:
@@ -171,11 +179,11 @@ placement given this student's real state*. This is the "hybrid."
 `get_timeline()` becomes:
 
 ```
-template = load_template(program_name, catalog_year, subplan)
+template = load_template(program_name, subplan)   # (as shipped: no catalog_year arg)
 if template:
-    items = _reflow(_match_template(template, audit, gen_ed), current_term)
+    items = _reflow_template(match_template(template, ...), current_term)
 else:
-    items = _sort_and_spread(_collect_missing(audit))   # Layer 1 path
+    items = _build_layer1_future(audit, gen_ed, ...)   # Layer 1 path
 ```
 
 Any major without a template runs the pure Layer 1 packer. The engine always produces
