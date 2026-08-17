@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Charlie — School Demand</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:#0f1117; --surface:#1a1d27; --border:#2a2d3e; --accent:#6366f1;
+      --accent2:#8b5cf6; --text:#e2e8f0; --muted:#64748b; --green:#22c55e;
+      --yellow:#eab308; --red:#ef4444;
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif; background:var(--bg); color:var(--text); min-height:100vh; }
+    header { background:var(--surface); border-bottom:1px solid var(--border); padding:0 32px; height:60px; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:100; }
+    header .logo { font-size:18px; font-weight:700; background:linear-gradient(135deg,var(--accent),var(--accent2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    header .subtitle { font-size:12px; color:var(--muted); margin-top:2px; }
+    .refresh-btn { background:var(--accent); color:#fff; border:none; padding:7px 18px; border-radius:8px; cursor:pointer; font-size:13px; font-weight:600; transition:opacity .15s; }
+    .refresh-btn:hover { opacity:.85; }
+    .stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; padding:28px 32px 0; }
+    .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px 24px; }
+    .stat-card .label { font-size:12px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+    .stat-card .value { font-size:36px; font-weight:700; margin-top:6px; }
+    .stat-card.a .value { color:var(--accent); }
+    .stat-card.b .value { color:var(--green); }
+    .stat-card.c .value { color:var(--accent2); }
+    .stat-card.d .value { color:var(--yellow); }
+    .panel { background:var(--surface); border:1px solid var(--border); border-radius:12px; margin:28px 32px; overflow:hidden; }
+    .panel-header { padding:16px 20px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+    .panel-header .count-badge { background:var(--border); color:var(--muted); font-size:12px; padding:2px 8px; border-radius:20px; }
+    input[type="text"] { background:var(--bg); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:7px 12px; font-size:13px; outline:none; width:240px; transition:border-color .15s; }
+    input[type="text"]:focus { border-color:var(--accent); }
+    .table-wrap { overflow-x:auto; }
+    table { width:100%; border-collapse:collapse; font-size:13px; }
+    thead th { padding:11px 16px; text-align:left; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); border-bottom:1px solid var(--border); white-space:nowrap; }
+    tbody tr { border-bottom:1px solid var(--border); }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:rgba(99,102,241,.06); }
+    tbody td { padding:10px 16px; color:var(--text); vertical-align:middle; }
+    .badge { display:inline-block; padding:2px 8px; border-radius:20px; font-size:11px; font-weight:600; }
+    .badge-green { background:rgba(34,197,94,.15); color:var(--green); }
+    .badge-yellow { background:rgba(234,179,8,.15); color:var(--yellow); }
+    .badge-red { background:rgba(239,68,68,.15); color:var(--red); }
+    .badge-muted { background:var(--border); color:var(--muted); }
+    .badge-purple { background:rgba(139,92,246,.15); color:var(--accent2); }
+    .votes { font-size:18px; font-weight:700; color:var(--accent); }
+    .act-btn { background:var(--bg); border:1px solid var(--border); color:var(--text); padding:5px 12px; border-radius:6px; cursor:pointer; font-size:12px; }
+    .act-btn:hover { border-color:var(--accent); }
+    .loading, .empty { padding:60px; text-align:center; color:var(--muted); font-size:14px; }
+    .spinner { width:28px; height:28px; border:3px solid var(--border); border-top-color:var(--accent); border-radius:50%; animation:spin .7s linear infinite; margin:0 auto 12px; }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    /* modal */
+    .overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:center; justify-content:center; z-index:200; padding:24px; }
+    .overlay.open { display:flex; }
+    .modal { background:var(--surface); border:1px solid var(--border); border-radius:14px; max-width:640px; width:100%; max-height:86vh; overflow-y:auto; }
+    .modal-head { padding:18px 22px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; background:var(--surface); }
+    .modal-head h2 { font-size:17px; }
+    .modal-head .x { background:none; border:none; color:var(--muted); font-size:22px; cursor:pointer; line-height:1; }
+    .modal-body { padding:20px 22px; }
+    .rd-summary { font-size:14px; line-height:1.5; padding:12px 14px; border-radius:10px; margin-bottom:18px; }
+    .rd-q { border:1px solid var(--border); border-radius:10px; padding:14px 16px; margin-bottom:12px; }
+    .rd-q .q-title { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:6px; display:flex; align-items:center; gap:8px; }
+    .rd-q .q-detail { font-size:13px; line-height:1.5; color:var(--text); }
+    .rd-q .q-meta { font-size:12px; color:var(--muted); margin-top:4px; }
+    .muted { color:var(--muted); }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="logo">Charlie — School Demand</div>
+    <div class="subtitle">Which school to add next · local dashboard</div>
+  </div>
+  <button class="refresh-btn" onclick="load()">Refresh</button>
+</header>
+
+<div class="stats-row">
+  <div class="stat-card a"><div class="label">Schools Requested</div><div class="value" id="s-schools">—</div></div>
+  <div class="stat-card b"><div class="label">Total Votes</div><div class="value" id="s-votes">—</div></div>
+  <div class="stat-card c"><div class="label">Matched Roster</div><div class="value" id="s-matched">—</div></div>
+  <div class="stat-card d"><div class="label">Triaged</div><div class="value" id="s-triaged">—</div></div>
+</div>
+
+<div class="panel">
+  <div class="panel-header">
+    <strong>Demand ranking</strong>
+    <span class="count-badge" id="count">—</span>
+    <input type="text" id="search" placeholder="Filter schools…" oninput="render()" />
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Votes</th><th>School</th><th>Match</th><th>Status</th>
+          <th>Readiness</th><th>Last requested</th><th></th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-head">
+      <h2 id="m-title">Readiness</h2>
+      <button class="x" onclick="closeModal()">&times;</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+  const BASE = '';
+  let _data = [];
+
+  const OVERALL = {
+    green:   ['badge-green',  'Cheapest to add'],
+    yellow:  ['badge-yellow', 'Some rework'],
+    red:     ['badge-red',    'Expensive'],
+    unknown: ['badge-muted',  'Needs triage'],
+  };
+  const RISK = { low:'badge-green', medium:'badge-yellow', high:'badge-red', unknown:'badge-muted' };
+
+  async function load() {
+    setLoading();
+    try {
+      const d = await get('/charlie/schools');
+      _data = d.schools;
+      document.getElementById('s-schools').textContent  = d.count.toLocaleString();
+      document.getElementById('s-votes').textContent    = d.total_votes.toLocaleString();
+      document.getElementById('s-matched').textContent  = d.matched.toLocaleString();
+      document.getElementById('s-triaged').textContent  = d.triaged.toLocaleString();
+      render();
+    } catch (e) {
+      document.getElementById('tbody').innerHTML =
+        `<tr><td colspan="7"><div class="empty">Error: ${esc(e.message)}. (Admin endpoints need dev-bypass or an allowlisted id.)</div></td></tr>`;
+    }
+  }
+
+  function render() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const rows = q ? _data.filter(s => (s.canonical_name||'').toLowerCase().includes(q)) : _data;
+    document.getElementById('count').textContent = rows.length + ' schools';
+    const tbody = document.getElementById('tbody');
+    if (!rows.length) { tbody.innerHTML = '<tr><td colspan="7"><div class="empty">No school requests yet</div></td></tr>'; return; }
+    tbody.innerHTML = rows.map(s => {
+      const rd = s.readiness;
+      const readinessCell = rd
+        ? `<span class="badge ${OVERALL[rd.overall]?.[0]||'badge-muted'}">${esc(rd.overall)}</span>`
+        : '<span class="muted">—</span>';
+      const matchCell = s.matched
+        ? '<span class="badge badge-green">roster</span>'
+        : '<span class="badge badge-yellow">unmatched</span>';
+      return `<tr>
+        <td><span class="votes">${s.votes}</span></td>
+        <td><strong>${esc(s.canonical_name)}</strong>
+            <div class="muted" style="font-size:11px">${esc((s.aliases_seen||[]).slice(0,3).join(' · '))}</div></td>
+        <td>${matchCell}</td>
+        <td><span class="badge badge-muted">${esc(s.status)}</span></td>
+        <td>${readinessCell}</td>
+        <td class="muted" style="font-size:12px">${fmt(s.last_requested_at)}</td>
+        <td style="text-align:right; white-space:nowrap">
+          ${rd ? `<button class="act-btn" onclick='showReadiness(${JSON.stringify(s.school_key)})'>View</button>` : ''}
+          <button class="act-btn" onclick='triage(${JSON.stringify(s.school_key)})'>Triage</button>
+        </td>
+      </tr>`;
+    }).join('');
+  }
+
+  async function triage(key) {
+    const url = prompt("Optional: catalog URL for Charlie to probe (leave blank to use what's known):", "");
+    if (url === null) return; // cancelled
+    const qs = url.trim() ? ('?catalog_url=' + encodeURIComponent(url.trim())) : '';
+    try {
+      const r = await fetch(BASE + '/charlie/schools/' + encodeURIComponent(key) + '/triage' + qs, { method:'POST' });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const d = await r.json();
+      const s = _data.find(x => x.school_key === key);
+      if (s) { s.readiness = d.readiness; s.triaged_at = d.triaged_at; s.status = 'triaged'; }
+      render();
+      openReadiness(s ? s.canonical_name : key, d.readiness);
+    } catch (e) { alert('Triage failed: ' + e.message); }
+  }
+
+  function showReadiness(key) {
+    const s = _data.find(x => x.school_key === key);
+    if (s && s.readiness) openReadiness(s.canonical_name, s.readiness);
+  }
+
+  function openReadiness(name, rd) {
+    document.getElementById('m-title').textContent = name;
+    const q = (title, level, detail, meta) => `
+      <div class="rd-q">
+        <div class="q-title">${esc(title)} ${level ? `<span class="badge ${RISK[level]||'badge-muted'}">${esc(level)}</span>` : ''}</div>
+        <div class="q-detail">${esc(detail||'')}</div>
+        ${meta ? `<div class="q-meta">${esc(meta)}</div>` : ''}
+      </div>`;
+    const cg = rd.can_get_data || {};
+    document.getElementById('m-body').innerHTML = `
+      <div class="rd-summary ${OVERALL[rd.overall]?.[0]||'badge-muted'}">${esc(rd.summary||'')}</div>
+      ${q('Q1 · Can I get the data?', cg.scraper_reuse, cg.detail,
+          [cg.catalog_platform ? ('Platform: ' + cg.catalog_platform) : 'Platform: not detected',
+           cg.catalog_url ? ('Probed: ' + cg.catalog_url) : ''].filter(Boolean).join('   ·   '))}
+      ${q('Q2 · Course-code grammar risk', rd.code_grammar_risk?.level, rd.code_grammar_risk?.detail)}
+      ${q('Q3 · Gen-ed ontology distance', rd.gen_ed_distance?.level, rd.gen_ed_distance?.detail)}
+      ${q('SIS (transcript parser)', null, rd.sis?.detail)}
+      ${q('Professor ratings', null, rd.professor_ratings?.detail)}
+    `;
+    document.getElementById('overlay').classList.add('open');
+  }
+
+  function closeModal() { document.getElementById('overlay').classList.remove('open'); }
+
+  function setLoading() {
+    document.getElementById('tbody').innerHTML =
+      '<tr><td colspan="7"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+  }
+  async function get(path) {
+    const r = await fetch(BASE + path);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }
+  function esc(s) { return s == null ? '' : String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+  function fmt(iso) { if (!iso) return '—'; try { return new Date(iso).toLocaleString(); } catch { return iso; } }
+
+  load();
+</script>
+</body>
+</html>

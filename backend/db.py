@@ -33,7 +33,8 @@ def get_s3():
 # Pre-built table handles used by routers
 _db = get_dynamodb()
 
-requirements_table = _db.Table("requirements")
-users_table        = _db.Table("users")
-transcript_table   = _db.Table("transcript_courses")
-sessions_table     = _db.Table("sessions")
+requirements_table    = _db.Table("requirements")
+users_table           = _db.Table("users")
+transcript_table      = _db.Table("transcript_courses")
+sessions_table        = _db.Table("sessions")
+school_requests_table = _db.Table("school_requests")

@@ -44,6 +44,15 @@ app.include_router(courses.router,    prefix="/courses",     tags=["Courses"])
 app.include_router(session.router,    prefix="/auth",        tags=["Auth"])
 app.include_router(support.router,    prefix="/support",     tags=["Support"])
 
+# Charlie (multi-school "add my school" agent) is dormant unless explicitly
+# enabled. It stays OFF in production: the router is never imported or mounted,
+# so there are no /charlie routes and no dependency on the school_requests table
+# (which prod's DynamoDB + IAM role don't provide). Set CHARLIE_ENABLED=1 in
+# backend/.env for local development to work on it.
+if os.getenv("CHARLIE_ENABLED") == "1":
+    from routers import charlie
+    app.include_router(charlie.router, prefix="/charlie", tags=["Charlie"])
+
 # Serve static assets (admin dashboard HTML)
 _static = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=str(_static)), name="static")
