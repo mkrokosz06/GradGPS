@@ -7,6 +7,8 @@ GET /admin/majors      — all programs with signup + course counts
 GET /admin/courses     — paginated/searchable course rows
 """
 
+from datetime import datetime, timezone, timedelta
+
 from fastapi import APIRouter, Query
 from fastapi.responses import FileResponse
 from pathlib import Path
@@ -46,18 +48,63 @@ def _scan_all(table, **kwargs) -> list[dict]:
 
 @router.get("/stats")
 def get_stats():
-    """High-level counts for the dashboard header."""
-    users = _scan_all(users_table, ProjectionExpression="user_id, major, transcript_parsed_at")
-    reqs  = _scan_all(requirements_table, ProjectionExpression="program_name")
+    """
+    Signup + activation funnel. Scans only the (small) users table — no
+    requirements scan — so it's cheap to poll/auto-refresh.
 
-    majors      = {r["program_name"] for r in reqs}
-    with_transcript = sum(1 for u in users if u.get("transcript_parsed_at"))
+    Activation is split: a user counts toward `added_major` once they pick a
+    major and `added_transcript` once a transcript is parsed. `activated` is
+    either signal; `fully_set_up` is both. Time buckets rely on `created_at`
+    (added on account creation going forward) — users created before that
+    field existed are counted in totals but not in new_today/new_this_week.
+    """
+    users = _scan_all(
+        users_table,
+        ProjectionExpression="user_id, major, transcript_parsed_at, created_at",
+    )
+
+    now         = datetime.now(timezone.utc)
+    today       = now.date().isoformat()          # e.g. "2026-08-18"
+    week_cutoff = (now - timedelta(days=7)).isoformat()
+
+    added_major      = 0
+    added_transcript = 0
+    fully_set_up     = 0
+    activated        = 0
+    new_today        = 0
+    new_this_week    = 0
+    dated_users      = 0
+
+    for u in users:
+        has_major      = bool(u.get("major"))
+        has_transcript = bool(u.get("transcript_parsed_at"))
+        if has_major:
+            added_major += 1
+        if has_transcript:
+            added_transcript += 1
+        if has_major and has_transcript:
+            fully_set_up += 1
+        if has_major or has_transcript:
+            activated += 1
+
+        created = u.get("created_at")
+        if created:
+            dated_users += 1
+            if created[:10] == today:
+                new_today += 1
+            if created >= week_cutoff:
+                new_this_week += 1
 
     return {
-        "total_users":           len(users),
-        "users_with_transcript": with_transcript,
-        "total_majors":          len(majors),
-        "total_requirement_rows": len(reqs),
+        "total_users":      len(users),
+        "added_major":      added_major,
+        "added_transcript": added_transcript,
+        "activated":        activated,       # major OR transcript
+        "fully_set_up":     fully_set_up,    # major AND transcript
+        "new_today":        new_today,
+        "new_this_week":    new_this_week,
+        # how many rows carry a created_at yet (transparency for the time buckets)
+        "dated_users":      dated_users,
     }
 
 

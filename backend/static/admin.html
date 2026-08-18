@@ -234,17 +234,25 @@
     <div class="label">Total Signups</div>
     <div class="value" id="stat-users">—</div>
   </div>
-  <div class="stat-card trans">
-    <div class="label">Uploaded Transcript</div>
-    <div class="value" id="stat-trans">—</div>
+  <div class="stat-card users">
+    <div class="label">New Today</div>
+    <div class="value" id="stat-today">—</div>
+  </div>
+  <div class="stat-card users">
+    <div class="label">New This Week</div>
+    <div class="value" id="stat-week">—</div>
   </div>
   <div class="stat-card majors">
-    <div class="label">Programs in Catalog</div>
-    <div class="value" id="stat-majors">—</div>
+    <div class="label">Added Major</div>
+    <div class="value" id="stat-major">—</div>
+  </div>
+  <div class="stat-card trans">
+    <div class="label">Added Transcript</div>
+    <div class="value" id="stat-trans">—</div>
   </div>
   <div class="stat-card courses">
-    <div class="label">Requirement Rows</div>
-    <div class="value" id="stat-courses">—</div>
+    <div class="label">Fully Set Up</div>
+    <div class="value" id="stat-full">—</div>
   </div>
 </div>
 
@@ -370,10 +378,13 @@
   async function loadStats() {
     try {
       const d = await get('/admin/stats');
-      document.getElementById('stat-users').textContent   = d.total_users.toLocaleString();
-      document.getElementById('stat-trans').textContent   = d.users_with_transcript.toLocaleString();
-      document.getElementById('stat-majors').textContent  = d.total_majors.toLocaleString();
-      document.getElementById('stat-courses').textContent = d.total_requirement_rows.toLocaleString();
+      const n = v => (v ?? 0).toLocaleString();
+      document.getElementById('stat-users').textContent = n(d.total_users);
+      document.getElementById('stat-today').textContent = n(d.new_today);
+      document.getElementById('stat-week').textContent  = n(d.new_this_week);
+      document.getElementById('stat-major').textContent = n(d.added_major);
+      document.getElementById('stat-trans').textContent = n(d.added_transcript);
+      document.getElementById('stat-full').textContent  = n(d.fully_set_up);
     } catch(e) { console.error('stats', e); }
   }
 
@@ -524,6 +535,16 @@
 
   // ── Boot ──────────────────────────────────────────────────────
   loadAll();
+
+  // Keep the live figures fresh without a manual refresh. Only re-pulls the
+  // cheap users-table views (stats + signups) — the catalog tabs are static,
+  // so we don't re-scan requirements on a timer. Pauses while the tab is
+  // hidden to avoid pointless polling.
+  setInterval(() => {
+    if (document.hidden) return;
+    loadStats();
+    loadUsers();
+  }, 60000);
 </script>
 </body>
 </html>

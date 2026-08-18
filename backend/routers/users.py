@@ -6,6 +6,7 @@ POST /users/create  — LEGACY, dev-bypass only (email-derived ids); removed
 """
 
 import os
+from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
@@ -56,7 +57,11 @@ def upsert_me(body: ProfileBody, user: dict = Depends(get_current_user)):
             )
         merged = {**existing, **update_fields}
     else:
-        merged = {"user_id": user_id, **update_fields}
+        merged = {
+            "user_id": user_id,
+            "created_at": datetime.now(timezone.utc).isoformat(),
+            **update_fields,
+        }
         users_table.put_item(Item=merged)
 
     return {
@@ -119,9 +124,10 @@ def create_user(body: CreateUserBody):
         }
 
     users_table.put_item(Item={
-        "user_id": user_id,
-        "name":    body.name.strip(),
-        "email":   body.email.strip().lower(),
+        "user_id":    user_id,
+        "name":       body.name.strip(),
+        "email":      body.email.strip().lower(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
     })
 
     return {
