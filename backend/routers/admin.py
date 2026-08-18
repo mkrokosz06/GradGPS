@@ -9,19 +9,26 @@ GET /admin/courses     — paginated/searchable course rows
 
 from datetime import datetime, timezone, timedelta
 
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Depends
 from fastapi.responses import FileResponse
 from pathlib import Path
 
 from db import requirements_table, users_table, transcript_table
+from deps import require_admin
 
 router = APIRouter()
 
 STATIC_DIR = Path(__file__).parent.parent / "static"
 
+# Data endpoints are gated per-route (below) so the dashboard *shell* can load
+# without auth and present a Google sign-in. Every endpoint that returns data
+# carries Depends(require_admin); only the static shell is public.
+_admin = [Depends(require_admin)]
+
 
 @router.get("/", include_in_schema=False)
 def admin_dashboard():
+    # Public shell — contains no data; it must sign in to call the endpoints below.
     return FileResponse(STATIC_DIR / "admin.html")
 
 
@@ -46,7 +53,7 @@ def _scan_all(table, **kwargs) -> list[dict]:
 # Endpoints
 # ---------------------------------------------------------------------------
 
-@router.get("/stats")
+@router.get("/stats", dependencies=_admin)
 def get_stats():
     """
     Signup + activation funnel. Scans only the (small) users table — no
@@ -108,7 +115,7 @@ def get_stats():
     }
 
 
-@router.get("/users")
+@router.get("/users", dependencies=_admin)
 def get_users():
     """Return all user records with transcript metadata."""
     users = _scan_all(users_table)
@@ -125,7 +132,7 @@ def get_users():
     return {"users": result, "count": len(result)}
 
 
-@router.get("/majors")
+@router.get("/majors", dependencies=_admin)
 def get_majors():
     """Return all programs with per-program course count and signup count."""
     # Requirements scan — just program_name and course_code to count rows
@@ -161,7 +168,7 @@ def get_majors():
     return {"majors": majors, "count": len(majors)}
 
 
-@router.get("/courses")
+@router.get("/courses", dependencies=_admin)
 def get_courses(
     major:  str  = Query(None,  description="Filter by exact program name"),
     search: str  = Query(None,  description="Substring search on course_code or title"),

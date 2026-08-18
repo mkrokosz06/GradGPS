@@ -216,16 +216,47 @@
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Sign-in gate overlay */
+    #auth-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #auth-overlay.hidden { display: none; }
+    .auth-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 16px; padding: 40px 44px; text-align: center;
+      max-width: 380px;
+    }
+    .auth-card .logo { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+    .auth-card p { color: var(--muted); font-size: 14px; margin-bottom: 24px; }
+    .auth-card #gbtn { display: flex; justify-content: center; min-height: 44px; }
+    .auth-card .auth-error { color: var(--red); font-size: 13px; margin-top: 16px; min-height: 18px; }
   </style>
+  <script src="https://accounts.google.com/gsi/client" async></script>
 </head>
 <body>
+
+<!-- Sign-in gate — the shell is public, but all data requires an admin session -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="logo">GradGPS Admin</div>
+    <p>Sign in with the admin Google account to continue.</p>
+    <div id="gbtn"></div>
+    <div class="auth-error" id="auth-error"></div>
+  </div>
+</div>
 
 <header>
   <div>
     <div class="logo">GradGPS Admin</div>
-    <div class="subtitle">Local dashboard — not publicly accessible</div>
+    <div class="subtitle">Signups &amp; activation — admin only</div>
   </div>
-  <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+  <div style="display:flex; gap:10px; align-items:center;">
+    <button class="refresh-btn" onclick="loadAll()">Refresh</button>
+    <button class="refresh-btn" onclick="signOut()">Sign out</button>
+  </div>
 </header>
 
 <!-- Stats -->
@@ -350,6 +381,63 @@
 <script>
   const BASE = '';  // same origin
   const LIMIT = 200;
+
+  // ── Auth ─────────────────────────────────────────────────────
+  // Same Google *Web* client id the backend already trusts (GOOGLE_CLIENT_IDS).
+  // https://admin.gradgps.com must be an Authorized JavaScript origin on it.
+  const GOOGLE_CLIENT_ID = '1087629564900-sojfbjaopgi6cis3dlapr7hkm704iet4.apps.googleusercontent.com';
+  const TOKEN_KEY = 'gradgps_admin_session';
+  let _session = localStorage.getItem(TOKEN_KEY) || null;
+
+  function showOverlay(msg) {
+    document.getElementById('auth-overlay').classList.remove('hidden');
+    if (msg) document.getElementById('auth-error').textContent = msg;
+  }
+  function hideOverlay() {
+    document.getElementById('auth-overlay').classList.add('hidden');
+    document.getElementById('auth-error').textContent = '';
+  }
+
+  // Called by Google Identity Services with a verified ID token.
+  async function onCredential(resp) {
+    try {
+      const r = await fetch(BASE + '/auth/session', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id_token: resp.credential }),
+      });
+      if (!r.ok) throw new Error('session ' + r.status);
+      const d = await r.json();
+      _session = d.session_token;
+      localStorage.setItem(TOKEN_KEY, _session);
+      hideOverlay();
+      startDashboard();
+    } catch (e) {
+      showOverlay('Sign-in failed. Try again.');
+    }
+  }
+
+  function signOut() {
+    if (_session) {
+      // Best-effort server-side revoke; ignore result.
+      fetch(BASE + '/auth/session', {
+        method: 'DELETE',
+        headers: { 'Authorization': 'Bearer ' + _session },
+      }).catch(() => {});
+    }
+    _session = null;
+    localStorage.removeItem(TOKEN_KEY);
+    showOverlay('');
+  }
+
+  function initGsi() {
+    if (!window.google || !google.accounts) { setTimeout(initGsi, 150); return; }
+    google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onCredential });
+    google.accounts.id.renderButton(
+      document.getElementById('gbtn'),
+      { theme: 'filled_blue', size: 'large', text: 'signin_with', shape: 'pill' }
+    );
+  }
 
   let _majorsData  = [];
   let _coursesOffset = 0;
@@ -518,7 +606,16 @@
 
   // ── Utilities ─────────────────────────────────────────────────
   async function get(path) {
-    const r = await fetch(BASE + path);
+    const r = await fetch(BASE + path, {
+      headers: _session ? { 'Authorization': 'Bearer ' + _session } : {},
+    });
+    if (r.status === 401 || r.status === 403) {
+      // Session missing / expired / not an admin — back to the sign-in gate.
+      _session = null;
+      localStorage.removeItem(TOKEN_KEY);
+      showOverlay(r.status === 403 ? 'That account is not an admin.' : 'Session expired — sign in again.');
+      throw new Error(`HTTP ${r.status}`);
+    }
     if (!r.ok) throw new Error(`HTTP ${r.status}`);
     return r.json();
   }
@@ -534,17 +631,29 @@
   }
 
   // ── Boot ──────────────────────────────────────────────────────
-  loadAll();
+  let _dashboardStarted = false;
+  function startDashboard() {
+    if (_dashboardStarted) { loadAll(); return; }
+    _dashboardStarted = true;
+    loadAll();
+    // Keep the live figures fresh without a manual refresh. Only re-pulls the
+    // cheap users-table views (stats + signups) — the catalog tabs are static,
+    // so we don't re-scan requirements on a timer. Pauses while the tab is
+    // hidden to avoid pointless polling.
+    setInterval(() => {
+      if (document.hidden || !_session) return;
+      loadStats();
+      loadUsers();
+    }, 60000);
+  }
 
-  // Keep the live figures fresh without a manual refresh. Only re-pulls the
-  // cheap users-table views (stats + signups) — the catalog tabs are static,
-  // so we don't re-scan requirements on a timer. Pauses while the tab is
-  // hidden to avoid pointless polling.
-  setInterval(() => {
-    if (document.hidden) return;
-    loadStats();
-    loadUsers();
-  }, 60000);
+  initGsi();                 // always ready the Google button behind the overlay
+  if (_session) {
+    hideOverlay();           // returning visitor with a stored session
+    startDashboard();        // get() will re-show the gate if the session is stale
+  } else {
+    showOverlay('');
+  }
 </script>
 </body>
 </html>
