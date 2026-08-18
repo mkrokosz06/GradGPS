@@ -89,16 +89,25 @@ def require_admin(
 ) -> str:
     """
     Gate for /admin/*. In dev-bypass mode the local dashboard works without
-    headers; otherwise the verified user must be in the ADMIN_USER_IDS
-    allowlist (comma-separated provider-scoped ids, e.g. "google:1234,apple:001.ab").
+    headers; otherwise the verified user must be allowlisted either by
+    provider-scoped id (ADMIN_USER_IDS, e.g. "google:1234,apple:001.ab") or by
+    email (ADMIN_EMAILS, comma-separated). An email only matches when the
+    provider marks it verified, so an unverified/typo'd claim can't slip in.
     """
     if _dev_bypass_enabled():
         return x_user_id.strip() if x_user_id and x_user_id.strip() else "dev-admin"
 
     user = get_current_user(authorization, x_user_id)
-    allowlist = {
+    id_allowlist = {
         x.strip() for x in os.getenv("ADMIN_USER_IDS", "").split(",") if x.strip()
     }
-    if user["user_id"] not in allowlist:
-        raise HTTPException(status_code=403, detail="Admin access required.")
-    return user["user_id"]
+    email_allowlist = {
+        x.strip().lower() for x in os.getenv("ADMIN_EMAILS", "").split(",") if x.strip()
+    }
+    email = (user.get("email") or "").strip().lower()
+
+    if user["user_id"] in id_allowlist:
+        return user["user_id"]
+    if email and user.get("email_verified") and email in email_allowlist:
+        return user["user_id"]
+    raise HTTPException(status_code=403, detail="Admin access required.")
