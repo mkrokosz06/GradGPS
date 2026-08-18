@@ -10,4 +10,4 @@ export const API_BASE =
 // runs as a dev build (Expo Go cannot do Google OAuth — no auth proxy).
 // Leave empty until configured; the Google button hides itself when unset.
 export const GOOGLE_WEB_CLIENT_ID = "1087629564900-sojfbjaopgi6cis3dlapr7hkm704iet4.apps.googleusercontent.com";
-export const GOOGLE_IOS_CLIENT_ID = "";
+export const GOOGLE_IOS_CLIENT_ID = "1087629564900-60ve3eda3vrbcadgar8804dpu6fpjm7e.apps.googleusercontent.com";
