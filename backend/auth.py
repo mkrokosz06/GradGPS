@@ -125,11 +125,17 @@ def verify_id_token(token: str) -> dict:
     try:
         # aud is checked manually below because we accept several client IDs
         # (iOS / Android / Web each have their own).
+        # verify_at_hash is off: native Google Sign-In returns an access token
+        # alongside the ID token, so Google adds an `at_hash` claim. jose would
+        # demand the access token to validate it — but we never use the access
+        # token (identity comes from the ID token alone), and the web flow omits
+        # at_hash entirely. Skipping it is what lets the native/TestFlight flow
+        # verify. (Signature, iss, aud, and exp are still fully enforced.)
         claims = jwt.decode(
             token,
             key,
             algorithms=["RS256"],
-            options={"verify_aud": False},
+            options={"verify_aud": False, "verify_at_hash": False},
         )
     except JWTError as exc:
         logger.warning(
