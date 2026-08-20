@@ -116,6 +116,43 @@ def build_gen_ed_satisfied(gen_ed_result: dict) -> dict[str, bool]:
     return out
 
 
+def build_satisfied_req_codes(*audit_results: dict) -> set[str]:
+    """Base codes of every requirement an audit reports SATISFIED — completed,
+    in-progress, or covered by a done/in-progress pair alternative.
+
+    The audit engine (the source of truth) knows equivalences the template
+    matcher doesn't: catalog `pair_group` alternatives (MATH 110 / MATH 140,
+    STAT 200 / SCM 200) and course renames.  Folding the satisfied requirement
+    *codes* into the taken set lets a template slot named `MATH 110` match a
+    student who actually took the paired MATH 140 — so the timeline stops
+    re-scheduling a requirement the audit already considers met."""
+    out: set[str] = set()
+    for res in audit_results:
+        for g in (res or {}).get("groups", []):
+            for src in (g.get("sub_groups") or [g]):
+                for it in src.get("items", []):
+                    if (it.get("status") in ("done", "in_progress")
+                            or it.get("pair_status") in ("done", "in_progress")):
+                        out.add(_base(it.get("course_code", "")))
+    return out
+
+
+def build_gen_ed_courses(gen_ed_result: dict) -> list[str]:
+    """Distinct base codes of the courses the gen-ed audit counts as completed
+    or in-progress, in first-seen order.  These fill the template's category-less
+    generic gen-ed slots (see `_assign_generic_gen_ed`)."""
+    out: list[str] = []
+    seen: set[str] = set()
+    for g in (gen_ed_result or {}).get("groups", []):
+        for it in g.get("items", []):
+            if it.get("status") in ("done", "in_progress"):
+                b = _base(it.get("course_code", ""))
+                if b and b not in seen:
+                    seen.add(b)
+                    out.append(b)
+    return out
+
+
 def build_used_codes(*audit_results: dict) -> set[str]:
     """Base codes of every course an audit consumed (major and/or gen-ed result).
     Surplus detection subtracts these so a course that filled a requirement the
@@ -274,6 +311,29 @@ def _assign_dept_level(records: list[dict], leftovers: list[dict]) -> None:
             leftovers.remove(hit)   # its credits can't also count as elective
 
 
+def _assign_generic_gen_ed(records: list[dict], gen_ed_courses: list[str]) -> None:
+    """Satisfy the template's category-less generic gen-ed slots from the
+    student's completed gen-ed courses, one course per slot in plan order.
+
+    PSU bulletin plans list most of a degree's gen-ed credits as generic
+    "General Education" cells with no specific category, so `match_template`'s
+    category check can never satisfy them — leaving a student who has finished
+    their gen-eds with a pile of phantom gen-ed slots re-scheduled into the
+    future.  Each completed gen-ed course (from the gen-ed audit) stands in for
+    one generic slot.  Courses already matched to a NAMED template slot are
+    excluded by the caller so a course can't count twice."""
+    pool = list(gen_ed_courses)
+    for rec in records:
+        slot = rec["slot"]
+        if (rec["satisfied"] or slot.get("type") != "gen_ed"
+                or slot.get("category")):
+            continue
+        if pool:
+            code = pool.pop(0)
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = code
+
+
 def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
     """Satisfy free-elective slots from the surplus-credit pool, in plan order.
     Purely credit-count based: any unclaimed course is by definition a free
@@ -297,6 +357,7 @@ def match_template(
     gen_ed_satisfied: dict[str, bool] | None = None,
     transcript_courses: list[dict] | None = None,
     used_codes: set[str] | None = None,
+    gen_ed_courses: list[str] | None = None,
 ) -> list[dict]:
     """Walk the template in order and produce one record per slot:
 
@@ -308,8 +369,10 @@ def match_template(
     Satisfaction rules:
       * course / choose_one — satisfied if any option is in the taken set.
       * gen_ed with a named category (US/IL/GN/…) — satisfied if the gen-ed audit
-        reports that category met.  A general (category-less) gen-ed slot is never
-        pre-satisfied (there's no single course to point at).
+        reports that category met.  A general (category-less) gen-ed slot is
+        satisfied (when `gen_ed_courses` is passed) by one completed gen-ed
+        course each, in plan order — so a student who has finished their gen-eds
+        doesn't see those generic slots re-scheduled.
       * pool with anchor `codes` (e.g. an accounting elective anchored ACCTG 403W)
         — satisfied if an anchor is taken.
       * world-language pools, dept level-selection pools ("PLSC 400-Level"), and
@@ -351,6 +414,17 @@ def match_template(
             "slot":        slot,
             "item":        None if satisfied else slot_to_item(slot),
         })
+
+    # Category-less generic gen-ed slots: satisfy from completed gen-ed courses,
+    # skipping any course already matched to a named slot (no double-count).
+    if gen_ed_courses:
+        named_consumed = {
+            _base(r["matched_code"]) for r in records
+            if r["satisfied"] and r["matched_code"]
+            and r["slot"].get("type") in ("course", "choose_one", "pool")
+        }
+        pool = [c for c in gen_ed_courses if _base(c) not in named_consumed]
+        _assign_generic_gen_ed(records, pool)
 
     if transcript_courses:
         leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())

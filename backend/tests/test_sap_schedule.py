@@ -18,7 +18,9 @@ from sap_schedule import (
     _base,
     _codes_match,
     build_taken_set,
+    build_gen_ed_courses,
     build_gen_ed_satisfied,
+    build_satisfied_req_codes,
     build_used_codes,
     is_taken,
     match_template,
@@ -264,6 +266,57 @@ def test_choose_one_label_keeps_coincidental_number_matches():
     item = slot_to_item({"type": "choose_one", "credits": 3,
                          "codes": ["CAS 100A", "CAS 100B", "CAS 100C"]})
     assert item["course_code"] == "CAS 100A or CAS 100B or CAS 100C"
+
+
+def test_satisfied_req_codes_fold_pair_alternatives_into_taken():
+    # The audit satisfies a MATH 110 requirement via the paired MATH 140 the
+    # student actually took; the template slot named MATH 110 must then drop out
+    # instead of being re-scheduled.  (Regression: 6th-year graduation bug.)
+    audit = {"groups": [{"items": [
+        {"course_code": "MATH 110", "status": "missing", "pair_status": "done"},
+        {"course_code": "STAT 200", "status": "missing", "pair_status": "in_progress"},
+        {"course_code": "IST 999", "status": "missing"},   # genuinely missing
+    ]}]}
+    codes = build_satisfied_req_codes(audit)
+    assert codes == {"MATH 110", "STAT 200"}
+
+    tpl = {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "course", "code": "MATH 110", "credits": 3},
+        {"type": "course", "code": "IST 999", "credits": 3},
+    ]}]}
+    recs = match_template(tpl, taken=set() | codes)
+    by_code = {r["slot"]["code"]: r for r in recs}
+    assert by_code["MATH 110"]["satisfied"]
+    assert not by_code["IST 999"]["satisfied"]
+
+
+def test_generic_gen_ed_slots_satisfied_from_completed_gen_ed_courses():
+    # Category-less generic gen_ed slots must be satisfied by completed gen-ed
+    # courses — one per slot — so a student who finished gen-eds doesn't see them
+    # re-scheduled.  A course already matched to a named slot can't count twice.
+    tpl = {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "course", "code": "ENGL 15", "credits": 3},
+        {"type": "gen_ed", "credits": 3},   # category-less
+        {"type": "gen_ed", "credits": 3},
+        {"type": "gen_ed", "credits": 3},
+    ]}]}
+    ge_courses = ["ENGL 15", "ANTH 140", "MUSIC 11"]   # ENGL 15 also fills a named slot
+    recs = match_template(tpl, taken={"ENGL 15"}, gen_ed_courses=ge_courses)
+    ge_slots = [r for r in recs if r["slot"]["type"] == "gen_ed"]
+    # Two completed gen-ed courses remain after ENGL 15 is claimed by the named
+    # slot → two of the three generic slots satisfied, one still scheduled.
+    assert sum(1 for r in ge_slots if r["satisfied"]) == 2
+    assert {r["matched_code"] for r in ge_slots if r["satisfied"]} == {"ANTH 140", "MUSIC 11"}
+
+
+def test_build_gen_ed_courses_distinct_completed_only():
+    result = {"groups": [
+        {"items": [{"course_code": "ANTH 140", "status": "done"},
+                   {"course_code": "MUSIC 11", "status": "in_progress"}]},
+        {"items": [{"course_code": "ANTH 140", "status": "done"},   # dup across groups
+                   {"course_code": "PHIL 1", "status": "missing"}]},   # not completed
+    ]}
+    assert build_gen_ed_courses(result) == ["ANTH 140", "MUSIC 11"]
 
 
 def test_build_gen_ed_satisfied_maps_category_tokens():

@@ -18,7 +18,8 @@ from routers.audit import _filter_rows
 from deps import get_user_id
 from plan_templates import load_template
 from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
-                          build_used_codes, match_template)
+                          build_used_codes, build_satisfied_req_codes,
+                          build_gen_ed_courses, match_template)
 
 router = APIRouter()
 
@@ -809,12 +810,18 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # credit-band packer, exactly as before — so only templated majors change.
     # (`template` was loaded above, before the requirement-rows 404 check.)
     if template:
+        # The major audit is the source of truth for course equivalences/pairs
+        # (MATH 110/140, STAT 200/SCM 200): fold its satisfied requirement codes
+        # into the taken set so the template stops re-scheduling met requirements.
+        taken = (build_taken_set(transcript_courses)
+                 | build_satisfied_req_codes(audit_result))
         records = match_template(
             template,
-            build_taken_set(transcript_courses),
+            taken,
             build_gen_ed_satisfied(gen_ed_result),
             transcript_courses=transcript_courses,
             used_codes=build_used_codes(audit_result, gen_ed_result),
+            gen_ed_courses=build_gen_ed_courses(gen_ed_result),
         )
         semesters.extend(_reflow_template(records, base_term))
     else:
