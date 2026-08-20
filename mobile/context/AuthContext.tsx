@@ -13,8 +13,12 @@ type AuthState = {
   loading:            boolean;
   /** Legacy dev sign-in (x-user-id model). Works only against AUTH_DEV_BYPASS backends. */
   signIn:             (userId: string, name: string, email: string) => Promise<void>;
-  /** Real sign-in: exchange a verified Google/Apple ID token for a session. */
-  signInWithIdToken:  (idToken: string) => Promise<void>;
+  /**
+   * Real sign-in: exchange a verified Google/Apple ID token for a session.
+   * `profile` carries name/email the token itself omits — Apple only hands
+   * over the user's name once, at first authorization, client-side.
+   */
+  signInWithIdToken:  (idToken: string, profile?: { name?: string; email?: string }) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   signOut:            () => Promise<void>;
 };
@@ -78,12 +82,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * native), arms the Bearer interceptor, then upserts the profile — the
    * backend answers with the canonical provider-scoped user_id.
    */
-  async function signInWithIdToken(idToken: string) {
+  async function signInWithIdToken(idToken: string, profile?: { name?: string; email?: string }) {
     const session = await createSession(idToken);
     await storeToken(session.session_token);
     setAuthToken(session.session_token);
     try {
-      const user = await upsertMe();
+      const user = await upsertMe(profile?.name, profile?.email);
       await AsyncStorage.multiSet([
         ["user_id", user.user_id],
         ["user_name", user.name ?? ""],

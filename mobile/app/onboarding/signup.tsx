@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import {
-  View, Text, TextInput, TouchableOpacity,
-  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  View, Text, TouchableOpacity,
+  StyleSheet, Platform, ActivityIndicator, Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import * as Google from "expo-auth-session/providers/google";
+import * as AppleAuthentication from "expo-apple-authentication";
 import * as WebBrowser from "expo-web-browser";
 import { useAuth } from "../../context/AuthContext";
-import { createUser } from "../../services/userService";
 import { GOOGLE_WEB_CLIENT_ID, GOOGLE_IOS_CLIENT_ID } from "../../constants/api";
 import { TosModal } from "../../components/TosModal";
 
@@ -37,20 +37,23 @@ export default function SignupScreen() {
   const router = useRouter();
   const { signIn, signInWithIdToken, signOut } = useAuth();
 
-  const [name,    setName]    = useState("");
-  const [email,   setEmail]   = useState("");
-  const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [appleLoading,  setAppleLoading]  = useState(false);
+  const [appleAvailable, setAppleAvailable] = useState(false);
   const [showTos, setShowTos] = useState(false);
 
+  // Sign in with Apple is iOS-only and needs the native module present.
+  useEffect(() => {
+    if (Platform.OS === "ios") {
+      AppleAuthentication.isAvailableAsync().then(setAppleAvailable).catch(() => setAppleAvailable(false));
+    }
+  }, []);
+
   // Google Sign-In (expo-auth-session). Yields an OIDC ID token the backend
-  // verifies. Works on web + dev builds; Expo Go cannot complete this flow.
+  // verifies. Works on web + native builds; Expo Go cannot complete this flow.
   const [request, response, promptAsync] = Google.useIdTokenAuthRequest({
     webClientId: GOOGLE_WEB_CLIENT_ID || undefined,
     iosClientId: GOOGLE_IOS_CLIENT_ID || undefined,
-    // Generic fallback so the hook doesn't throw on platforms whose client ID
-    // isn't configured yet (e.g. iOS in Expo Go — the button is hidden there,
-    // so this dummy value is never actually used to start a flow).
     clientId: GOOGLE_WEB_CLIENT_ID || "unconfigured.apps.googleusercontent.com",
   });
 
@@ -66,7 +69,7 @@ export default function SignupScreen() {
       signInWithIdToken(idToken)
         .then(() => setShowTos(true))
         .catch((e: any) => {
-          Alert.alert("Error", e?.response?.data?.detail ?? "Sign-in failed. Is the backend running?");
+          Alert.alert("Error", e?.response?.data?.detail ?? "Sign-in failed. Please try again.");
         })
         .finally(() => setGoogleLoading(false));
     } else if (response.type === "error") {
@@ -82,21 +85,45 @@ export default function SignupScreen() {
     promptAsync();
   }
 
-  async function handleContinue() {
-    if (!name.trim())  { Alert.alert("Required", "Please enter your name."); return; }
-    if (!email.trim()) { Alert.alert("Required", "Please enter your email."); return; }
-    if (!email.includes("@")) { Alert.alert("Invalid", "Please enter a valid email address."); return; }
-
-    setLoading(true);
+  // Apple returns the user's name ONLY on the first authorization, in the
+  // credential (never inside the token). We forward it to the profile upsert
+  // so the account isn't nameless; subsequent sign-ins reuse the stored name.
+  async function handleApple() {
+    setAppleLoading(true);
     try {
-      const user = await createUser(name.trim(), email.trim().toLowerCase());
-      await signIn(user.user_id, user.name, user.email);
+      const cred = await AppleAuthentication.signInAsync({
+        requestedScopes: [
+          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
+          AppleAuthentication.AppleAuthenticationScope.EMAIL,
+        ],
+      });
+      const idToken = cred.identityToken;
+      if (!idToken) {
+        Alert.alert("Error", "Apple did not return an identity token.");
+        return;
+      }
+      const name = cred.fullName
+        ? [cred.fullName.givenName, cred.fullName.familyName].filter(Boolean).join(" ").trim()
+        : "";
+      await signInWithIdToken(idToken, {
+        name:  name || undefined,
+        email: cred.email || undefined,
+      });
       setShowTos(true);
     } catch (e: any) {
-      Alert.alert("Error", e?.response?.data?.detail ?? "Could not create account. Is the backend running?");
+      if (e?.code === "ERR_REQUEST_CANCELED") return; // user backed out
+      Alert.alert("Error", e?.response?.data?.detail ?? "Apple sign-in failed. Please try again.");
     } finally {
-      setLoading(false);
+      setAppleLoading(false);
     }
+  }
+
+  // Dev-only bypass so Expo Go / `expo start` can sign in as the seeded test
+  // user — Google and Apple cannot complete in Expo Go. Stripped from
+  // production/TestFlight builds by the __DEV__ guard.
+  async function handleDevSignIn() {
+    await signIn("matthew-test-001", "Matthew Krokosz", "matthew@psu.edu");
+    setShowTos(true);
   }
 
   async function handleDeclineTos() {
@@ -109,111 +136,80 @@ export default function SignupScreen() {
     router.push("/onboarding/major" as any);
   }
 
+  const busy = googleLoading || appleLoading;
+
   return (
     <SafeAreaView style={styles.safe}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-      >
-        <View style={styles.container}>
-          <StepDots step={0} />
+      <View style={styles.container}>
+        <StepDots step={0} />
 
-          <Text style={styles.heading}>Let's get started</Text>
-          <Text style={styles.sub}>Create your GradGPS account.</Text>
+        <Text style={styles.heading}>Let's get started</Text>
+        <Text style={styles.sub}>Sign in to create your GradGPS account.</Text>
 
-          {GOOGLE_CONFIGURED && (
-            <>
-              <TouchableOpacity
-                style={[styles.googleBtn, (googleLoading || !request) && { opacity: 0.6 }]}
-                onPress={handleGoogle}
-                disabled={googleLoading || !request}
-                activeOpacity={0.85}
-              >
-                {googleLoading
-                  ? <ActivityIndicator color="#0f172a" />
-                  : <Text style={styles.googleBtnText}>Continue with Google</Text>}
-              </TouchableOpacity>
-
-              <View style={styles.dividerRow}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
-            </>
+        <View style={styles.buttons}>
+          {appleAvailable && (
+            <AppleAuthentication.AppleAuthenticationButton
+              buttonType={AppleAuthentication.AppleAuthenticationButtonType.SIGN_IN}
+              buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.BLACK}
+              cornerRadius={16}
+              style={styles.appleBtn}
+              onPress={handleApple}
+            />
           )}
 
-          <View style={styles.fields}>
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Full name</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Jane Smith"
-                placeholderTextColor="#cbd5e1"
-                value={name}
-                onChangeText={setName}
-                autoCapitalize="words"
-                returnKeyType="next"
-              />
-            </View>
+          {GOOGLE_CONFIGURED && (
+            <TouchableOpacity
+              style={[styles.googleBtn, (busy || !request) && { opacity: 0.6 }]}
+              onPress={handleGoogle}
+              disabled={busy || !request}
+              activeOpacity={0.85}
+            >
+              {googleLoading
+                ? <ActivityIndicator color="#0f172a" />
+                : <Text style={styles.googleBtnText}>Continue with Google</Text>}
+            </TouchableOpacity>
+          )}
 
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>Penn State email</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="abc1234@psu.edu"
-                placeholderTextColor="#cbd5e1"
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-                returnKeyType="done"
-                onSubmitEditing={handleContinue}
-              />
-            </View>
-          </View>
-
-          <TouchableOpacity
-            style={[styles.primaryBtn, loading && { opacity: 0.6 }]}
-            onPress={handleContinue}
-            disabled={loading}
-            activeOpacity={0.85}
-          >
-            {loading
-              ? <ActivityIndicator color="#ffffff" />
-              : <Text style={styles.primaryBtnText}>Continue</Text>}
-          </TouchableOpacity>
+          {__DEV__ && (
+            <TouchableOpacity
+              style={styles.devBtn}
+              onPress={handleDevSignIn}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.devBtnText}>Dev sign-in (test user)</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      </KeyboardAvoidingView>
+
+        <Text style={styles.legal}>
+          By continuing you agree to our Terms of Service and Privacy Policy.
+        </Text>
+      </View>
       <TosModal visible={showTos} onAgree={handleAgreeTos} onDecline={handleDeclineTos} />
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe:        { flex: 1, backgroundColor: "#ffffff" },
-  container:   { flex: 1, paddingHorizontal: 28, paddingTop: 48, paddingBottom: 32 },
-  heading:     { fontSize: 30, fontWeight: "800", color: "#0f172a", marginBottom: 6 },
-  sub:         { fontSize: 15, color: "#94a3b8", marginBottom: 36 },
-  fields:      { gap: 20, marginBottom: 36 },
-  fieldGroup:  { gap: 6 },
-  label:       { fontSize: 12, fontWeight: "700", color: "#64748b", letterSpacing: 0.5 },
-  input:       {
-    borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 14,
-    paddingHorizontal: 16, paddingVertical: 14,
-    fontSize: 15, color: "#0f172a", backgroundColor: "#f8fafc",
-  },
-  primaryBtn:  {
-    backgroundColor: "#1a3a6b", borderRadius: 16,
-    paddingVertical: 17, alignItems: "center",
-  },
-  primaryBtnText: { color: "#ffffff", fontSize: 16, fontWeight: "700" },
+  safe:      { flex: 1, backgroundColor: "#ffffff" },
+  container: { flex: 1, paddingHorizontal: 28, paddingTop: 48, paddingBottom: 32 },
+  heading:   { fontSize: 30, fontWeight: "800", color: "#0f172a", marginBottom: 6 },
+  sub:       { fontSize: 15, color: "#94a3b8", marginBottom: 40 },
+  buttons:   { gap: 16 },
+  appleBtn:  { height: 54 },
   googleBtn: {
     borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 16,
     paddingVertical: 16, alignItems: "center", backgroundColor: "#ffffff",
-    marginBottom: 24,
+    height: 54, justifyContent: "center",
   },
   googleBtnText: { color: "#0f172a", fontSize: 16, fontWeight: "700" },
-  dividerRow:  { flexDirection: "row", alignItems: "center", gap: 12, marginBottom: 24 },
-  dividerLine: { flex: 1, height: 1, backgroundColor: "#e2e8f0" },
-  dividerText: { fontSize: 12, color: "#94a3b8", fontWeight: "600" },
+  devBtn: {
+    borderWidth: 1.5, borderColor: "#fed7aa", borderRadius: 16,
+    paddingVertical: 14, alignItems: "center", backgroundColor: "#fff7ed",
+  },
+  devBtnText: { color: "#c2410c", fontSize: 14, fontWeight: "700" },
+  legal: {
+    marginTop: "auto", fontSize: 12, color: "#cbd5e1",
+    textAlign: "center", lineHeight: 18,
+  },
 });

@@ -10,6 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.gradgps.app",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "CFBundleURLTypes": [
@@ -27,7 +28,19 @@
         "backgroundColor": "#2a4a8f"
       }
     },
-    "web": { "bundler": "metro", "favicon": "./assets/favicon.png" },
-    "plugins": ["expo-router"]
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-apple-authentication"
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "5edc93c4-d727-45f2-ad80-38dee65c0f33"
+      }
+    }
   }
 }
