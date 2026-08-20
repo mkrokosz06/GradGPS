@@ -131,7 +131,13 @@ def verify_id_token(token: str) -> dict:
             algorithms=["RS256"],
             options={"verify_aud": False},
         )
-    except JWTError:
+    except JWTError as exc:
+        logger.warning(
+            "ID token decode failed: %s: %s | iss=%s aud=%s exp=%s iat=%s now=%s",
+            type(exc).__name__, exc,
+            unverified.get("iss"), unverified.get("aud"),
+            unverified.get("exp"), unverified.get("iat"), int(time.time()),
+        )
         raise TokenVerificationError("Invalid or expired token.")
 
     aud = claims.get("aud")
