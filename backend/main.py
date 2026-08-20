@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from routers import audit, transcript, programs, timeline, admin, users, courses, session, support
+from routers import audit, transcript, programs, timeline, admin, users, courses, session, support, email_auth
 
 app = FastAPI(title="DegreeCheck API", version="0.1.0")
 
@@ -40,6 +40,7 @@ app.include_router(users.router,      prefix="/users",       tags=["Users"])
 app.include_router(admin.router,      prefix="/admin",       tags=["Admin"])
 app.include_router(courses.router,    prefix="/courses",     tags=["Courses"])
 app.include_router(session.router,    prefix="/auth",        tags=["Auth"])
+app.include_router(email_auth.router, prefix="/auth",        tags=["Auth"])
 app.include_router(support.router,    prefix="/support",     tags=["Support"])
 
 # Charlie (multi-school "add my school" agent) is dormant unless explicitly

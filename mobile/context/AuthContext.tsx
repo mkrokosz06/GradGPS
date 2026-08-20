@@ -19,13 +19,15 @@ type AuthState = {
    * over the user's name once, at first authorization, client-side.
    */
   signInWithIdToken:  (idToken: string, profile?: { name?: string; email?: string }) => Promise<void>;
+  /** Adopt a server-minted session token directly (email/OTP sign-in already returns one). */
+  signInWithSession:  (sessionToken: string, profile?: { name?: string; email?: string }) => Promise<void>;
   completeOnboarding: () => Promise<void>;
   signOut:            () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState>({
   userId: null, name: null, email: null, onboardingDone: false, loading: true,
-  signIn: async () => {}, signInWithIdToken: async () => {},
+  signIn: async () => {}, signInWithIdToken: async () => {}, signInWithSession: async () => {},
   completeOnboarding: async () => {}, signOut: async () => {},
 });
 
@@ -84,8 +86,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   async function signInWithIdToken(idToken: string, profile?: { name?: string; email?: string }) {
     const session = await createSession(idToken);
-    await storeToken(session.session_token);
-    setAuthToken(session.session_token);
+    await signInWithSession(session.session_token, profile);
+  }
+
+  /**
+   * Adopt a server-issued session token: store it, arm the Bearer interceptor,
+   * then upsert the profile — the backend answers with the canonical user_id.
+   * Shared by the OIDC path (after the ID-token exchange) and email/OTP
+   * sign-in (which returns a session token straight from /auth/email/verify).
+   */
+  async function signInWithSession(sessionToken: string, profile?: { name?: string; email?: string }) {
+    await storeToken(sessionToken);
+    setAuthToken(sessionToken);
     try {
       const user = await upsertMe(profile?.name, profile?.email);
       await AsyncStorage.multiSet([
@@ -119,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   return (
     <AuthContext.Provider value={{
       userId, name, email, onboardingDone, loading,
-      signIn, signInWithIdToken, completeOnboarding, signOut,
+      signIn, signInWithIdToken, signInWithSession, completeOnboarding, signOut,
     }}>
       {children}
     </AuthContext.Provider>
