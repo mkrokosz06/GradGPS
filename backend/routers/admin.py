@@ -123,6 +123,7 @@ def get_users():
     for u in users:
         result.append({
             "user_id":              u.get("user_id"),
+            "name":                 u.get("name", ""),
             "major":                u.get("major", "—"),
             "subplan":              u.get("subplan", ""),
             "transcript_parsed_at": u.get("transcript_parsed_at", ""),

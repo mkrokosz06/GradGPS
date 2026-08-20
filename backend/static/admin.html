@@ -305,6 +305,7 @@
       <thead>
         <tr>
           <th>User ID</th>
+          <th>Name</th>
           <th>Major</th>
           <th>Subplan</th>
           <th>Transcript Uploaded</th>
@@ -312,7 +313,7 @@
         </tr>
       </thead>
       <tbody id="users-tbody">
-        <tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+        <tr><td colspan="6"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
       </tbody>
     </table>
   </div>
@@ -479,17 +480,18 @@
   // ── Users ────────────────────────────────────────────────────
   async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="5"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="6"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
     try {
       const d = await get('/admin/users');
       document.getElementById('users-count').textContent = d.count + ' users';
       if (!d.users.length) {
-        tbody.innerHTML = '<tr><td colspan="5"><div class="empty">No signups yet</div></td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6"><div class="empty">No signups yet</div></td></tr>';
         return;
       }
       tbody.innerHTML = d.users.map(u => `
         <tr>
           <td style="font-family:monospace;font-size:12px;">${esc(u.user_id)}</td>
+          <td>${esc(u.name) || '<span style="color:var(--muted)">—</span>'}</td>
           <td>${esc(u.major)}</td>
           <td style="color:var(--muted)">${esc(u.subplan)}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.transcript_parsed_at)}</td>
@@ -498,7 +500,7 @@
             : '<span class="badge badge-muted">No transcript</span>'}</td>
         </tr>`).join('');
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="5"><div class="empty">Error: ${e.message}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty">Error: ${e.message}</div></td></tr>`;
     }
   }
 
