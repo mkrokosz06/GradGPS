@@ -16,6 +16,7 @@ sys.path.append(os.path.dirname(__file__))
 
 from seed_matthew import (
     patch_eti_catalog,
+    patch_eti_select_groups,
     patch_phys_alternatives,
     patch_known_alternatives,
     patch_choose_credits_option_groups,
@@ -24,6 +25,7 @@ from fix_junk_titles import fix_junk_titles
 
 if __name__ == "__main__":
     patch_eti_catalog()
+    patch_eti_select_groups()
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()

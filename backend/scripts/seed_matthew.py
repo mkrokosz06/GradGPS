@@ -537,6 +537,59 @@ def patch_known_alternatives():
         print(f"  Skipped {skipped_excluded} excluded (both-required) combos.")
 
 
+def patch_eti_select_groups():
+    """
+    Fix catalog defect: the ETI bulletin has THREE separate "Select 3 credits"
+    groups under Requirements for the Major —
+
+      1. intro course        (CMPSC 121/131, IST 140, CYBER 100/100S, IST 110, HCDD 113/113S, ...)
+      2. second programming  (CMPSC 122, CMPSC 132, IST 242)
+      3. 400-level application (ETI 400, ETI 423, ETI 435, ETI 463, IST 440W)
+
+    — but the scraper flattened all their courses into ONE choose_credits pool
+    with threshold 3, so taking any single intro course (e.g. CMPSC 131) marks
+    the whole thing satisfied and the audit under-requires the degree by 6 cr.
+
+    Fix: convert groups 2 and 3 into choose_one alternatives (shared
+    pair_group_id, the same mechanism as the other pair patches), leaving the
+    remaining pool rows as the intro select-3 group.  Idempotent — converted
+    rows are no longer choose_credits, so a re-run is a no-op.
+    """
+    print("\nPatching ETI select groups (bulletin has 3 pools, scraper made 1)...")
+    resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq(MAJOR)
+    )
+    rows = resp.get("Items", [])
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq(MAJOR),
+            ExclusiveStartKey=resp["LastEvaluatedKey"]
+        )
+        rows.extend(resp.get("Items", []))
+
+    GROUPS = [
+        ({"CMPSC 122", "CMPSC 132", "IST 242"},            Decimal("590")),  # 2nd programming
+        ({"ETI 435", "ETI 463", "IST 440W"},               Decimal("591")),  # 400-level application
+    ]
+
+    for codes, pid in GROUPS:
+        targets = [
+            r for r in rows
+            if r["course_code"] in codes
+            and r.get("group_type") == "choose_credits"
+            and not r.get("pair_group_id")
+        ]
+        if len(targets) < 2:   # already patched, or catalog changed shape
+            continue
+        for r in targets:
+            requirements_table.update_item(
+                Key={"program_name": r["program_name"], "group_course": r["group_course"]},
+                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
+                ExpressionAttributeValues={":pid": pid, ":gt": "choose_one"},
+            )
+        print(f"  Split out choose-one group {int(pid)}: {', '.join(sorted(codes))} ({len(targets)} rows)")
+
+
 def patch_choose_credits_option_groups():
     """
     Fix catalog defect: option groups named 'X Option (N credits)' where the scraper
@@ -632,6 +685,7 @@ if __name__ == "__main__":
     seed_courses(courses)
 
     patch_eti_catalog()
+    patch_eti_select_groups()
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()

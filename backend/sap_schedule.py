@@ -125,13 +125,23 @@ def build_satisfied_req_codes(*audit_results: dict) -> set[str]:
     STAT 200 / SCM 200) and course renames.  Folding the satisfied requirement
     *codes* into the taken set lets a template slot named `MATH 110` match a
     student who actually took the paired MATH 140 — so the timeline stops
-    re-scheduling a requirement the audit already considers met."""
+    re-scheduling a requirement the audit already considers met.
+
+    Likewise, every code in a SATISFIED choose_credits / choose_courses pool is
+    included: the catalog may model options as one pool (IST 140 / IST 110 /
+    CYBER 100 / CMPSC 121-132 in a "choose N credits" group) that the template
+    lists as individual slots — once the pool is met (e.g. via CMPSC 131), the
+    template must not re-schedule its other options."""
     out: set[str] = set()
     for res in audit_results:
         for g in (res or {}).get("groups", []):
             for src in (g.get("sub_groups") or [g]):
+                gtype = src.get("sub_type") or src.get("group_type", "")
+                pool_met = (gtype in ("choose_credits", "choose_courses")
+                            and src.get("satisfied"))
                 for it in src.get("items", []):
-                    if (it.get("status") in ("done", "in_progress")
+                    if (pool_met
+                            or it.get("status") in ("done", "in_progress")
                             or it.get("pair_status") in ("done", "in_progress")):
                         out.add(_base(it.get("course_code", "")))
     return out

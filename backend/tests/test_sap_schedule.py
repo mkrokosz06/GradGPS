@@ -290,6 +290,34 @@ def test_satisfied_req_codes_fold_pair_alternatives_into_taken():
     assert not by_code["IST 999"]["satisfied"]
 
 
+def test_satisfied_catalog_pool_drops_templates_individual_option_slots():
+    # The catalog models programming options as ONE choose_credits pool
+    # (IST 140 / IST 110 / CYBER 100 / CMPSC 131 ...) that the template lists as
+    # individual slots.  Once the audit says the pool is satisfied (via CMPSC 131),
+    # the template must not re-schedule its other options — but an UNSATISFIED
+    # pool contributes nothing.
+    def _audit(pool_satisfied):
+        return {"groups": [{"group_type": "choose_credits", "satisfied": pool_satisfied,
+                            "items": [
+            {"course_code": "CMPSC 131", "status": "done"},
+            {"course_code": "IST 140", "status": "missing"},
+            {"course_code": "IST 110", "status": "missing"},
+            {"course_code": "CYBER 100", "status": "missing"},
+        ]}]}
+
+    tpl = {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "course", "code": "IST 140", "credits": 3},
+        {"type": "choose_one", "codes": ["IST 110", "CYBER 100"], "credits": 3},
+    ]}]}
+
+    recs = match_template(tpl, taken=build_satisfied_req_codes(_audit(True)))
+    assert all(r["satisfied"] for r in recs)
+
+    recs = match_template(tpl, taken=build_satisfied_req_codes(_audit(False)))
+    # Pool not met: only the taken CMPSC 131 code folds in — neither slot matches.
+    assert all(not r["satisfied"] for r in recs)
+
+
 def test_generic_gen_ed_slots_satisfied_from_completed_gen_ed_courses():
     # Category-less generic gen_ed slots must be satisfied by completed gen-ed
     # courses — one per slot — so a student who finished gen-eds doesn't see them
