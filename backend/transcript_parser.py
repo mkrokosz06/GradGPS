@@ -37,12 +37,16 @@ logging.getLogger("pdfplumber").setLevel(logging.WARNING)
 #   MATH 140 CALC ANLY GEOM I 4.000 0.000 F 0.000
 #   CMPSC 131 PROG & COMP I 3.000 0.000 0.000       ← in-progress (no grade, no points)
 #   PLSC 1 Amer. Politics 3.000 3.000 TR 0.000
+#   ENGL XFRGH Transfer Credit GH 6.000 6.000 TR 0.000   ← generic transfer/test credit
 #
 # Strategy: anchor on the numeric columns at the END of the line.
 # The department code is always the first token; course number is always second.
+# The number is normally numeric, but PSU renders generic transfer/test credit
+# (AP, ACE, ...) as an XFR placeholder "number" carrying the gen-ed attribute
+# letters it fulfils (XFRGH = GH credits) — real credits that must be counted.
 COURSE_PATTERN = re.compile(
     r"^([A-Z]{2,6})\s+"           # dept code (EDSGN, CMPSC, FRNSC...)
-    r"(\d{1,3}[A-Z]{0,2})\s+"    # course number, optional suffix (131, 415W, 100B)
+    r"(\d{1,3}[A-Z]{0,2}|XFR[A-Z]{0,4})\s+"  # course number (131, 415W, 100B) or XFR placeholder
     r".+?"                         # description — non-greedy, any chars
     r"\s+(\d+\.\d{3})"            # attempted credits  e.g. 3.000
     r"\s+(\d+\.\d{3})"            # earned credits     e.g. 3.000  (0.000 if not done)
@@ -86,8 +90,11 @@ def _normalise_code(code: str) -> str:
 
     Section letters (A/B/C in CAS 100A, 100B, 100C) are intentionally kept —
     those are distinct catalog entries, not attribute designations.
+
+    Only a suffix directly after a digit is stripped, so XFR placeholder codes
+    ('ENGL XFRGH' — generic transfer credit) keep their attribute letters.
     """
-    return re.sub(r"[WHN]$", "", code.strip())
+    return re.sub(r"(?<=\d)[WHN]$", "", code.strip())
 
 
 def _normalise_term(match: re.Match) -> str:
@@ -135,11 +142,29 @@ def _accumulate(courses: list[dict], seen: dict[str, int], entry: dict) -> None:
     """
     Add `entry` to `courses`, deduping by normalised code. When the same course
     appears twice, keep the higher-priority status (done > in_progress > transfer).
+
+    Exception — repeatable courses: the same code completed in DIFFERENT terms
+    (special topics like ENGR 297 taken at 0.25cr one term and 1cr another, or
+    repeated XFR transfer blocks) is a genuine repeat, not a duplicate — PSU
+    counts every earned instance.  The credits are summed onto one entry (the
+    stored-table key is the course code, so two rows can't coexist); grade/term
+    show the later-parsed instance.  Grade-replacement retakes are unaffected:
+    PSU zeroes the excluded attempt's earned credits, so it parses as failed
+    and is dropped before ever reaching here.
     """
     norm_code = entry["course_code"]
     if norm_code in seen:
         existing = courses[seen[norm_code]]
-        if _STATUS_PRIORITY[entry["status"]] >= _STATUS_PRIORITY[existing["status"]]:
+        if (entry["status"] == existing["status"]
+                and entry["status"] in ("done", "transfer")
+                and entry.get("term") != existing.get("term")):
+            entry = dict(entry)
+            entry["credits_earned"] = (
+                float(entry.get("credits_earned", 0))
+                + float(existing.get("credits_earned", 0))
+            )
+            courses[seen[norm_code]] = entry
+        elif _STATUS_PRIORITY[entry["status"]] >= _STATUS_PRIORITY[existing["status"]]:
             courses[seen[norm_code]] = entry
     else:
         seen[norm_code] = len(courses)
