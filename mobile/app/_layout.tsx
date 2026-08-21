@@ -4,6 +4,7 @@ import { View, ActivityIndicator } from "react-native";
 import { useEffect } from "react";
 import "../global.css";
 import { AuthProvider, useAuth } from "../context/AuthContext";
+import { UpdateGate } from "../components/UpdateGate";
 
 function RootRedirector() {
   const { userId, onboardingDone, loading } = useAuth();
@@ -37,7 +38,9 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <AuthProvider>
         <View style={{ flex: 1, backgroundColor: "#ffffff" }}>
-          <RootRedirector />
+          <UpdateGate>
+            <RootRedirector />
+          </UpdateGate>
         </View>
       </AuthProvider>
     </SafeAreaProvider>
