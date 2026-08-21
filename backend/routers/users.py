@@ -1,19 +1,24 @@
 """
-POST /users/me      — authenticated upsert of the caller's profile
-GET  /users/me      — fetch current user's profile
-POST /users/create  — LEGACY, dev-bypass only (email-derived ids); removed
-                      once the mobile app signs in with Google/Apple.
+POST   /users/me     — authenticated upsert of the caller's profile
+GET    /users/me     — fetch current user's profile
+DELETE /users/me     — permanently delete the caller's account + all data
+POST   /users/create — LEGACY, dev-bypass only (email-derived ids); removed
+                       once the mobile app signs in with Google/Apple.
 """
 
 import os
+import logging
 from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from db import users_table
+from db import users_table, transcript_table, sessions_table, get_s3
 from deps import get_current_user, get_user_id
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
+
+S3_BUCKET = os.getenv("S3_BUCKET", "degreecheck-transcripts")
 
 
 class ProfileBody(BaseModel):
@@ -84,6 +89,75 @@ def get_me(user_id: str = Depends(get_user_id)):
         "major":   user.get("major"),
         "subplan": user.get("subplan"),
     }
+
+
+@router.delete("/me")
+def delete_me(user_id: str = Depends(get_user_id)):
+    """
+    Permanently delete the caller's account: stored transcript PDF, parsed
+    course rows, profile record, and every active session. In-app account
+    deletion is required by App Store guideline 5.1.1(v) and promised in the
+    Privacy Policy.
+    """
+    from boto3.dynamodb.conditions import Key as DKey, Attr
+
+    # Defense in depth (mirrors DELETE /transcript): the S3 key is built from
+    # user_id and must never traverse outside the user's prefix.
+    if "/" in user_id or ".." in user_id:
+        raise HTTPException(status_code=400, detail="Invalid user id.")
+
+    # 1. Stored PDF FIRST — if object storage is unreachable we must not
+    #    report success, so fail loudly with everything else intact and let
+    #    the user retry cleanly. delete_object is idempotent (no error when
+    #    no PDF was ever stored).
+    try:
+        get_s3().delete_object(Bucket=S3_BUCKET, Key=f"transcripts/{user_id}/transcript.pdf")
+    except Exception:
+        logger.exception("S3 delete failed during account deletion for user_id=%s", user_id)
+        raise HTTPException(
+            status_code=502,
+            detail="Could not delete your stored data. Please try again.",
+        )
+
+    # 2. Parsed transcript course rows (paginated).
+    query_kwargs = {
+        "KeyConditionExpression": DKey("user_id").eq(user_id),
+        "ProjectionExpression": "user_id, course_code",
+    }
+    resp = transcript_table.query(**query_kwargs)
+    rows = list(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = transcript_table.query(**query_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+        rows.extend(resp.get("Items", []))
+    if rows:
+        with transcript_table.batch_writer() as batch:
+            for item in rows:
+                batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
+
+    # 3. Profile record.
+    users_table.delete_item(Key={"user_id": user_id})
+
+    # 4. Sessions last, best-effort: the account data is already gone, so a
+    #    failure here must not surface as an error. The sessions table is
+    #    keyed by token hash with no user index, so scan-and-delete; any
+    #    stragglers only resolve to a profile-less identity and expire via
+    #    TTL within 30 days.
+    try:
+        scan_kwargs = {
+            "FilterExpression": Attr("user_id").eq(user_id),
+            "ProjectionExpression": "token_hash",
+        }
+        resp = sessions_table.scan(**scan_kwargs)
+        hashes = [item["token_hash"] for item in resp.get("Items", [])]
+        while "LastEvaluatedKey" in resp:
+            resp = sessions_table.scan(**scan_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+            hashes.extend(item["token_hash"] for item in resp.get("Items", []))
+        for token_hash in hashes:
+            sessions_table.delete_item(Key={"token_hash": token_hash})
+    except Exception:
+        logger.exception("Session cleanup failed during account deletion for user_id=%s", user_id)
+
+    return {"status": "ok"}
 
 
 # ─── LEGACY (dev bypass only) ────────────────────────────────────────────────

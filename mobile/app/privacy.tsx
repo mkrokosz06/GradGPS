@@ -16,12 +16,13 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: July 9, 2026</Text>
+        <Text style={styles.updated}>Last updated: August 20, 2026</Text>
 
         <Section title="1. What We Collect">
           When you use GradGPS, we collect:{"\n\n"}
-          • Your name and a user identifier created at sign-up{"\n"}
+          • Your name and email address, provided by your sign-in method (Google, Apple, or email verification code), and a user identifier created at sign-up{"\n"}
           • Your selected major and subplan{"\n"}
+          • Basic account activity information, such as when you signed up and when you last used the app{"\n"}
           • Academic data parsed from your uploaded transcript: course codes, grades, credits earned, and enrollment terms{"\n"}
           • A copy of the transcript PDF you upload, and — if you upload an official transcript — the date you acknowledged and consented to using it{"\n\n"}
           We recommend uploading your unofficial transcript. If you upload an official transcript, the stored PDF may also contain additional identifiers printed on it, such as your student ID number, date of birth, or a partially masked Social Security Number. We only extract the academic data listed above; we never ask you for, or separately store, your Google or Apple account password, your full Social Security Number, or your financial information.
@@ -31,15 +32,20 @@ export default function PrivacyPolicyScreen() {
           Your data is used exclusively to:{"\n\n"}
           • Generate your personalized degree audit and academic timeline{"\n"}
           • Show your credit progress toward graduation{"\n"}
-          • Recommend future courses based on your remaining requirements{"\n\n"}
+          • Recommend future courses based on your remaining requirements{"\n"}
+          • Sign you in and keep your account secure{"\n"}
+          • Respond when you contact support{"\n"}
+          • Understand overall app usage in aggregate so we can improve GradGPS{"\n\n"}
           We do not sell, rent, or share your personal information with third parties for marketing purposes.
         </Section>
 
         <Section title="3. Third-Party Services">
           GradGPS uses the following external services:{"\n\n"}
+          • Sign-In Providers — If you sign in with Google or Apple, they handle authentication and share your name and email address with us. Their own privacy policies apply to your use of those services.{"\n"}
+          • Email Delivery — We use Amazon Web Services to send emails such as sign-in verification codes and replies to your support requests.{"\n"}
           • Professor Ratings — When you tap a course, we retrieve professor ratings using the course code only (no personal data).{"\n"}
           • University Course Bulletins — We fetch public course descriptions using the course code only.{"\n\n"}
-          No personally identifiable information is sent to either of these services. As GradGPS expands to support additional schools, new institution-specific integrations may be added. Any such additions will be reflected in an updated Privacy Policy.
+          No personally identifiable information is sent to the professor-ratings or course-bulletin services. As GradGPS expands to support additional schools, new institution-specific integrations may be added. Any such additions will be reflected in an updated Privacy Policy.
         </Section>
 
         <Section title="4. Data Storage">
@@ -47,15 +53,15 @@ export default function PrivacyPolicyScreen() {
         </Section>
 
         <Section title="5. Data Retention">
-          Your data is retained for as long as your account is active. You may request deletion of your account and all associated data at any time by contacting us. Upon deletion, your transcript data, profile, and academic records will be permanently removed.
+          Your data is retained for as long as your account is active. You can permanently delete your account and all associated data at any time from the Account screen in the app — this removes your transcript file, parsed academic data, profile, and active sessions. You may also request deletion by contacting us.
         </Section>
 
         <Section title="6. Security">
-          We take reasonable measures to protect your data, including encrypted storage and access controls. However, no system is completely secure. Please do not share your account credentials with others.
+          We take reasonable measures to protect your data, including encrypted storage and access controls. However, no system is completely secure. Please keep the sign-in method associated with your account (your Google, Apple, or email account) secure and do not share it with others.
         </Section>
 
         <Section title="7. Children's Privacy">
-          GradGPS is intended for use by college students (18+). We do not knowingly collect data from anyone under 13 years of age.
+          GradGPS is intended for current and prospective college students and is not directed at children. We do not knowingly collect data from anyone under 13 years of age.
         </Section>
 
         <Section title="8. Changes to This Policy">
@@ -63,7 +69,7 @@ export default function PrivacyPolicyScreen() {
         </Section>
 
         <Section title="9. Contact Us">
-          If you have questions or want to request data deletion, contact us at support@gradgps.app.
+          If you have questions or want to request data deletion, contact us through the Contact Support screen in the app or the contact form at gradgps.com.
         </Section>
       </ScrollView>
     </SafeAreaView>

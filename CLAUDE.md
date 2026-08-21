@@ -111,7 +111,7 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 | `transcript.py` | `/transcript` | PDF upload, parse, store |
 | `programs.py` | `/programs` | Major search/select |
 | `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
-| `users.py` | `/users` | User profile |
+| `users.py` | `/users` | User profile + `DELETE /users/me` account deletion (PDF, courses, profile, sessions) |
 | `admin.py` | `/admin` | Admin utilities |
 | `support.py` | `/support` | Support/contact form (mobile app + gradgps.com). Emails `SUPPORT_EMAIL` via SES with the sender as Reply-To; unset `SUPPORT_EMAIL` (local dev) = log only. No auth required (website form is anonymous); in-memory rate limit + honeypot field. SES setup: identity `mkrokosz06@gmail.com` verified, `ses:SendEmail` on the App Runner role (`GradGPSSupportSES` inline policy). |
 | `charlie.py` | `/charlie` | **Charlie** — the "add my school" agent (multi-school demand funnel + onboarding scout). Public `POST /charlie/request` captures + normalizes a school name (aliases → one canonical row, votes accumulate); admin endpoints rank demand and run **feasibility triage** (`run_triage` → readiness report). Core logic in `backend/charlie.py` (+ `charlie_schools.json` seed roster); founder dashboard at `/charlie/dashboard` (`static/charlie.html`). **Not autonomous** — never adds a school without a human. **Gated OFF by default** — the router only mounts when `CHARLIE_ENABLED=1` (set in `backend/.env` for local dev); prod never sets it, so `/charlie/*` doesn't exist there. Enabling it in prod would first need the `school_requests` table created + an IAM grant for it on `GradGPSAppRunnerInstance`. Design: `docs/charlie.md`. |

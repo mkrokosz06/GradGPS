@@ -1,10 +1,11 @@
 import React, { useState, useCallback } from "react";
-import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { getAudit, getCachedAudit, type AuditSummary } from "../../services/auditService";
+import { deleteAccount } from "../../services/userService";
 
 function classYear(credits: number): string {
   if (credits < 30)  return "Freshman";
@@ -18,6 +19,32 @@ export default function AccountScreen() {
   const [audit, setAudit] = useState<AuditSummary | null>(
     () => (userId ? getCachedAudit(userId) : null),
   );
+  const [deleting, setDeleting] = useState(false);
+
+  function confirmDeleteAccount() {
+    Alert.alert(
+      "Delete Account?",
+      "This permanently deletes your account, your transcript, and all of your academic data. This cannot be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        { text: "Delete", style: "destructive", onPress: handleDeleteAccount },
+      ],
+    );
+  }
+
+  async function handleDeleteAccount() {
+    setDeleting(true);
+    try {
+      await deleteAccount();
+      // Server already revoked every session; signOut just clears local state
+      // (its own revoke call is best-effort and idempotent).
+      await signOut();
+    } catch {
+      Alert.alert("Error", "Could not delete your account. Please check your connection and try again.");
+    } finally {
+      setDeleting(false);
+    }
+  }
 
   useFocusEffect(
     useCallback(() => {
@@ -146,6 +173,18 @@ export default function AccountScreen() {
           }}
         >
           <Text style={{ color: "#ef4444", fontSize: 14, fontWeight: "600" }}>Sign Out</Text>
+        </TouchableOpacity>
+
+        {/* Delete account — deliberately low-key next to Sign Out */}
+        <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={confirmDeleteAccount}
+          disabled={deleting}
+          style={{ paddingVertical: 14, alignItems: "center", marginTop: 4 }}
+        >
+          <Text style={{ color: "#f87171", fontSize: 12, fontWeight: "600" }}>
+            {deleting ? "Deleting Account…" : "Delete Account"}
+          </Text>
         </TouchableOpacity>
       </ScrollView>
     </SafeAreaView>

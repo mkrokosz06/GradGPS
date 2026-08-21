@@ -16,6 +16,14 @@ export async function upsertMe(name?: string, email?: string): Promise<CreateUse
   return res.data;
 }
 
+/**
+ * Permanently delete the caller's account — stored transcript PDF, parsed
+ * courses, profile, and all server sessions. Irreversible.
+ */
+export async function deleteAccount(): Promise<void> {
+  await api.delete("/users/me");
+}
+
 /** LEGACY dev-only signup (backend requires AUTH_DEV_BYPASS=1). */
 export async function createUser(name: string, email: string): Promise<CreateUserResponse> {
   const res = await api.post<CreateUserResponse>("/users/create", { name, email });

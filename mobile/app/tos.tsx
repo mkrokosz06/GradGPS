@@ -16,7 +16,7 @@ export default function TermsOfServiceScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: July 9, 2026</Text>
+        <Text style={styles.updated}>Last updated: August 20, 2026</Text>
 
         <Section title="1. Acceptance of Terms">
           By using GradGPS, you agree to these Terms of Service. If you do not agree, please do not use the app.
@@ -35,7 +35,7 @@ export default function TermsOfServiceScreen() {
         </Section>
 
         <Section title="5. Your Responsibilities">
-          You are responsible for the accuracy of any transcript or personal information you upload. You agree not to misuse, reverse-engineer, or attempt to disrupt the service. You must be a currently enrolled or prospective college student to use this app.
+          You are responsible for the accuracy of any transcript or personal information you upload, and for keeping the sign-in method associated with your account (your Google, Apple, or email account) secure. You agree not to misuse, reverse-engineer, or attempt to disrupt the service. You must be a currently enrolled or prospective college student to use this app.
         </Section>
 
         <Section title="6. Transcript Data">
@@ -51,7 +51,7 @@ export default function TermsOfServiceScreen() {
         </Section>
 
         <Section title="9. Contact">
-          Questions about these terms? Reach out at support@gradgps.app.
+          Questions about these terms? Reach out through the Contact Support screen in the app or the contact form at gradgps.com.
         </Section>
       </ScrollView>
     </SafeAreaView>
