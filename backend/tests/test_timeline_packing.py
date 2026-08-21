@@ -281,6 +281,36 @@ def test_reflow_drops_satisfied_and_merges_light_fragments():
         assert s["credits"] >= _MERGE_MIN, f"{s['term']} = {s['credits']}cr fragment"
 
 
+def test_reflow_rebalance_compresses_behind_student_and_places_internship():
+    # A behind student (early slots satisfied) with a back-loaded major sequence
+    # and a required internship: the remaining work re-packs into the FEWEST
+    # in-band semesters (not the template's lopsided groupings), and the
+    # internship lands in its own summer between the last-two academic terms.
+    records = (
+        [{"sem_index": 0, "season": "FA", "satisfied": True, "matched_code": "X",
+          "slot": {"type": "course"}, "item": None}]        # a finished early slot
+        + [{"sem_index": 1 + i // 3, "season": "FA", "satisfied": False,
+            "slot": {"type": "course"},
+            "item": {"course_code": f"C{i}", "credits": 3}} for i in range(15)]  # 45 cr
+        + [{"sem_index": 9, "season": "SU", "satisfied": False,
+            "slot": {"type": "course"},
+            "item": {"course_code": "IST 495", "course_title": "Internship", "credits": 1}}]
+    )
+    sems = _reflow_template(records, "FA 2026")
+    academic = _upcoming(sems)
+    # 45 cr → ceil(45/18) = 3 academic semesters, none over the band.
+    assert len(academic) == 3
+    for s in academic:
+        assert s["credits"] <= _MAX_CREDITS
+    # Exactly one summer term, holding only the internship, anchored before a Fall.
+    su = [s for s in sems if s["term"].startswith("SU")]
+    assert len(su) == 1 and [c["course_code"] for c in su[0]["courses"]] == ["IST 495"]
+    terms = [s["term"] for s in sems]
+    su_i = terms.index(su[0]["term"])
+    assert terms[su_i + 1].startswith("FA")       # summer validly precedes a Fall
+    assert academic[-1]["term"] == "SP 2028"      # graduates senior spring, not later
+
+
 # ── Tiny runner so this works without pytest installed ──────────────────────
 
 if __name__ == "__main__":

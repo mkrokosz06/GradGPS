@@ -524,15 +524,15 @@ def _build_future_semesters(
     return semesters
 
 
-def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
-    """Reflow matched SAP-template slots into future semesters.
+def _reflow_reproduce(records: list[dict], base_term: str) -> list[dict]:
+    """Reproduce the published plan for an on-track / no-transcript student.
 
     Unsatisfied slots keep the template's ordering, per-semester groupings, AND
-    each semester's own season (Fall / Spring / Summer) — the published plan is
-    already prerequisite-sequenced, credit-balanced, and correctly places summer
-    terms (internships, field camps).  Satisfied slots (in the transcript) drop
-    out and later semesters shift earlier.  For a student with no transcript this
-    reproduces the official plan exactly, summers included.
+    each semester's own season — the published plan is already prerequisite-
+    sequenced, credit-balanced, and correctly places summer terms (internships,
+    field camps).  Any light Fall/Spring fragments a partially-complete student
+    leaves behind merge forward; summer terms never merge.  With nothing dropped
+    this reproduces the official plan exactly, summers included.
     """
     def _cr(items):
         return sum(_display_credits(it) for it in items)
@@ -550,11 +550,6 @@ def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
         groups[-1][1].append(r["item"])
     groups = [g for g in groups if g[1]]
 
-    # Merge-forward only the LIGHT Fall/Spring fragments a partially-complete
-    # student leaves behind (< _MERGE_MIN credits after finished courses drop).
-    # Summer terms are intentionally small (a lone internship) and never merged,
-    # and an on-track / no-transcript student's full semesters never merge — so
-    # the published plan is reproduced exactly.
     merged: list[list] = []
     for season, items in groups:
         prev = merged[-1] if merged else None
@@ -578,6 +573,72 @@ def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
         semesters.append(_emit_semester(cursor, items))
 
     return semesters
+
+
+def _reflow_rebalance(records: list[dict], base_term: str) -> list[dict]:
+    """Reflow for a partially-complete student, re-packing the REMAINING slots.
+
+    A behind/scattered student who has finished many early template slots would,
+    under the reproduce path, be left with the template's lumpy per-semester
+    groupings (a light semester here, a heavy one there) — stretching graduation
+    past where the real remaining load warrants.  Instead we re-pack the remaining
+    (prerequisite-ordered) slots into balanced ~15-credit semesters and lift a
+    required internship into its own summer term between junior and senior year —
+    the same shape the Layer 1 packer produces.
+    """
+    unsatisfied = [r["item"] for r in records if not r["satisfied"]]
+    internship  = [it for it in unsatisfied if _is_internship(it)]
+    academic    = [it for it in unsatisfied if not _is_internship(it)]
+
+    # Pack academic slots, in order, into as FEW semesters as the credit band
+    # allows, split evenly.  Using the fewest semesters (each up to the 18-credit
+    # max) keeps a behind student from stretching an extra term just to carry a
+    # few trailing padding credits — those fold into the senior semesters — while
+    # the even split avoids two maxed-out semesters next to a light one.
+    total_cr = sum(_display_credits(it) for it in academic)
+    n_sems = max(1, math.ceil(total_cr / _MAX_CREDITS)) if total_cr else 0
+    chunks = [c for c in _slice_even(academic, n_sems) if c]
+
+    # Lay chunks onto alternating Fall/Spring terms.
+    acad: list[tuple[str, list[dict]]] = []
+    future_term = _next_term(base_term)
+    for chunk in chunks:
+        acad.append((future_term, chunk))
+        future_term = _next_term(future_term)
+
+    if not internship:
+        return [_emit_semester(t, c) for t, c in acad]
+
+    # Drop the internship into its own summer that opens senior year: the summer
+    # before the Fall among the final two academic terms.  A summer only validly
+    # precedes a Fall (there is no summer between a Fall and the next Spring), so
+    # anchoring on that Fall places the internship between junior spring and
+    # senior fall regardless of the plan's term parity.
+    tail = acad[-2:] if len(acad) >= 2 else acad
+    anchor_fall = next((t for t, _ in tail if t.startswith("FA")), acad[-1][0])
+    su_term = _preceding_summer(anchor_fall)
+
+    semesters: list[dict] = []
+    for t, c in acad:
+        if t == anchor_fall:
+            semesters.append(_emit_semester(su_term, internship))
+        semesters.append(_emit_semester(t, c))
+    return semesters
+
+
+def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
+    """Reflow matched SAP-template slots into future semesters.
+
+    A no-transcript / on-track student (nothing satisfied) reproduces the
+    published plan exactly (`_reflow_reproduce`).  A partially-complete student
+    — who has already satisfied some slots — gets the remaining, prerequisite-
+    ordered work re-packed into balanced semesters with the internship placed
+    between junior and senior year (`_reflow_rebalance`), so graduation reflects
+    the real remaining load rather than the template's now-lopsided groupings.
+    """
+    if any(r["satisfied"] for r in records):
+        return _reflow_rebalance(records, base_term)
+    return _reflow_reproduce(records, base_term)
 
 
 def _build_layer1_future(

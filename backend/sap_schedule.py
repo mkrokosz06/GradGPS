@@ -415,15 +415,22 @@ def match_template(
             "item":        None if satisfied else slot_to_item(slot),
         })
 
-    # Category-less generic gen-ed slots: satisfy from completed gen-ed courses,
-    # skipping any course already matched to a named slot (no double-count).
+    # Category-less generic gen-ed slots: satisfy from completed gen-ed courses.
+    # Exclude only courses that are the LITERAL code of a named template slot —
+    # those belong to that slot.  A course matched to a named slot merely via
+    # equivalence (MATH 140 -> the template's MATH 110 slot) is NOT excluded: it's
+    # a genuine extra gen-ed course still available for a generic slot, so a
+    # student who has finished gen-eds isn't left with phantom gen-ed slots.
     if gen_ed_courses:
-        named_consumed = {
-            _base(r["matched_code"]) for r in records
-            if r["satisfied"] and r["matched_code"]
-            and r["slot"].get("type") in ("course", "choose_one", "pool")
-        }
-        pool = [c for c in gen_ed_courses if _base(c) not in named_consumed]
+        named_codes: set[str] = set()
+        for r in records:
+            s = r["slot"]
+            if s.get("type") == "course":
+                named_codes.add(_base(s.get("code", "")))
+            elif s.get("type") in ("choose_one", "pool"):
+                for c in s.get("codes", []):
+                    named_codes.add(_base(c))
+        pool = [c for c in gen_ed_courses if _base(c) not in named_codes]
         _assign_generic_gen_ed(records, pool)
 
     if transcript_courses:
