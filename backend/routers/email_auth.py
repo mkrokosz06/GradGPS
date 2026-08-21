@@ -17,6 +17,7 @@ SES. NOTE: until SES production access is granted, SES only delivers to
 
 import os
 import re
+import secrets
 import time
 import logging
 from collections import defaultdict, deque
@@ -76,6 +77,19 @@ def _dev_mode() -> bool:
     return os.getenv("AUTH_DEV_BYPASS", "").strip().lower() in {"1", "true", "yes"}
 
 
+def _review_account() -> tuple[str, str] | None:
+    """App Store review demo account (REVIEW_EMAIL + REVIEW_CODE env vars).
+
+    Apple's reviewer can't read a real inbox, so this one address signs in
+    with a fixed 6-digit code and no email is ever sent. Returns (email, code)
+    when configured, else None (feature fully disabled)."""
+    email = os.getenv("REVIEW_EMAIL", "").strip().lower()
+    code = os.getenv("REVIEW_CODE", "").strip()
+    if email and len(code) == 6 and code.isdigit():
+        return email, code
+    return None
+
+
 def _send_code_email(sender: str, dest: str, code: str) -> None:
     ses = boto3.client("sesv2", region_name=os.getenv("AWS_DEFAULT_REGION", "us-east-1"))
     body = (
@@ -100,6 +114,12 @@ def email_start(body: StartBody, request: Request):
     email = body.email.strip().lower()
     if not _EMAIL_RE.match(email) or len(email) > 254:
         raise HTTPException(status_code=400, detail="Please enter a valid email address.")
+
+    review = _review_account()
+    if review and email == review[0]:
+        # Fixed-code demo account: nothing to issue or send, and no rate
+        # limiting so reviewer retries can never 429.
+        return {"ok": True}
 
     if _rate_limited(_by_ip, _client_ip(request), _START_PER_IP) or \
        _rate_limited(_by_email, email, _START_PER_EMAIL):
@@ -136,7 +156,12 @@ def email_verify(body: VerifyBody):
     if not _EMAIL_RE.match(email) or not code.isdigit() or len(code) != 6:
         raise HTTPException(status_code=400, detail="Enter the 6-digit code we emailed you.")
 
-    if not check_code(email, code):
+    review = _review_account()
+    if review and email == review[0]:
+        ok = secrets.compare_digest(code, review[1])
+    else:
+        ok = check_code(email, code)
+    if not ok:
         raise HTTPException(status_code=401, detail="That code is invalid or has expired.")
 
     name = (body.name or "").strip()[:_MAX_NAME] or None
