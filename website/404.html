@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex" />
+<meta name="theme-color" content="#1a3a6b" />
+<link rel="icon" type="image/png" href="/logo.png" />
+<title>Wrong turn — GradGPS</title>
+<style>
+  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/barlow-400.woff2) format("woff2"); }
+  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/barlow-semi-condensed-700.woff2) format("woff2"); }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background-color: #FAFBFD;
+    background-image: radial-gradient(rgba(26, 58, 107, 0.07) 1px, transparent 1.5px);
+    background-size: 26px 26px;
+    color: #16233A;
+    font-family: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
+    text-align: center; padding: 24px;
+  }
+  img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 18px; }
+  h1 {
+    font-family: "Barlow Semi Condensed", "Arial Narrow", "Segoe UI", sans-serif;
+    font-weight: 700; font-size: clamp(40px, 7vw, 64px); line-height: 1; margin: 0 0 12px;
+  }
+  h1 span { color: #2a5298; }
+  p { color: #52627D; font-size: 18px; margin: 0 0 28px; }
+  a.btn {
+    display: inline-block; text-decoration: none; font-weight: 600; color: #fff;
+    background: #1a3a6b; border-radius: 10px; padding: 12px 24px; font-size: 15.5px;
+    box-shadow: 0 3px 12px rgba(26, 58, 107, 0.25);
+  }
+  a.btn:hover { background: #2a5298; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/logo.png" alt="" />
+  <h1>Wrong turn. <span>Recalculating&hellip;</span></h1>
+  <p>This page isn&rsquo;t on the map.</p>
+  <a class="btn" href="/">Back to the route</a>
+</main>
+</body>
+</html>
