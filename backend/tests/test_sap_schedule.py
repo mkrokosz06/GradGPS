@@ -51,14 +51,18 @@ def test_equivalence_matching():
     assert is_taken("ETI 301", taken)
 
 
-def test_transfer_and_missing_not_taken():
+def test_transfer_counts_as_taken_missing_does_not():
+    # Transfer credit counts — the audit engine treats it as done, and a
+    # transferred course must not be re-scheduled by the timeline.
     taken = build_taken_set([
         {"course_code": "ACCTG 211", "status": "done"},
         {"course_code": "FIN 301", "status": "in_progress"},
+        {"course_code": "ECON 102", "status": "transfer"},
         {"course_code": "MKTG 301", "status": "missing"},   # not taken
     ])
     assert is_taken("ACCTG 211", taken)
     assert is_taken("FIN 301", taken)
+    assert is_taken("ECON 102", taken)
     assert not is_taken("MKTG 301", taken)
 
 
@@ -165,6 +169,71 @@ def test_world_language_uses_single_majority_dept():
     # The stray GER course becomes surplus and covers the 3-cr elective.
     elec = next(r for r in recs if r["slot"]["type"] == "elective")
     assert elec["satisfied"]
+
+
+def _wl3_tpl(labels=("World Language Level 1", "World Language Level 2",
+                     "World Language Level 3")):
+    """Full three-level world-language sequence + one free elective."""
+    return {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        *({"type": "pool", "ref": "world_language", "label": lb, "credits": 4}
+          for lb in labels),
+        {"type": "elective", "label": "Elective", "credits": 3},
+    ]}]}
+
+
+def test_world_language_satisfied_from_transfer_credit():
+    # Language requirements are very commonly completed via transfer/AP credit —
+    # those courses must satisfy the WL slots, not get re-scheduled.
+    courses = [{"course_code": "SPAN 1", "status": "transfer", "credits_earned": 4},
+               {"course_code": "SPAN 2", "status": "transfer", "credits_earned": 4},
+               {"course_code": "SPAN 3", "status": "transfer", "credits_earned": 4}]
+    recs = match_template(_wl3_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, True, True]
+
+
+def test_placement_into_top_level_satisfies_whole_sequence():
+    # PSU language requirements are proficiency levels: passing SPAN 3 attests
+    # the 12th-credit level even if levels 1-2 were skipped via placement.
+    courses = [{"course_code": "SPAN 3", "status": "done", "credits_earned": 4}]
+    recs = match_template(_wl3_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, True, True]
+    assert all(r["matched_code"] == "SPAN 3" for r in wl)
+    # Only the one real course is consumed — no phantom elective credits.
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert not elec["satisfied"]
+
+
+def test_partial_sequence_keeps_higher_levels_scheduled():
+    courses = [{"course_code": "SPAN 1", "status": "done", "credits_earned": 4}]
+    recs = match_template(_wl3_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, False, False]
+
+
+def test_generic_transfer_placeholder_level_from_credits():
+    # AP/test language credit posts as an XFR placeholder with no course number;
+    # 12 transfer credits ≈ the full basic sequence (4 credits per level).
+    courses = [{"course_code": "SPAN XFRIL", "status": "transfer",
+                "credits_earned": 12}]
+    recs = match_template(_wl3_tpl(), build_taken_set(courses),
+                          transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, True, True]
+
+
+def test_bare_world_language_labels_use_plan_position():
+    # Unnumbered "World Language" slots fall back to plan order: 1st = level 1.
+    courses = [{"course_code": "FR 2", "status": "done", "credits_earned": 4}]
+    recs = match_template(
+        _wl3_tpl(labels=("World Language",) * 3), build_taken_set(courses),
+        transcript_courses=courses)
+    wl = [r for r in recs if r["slot"].get("ref") == "world_language"]
+    assert [r["satisfied"] for r in wl] == [True, True, False]
 
 
 def _dept_level_tpl():

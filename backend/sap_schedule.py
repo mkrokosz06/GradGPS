@@ -71,10 +71,11 @@ def _equivalents(code: str) -> set[str]:
 
 def build_taken_set(transcript_courses: list[dict]) -> set[str]:
     """Base course codes the student has completed or is taking, expanded with
-    known equivalences so a renamed/cross-listed course still matches a template."""
+    known equivalences so a renamed/cross-listed course still matches a template.
+    Transfer credit counts — the audit engine treats it as done."""
     taken: set[str] = set()
     for c in transcript_courses:
-        if c.get("status") in ("done", "in_progress"):
+        if c.get("status") in ("done", "in_progress", "transfer"):
             taken |= _equivalents(c.get("course_code", ""))
     return taken
 
@@ -265,7 +266,7 @@ def _leftover_courses(transcript_courses: list[dict], consumed: set[str],
     claimed = consumed | used_codes
     out = []
     for c in transcript_courses:
-        if c.get("status") not in ("done", "in_progress"):
+        if c.get("status") not in ("done", "in_progress", "transfer"):
             continue
         toks = _equivalents(c.get("course_code", ""))
         if any(_codes_match(t, u) for t in toks for u in claimed):
@@ -274,11 +275,56 @@ def _leftover_courses(transcript_courses: list[dict], consumed: set[str],
     return out
 
 
+_WORD_LEVELS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5}
+
+
+def _slot_language_level(slot: dict) -> int | None:
+    """Proficiency level a world-language slot demands, parsed from its label:
+    'World Language Level 3', 'Level Two (8th credit level)', 'World Language 2'.
+    None when the label carries no level (bare 'World Language')."""
+    low = (slot.get("label") or "").lower()
+    m = re.search(r"\blevel[\s-]*(one|two|three|four|five|\d{1,2})\b", low)
+    if m:
+        tok = m.group(1)
+        return int(tok) if tok.isdigit() else _WORD_LEVELS[tok]
+    m = re.search(r"\bworld language\s+(\d{1,2})\b", low)
+    if m:
+        return int(m.group(1))
+    m = re.search(r"\b(\d{1,2})(?:st|nd|rd|th)\s+credit\s+level\b", low)
+    if m:
+        return max(1, -(-int(m.group(1)) // 4))   # 12th credit level → level 3
+    return None
+
+
+def _language_level(course: dict) -> int:
+    """Proficiency level a completed language course attests.  PSU numbers the
+    basic sequence 1/2/3 (each = 4 credit levels); 100-level is the 4th course,
+    200+ the 5th.  Generic transfer placeholders ('SPAN XFRIL') carry no number —
+    estimate from credits (4 credits per level, capped at the basic sequence)."""
+    n = _course_number(course)
+    if 1 <= n <= 3:
+        return n
+    if 100 <= n < 200:
+        return 4
+    if n >= 200:
+        return 5
+    return min(3, int(_course_credits(course) // 4))
+
+
 def _assign_world_language(records: list[dict], leftovers: list[dict]) -> None:
-    """Satisfy un-anchored world-language pool slots, one leftover language
-    course per slot in plan order.  A language requirement is one language's
-    sequence, so only the dept the student has the most courses in is used
-    (most courses, then alphabetical, for determinism)."""
+    """Satisfy un-anchored world-language pool slots from leftover language
+    courses.  A language requirement is one language's sequence, so only the
+    dept the student has the most courses in is used (most courses, then
+    alphabetical, for determinism).
+
+    PSU language requirements are PROFICIENCY levels, not per-course seat time:
+    a student who placed into SPAN 3 and passed it has completed the 12th-credit
+    level, whatever the number of courses on the transcript.  Each slot's
+    required level comes from its label (falling back to its position in the
+    plan: 1st slot = level 1); a slot is satisfied when the student's highest
+    attained level reaches it.  One consumed course per satisfied slot (highest
+    level first) is removed from the elective surplus, mirroring the old
+    one-course-per-slot bookkeeping."""
     slots = [r for r in records if not r["satisfied"]
              and r["slot"].get("type") == "pool"
              and r["slot"].get("ref") == "world_language"]
@@ -289,9 +335,18 @@ def _assign_world_language(records: list[dict], leftovers: list[dict]) -> None:
     if not slots or not by_dept:
         return
     dept = sorted(by_dept, key=lambda d: (-len(by_dept[d]), d))[0]
-    for rec, course in zip(slots, by_dept[dept]):
-        rec["satisfied"], rec["item"] = True, None
-        rec["matched_code"] = _norm(course.get("course_code", ""))
+    courses = sorted(by_dept[dept], key=_language_level, reverse=True)
+    attained = _language_level(courses[0])
+    satisfied_count = 0
+    for i, rec in enumerate(slots):
+        required = _slot_language_level(rec["slot"]) or (i + 1)
+        if attained >= required:
+            match = next((c for c in courses if _language_level(c) == required),
+                         courses[0])
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = _norm(match.get("course_code", ""))
+            satisfied_count += 1
+    for course in courses[:satisfied_count]:
         leftovers.remove(course)   # its credits can't also count as elective
 
 
