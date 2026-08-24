@@ -27,7 +27,7 @@
 <meta name="twitter:image" content="https://gradgps.com/og.png" />
 <title>GradGPS — Your AI degree advisor for Penn State</title>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GradGPS","operatingSystem":"iOS","applicationCategory":"EducationalApplication","description":"AI-powered degree audit and semester-by-semester graduation planner for Penn State students.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://gradgps.com/"}
+{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GradGPS","operatingSystem":"iOS","applicationCategory":"EducationalApplication","description":"AI-powered degree audit and semester-by-semester graduation planner for Penn State students.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"screenshot":"https://gradgps.com/shots/app-timeline.png","url":"https://gradgps.com/"}
 </script>
 <style>
   @font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/barlow-400.woff2) format("woff2"); }
@@ -223,6 +223,26 @@
     margin-bottom: 2px;
   }
 
+  /* ---------- screenshots ---------- */
+  .shots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 34px; align-items: start; }
+  .shot { text-align: center; }
+  .phone {
+    max-width: 280px; margin: 0 auto;
+    border: 9px solid var(--ink); border-radius: 40px; overflow: hidden;
+    background: #fff; box-shadow: 0 24px 60px rgba(22, 35, 58, 0.16);
+  }
+  .phone img { display: block; width: 100%; height: auto; }
+  .shot h3 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 18px 0 4px; }
+  .shot p { margin: 0 auto; color: var(--ink-soft); font-size: 15px; max-width: 24em; }
+  @media (max-width: 780px) {
+    .shots-grid {
+      display: flex; overflow-x: auto; gap: 22px;
+      scroll-snap-type: x mandatory; padding-bottom: 10px;
+      margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+    }
+    .shot { flex: 0 0 78%; scroll-snap-align: center; }
+  }
+
   /* ---------- legend (features) ---------- */
   .legend-panel {
     background: #fff; border: 1px solid var(--line); border-radius: 18px;
@@ -394,6 +414,34 @@
             <h3>Follow your route</h3>
             <p>Your AI advisor hands you a full degree audit plus a semester-by-semester timeline to graduation, recalculated every time your record changes.</p>
           </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="shots">
+    <div class="wrap">
+      <p class="kicker">Street view</p>
+      <h2>Here&rsquo;s what your route looks like.</h2>
+      <p class="section-lede">
+        Real screens from the beta &mdash; your registration plan, your semester-by-semester
+        timeline, and your progress adding up.
+      </p>
+      <div class="shots-grid">
+        <div class="shot">
+          <div class="phone"><img src="/shots/app-home.png" width="780" height="1688" loading="lazy" alt="GradGPS home screen: current semester in progress and a recommended Fall 2026 registration plan of five courses" /></div>
+          <h3>Plan your registration</h3>
+          <p>Next semester picked from what&rsquo;s actually left &mdash; required courses first, choose-one alternatives spelled out.</p>
+        </div>
+        <div class="shot">
+          <div class="phone"><img src="/shots/app-timeline.png" width="780" height="1688" loading="lazy" alt="GradGPS timeline screen: credit progress bar and a semester timeline with a you-are-here marker on Spring 2026" /></div>
+          <h3>Follow the timeline</h3>
+          <p>Every semester from first to final &mdash; past ones checked off, you-are-here marked, future ones planned.</p>
+        </div>
+        <div class="shot">
+          <div class="phone"><img src="/shots/app-account.png" width="780" height="1688" loading="lazy" alt="GradGPS account screen: 52 of 120 credits, with requirements done, in progress, and remaining" /></div>
+          <h3>Watch it add up</h3>
+          <p>Credits earned and requirements done, in progress, and remaining &mdash; refreshed with every upload.</p>
         </div>
       </div>
     </div>
