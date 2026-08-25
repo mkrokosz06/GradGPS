@@ -103,7 +103,18 @@
   @media (max-width: 720px) { .site-nav a:not(.btn) { display: none; } }
 
   /* ---------- hero ---------- */
-  .hero { padding: 84px 0 30px; }
+  .hero { padding: 70px 0 34px; text-align: center; }
+  .hero-copy { max-width: 40em; margin: 0 auto; }
+  .hero .eyebrow { justify-content: center; }
+  .hero p.lede { margin-left: auto; margin-right: auto; }
+  .hero-ctas { justify-content: center; }
+  .hero-shots { margin-top: 56px; }
+  .hero-shots .shots-grid { max-width: 940px; margin: 0 auto; }
+  @media (min-width: 781px) {
+    .hero-shots .shot:nth-child(2) { transform: translateY(-28px); }
+    .hero-shots .shot:nth-child(1),
+    .hero-shots .shot:nth-child(3) { transform: translateY(12px); }
+  }
   .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
     font-size: 13px; font-weight: 600; letter-spacing: 0.13em;
@@ -136,7 +147,6 @@
   .hero-note { font-size: 14px; color: var(--missing); margin: 16px 0 0; }
 
   /* ---------- route map ---------- */
-  .routemap { padding: 26px 0 40px; }
   .routemap-card {
     background: #fff; border: 1px solid var(--line); border-radius: 18px;
     padding: 30px 22px 18px;
@@ -149,8 +159,8 @@
   }
   .routemap-head .t { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: 0.02em; }
   .routemap-head .m { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .routemap svg { display: block; min-width: 760px; width: 100%; height: auto; }
-  .routemap text { font-family: var(--sans); }
+  .routemap-card svg { display: block; min-width: 760px; width: 100%; height: auto; }
+  .routemap-card text { font-family: var(--sans); }
   .rm-label { font-size: 13px; font-weight: 600; fill: var(--ink); }
   .rm-sub { font-size: 11px; fill: var(--ink-soft); }
   .rm-flag { font-family: var(--display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; fill: #b45309; }
@@ -345,30 +355,39 @@
 <main id="top">
   <section class="hero">
     <div class="wrap">
-      <p class="eyebrow"><span class="ai-chip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2 7.5L21.5 12 14 14.5 12 22l-2-7.5L2.5 12 10 9.5z"/></svg>AI-powered</span>Degree navigation for Penn State &middot; in open beta</p>
-      <h1>You are here. <span class="dest">Graduation is that&nbsp;way.</span></h1>
-      <p class="lede">
-        GradGPS is a free iPhone app that puts an AI degree advisor in your pocket: it reads
-        your transcript, checks it against your major&rsquo;s real requirements, and maps
-        every remaining semester to graduation.
-      </p>
-      <div class="hero-ctas">
-        <a class="btn btn-navy" href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">Get it on TestFlight</a>
-        <a class="btn btn-line" href="#how">How it works</a>
-      </div>
-      <p class="hero-note">Free for students &middot; iPhone &middot; works with your LionPATH transcript<br />
-      The button opens TestFlight &mdash; Apple&rsquo;s free beta-app installer. Two taps, about a minute.</p>
-    </div>
-  </section>
-
-  <section class="routemap" aria-label="Example degree route">
-    <div class="wrap">
-      <div class="routemap-card">
-        <div class="routemap-head">
-          <span class="t" id="rm-title">Route: Enterprise Technology Integration, B.S.</span>
-          <span class="m" id="rm-meta">97 / 120 CR &middot; ETA MAY 2027</span>
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="ai-chip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2 7.5L21.5 12 14 14.5 12 22l-2-7.5L2.5 12 10 9.5z"/></svg>AI-powered</span>Degree navigation for Penn State &middot; in open beta</p>
+        <h1>You are here. <span class="dest">Graduation is that&nbsp;way.</span></h1>
+        <p class="lede">
+          GradGPS is a free iPhone app that puts an AI degree advisor in your pocket: it reads
+          your transcript, checks it against your major&rsquo;s real requirements, and maps
+          every remaining semester to graduation.
+        </p>
+        <div class="hero-ctas">
+          <a class="btn btn-navy" href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">Get it on TestFlight</a>
+          <a class="btn btn-line" href="#how">How it works</a>
         </div>
-        <svg id="rm-svg" viewBox="0 0 980 220" role="img" aria-label="Example degree route"></svg>
+        <p class="hero-note">Free for students &middot; iPhone &middot; works with your LionPATH transcript<br />
+        The button opens TestFlight &mdash; Apple&rsquo;s free beta-app installer. Two taps, about a minute.</p>
+      </div>
+      <div class="hero-shots">
+        <div class="shots-grid">
+          <div class="shot">
+            <div class="phone"><img src="/shots/app-home.png" width="780" height="1688" fetchpriority="high" alt="GradGPS home screen: current semester in progress and a recommended Fall 2026 registration plan of five courses" /></div>
+            <h3>Plan your registration</h3>
+            <p>Next semester picked from what&rsquo;s actually left &mdash; required courses first, choose-one alternatives spelled out.</p>
+          </div>
+          <div class="shot">
+            <div class="phone"><img src="/shots/app-timeline.png" width="780" height="1688" fetchpriority="high" alt="GradGPS timeline screen: credit progress bar and a semester timeline with a you-are-here marker on Spring 2026" /></div>
+            <h3>Follow the timeline</h3>
+            <p>Every semester from first to final &mdash; past ones checked off, you-are-here marked, future ones planned.</p>
+          </div>
+          <div class="shot">
+            <div class="phone"><img src="/shots/app-account.png" width="780" height="1688" fetchpriority="high" alt="GradGPS account screen: 52 of 120 credits, with requirements done, in progress, and remaining" /></div>
+            <h3>Watch it add up</h3>
+            <p>Credits earned and requirements done, in progress, and remaining &mdash; refreshed with every upload.</p>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -419,30 +438,20 @@
     </div>
   </section>
 
-  <section class="block" id="shots">
+  <section class="block" id="route">
     <div class="wrap">
-      <p class="kicker">Street view</p>
-      <h2>Here&rsquo;s what your route looks like.</h2>
+      <p class="kicker">Live example</p>
+      <h2>Watch a real route come together.</h2>
       <p class="section-lede">
-        Real screens from the beta &mdash; your registration plan, your semester-by-semester
-        timeline, and your progress adding up.
+        Every stop is a semester &mdash; completed ones checked off, a &ldquo;you are here&rdquo;
+        marker on the term in progress, and a dashed line running all the way to your graduation pin.
       </p>
-      <div class="shots-grid">
-        <div class="shot">
-          <div class="phone"><img src="/shots/app-home.png" width="780" height="1688" loading="lazy" alt="GradGPS home screen: current semester in progress and a recommended Fall 2026 registration plan of five courses" /></div>
-          <h3>Plan your registration</h3>
-          <p>Next semester picked from what&rsquo;s actually left &mdash; required courses first, choose-one alternatives spelled out.</p>
+      <div class="routemap-card">
+        <div class="routemap-head">
+          <span class="t" id="rm-title">Route: Enterprise Technology Integration, B.S.</span>
+          <span class="m" id="rm-meta">97 / 120 CR &middot; ETA MAY 2027</span>
         </div>
-        <div class="shot">
-          <div class="phone"><img src="/shots/app-timeline.png" width="780" height="1688" loading="lazy" alt="GradGPS timeline screen: credit progress bar and a semester timeline with a you-are-here marker on Spring 2026" /></div>
-          <h3>Follow the timeline</h3>
-          <p>Every semester from first to final &mdash; past ones checked off, you-are-here marked, future ones planned.</p>
-        </div>
-        <div class="shot">
-          <div class="phone"><img src="/shots/app-account.png" width="780" height="1688" loading="lazy" alt="GradGPS account screen: 52 of 120 credits, with requirements done, in progress, and remaining" /></div>
-          <h3>Watch it add up</h3>
-          <p>Credits earned and requirements done, in progress, and remaining &mdash; refreshed with every upload.</p>
-        </div>
+        <svg id="rm-svg" viewBox="0 0 980 220" role="img" aria-label="Example degree route"></svg>
       </div>
     </div>
   </section>
