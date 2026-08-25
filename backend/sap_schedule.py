@@ -414,6 +414,45 @@ def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
             rec["matched_code"] = f"{need:g} surplus credits"
 
 
+# ── Class-selector slot identity & options ───────────────────────────────────
+
+def slot_identity(slot: dict, sem_index: int) -> tuple[str, str]:
+    """(slot_kind, slot_key) — a stable requirement identity the class selector
+    keys a student's course choice / semester pin on.  Code-based slots key on
+    their course(s) so the key survives reflow; generic pool / elective /
+    category-less gen-ed slots fold in the template semester index to stay unique
+    (two "Free elective" cells must not collapse to one key)."""
+    t = slot.get("type")
+    if t == "course":
+        return "course", f"course:{_base(slot.get('code', ''))}"
+    if t == "choose_one":
+        codes = sorted({_base(c) for c in slot.get("codes", []) if c})
+        return "choose_one", "one:" + "|".join(codes)
+    if t == "gen_ed":
+        cat = slot.get("category")
+        if cat:
+            return "gen_ed", f"gened:{_norm(cat)}"
+        return "gen_ed", f"gened:GENERAL#s{sem_index}"
+    if t == "pool":
+        codes = sorted({_base(c) for c in slot.get("codes", []) if c})
+        if codes:
+            return "pool", "pool:" + "|".join(codes)
+        ref = _norm(str(slot.get("ref") or slot.get("label") or "pool"))
+        return "pool", f"pool:{ref}#s{sem_index}"
+    return "elective", f"elective:s{sem_index}"
+
+
+def slot_options(slot: dict) -> list[dict]:
+    """Bounded alternative courses the student can swap to for this slot, or []
+    when the choice is unbounded (a whole gen-ed category or a large un-anchored
+    pool — the catalog-browse case, out of scope for v1 swap)."""
+    credits = float(slot.get("credits", 3) or 3)
+    if slot.get("type") in ("choose_one", "pool"):
+        codes = _dedupe_crosslisted(slot.get("codes", []))
+        return [{"course_code": c, "course_title": "", "credits": credits} for c in codes]
+    return []
+
+
 # ── Match ────────────────────────────────────────────────────────────────────
 
 def match_template(
@@ -423,6 +462,7 @@ def match_template(
     transcript_courses: list[dict] | None = None,
     used_codes: set[str] | None = None,
     gen_ed_courses: list[str] | None = None,
+    course_choices: dict[str, str] | None = None,
 ) -> list[dict]:
     """Walk the template in order and produce one record per slot:
 
@@ -470,6 +510,24 @@ def match_template(
                 satisfied, matched = True, cat
         # elective / un-anchored world_language: the leftover pass below
 
+        item = None if satisfied else slot_to_item(slot)
+        if item is not None:
+            kind, skey = slot_identity(slot, si)
+            item["slot_key"] = skey
+            item["slot_kind"] = kind
+            opts = slot_options(slot)
+            if opts:
+                item["options"] = opts
+            # Apply a stored course choice: schedule/display the chosen course
+            # (a concrete course now fills a choose-one / anchored-pool slot).
+            chosen = (course_choices or {}).get(skey)
+            if chosen and (not opts or any(_codes_match(chosen, o["course_code"]) for o in opts)):
+                item["chosen_code"] = chosen
+                if kind != "course":
+                    item["course_code"] = chosen
+                    if kind in ("pool", "gen_ed", "elective"):
+                        item["is_pool"] = False
+
         records.append({
             "sem_index":   si,
             "season":      sem.get("term_season"),
@@ -477,7 +535,7 @@ def match_template(
             "satisfied":   satisfied,
             "matched_code": matched,
             "slot":        slot,
-            "item":        None if satisfied else slot_to_item(slot),
+            "item":        item,
         })
 
     # Category-less generic gen-ed slots: satisfy from completed gen-ed courses.

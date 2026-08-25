@@ -10,9 +10,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
+import { CoursePickerModal } from "../../components/CoursePickerModal";
 import { useAuth } from "../../context/AuthContext";
 import { getAudit, type AuditSummary } from "../../services/auditService";
 import { getTimeline, type TimelineData, type TimelineCourse, type Semester } from "../../services/timelineService";
+import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -143,7 +145,7 @@ function CurrentSemesterStrip({ semester, credits }: { semester: Semester; credi
   );
 }
 
-function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
+function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void }) {
   const router = useRouter();
   const type   = courseType(course);
 
@@ -193,6 +195,9 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
     ? course.course_code.split(" or ").map((s) => s.trim())
     : null;
 
+  const actionable = !!onEdit && !!course.slot_key && course.status === "missing";
+  const hasSwap    = (course.options?.length ?? 0) > 1;
+
   const handlePress = () => {
     if (pairCodes) {
       router.push(`/course/${encodeURIComponent(pairCodes[0])}?pair=${encodeURIComponent(pairCodes[1])}` as any);
@@ -205,6 +210,8 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
     <TouchableOpacity
       activeOpacity={0.75}
       onPress={handlePress}
+      onLongPress={actionable ? () => onEdit!(course) : undefined}
+      delayLongPress={250}
       style={{
         flexDirection: "row", alignItems: "center",
         paddingVertical: 14, paddingHorizontal: 18,
@@ -219,9 +226,12 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
       }} />
 
       <View style={{ flex: 1 }}>
-        <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
-          {course.course_code}
-        </Text>
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {course.pinned ? <Text style={{ fontSize: 11, marginRight: 4 }}>📌</Text> : null}
+          <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
+            {course.course_code}
+          </Text>
+        </View>
         {course.course_title ? (
           <Text style={{ color: "#64748b", fontSize: 12, marginTop: 2 }} numberOfLines={1}>
             {course.course_title}
@@ -236,13 +246,38 @@ function RegistrationCourseRow({ course }: { course: TimelineCourse }) {
         }}>
           <Text style={{ color: type.color, fontSize: 10, fontWeight: "700" }}>{type.label}</Text>
         </View>
-        <Text style={{ color: "#94a3b8", fontSize: 11 }}>Tap for ratings</Text>
+        {actionable ? (
+          <TouchableOpacity
+            onPress={() => onEdit!(course)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{
+              flexDirection: "row", alignItems: "center",
+              backgroundColor: "#eff4fb", borderRadius: 999,
+              paddingHorizontal: 8, paddingVertical: 2,
+              borderWidth: 1, borderColor: "#dbe6f5",
+            }}
+          >
+            <Text style={{ color: "#2a5298", fontSize: 11, fontWeight: "700" }}>
+              {hasSwap ? `${course.options!.length} options ›` : "Edit ›"}
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <Text style={{ color: "#94a3b8", fontSize: 11 }}>Tap for ratings</Text>
+        )}
       </View>
     </TouchableOpacity>
   );
 }
 
-function RegistrationSection({ semester, audit }: { semester: Semester; audit: AuditSummary }) {
+function RegistrationSection({
+  semester,
+  audit,
+  onEditCourse,
+}: {
+  semester: Semester;
+  audit: AuditSummary;
+  onEditCourse?: (course: TimelineCourse, term: string, termLabel: string) => void;
+}) {
   const router  = useRouter();
   const courses = semester.courses;
 
@@ -275,7 +310,11 @@ function RegistrationSection({ semester, audit }: { semester: Semester; audit: A
 
       {/* Course list */}
       {courses.map((c, i) => (
-        <RegistrationCourseRow key={`${c.course_code}_${i}`} course={c} />
+        <RegistrationCourseRow
+          key={`${c.course_code}_${i}`}
+          course={c}
+          onEdit={onEditCourse ? (course) => onEditCourse(course, semester.term, semester.label) : undefined}
+        />
       ))}
 
       {/* Footer */}
@@ -325,6 +364,8 @@ export default function HomeScreen() {
   const [timeline,   setTimeline]   = useState<TimelineData | null>(null);
   const [loading,    setLoading]    = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [editing, setEditing] = useState<{ course: TimelineCourse; term: string; label: string } | null>(null);
+  const [saving, setSaving]   = useState(false);
 
   const fetchData = useCallback(async () => {
     if (!userId) { setLoading(false); return; }
@@ -343,6 +384,30 @@ export default function HomeScreen() {
 
   useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
   const onRefresh = useCallback(() => { setRefreshing(true); fetchData(); }, [fetchData]);
+
+  // Class-selector mutations: write, re-pull so the plan reflows (the modal
+  // stays on-screen, so useFocusEffect won't refire — refetch explicitly).
+  const applyChoice = useCallback(async (payload: ChoicePayload) => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await putChoice(userId, payload);
+      await fetchData();
+      setEditing(null);
+    } catch { /* keep modal open on failure */ }
+    finally { setSaving(false); }
+  }, [userId, fetchData]);
+
+  const clearChoice = useCallback(async (slotKey: string) => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await deleteChoice(userId, slotKey);
+      await fetchData();
+      setEditing(null);
+    } catch { /* keep modal open on failure */ }
+    finally { setSaving(false); }
+  }, [userId, fetchData]);
 
   if (loading) {
     return (
@@ -398,11 +463,26 @@ export default function HomeScreen() {
         ) : null}
 
         {nextSem ? (
-          <RegistrationSection semester={nextSem} audit={audit!} />
+          <RegistrationSection
+            semester={nextSem}
+            audit={audit!}
+            onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+          />
         ) : (
           <AllDoneCard gradLabel={gradLabel} />
         )}
       </ScrollView>
+
+      <CoursePickerModal
+        visible={!!editing}
+        course={editing?.course ?? null}
+        term={editing?.term ?? ""}
+        termLabel={editing?.label ?? ""}
+        busy={saving}
+        onApply={applyChoice}
+        onClear={clearChoice}
+        onClose={() => setEditing(null)}
+      />
     </SafeAreaView>
   );
 }

@@ -20,6 +20,7 @@ from plan_templates import load_template
 from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_used_codes, build_satisfied_req_codes,
                           build_gen_ed_courses, match_template)
+from routers.user_choices import get_user_choices
 
 router = APIRouter()
 
@@ -166,13 +167,18 @@ def _gen_ed_effectively_satisfied(group: dict, planned: list[dict]) -> bool:
     return bool(group.get("satisfied"))
 
 
-def _collect_missing(audit_result: dict) -> list[dict]:
+def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None = None) -> list[dict]:
     """
     Flatten every missing course item out of the audit result.
     Handles normal groups, mixed sub_groups, and choose_credits pools.
     For pairs, only the first option in each pair is emitted (avoids duplicates).
     For choose_credits pools, emits a synthetic summary entry instead of all options.
+
+    Named courses and choose-one pairs carry a stable `slot_key`/`slot_kind` (and,
+    for pairs, `options`) so the class selector can pin them or swap the pair's
+    chosen course; a stored choice in `course_choices` is applied here.
     """
+    course_choices = course_choices or {}
     missing: list[dict] = []
     seen_pairs: set[str] = set()
     seen_codes: set[str] = set()   # prevent same course appearing in multiple groups
@@ -273,11 +279,27 @@ def _collect_missing(audit_result: dict) -> list[dict]:
                         seen_codes.add(item["course_code"])
                         if partner:
                             seen_codes.add(partner["course_code"])
-                        missing.append({
+                        pair_codes = [item["course_code"]]
+                        if partner:
+                            pair_codes.append(partner["course_code"])
+                        credits = item.get("credits") or 3
+                        skey = "one:" + "|".join(sorted({_strip_w(c) for c in pair_codes}))
+                        entry = {
                             "course_code": label,
                             "course_title": item.get("course_title", ""),
-                            "credits": item.get("credits") or 3,
-                        })
+                            "credits": credits,
+                            "slot_key": skey,
+                            "slot_kind": "choose_one",
+                            "options": [
+                                {"course_code": c, "course_title": "", "credits": float(credits or 3)}
+                                for c in pair_codes
+                            ],
+                        }
+                        chosen = course_choices.get(skey)
+                        if chosen and any(chosen.strip().upper() == c.strip().upper() for c in pair_codes):
+                            entry["course_code"] = chosen
+                            entry["chosen_code"] = chosen
+                        missing.append(entry)
                     else:
                         code = item.get("course_code", "")
                         if code in seen_codes:
@@ -287,6 +309,8 @@ def _collect_missing(audit_result: dict) -> list[dict]:
                             "course_code": code,
                             "course_title": item.get("course_title", ""),
                             "credits": item.get("credits") or 3,
+                            "slot_key": f"course:{_strip_w(code)}",
+                            "slot_kind": "course",
                         })
 
     return missing
@@ -437,6 +461,12 @@ def _emit_semester(term: str, courses: list[dict]) -> dict:
                 "pool_courses":        c.get("pool_courses"),
                 "pool_needed_credits": c.get("pool_needed_credits"),
                 "pool_needed_courses": c.get("pool_needed_courses"),
+                # Class selector metadata (present on actionable future slots).
+                "slot_key":            c.get("slot_key"),
+                "slot_kind":           c.get("slot_kind"),
+                "options":             c.get("options"),
+                "chosen_code":         c.get("chosen_code"),
+                "pinned":              c.get("pinned", False),
             }
             for c in courses
         ],
@@ -648,11 +678,12 @@ def _build_layer1_future(
     transcript_courses: list[dict],
     transfer_courses: list[dict],
     base_term: str,
+    course_choices: dict[str, str] | None = None,
 ) -> list[dict]:
     """Layer 1 fallback: build future semesters from the audit alone (no SAP
     template) with the credit-band packer.  Used for every major that doesn't
     have a plan template."""
-    collected     = _collect_missing(audit_result)
+    collected     = _collect_missing(audit_result, course_choices)
     named_courses = _sort_named([c for c in collected if not c.get("is_pool")])
     raw_pools     = [c for c in collected if c.get("is_pool")]
 
@@ -730,6 +761,88 @@ def _build_layer1_future(
     return _build_future_semesters(
         named_courses, gen_ed_slots, pool_slots, base_term, internship_items,
     )
+
+
+def _semester_credits(courses: list[dict]) -> float:
+    return round(sum(float(c.get("credits_earned", 3) or 3) for c in courses), 1)
+
+
+def _apply_pins(future: list[dict], pins: dict[str, str]) -> list[dict]:
+    """Anchor pinned courses to their pinned terms, then re-pack around them.
+
+    `future` is the emitted upcoming-semester list; `pins` maps slot_key → term.
+    Only emitted courses carrying that slot_key are moved (a pin for a course the
+    student has since completed simply matches nothing and is inert).  Conflict
+    rules: a pin whose term has fallen into the past moves to the earliest future
+    term (`pin_moved`); a term pushed past the credit cap bumps its lowest-priority
+    *unpinned* course forward.  Placement is best-effort — the audit stays the
+    source of truth for what's required.
+    """
+    if not pins or not future:
+        return future
+
+    earliest = min((s["term"] for s in future), key=_term_key)
+    by_term: dict[str, dict] = {s["term"]: s for s in future}
+
+    def _ensure_term(term: str) -> dict:
+        if term not in by_term:
+            by_term[term] = {
+                "term": term, "label": _term_label(term),
+                "status": "upcoming", "credits": 0.0, "courses": [],
+            }
+        return by_term[term]
+
+    # 1. Detach every pinned course from where the packer put it.
+    moved: list[tuple[dict, str]] = []
+    for sem in future:
+        keep = []
+        for c in sem["courses"]:
+            sk = c.get("slot_key")
+            if sk and sk in pins:
+                target = pins[sk]
+                if _term_key(target) < _term_key(earliest):
+                    target = earliest
+                    c["pin_moved"] = True
+                c["pinned"] = True
+                moved.append((c, target))
+            else:
+                keep.append(c)
+        sem["courses"] = keep
+
+    # 2. Re-attach each pinned course to its target term (creating it if needed).
+    for c, target in moved:
+        _ensure_term(target)["courses"].append(c)
+
+    # 3. Relieve any over-cap term by bumping its lowest-priority unpinned course
+    #    forward (pools/gen-ed placeholders first, then the last-listed course).
+    for _ in range(len(by_term) * 4):  # bounded: cascades can't loop forever
+        ordered = sorted(by_term.values(), key=lambda s: _term_key(s["term"]))
+        changed = False
+        for sem in ordered:
+            if _semester_credits(sem["courses"]) <= _MAX_CREDITS:
+                continue
+            idx = next((i for i, c in enumerate(sem["courses"])
+                        if not c.get("pinned") and c.get("is_pool")), None)
+            if idx is None:
+                idx = next((i for i in range(len(sem["courses"]) - 1, -1, -1)
+                            if not sem["courses"][i].get("pinned")), None)
+            if idx is None:
+                continue  # everything here is pinned — allow the overflow
+            bumped = sem["courses"].pop(idx)
+            _ensure_term(_next_term(sem["term"]))["courses"].append(bumped)
+            changed = True
+            break
+        if not changed:
+            break
+
+    # 4. Recompute totals, drop empties, return in chronological order.
+    result = []
+    for sem in sorted(by_term.values(), key=lambda s: _term_key(s["term"])):
+        if not sem["courses"]:
+            continue
+        sem["credits"] = _semester_credits(sem["courses"])
+        result.append(sem)
+    return result
 
 
 @router.get("")
@@ -870,6 +983,13 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # state onto it.  Every major WITHOUT a template falls back to the Layer 1
     # credit-band packer, exactly as before — so only templated majors change.
     # (`template` was loaded above, before the requirement-rows 404 check.)
+    # Class-selector decisions: which course fills an option-bearing slot
+    # (course_choices) and which term a slot is pinned to (pins). Both key on the
+    # stable slot_key the timeline emits; applied below and in _apply_pins.
+    choices        = get_user_choices(user_id)
+    course_choices = {k: v["chosen_course"] for k, v in choices.items() if v.get("chosen_course")}
+    pins           = {k: v["pinned_term"]   for k, v in choices.items() if v.get("pinned_term")}
+
     if template:
         # The major audit is the source of truth for course equivalences/pairs
         # (MATH 110/140, STAT 200/SCM 200): fold its satisfied requirement codes
@@ -883,13 +1003,17 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             transcript_courses=transcript_courses,
             used_codes=build_used_codes(audit_result, gen_ed_result),
             gen_ed_courses=build_gen_ed_courses(gen_ed_result),
+            course_choices=course_choices,
         )
-        semesters.extend(_reflow_template(records, base_term))
+        future = _reflow_template(records, base_term)
     else:
-        semesters.extend(_build_layer1_future(
+        future = _build_layer1_future(
             audit_result, gen_ed_result, requirement_rows,
             transcript_courses, transfer_courses, base_term,
-        ))
+            course_choices=course_choices,
+        )
+
+    semesters.extend(_apply_pins(future, pins))
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(

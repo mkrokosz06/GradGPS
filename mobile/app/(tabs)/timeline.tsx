@@ -11,8 +11,10 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
+import { CoursePickerModal } from "../../components/CoursePickerModal";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
+import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -368,7 +370,7 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
 
 // ── Course row ────────────────────────────────────────────────────────────────
 
-function CourseRow({ course }: { course: TimelineCourse }) {
+function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void }) {
   const router = useRouter();
   const config = {
     done:        { dot: "✓", dotColor: "text-done",     textColor: "text-gray-800", bg: "bg-green-50" },
@@ -411,6 +413,10 @@ function CourseRow({ course }: { course: TimelineCourse }) {
     ? course.course_code.split(" or ").map((s) => s.trim())
     : null;
 
+  // A future slot the student can choose/pin: it carries a stable slot_key.
+  const actionable = !!onEdit && !!course.slot_key && course.status === "missing";
+  const hasSwap    = (course.options?.length ?? 0) > 1;
+
   const handlePress = () => {
     if (pairCodes) {
       router.push(`/course/${encodeURIComponent(pairCodes[0])}?pair=${encodeURIComponent(pairCodes[1])}` as any);
@@ -423,21 +429,38 @@ function CourseRow({ course }: { course: TimelineCourse }) {
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={handlePress}
+      onLongPress={actionable ? () => onEdit!(course) : undefined}
+      delayLongPress={250}
       className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
     >
       <Text className={`w-5 text-center text-sm font-bold ${config.dotColor}`}>{config.dot}</Text>
       <View className="flex-1 ml-3">
-        <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
+        <View className="flex-row items-center">
+          {course.pinned ? <Text className="text-xs mr-1">📌</Text> : null}
+          <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
+        </View>
         {course.course_title ? (
           <Text className="text-gray-400 text-xs mt-0.5" numberOfLines={1}>{course.course_title}</Text>
         ) : null}
         <Text className="text-gray-400 text-xs mt-0.5">tap for ratings ›</Text>
       </View>
-      <View className="ml-3 items-end">
+      <View className="ml-3 items-end justify-center">
         {course.grade ? (
           <Text className="text-gray-600 text-sm font-bold">{course.grade}</Text>
         ) : course.credits_earned > 0 ? (
           <Text className="text-gray-400 text-xs">{course.credits_earned} cr</Text>
+        ) : null}
+        {actionable ? (
+          <TouchableOpacity
+            onPress={() => onEdit!(course)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            className="mt-1 flex-row items-center bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100"
+          >
+            <Text className="text-navy text-xs font-semibold">
+              {hasSwap ? `${course.options!.length} options` : "Edit"}
+            </Text>
+            <Text className="text-navy text-xs"> ›</Text>
+          </TouchableOpacity>
         ) : null}
       </View>
     </TouchableOpacity>
@@ -450,10 +473,12 @@ function ContentPanel({
   semester,
   refreshing,
   onRefresh,
+  onEditCourse,
 }: {
   semester: Semester;
   refreshing: boolean;
   onRefresh: () => void;
+  onEditCourse?: (course: TimelineCourse, term: string, termLabel: string) => void;
 }) {
   const isCurrent  = semester.status === "current";
   const isUpcoming = semester.status === "upcoming";
@@ -492,7 +517,15 @@ function ContentPanel({
           <Text className="text-gray-300 text-center mt-6">No courses recorded</Text>
         ) : (
           semester.courses.map((c, i) => (
-            <CourseRow key={`${c.course_code}_${i}`} course={c} />
+            <CourseRow
+              key={`${c.course_code}_${i}`}
+              course={c}
+              onEdit={
+                isUpcoming && onEditCourse
+                  ? (course) => onEditCourse(course, semester.term, semester.label)
+                  : undefined
+              }
+            />
           ))
         )}
       </ScrollView>
@@ -508,6 +541,8 @@ export default function TimelineScreen() {
   const [error, setError]           = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
+  const [editing, setEditing] = useState<{ course: TimelineCourse; term: string; label: string } | null>(null);
+  const [saving, setSaving] = useState(false);
   const { userId } = useAuth();
   const timelineScrollRef = useRef<ScrollView>(null);
   const timelineViewportW = useRef(0);
@@ -570,6 +605,30 @@ export default function TimelineScreen() {
   useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
 
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
+
+  // Class-selector mutations: write, then re-pull so the plan reflows. The modal
+  // stays on-screen (no navigation), so useFocusEffect won't fire — refetch here.
+  const applyChoice = useCallback(async (payload: ChoicePayload) => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await putChoice(userId, payload);
+      await fetchTimeline();
+      setEditing(null);
+    } catch { /* leave the modal open so the user can retry */ }
+    finally { setSaving(false); }
+  }, [userId, fetchTimeline]);
+
+  const clearChoice = useCallback(async (slotKey: string) => {
+    if (!userId) return;
+    setSaving(true);
+    try {
+      await deleteChoice(userId, slotKey);
+      await fetchTimeline();
+      setEditing(null);
+    } catch { /* keep modal open on failure */ }
+    finally { setSaving(false); }
+  }, [userId, fetchTimeline]);
 
   // ── Loading ──────────────────────────────────────────────────────────────
   if (loading) {
@@ -666,13 +725,29 @@ export default function TimelineScreen() {
 
         {/* Content area */}
         {selectedSemester ? (
-          <ContentPanel semester={selectedSemester} refreshing={refreshing} onRefresh={onRefresh} />
+          <ContentPanel
+            semester={selectedSemester}
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+          />
         ) : (
           <View className="flex-1 items-center justify-center">
             <Text className="text-gray-300">Select a semester above</Text>
           </View>
         )}
       </View>
+
+      <CoursePickerModal
+        visible={!!editing}
+        course={editing?.course ?? null}
+        term={editing?.term ?? ""}
+        termLabel={editing?.label ?? ""}
+        busy={saving}
+        onApply={applyChoice}
+        onClear={clearChoice}
+        onClose={() => setEditing(null)}
+      />
     </SafeAreaView>
   );
 }

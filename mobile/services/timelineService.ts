@@ -6,6 +6,14 @@ export type PoolCourse = {
   credits:      number;
 };
 
+export type SlotOption = {
+  course_code:  string;
+  course_title: string;
+  credits:      number;
+};
+
+export type SlotKind = "course" | "choose_one" | "pool" | "gen_ed" | "elective";
+
 export type TimelineCourse = {
   course_code:          string;
   course_title?:        string;
@@ -17,6 +25,13 @@ export type TimelineCourse = {
   pool_courses?:        PoolCourse[];
   pool_needed_credits?: number;
   pool_needed_courses?: number;
+  // Class selector (present on actionable future slots).
+  slot_key?:            string | null;
+  slot_kind?:           SlotKind | null;
+  options?:             SlotOption[] | null;
+  chosen_code?:         string | null;
+  pinned?:              boolean;
+  pin_moved?:           boolean;
 };
 
 export type Semester = {

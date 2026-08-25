@@ -12,7 +12,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
-from db import users_table, transcript_table, sessions_table, get_s3
+from db import users_table, transcript_table, sessions_table, user_choices_table, get_s3
 from deps import get_current_user, get_user_id
 
 router = APIRouter()
@@ -134,10 +134,25 @@ def delete_me(user_id: str = Depends(get_user_id)):
             for item in rows:
                 batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
 
-    # 3. Profile record.
+    # 3. Class-selector course choices / semester pins (paginated).
+    choice_kwargs = {
+        "KeyConditionExpression": DKey("user_id").eq(user_id),
+        "ProjectionExpression": "user_id, slot_key",
+    }
+    resp = user_choices_table.query(**choice_kwargs)
+    choices = list(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = user_choices_table.query(**choice_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+        choices.extend(resp.get("Items", []))
+    if choices:
+        with user_choices_table.batch_writer() as batch:
+            for item in choices:
+                batch.delete_item(Key={"user_id": item["user_id"], "slot_key": item["slot_key"]})
+
+    # 4. Profile record.
     users_table.delete_item(Key={"user_id": user_id})
 
-    # 4. Sessions last, best-effort: the account data is already gone, so a
+    # 5. Sessions last, best-effort: the account data is already gone, so a
     #    failure here must not surface as an error. The sessions table is
     #    keyed by token hash with no user index, so scan-and-delete; any
     #    stragglers only resolve to a profile-less identity and expire via

@@ -193,4 +193,30 @@ except dynamodb.exceptions.ResourceInUseException:
     print("Table already exists: school_requests")
 
 
+# ── 8. user_course_choices ───────────────────────────────────────────────────
+# PK: user_id   SK: slot_key
+# One row per student decision on a suggested course slot. slot_key is a stable
+# requirement identity (e.g. "one:MATH 110|MATH 140", "gened:US", "course:CHEM 110",
+# "pool:<ref>#<code>"). Attributes: slot_kind, chosen_course?, pinned_term?, created_at.
+# Powers the class selector — the timeline reads these to fix which course fills a
+# slot and (best-effort) which term it lands in.
+
+try:
+    dynamodb.create_table(
+        TableName="user_course_choices",
+        KeySchema=[
+            {"AttributeName": "user_id",  "KeyType": "HASH"},
+            {"AttributeName": "slot_key",  "KeyType": "RANGE"},
+        ],
+        AttributeDefinitions=[
+            {"AttributeName": "user_id",  "AttributeType": "S"},
+            {"AttributeName": "slot_key",  "AttributeType": "S"},
+        ],
+        BillingMode="PAY_PER_REQUEST",
+    )
+    print("Created table: user_course_choices")
+except dynamodb.exceptions.ResourceInUseException:
+    print("Table already exists: user_course_choices")
+
+
 print("\nAll tables and buckets ready.")
