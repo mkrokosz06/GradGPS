@@ -1,9 +1,12 @@
 # Business Breadth — handling plan
 
-Status: **Option A implemented on `dev`** (2026-08-25). `_BUSINESS_DEPTS`,
-`_assign_business_breadth`, and `_template_major_dept` are in `sap_schedule.py`
-with tests in `tests/test_sap_schedule.py`. Option D (UI hint) and B/C (real
-Smeal list) remain future work.
+Status: **Options A + D implemented on `dev`** (2026-08-25). Option A —
+`_BUSINESS_DEPTS`, `_assign_business_breadth`, `_template_major_dept` in
+`sap_schedule.py` with tests in `tests/test_sap_schedule.py`. Option D — the
+timeline card now shows a directional subtitle ("Business elective outside your
+major — see the Smeal breadth list") via `pool_ref`, passed through
+`_emit_semester` and rendered in `mobile/app/(tabs)/timeline.tsx`. B/C (real Smeal
+list) and a *verified* Smeal link remain future work.
 
 ## Problem
 
