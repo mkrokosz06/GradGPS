@@ -3,7 +3,7 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 124.0,
+  "total_credits": 122.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/anthropological-science-bs/",
   "scraped": true,
   "semesters": [
@@ -23,7 +23,7 @@
         },
         {
           "type": "course",
-          "code": "LA 83",
+          "code": "LA 283",
           "credits": 1.5
         },
         {
@@ -126,11 +126,6 @@
       "term_season": "SP",
       "credits": 16.5,
       "slots": [
-        {
-          "type": "course",
-          "code": "LA 283",
-          "credits": 1.5
-        },
         {
           "type": "gen_ed",
           "category": null,

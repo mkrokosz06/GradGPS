@@ -3,7 +3,7 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 126.0,
+  "total_credits": 124.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/labor-human-resources-bs/",
   "scraped": true,
   "semesters": [
@@ -23,7 +23,7 @@
         },
         {
           "type": "course",
-          "code": "LA 83",
+          "code": "LA 283",
           "credits": 1.5
         },
         {
@@ -148,11 +148,6 @@
           "type": "course",
           "code": "LHR 305",
           "credits": 3.0
-        },
-        {
-          "type": "course",
-          "code": "LA 283",
-          "credits": 1.5
         },
         {
           "type": "gen_ed",
