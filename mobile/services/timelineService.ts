@@ -33,6 +33,7 @@ export type TimelineCourse = {
   chosen_code?:         string | null;
   pinned?:              boolean;
   pin_moved?:           boolean;
+  searchable?:          boolean;
 };
 
 export type Semester = {

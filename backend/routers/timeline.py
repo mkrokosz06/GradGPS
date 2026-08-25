@@ -468,6 +468,7 @@ def _emit_semester(term: str, courses: list[dict]) -> dict:
                 "options":             c.get("options"),
                 "chosen_code":         c.get("chosen_code"),
                 "pinned":              c.get("pinned", False),
+                "searchable":          c.get("searchable", False),
             }
             for c in courses
         ],

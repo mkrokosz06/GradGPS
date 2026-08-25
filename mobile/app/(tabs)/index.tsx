@@ -165,13 +165,21 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
       poolLabel = `Elective Pool — ${needed} ${unit}`;
     }
 
+    // Searchable gen-ed slots are actionable — tap/long-press to search for a course.
+    const poolActionable = !!onEdit && !!course.slot_key && !!course.searchable && course.status === "missing";
     return (
-      <View style={{
-        flexDirection: "row", alignItems: "center",
-        paddingVertical: 14, paddingHorizontal: 18,
-        borderBottomWidth: 1, borderBottomColor: "#f8fafc",
-        opacity: 0.55,
-      }}>
+      <TouchableOpacity
+        activeOpacity={poolActionable ? 0.75 : 1}
+        onPress={poolActionable ? () => onEdit!(course) : undefined}
+        onLongPress={poolActionable ? () => onEdit!(course) : undefined}
+        delayLongPress={250}
+        style={{
+          flexDirection: "row", alignItems: "center",
+          paddingVertical: 14, paddingHorizontal: 18,
+          borderBottomWidth: 1, borderBottomColor: "#f8fafc",
+          opacity: poolActionable ? 1 : 0.55,
+        }}
+      >
         <View style={{
           width: 9, height: 9, borderRadius: 4.5,
           borderWidth: 2, borderColor: "#cbd5e1", marginRight: 14,
@@ -181,13 +189,24 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
             {poolLabel}
           </Text>
         </View>
-        <View style={{
-          backgroundColor: type.bg, borderRadius: 7,
-          paddingHorizontal: 9, paddingVertical: 4,
-        }}>
-          <Text style={{ color: type.color, fontSize: 10, fontWeight: "700" }}>{type.label}</Text>
-        </View>
-      </View>
+        {poolActionable ? (
+          <View style={{
+            flexDirection: "row", alignItems: "center",
+            backgroundColor: "#eff4fb", borderRadius: 999,
+            paddingHorizontal: 8, paddingVertical: 2,
+            borderWidth: 1, borderColor: "#dbe6f5",
+          }}>
+            <Text style={{ color: "#2a5298", fontSize: 11, fontWeight: "700" }}>Choose ›</Text>
+          </View>
+        ) : (
+          <View style={{
+            backgroundColor: type.bg, borderRadius: 7,
+            paddingHorizontal: 9, paddingVertical: 4,
+          }}>
+            <Text style={{ color: type.color, fontSize: 10, fontWeight: "700" }}>{type.label}</Text>
+          </View>
+        )}
+      </TouchableOpacity>
     );
   }
 

@@ -486,12 +486,14 @@ def _assign_business_breadth(records: list[dict], leftovers: list[dict],
 
 # ── Class-selector slot identity & options ───────────────────────────────────
 
-def slot_identity(slot: dict, sem_index: int) -> tuple[str, str]:
+def slot_identity(slot: dict, ordinal: int) -> tuple[str, str]:
     """(slot_kind, slot_key) — a stable requirement identity the class selector
     keys a student's course choice / semester pin on.  Code-based slots key on
     their course(s) so the key survives reflow; generic pool / elective /
-    category-less gen-ed slots fold in the template semester index to stay unique
-    (two "Free elective" cells must not collapse to one key)."""
+    category-less gen-ed slots fold in a global slot `ordinal` (the slot's
+    position in the template) to stay unique — two "General Education" or "Free
+    elective" cells, even in the same semester, must not collapse to one key.
+    The ordinal is stable because the template is fixed."""
     t = slot.get("type")
     if t == "course":
         return "course", f"course:{_base(slot.get('code', ''))}"
@@ -502,14 +504,14 @@ def slot_identity(slot: dict, sem_index: int) -> tuple[str, str]:
         cat = slot.get("category")
         if cat:
             return "gen_ed", f"gened:{_norm(cat)}"
-        return "gen_ed", f"gened:GENERAL#s{sem_index}"
+        return "gen_ed", f"gened:GENERAL#s{ordinal}"
     if t == "pool":
         codes = sorted({_base(c) for c in slot.get("codes", []) if c})
         if codes:
             return "pool", "pool:" + "|".join(codes)
         ref = _norm(str(slot.get("ref") or slot.get("label") or "pool"))
-        return "pool", f"pool:{ref}#s{sem_index}"
-    return "elective", f"elective:s{sem_index}"
+        return "pool", f"pool:{ref}#s{ordinal}"
+    return "elective", f"elective:s{ordinal}"
 
 
 def slot_options(slot: dict) -> list[dict]:
@@ -564,7 +566,7 @@ def match_template(
     consumed: set[str] = set()
     records: list[dict] = []
 
-    for si, sem, slot in iter_slots(template):
+    for ordinal, (si, sem, slot) in enumerate(iter_slots(template)):
         t = slot.get("type")
         satisfied = False
         matched = None
@@ -583,9 +585,12 @@ def match_template(
 
         item = None if satisfied else slot_to_item(slot)
         if item is not None:
-            kind, skey = slot_identity(slot, si)
+            kind, skey = slot_identity(slot, ordinal)
             item["slot_key"] = skey
             item["slot_kind"] = kind
+            if kind == "gen_ed":
+                # No bounded option list — the picker offers a course search instead.
+                item["searchable"] = True
             opts = slot_options(slot)
             if opts:
                 item["options"] = opts

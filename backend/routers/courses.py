@@ -7,10 +7,11 @@ import re
 import asyncio
 import httpx
 
-from fastapi import APIRouter, HTTPException, Query
-from boto3.dynamodb.conditions import Attr
+from fastapi import APIRouter, HTTPException, Query, Depends
+from boto3.dynamodb.conditions import Attr, Key
 
 from db import requirements_table
+from deps import get_user_id
 import rmp_client
 
 router = APIRouter()
@@ -18,6 +19,69 @@ router = APIRouter()
 # ── In-memory cache: course_code -> {course_title, credits} ──────────────────
 # Avoids re-scanning the 31k-row requirements table on every tap.
 _course_cache: dict[str, dict] = {}
+
+# ── Gen-ed course cache: for the class-selector "search for a class" picker ──
+# The eight choose_credits domain/culture pools under __GEN_ED__ hold every
+# course that satisfies a gen-ed category. We load them once (they change rarely)
+# into a category-token → [courses] map plus an all-gen-ed union, so a slot's
+# candidate list is a cheap in-memory lookup + substring filter.
+_gen_ed_by_cat: dict[str, list[dict]] | None = None
+_gen_ed_all: list[dict] | None = None
+
+
+def _cat_token(group_name: str) -> str:
+    """'US: United States Cultures' -> 'US'; 'GN: Natural Sciences' -> 'GN'."""
+    return (group_name or "").split(":")[0].strip().upper().split(" ")[0] if group_name else ""
+
+
+def _load_gen_ed() -> None:
+    global _gen_ed_by_cat, _gen_ed_all
+    if _gen_ed_by_cat is not None:
+        return
+    rows: list[dict] = []
+    resp = requirements_table.query(KeyConditionExpression=Key("program_name").eq("__GEN_ED__"))
+    rows.extend(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq("__GEN_ED__"),
+            ExclusiveStartKey=resp["LastEvaluatedKey"],
+        )
+        rows.extend(resp.get("Items", []))
+
+    by_cat: dict[str, dict[str, dict]] = {}   # cat -> code(upper) -> course (deduped)
+    all_map: dict[str, dict] = {}
+    for r in rows:
+        # Only the searchable domain/culture pools — skip the fixed Communication
+        # choose_one groups (bounded options) and the WAC rule row.
+        if r.get("group_type") != "choose_credits":
+            continue
+        code = (r.get("course_code") or "").strip()
+        if not code:
+            continue
+        cat = _cat_token(r.get("requirement_group", ""))
+        course = {
+            "course_code":    code,
+            "course_title":   r.get("course_title", ""),
+            "credits":        float(r.get("credits", 3) or 3),
+            "multi_category": bool(r.get("multi_category", False)),
+        }
+        by_cat.setdefault(cat, {})[code.upper()] = course
+        all_map[code.upper()] = course
+
+    _gen_ed_by_cat = {c: list(m.values()) for c, m in by_cat.items()}
+    _gen_ed_all = list(all_map.values())
+
+
+def _resolve_slot_universe(slot_key: str) -> list[dict]:
+    """Candidate courses that can fill a slot. v1: gen-ed slots only.
+    'gened:US' -> that category; 'gened:GENERAL#sN' -> all gen-ed courses."""
+    if not slot_key.startswith("gened:"):
+        return []
+    _load_gen_ed()
+    token = slot_key[len("gened:"):].split("#")[0].strip().upper()
+    if token == "GENERAL":
+        return _gen_ed_all or []
+    return (_gen_ed_by_cat or {}).get(token, [])
 
 
 def _normalize_code(code: str) -> str:
@@ -88,6 +152,39 @@ async def _get_description(code: str) -> str | None:
 
 
 # ── Routes ────────────────────────────────────────────────────────────────────
+# NOTE: /for-slot MUST be declared before /{code}, else FastAPI matches it as a
+# course code ("for-slot").
+
+@router.get("/for-slot")
+def courses_for_slot(
+    slot_key: str = Query(..., description="The class-selector slot_key, e.g. 'gened:US'"),
+    q: str | None = Query(None, description="Substring filter over code + title"),
+    limit: int = Query(40, ge=1, le=200),
+    user_id: str = Depends(get_user_id),
+):
+    """Candidate courses a student can search to fill a slot. v1: gen-ed slots
+    only (named category or generic). Non-gen-ed slots return an empty list.
+
+    A large universe (generic 'any gen-ed') returns `needs_query: true` on an
+    empty `q` so the UI prompts the user to type instead of shipping ~3.9k rows.
+    """
+    universe = _resolve_slot_universe(slot_key)
+    ql = (q or "").strip().lower()
+
+    if not ql:
+        if len(universe) > 200:
+            return {"results": [], "needs_query": True}
+        results = sorted(universe, key=lambda c: c["course_code"])
+        return {"results": results, "needs_query": False}
+
+    hits = [
+        c for c in universe
+        if ql in c["course_code"].lower() or ql in c["course_title"].lower()
+    ]
+    # Prefix matches on the code first (e.g. "soc" → SOC 119 before a title hit).
+    hits.sort(key=lambda c: (not c["course_code"].lower().startswith(ql), c["course_code"]))
+    return {"results": hits[:limit], "needs_query": False}
+
 
 @router.get("/{code}")
 async def get_course(code: str):

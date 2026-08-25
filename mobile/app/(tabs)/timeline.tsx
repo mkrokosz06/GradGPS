@@ -391,8 +391,17 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
     // points to the Smeal website), so give it a directional subtitle instead of
     // the opaque "Choose N credit(s)" placeholder.
     const isBreadth = course.pool_ref === "business_breadth";
+    // Searchable gen-ed slots are actionable: long-press / tap the chip to search
+    // for a course to fill the category.
+    const poolActionable = !!onEdit && !!course.slot_key && !!course.searchable && course.status === "missing";
     return (
-      <View className={`flex-row items-start px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}>
+      <TouchableOpacity
+        activeOpacity={poolActionable ? 0.7 : 1}
+        onPress={poolActionable ? () => onEdit!(course) : undefined}
+        onLongPress={poolActionable ? () => onEdit!(course) : undefined}
+        delayLongPress={250}
+        className={`flex-row items-start px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
+      >
         <Text className={`w-5 text-center text-sm font-bold mt-0.5 ${config.dotColor}`}>{config.dot}</Text>
         <View className="flex-1 ml-3">
           <Text className={`text-sm font-semibold ${config.textColor}`}>
@@ -413,7 +422,12 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
             <Text className="text-gray-400 text-xs mt-0.5">{course.course_title}</Text>
           ) : null}
         </View>
-      </View>
+        {poolActionable ? (
+          <View className="ml-2 mt-0.5 flex-row items-center bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+            <Text className="text-navy text-xs font-semibold">Choose ›</Text>
+          </View>
+        ) : null}
+      </TouchableOpacity>
     );
   }
 

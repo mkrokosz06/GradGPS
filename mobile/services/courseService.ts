@@ -16,6 +16,28 @@ export type CourseDetail = {
   description:  string | null;
 };
 
+export type SlotCourse = {
+  course_code:    string;
+  course_title:   string;
+  credits:        number;
+  multi_category: boolean;
+};
+
+/** Search the courses that can validly fill a class-selector slot (v1: gen-ed
+ *  slots). `q` filters server-side; `needs_query` is true when the universe is
+ *  too large to return without a query (generic "any gen-ed" slots). */
+export async function searchSlotCourses(
+  userId: string,
+  slotKey: string,
+  q: string,
+): Promise<{ results: SlotCourse[]; needs_query: boolean }> {
+  const res = await api.get<{ results: SlotCourse[]; needs_query: boolean }>(
+    "/courses/for-slot",
+    { params: { slot_key: slotKey, q: q || undefined }, headers: { "x-user-id": userId } },
+  );
+  return res.data;
+}
+
 export type ProfessorRating = {
   id:                      string;
   name:                    string;
