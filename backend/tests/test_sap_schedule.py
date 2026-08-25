@@ -17,6 +17,7 @@ from plan_templates import load_template
 from sap_schedule import (
     _base,
     _codes_match,
+    _template_major_dept,
     build_taken_set,
     build_gen_ed_courses,
     build_gen_ed_satisfied,
@@ -266,6 +267,100 @@ def test_dept_level_item_title_names_dept_and_level():
                          "level": 400, "label": "PLSC 400-Level Course", "credits": 3})
     assert item["is_pool"] and item["course_title"] == "Choose a 400-level PLSC course"
     assert item["course_code"] == "PLSC 400-Level Course"
+
+
+# ── business breadth ─────────────────────────────────────────────────────────
+
+def _breadth_tpl(n_breadth=2):
+    """A Finance-flavored Smeal plan: FIN course slots (so the major dept derives
+    to FIN), a required non-major business core course (ACCTG 211), N business-
+    breadth pool slots, and one free elective."""
+    return {"semesters": [{"year": 3, "term_season": "FA", "slots": [
+        {"type": "course", "code": "FIN 301", "credits": 3},
+        {"type": "course", "code": "FIN 305", "credits": 3},
+        {"type": "course", "code": "ACCTG 211", "credits": 3},
+        *({"type": "pool", "ref": "business_breadth",
+           "label": "Business Breadth Course", "credits": 3} for _ in range(n_breadth)),
+        {"type": "elective", "label": "Elective", "credits": 3},
+    ]}]}
+
+
+def _breadth(recs):
+    return [r for r in recs if r["slot"].get("ref") == "business_breadth"]
+
+
+def test_business_breadth_major_dept_derivation():
+    # FIN dominates the pinned business courses; a plan with no business courses
+    # yields None (breadth then stays scheduled).
+    assert _template_major_dept(_breadth_tpl()) == "FIN"
+    assert _template_major_dept(_wl3_tpl()) is None
+
+
+def test_business_breadth_satisfied_from_leftover_business_course():
+    # A leftover business course OUTSIDE the major dept (MKTG) fills one breadth
+    # slot and is consumed — so it can't also cover the elective.
+    courses = [{"course_code": "FIN 301", "status": "done", "credits_earned": 3},
+               {"course_code": "FIN 305", "status": "done", "credits_earned": 3},
+               {"course_code": "ACCTG 211", "status": "done", "credits_earned": 3},
+               {"course_code": "MKTG 445", "status": "done", "credits_earned": 3}]
+    recs = match_template(_breadth_tpl(n_breadth=1), build_taken_set(courses),
+                          transcript_courses=courses)
+    bb = _breadth(recs)
+    assert [r["satisfied"] for r in bb] == [True]
+    assert bb[0]["matched_code"] == "MKTG 445"
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert not elec["satisfied"]
+
+
+def test_business_breadth_same_dept_leftover_stays_scheduled():
+    # An EXTRA finance course is the student's own major dept — not breadth. It
+    # falls through to the elective surplus instead.
+    courses = [{"course_code": "FIN 301", "status": "done", "credits_earned": 3},
+               {"course_code": "FIN 305", "status": "done", "credits_earned": 3},
+               {"course_code": "ACCTG 211", "status": "done", "credits_earned": 3},
+               {"course_code": "FIN 420", "status": "done", "credits_earned": 3}]
+    recs = match_template(_breadth_tpl(n_breadth=1), build_taken_set(courses),
+                          transcript_courses=courses)
+    assert [r["satisfied"] for r in _breadth(recs)] == [False]
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert elec["satisfied"]
+
+
+def test_business_breadth_ignores_consumed_required_course():
+    # ACCTG 211 is a required course slot (consumed), not a leftover — so even a
+    # non-FIN business course can't satisfy breadth when it's already claimed.
+    courses = [{"course_code": "FIN 301", "status": "done", "credits_earned": 3},
+               {"course_code": "FIN 305", "status": "done", "credits_earned": 3},
+               {"course_code": "ACCTG 211", "status": "done", "credits_earned": 3}]
+    recs = match_template(_breadth_tpl(n_breadth=1), build_taken_set(courses),
+                          transcript_courses=courses)
+    assert [r["satisfied"] for r in _breadth(recs)] == [False]
+
+
+def test_business_breadth_partial_when_fewer_leftovers_than_slots():
+    # One qualifying leftover, two breadth slots → one satisfied, one scheduled.
+    courses = [{"course_code": "FIN 301", "status": "done", "credits_earned": 3},
+               {"course_code": "FIN 305", "status": "done", "credits_earned": 3},
+               {"course_code": "ACCTG 211", "status": "done", "credits_earned": 3},
+               {"course_code": "MKTG 445", "status": "done", "credits_earned": 3}]
+    recs = match_template(_breadth_tpl(n_breadth=2), build_taken_set(courses),
+                          transcript_courses=courses)
+    assert [r["satisfied"] for r in _breadth(recs)] == [True, False]
+
+
+def test_business_breadth_no_major_dept_leaves_scheduled():
+    # No business course slots → major dept underivable → breadth stays scheduled
+    # (fail-safe), and the leftover business course covers the elective instead.
+    tpl = {"semesters": [{"year": 3, "term_season": "FA", "slots": [
+        {"type": "pool", "ref": "business_breadth",
+         "label": "Business Breadth Course", "credits": 3},
+        {"type": "elective", "label": "Elective", "credits": 3},
+    ]}]}
+    courses = [{"course_code": "MKTG 445", "status": "done", "credits_earned": 3}]
+    recs = match_template(tpl, build_taken_set(courses), transcript_courses=courses)
+    assert [r["satisfied"] for r in _breadth(recs)] == [False]
+    elec = next(r for r in recs if r["slot"]["type"] == "elective")
+    assert elec["satisfied"]
 
 
 def test_electives_satisfied_by_surplus_not_by_used_courses():

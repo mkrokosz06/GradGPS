@@ -250,6 +250,18 @@ _WORLD_LANGUAGE_DEPTS = {
     "LATIN", "PORT", "RUS", "SPAN", "UKR",
 }
 
+# Smeal College of Business subject codes, used to satisfy "Business Breadth"
+# pool slots (see _assign_business_breadth).  Conservative like the language set:
+# a dept missing here just leaves the slot scheduled (today's behavior), while a
+# wrong entry would FALSELY satisfy a slot — so this stays narrow and is limited
+# to prefixes that actually appear in the 9 Smeal SAP templates.  'BA' (the
+# shared business core) is a member for matching but is excluded when deriving a
+# student's MAJOR dept (see _template_major_dept), where it outnumbers the real
+# major department in every plan.
+_BUSINESS_DEPTS = {
+    "ACCTG", "BA", "BLAW", "FIN", "MGMT", "MIS", "MKTG", "RM", "SCM",
+}
+
 
 def _dept(course: dict) -> str:
     return _norm(course.get("course_code", "")).split(" ")[0]
@@ -414,6 +426,64 @@ def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
             rec["matched_code"] = f"{need:g} surplus credits"
 
 
+def _template_major_dept(template: dict) -> str | None:
+    """Best-guess the student's major department from a Smeal template: the most
+    common business dept among its pinned `course` slots, EXCLUDING the shared
+    'BA' business core (which outnumbers the real major dept in every plan).
+    Used only to enforce business breadth's "outside your own major" rule; None
+    (template pins no business courses) safely leaves breadth slots scheduled.
+    Empirically resolves the correct dept for all 9 Smeal majors (ACCTG, FIN,
+    MKTG, MGMT, SCM, MIS, RM).
+
+    Counts every code the template pins — `course` slots plus `choose_one`/`pool`
+    anchor codes — because a major's own courses often live in choose-one/pool
+    slots (Marketing pins more ACCTG *course* cells than MKTG ones, but MKTG
+    dominates once its pool/choose-one courses are counted)."""
+    counts: dict[str, int] = {}
+    for _si, _sem, slot in iter_slots(template):
+        codes = ([slot["code"]] if slot.get("type") == "course" and slot.get("code")
+                 else slot.get("codes", []))
+        for code in codes:
+            dept = _norm(code).split(" ")[0]
+            if dept in _BUSINESS_DEPTS and dept != "BA":
+                counts[dept] = counts.get(dept, 0) + 1
+    if not counts:
+        return None
+    # Most courses wins; alphabetical tie-break for determinism.
+    return sorted(counts, key=lambda d: (-counts[d], d))[0]
+
+
+def _assign_business_breadth(records: list[dict], leftovers: list[dict],
+                             major_dept: str | None) -> None:
+    """Satisfy un-anchored Smeal "Business Breadth" pool slots
+    (`ref == "business_breadth"`) from leftover business-college courses OUTSIDE
+    the student's major department, one course per slot in plan order.
+
+    PSU's bulletin doesn't enumerate the qualifying courses (it points to an
+    external Smeal list), so this is a deliberate heuristic: a leftover course
+    whose dept is a known business dept and isn't the major's own dept stands in
+    for one 3-cr breadth slot.  Leftover-only (a required business course already
+    consumed by a slot/audit is never miscounted) and consuming (its credits
+    can't also fill a language/elective slot).  Fail-safe: no qualifying leftover
+    — or no derivable major dept — leaves the slot scheduled, today's behavior."""
+    if not major_dept:
+        return
+    for rec in records:
+        slot = rec["slot"]
+        if (rec["satisfied"] or slot.get("type") != "pool"
+                or slot.get("ref") != "business_breadth"):
+            continue
+        hit = next(
+            (c for c in leftovers
+             if _dept(c) in _BUSINESS_DEPTS and _dept(c) != major_dept),
+            None,
+        )
+        if hit:
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = _norm(hit.get("course_code", ""))
+            leftovers.remove(hit)   # its credits can't also count as elective
+
+
 # ── Class-selector slot identity & options ───────────────────────────────────
 
 def slot_identity(slot: dict, sem_index: int) -> tuple[str, str]:
@@ -486,8 +556,9 @@ def match_template(
         audit (`used_codes`, see build_used_codes) consumed.  Language slots take
         one leftover course from a `_WORLD_LANGUAGE_DEPTS` dept each; dept-level
         slots take one leftover course from their dept at their level; elective
-        slots draw on the surplus credit pool.  Other un-anchored pools
-        (business breadth) stay scheduled.
+        slots draw on the surplus credit pool.  Smeal "business breadth" pools
+        take one leftover business-college course outside the major's own dept
+        (see _assign_business_breadth).
     """
     gen_ed_satisfied = gen_ed_satisfied or {}
     consumed: set[str] = set()
@@ -560,6 +631,7 @@ def match_template(
         leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
         _assign_world_language(records, leftovers)
         _assign_dept_level(records, leftovers)
-        _assign_electives(records, leftovers)
+        _assign_business_breadth(records, leftovers, _template_major_dept(template))
+        _assign_electives(records, leftovers)   # electives LAST — soaks up remainder
 
     return records

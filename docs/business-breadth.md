@@ -1,0 +1,217 @@
+# Business Breadth — handling plan
+
+Status: **Option A implemented on `dev`** (2026-08-25). `_BUSINESS_DEPTS`,
+`_assign_business_breadth`, and `_template_major_dept` are in `sap_schedule.py`
+with tests in `tests/test_sap_schedule.py`. Option D (UI hint) and B/C (real
+Smeal list) remain future work.
+
+## Problem
+
+"Business breadth" is a Smeal College requirement: take a spread of business
+courses **outside your own major department**. Each slot is 3 credits; majors
+require 1–4 of them.
+
+In the codebase it exists **only** as a SAP-template `pool` slot with
+`ref: "business_breadth"` and **no `codes` array** — 48 occurrences across 9
+Smeal templates (`accounting-bs-business.json`, `finance-bs-business.json`,
+`marketing-bs-business.json`, `management-bs-business.json`,
+`supply-chain-and-information-systems-bs.json`,
+`business-analytics-and-information-systems-bs.json`, `real-estate-bs.json`,
+`risk-management-bs.json`, `corporate-innovation-and-entrepreneurship-bs.json`).
+It has **zero** representation in the audit engine, the `requirements` table, or
+the catalog loaders — nothing is a source of truth for it.
+
+### The bug
+
+`match_template()` (`backend/sap_schedule.py:456-481`) can only satisfy a `pool`
+slot through the anchor-code branch (`sap_schedule.py:461-463`), and a
+business-breadth slot has no `codes`, so `codes` is `[]` and it's never matched.
+The leftover passes that run afterward only handle specific refs —
+`_assign_world_language` (`world_language`), `_assign_dept_level` (`dept_level`),
+`_assign_generic_gen_ed` (generic gen-ed), `_assign_electives`
+(`type == "elective"`). **None covers `ref == "business_breadth"`**
+(`sap_schedule.py:501-505`). So every breadth slot stays `satisfied: False` and
+is re-scheduled into the future via `_reflow_template`, even for a student who
+already completed qualifying breadth courses.
+
+Consequences:
+- **Over-scheduling.** A Smeal student is told to take 3–12 credits of breadth
+  they may already have done → projected graduation pushed later than reality.
+- **Not even elective-absorbable.** `_assign_electives` gates on
+  `type == "elective"` (`sap_schedule.py:408`); breadth is `type == "pool"`, so
+  surplus credits can't cover it either. It's the least-satisfiable slot type.
+- **Double-count risk.** Because the breadth slot never consumes anything, the
+  student's real breadth course counts as a *leftover* and can be pulled into a
+  world-language or free-elective slot (`_leftover_courses`,
+  `sap_schedule.py:262-275`) while the breadth slot is *still* scheduled.
+- **Opaque UI.** The mobile card renders "Business Breadth Course / Choose 3
+  credit(s)" with no dropdown and no tap target
+  (`mobile/app/(tabs)/timeline.tsx:379-408`) — no guidance on what qualifies.
+
+### Why the data is missing
+
+PSU's bulletin deliberately does not enumerate qualifying courses — the
+plan-grid cell literally says *"See the Business Breadth Course list on the
+Smeal College website."* (cached in `backend/scripts/.sap_cache/…accounting…`).
+The deterministic scraper (`scrape_sap.py:167-168`) therefore captures only a
+labeled, code-less pool. This is the root reason we can't just add a `codes`
+list today.
+
+## Goal / non-goals
+
+**Goal (this plan):** stop over-scheduling business breadth for students who
+have already satisfied it, without inventing a course list — using the same
+leftover-satisfaction pattern already proven for world-language and dept-level
+pools. Ship on `dev`, validate, then promote.
+
+**Non-goals (deferred):** a fully accurate per-course breadth model, an
+audit-side requirement row, and a Layer-1 fallback path. Those need the real
+Smeal list (see "Later").
+
+## Design — Option A: leftover-satisfaction pass
+
+Add a pass mirroring `_assign_dept_level`, wired into `match_template` alongside
+the other leftover passes.
+
+### 1. Business-department set
+
+```python
+# backend/sap_schedule.py — next to _WORLD_LANGUAGE_DEPTS
+# Smeal / business-college subject codes. Conservative like _WORLD_LANGUAGE_DEPTS:
+# a dept missing here just leaves the slot scheduled (today's behavior); a wrong
+# entry would FALSELY satisfy a slot, so keep this tight and catalog-validated.
+_BUSINESS_DEPTS = {
+    "ACCTG", "BA", "BLAW", "FIN", "MGMT", "MKTG", "SCM", "RM", "REST",
+    # candidates to validate against the catalog before adding:
+    # "IB", "ENTR", "EBF", "SCIS"
+}
+```
+**Open item:** this set must be validated against the real catalog / Smeal list
+before merge. Until then it's a conservative approximation and is the main
+correctness risk (see Risks).
+
+### 2. The pass
+
+```python
+def _assign_business_breadth(records, leftovers, major_dept):
+    """Satisfy un-anchored business-breadth pool slots from leftover business-
+    college courses OUTSIDE the student's major department, one course per slot
+    in plan order. Conservative: unknown depts leave the slot scheduled."""
+    if not major_dept:
+        return  # can't apply the "outside your major" rule safely → leave scheduled
+    for rec in records:
+        slot = rec["slot"]
+        if (rec["satisfied"] or slot.get("type") != "pool"
+                or slot.get("ref") != "business_breadth"):
+            continue
+        hit = next(
+            (c for c in leftovers
+             if _dept(c) in _BUSINESS_DEPTS and _dept(c) != major_dept),
+            None,
+        )
+        if hit:
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = _norm(hit.get("course_code", ""))
+            leftovers.remove(hit)   # its credits can't also count as elective
+```
+
+Key properties, all matching existing passes:
+- **Leftover-only.** Draws from `_leftover_courses` — courses neither a template
+  slot nor an audit consumed — so a *required* business course (already consumed
+  by a slot/audit) is never miscounted as breadth.
+- **Consumes on match** (`leftovers.remove(hit)`) — kills the double-count risk;
+  a course satisfying a breadth slot can't also fill a language/elective slot.
+- **Fail-safe.** No qualifying leftover → slot stays scheduled (today's
+  behavior). Never *removes* a legitimately-needed slot.
+
+### 3. Deriving `major_dept`
+
+The "outside your own major" rule needs the student's major department.
+`_template_major_dept(template)` derives it, DB-free, from the template itself:
+the most common business dept among **all pinned codes** (`course` slots + the
+anchor `codes` on `choose_one`/`pool` slots), **excluding the shared `BA`
+business core**. Returns `None` when no business courses are pinned (breadth then
+stays scheduled — fail-safe).
+
+**Implementation note:** an early cut counted only `type: "course"` slots, which
+mis-derived Marketing as ACCTG — marketing plans pin more required ACCTG *course*
+cells than MKTG ones, because the MKTG courses live in `choose_one`/`pool` slots.
+Counting all pinned codes fixes it; verified to resolve the correct dept for all
+9 Smeal majors (ACCTG, FIN, MKTG, MGMT, SCM, MIS, RM×2).
+
+### 4. Wiring
+
+```python
+# backend/sap_schedule.py, in match_template(), with the other leftover passes:
+if transcript_courses:
+    leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
+    _assign_world_language(records, leftovers)
+    _assign_dept_level(records, leftovers)
+    _assign_business_breadth(records, leftovers, _template_major_dept(template))
+    _assign_electives(records, leftovers)   # electives LAST — soaks up remainder
+```
+Order matters: run **before** `_assign_electives` so breadth claims its courses
+before the generic elective pass drains the surplus. Update the `match_template`
+docstring (`sap_schedule.py:449-450`) which currently says breadth "stays
+scheduled."
+
+## Risks
+
+- **`_BUSINESS_DEPTS` accuracy is the whole ballgame.** A too-broad set falsely
+  satisfies breadth (student under-scheduled — worse than the current bug). A
+  too-narrow set leaves slots scheduled (current behavior — safe). Bias narrow;
+  validate against the catalog before merge.
+- **"Outside major dept" is an approximation** of the real Smeal rule, which is
+  an approved *list*, not simply "any non-major business course." Some in-list
+  courses may be non-business depts (e.g. ECON); some business courses may not be
+  on the list. Accepted as a conservative interim until the list is sourced.
+- **Multi-slot majors** (SCIS needs 4) are modeled as N separate 3-cr slots; the
+  pass satisfies them one leftover each, in order — correct as long as enough
+  qualifying leftovers exist, otherwise the remainder stays scheduled (safe).
+
+## Companion — Option D (UI hint, optional, low-cost)
+
+Independently of matching, use the already-present `pool_ref: "business_breadth"`
+(`sap_schedule.py:235`, currently read by nothing) to render a helpful subtitle
+on the timeline card: e.g. "Business elective outside your major — see the Smeal
+breadth list," optionally linking Smeal's page. Turns the opaque dead-end card
+into guidance. Touches `mobile/app/(tabs)/timeline.tsx:379-408`. Can ship with or
+after Option A.
+
+## Later — the correct model (Options B / C)
+
+When the Smeal breadth list can be sourced:
+- **B:** scrape/hand-author the list into a data file (like `gen_ed_courses.json`),
+  give breadth slots real `codes`, satisfy via the existing anchor-code branch,
+  and render a real "choose from these" dropdown on mobile.
+- **C:** model it audit-side as a per-major `choose_credits` requirement group so
+  `run_audit` is the source of truth — both the SAP path (via the taken set,
+  `timeline.py:877-878`) and the Layer-1 fallback would then handle it
+  consistently, closing the "vanishes without a template" gap.
+
+## Test plan
+
+- **Unit (`backend/tests/`)**: a Smeal template + a synthetic transcript with
+  (a) a qualifying leftover business course outside the major dept → slot
+  satisfied and consumed; (b) only same-major-dept leftovers → slot stays
+  scheduled; (c) a business course already consumed by a required slot → NOT
+  counted as breadth; (d) fewer leftovers than slots → partial satisfaction,
+  remainder scheduled; (e) no `major_dept` derivable → all slots stay scheduled.
+- **Regression**: the seeded test user is ETI (not Smeal), so existing timeline
+  snapshots must be unchanged. Spot-check one Smeal major end-to-end against a
+  real/known transcript before promoting off `dev`.
+
+## Files touched (Option A + D)
+
+- `backend/sap_schedule.py` — `_BUSINESS_DEPTS`, `_assign_business_breadth`,
+  `_template_major_dept` helper, wiring + docstring in `match_template`.
+- `mobile/app/(tabs)/timeline.tsx` — (Option D) `pool_ref` subtitle/link.
+- `backend/tests/…` — new coverage above.
+- No template JSON changes, no catalog/DB changes.
+
+## Rollout
+
+Build on `dev`; validate with the unit tests + a Smeal spot-check; then merge to
+`main` (auto-deploys). Because the pass is leftover-only and fail-safe, the
+worst realistic regression from a too-broad `_BUSINESS_DEPTS` is under-scheduling
+one slot — bound that risk by keeping the dept set narrow and catalog-validated.
