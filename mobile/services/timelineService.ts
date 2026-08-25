@@ -25,6 +25,7 @@ export type TimelineCourse = {
   pool_courses?:        PoolCourse[];
   pool_needed_credits?: number;
   pool_needed_courses?: number;
+  pool_ref?:            string;
   // Class selector (present on actionable future slots).
   slot_key?:            string | null;
   slot_kind?:           SlotKind | null;

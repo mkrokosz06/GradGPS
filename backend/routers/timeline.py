@@ -461,6 +461,7 @@ def _emit_semester(term: str, courses: list[dict]) -> dict:
                 "pool_courses":        c.get("pool_courses"),
                 "pool_needed_credits": c.get("pool_needed_credits"),
                 "pool_needed_courses": c.get("pool_needed_courses"),
+                "pool_ref":            c.get("pool_ref"),
                 # Class selector metadata (present on actionable future slots).
                 "slot_key":            c.get("slot_key"),
                 "slot_kind":           c.get("slot_kind"),
@@ -688,22 +689,38 @@ def _build_layer1_future(
     raw_pools     = [c for c in collected if c.get("is_pool")]
 
     # Gen ed → one slot per still-incomplete category.
+    course_choices = course_choices or {}
     gen_ed_slots: list[dict] = []
     for group in gen_ed_result.get("groups", []):
         # Suppress a category if it will be covered by courses already in
         # progress or by future major courses in the plan.
         if not _gen_ed_effectively_satisfied(group, named_courses):
-            if group.get("group_type") == "writing_intensive":
-                title = "Choose a writing-intensive (W) course"
-            else:
-                title = f"Choose a {group['name']} course"
-            gen_ed_slots.append({
+            writing = group.get("group_type") == "writing_intensive"
+            title = ("Choose a writing-intensive (W) course" if writing
+                     else f"Choose a {group['name']} course")
+            # Stable slot identity so the class-selector picker can search for a
+            # course to fill this category (and persist/pin the choice).
+            token = (group["name"].split(":")[0].strip().upper().split(" ")[0]
+                     if group.get("name") else "")
+            slot: dict = {
                 "course_code":       group["name"],
                 "course_title":      title,
                 "credits":           3,
                 "is_pool":           True,
                 "gen_ed_categories": [group["name"]],
-            })
+                "slot_key":          f"gened:{token}",
+                "slot_kind":         "gen_ed",
+                # WAC is a designation, not a course list — not searchable.
+                "searchable":        not writing,
+            }
+            chosen = course_choices.get(slot["slot_key"])
+            if chosen and not writing:
+                # A picked course now fills this category slot (display/schedule only;
+                # the gen-ed audit stays the source of truth for completion).
+                slot["course_code"] = chosen
+                slot["chosen_code"] = chosen
+                slot["is_pool"] = False
+            gen_ed_slots.append(slot)
 
     # Expand every requirement pool (choose_credits / choose_courses) into
     # ~3-credit placeholder slots so the packer can spread it across semesters

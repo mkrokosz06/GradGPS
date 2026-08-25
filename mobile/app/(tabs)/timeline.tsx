@@ -387,6 +387,10 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
 
     // Gen Ed multi-category or large pool summary → flat display
     const cats = course.gen_ed_categories;
+    // Business breadth is an un-anchored Smeal pool with no course list (PSU
+    // points to the Smeal website), so give it a directional subtitle instead of
+    // the opaque "Choose N credit(s)" placeholder.
+    const isBreadth = course.pool_ref === "business_breadth";
     return (
       <View className={`flex-row items-start px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}>
         <Text className={`w-5 text-center text-sm font-bold mt-0.5 ${config.dotColor}`}>{config.dot}</Text>
@@ -401,7 +405,11 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
           {cats && cats.length > 1 && cats.map((cat, i) => (
             <Text key={i} className="text-gray-400 text-xs mt-0.5">{cat}</Text>
           ))}
-          {!cats && course.course_title ? (
+          {isBreadth ? (
+            <Text className="text-gray-400 text-xs mt-0.5">
+              Business elective outside your major — see the Smeal breadth list
+            </Text>
+          ) : !cats && course.course_title ? (
             <Text className="text-gray-400 text-xs mt-0.5">{course.course_title}</Text>
           ) : null}
         </View>
