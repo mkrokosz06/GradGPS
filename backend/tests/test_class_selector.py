@@ -157,6 +157,24 @@ def test_apply_pins_over_cap_bumps_unpinned_forward():
     assert len(later["courses"]) >= 1
 
 
+# ── business breadth slot universe ───────────────────────────────────────────
+
+def test_breadth_slot_universe_excludes_own_area():
+    from routers.courses import _resolve_slot_universe
+    fin = "Finance, B.S. (Business)"
+    allc = _resolve_slot_universe("pool:BUSINESS_BREADTH#s5", None, fin)
+    codes = {c["course_code"] for c in allc}
+    assert "MKTG 445" in codes                                  # other area included
+    assert not any(c.startswith("FIN ") for c in codes)        # own area excluded
+
+
+def test_breadth_slot_universe_area_scoped():
+    from routers.courses import _resolve_slot_universe
+    fin = "Finance, B.S. (Business)"
+    mktg = _resolve_slot_universe("pool:BUSINESS_BREADTH#s5", "Marketing", fin)
+    assert {c["course_code"] for c in mktg} == {"MKTG 327", "MKTG 330", "MKTG 422", "MKTG 445"}
+
+
 # ── plain-python runner ──────────────────────────────────────────────────────
 
 if __name__ == "__main__":

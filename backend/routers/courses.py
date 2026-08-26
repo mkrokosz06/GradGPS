@@ -10,10 +10,11 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query, Depends
 from boto3.dynamodb.conditions import Attr, Key
 
-from db import requirements_table, transcript_table
+from db import requirements_table, transcript_table, users_table
 from deps import get_user_id
 from audit_engine import run_gen_ed_audit
 from sap_schedule import build_gen_ed_satisfied
+import business_breadth as bb
 import rmp_client
 
 router = APIRouter()
@@ -140,11 +141,33 @@ def remaining_gen_ed_domains(user_id: str) -> list[dict]:
     return out
 
 
-def _resolve_slot_universe(slot_key: str, category: str | None = None) -> list[dict]:
+def _user_program(user_id: str) -> str | None:
+    """The student's major (program_name) — needed to exclude their own area from
+    the business-breadth universe."""
+    try:
+        item = (users_table.get_item(Key={"user_id": user_id}).get("Item")) or {}
+    except Exception:
+        return None
+    return item.get("major")
+
+
+def _breadth_courses(program_name: str | None, area: str | None) -> list[dict]:
+    """Business-breadth candidates in the picker's shape. With `area`, just that
+    area's two-piece-sequence courses; else every breadth course available to the
+    program (own major area excluded)."""
+    src = bb.area_courses(area) if area else bb.all_courses(program_name)
+    return [{"course_code": c["code"], "course_title": c.get("title", ""),
+             "credits": 3, "area": c.get("area", area)} for c in src]
+
+
+def _resolve_slot_universe(slot_key: str, category: str | None = None,
+                           program_name: str | None = None) -> list[dict]:
     """Candidate courses that can fill a slot.
     - gen-ed slots: 'gened:US' -> that category; `category` overrides it so the
       student can pick a different domain; 'gened:GENERAL' / no domain -> all.
     - world-language pool slots -> every world-language-department course.
+    - business-breadth pool slots -> the breadth courses for the student's program
+      (own major area excluded); `category` narrows to one area.
     Anything else -> [] (not searchable in v1)."""
     if slot_key.startswith("gened:"):
         _load_gen_ed()
@@ -154,6 +177,8 @@ def _resolve_slot_universe(slot_key: str, category: str | None = None) -> list[d
         return _gen_ed_all or []          # GENERAL / unknown -> whole gen-ed union
     if slot_key.startswith("pool:WORLD_LANGUAGE"):
         return _load_lang()
+    if slot_key.upper().startswith("POOL:BUSINESS_BREADTH"):
+        return _breadth_courses(program_name, category)
     return []
 
 
@@ -234,6 +259,27 @@ def gen_ed_domains(user_id: str = Depends(get_user_id)):
     return {"domains": remaining_gen_ed_domains(user_id)}
 
 
+@router.get("/breadth-areas")
+def breadth_areas(user_id: str = Depends(get_user_id)):
+    """Business-breadth areas the student can pick from (own major area excluded),
+    each with its two-piece-sequence courses — the picker's area chips + courses.
+    Ships the disclaimer since only some Smeal majors' lists are sourced."""
+    program = _user_program(user_id)
+    areas = [
+        {
+            "area": area,
+            "structure": spec.get("structure"),
+            "courses": [
+                {"course_code": c["code"], "course_title": c.get("title", ""),
+                 "credits": 3, "level_400": c.get("level_400", False)}
+                for c in spec.get("courses", [])
+            ],
+        }
+        for area, spec in bb.areas_for_program(program).items()
+    ]
+    return {"areas": areas, "disclaimer": bb.disclaimer()}
+
+
 @router.get("/for-slot")
 def courses_for_slot(
     slot_key: str = Query(..., description="The class-selector slot_key, e.g. 'gened:US'"),
@@ -249,7 +295,8 @@ def courses_for_slot(
     show it immediately and scroll — only an unusually huge universe (the whole
     gen-ed union, which the domain chips avoid) returns `needs_query: true`.
     """
-    universe = _resolve_slot_universe(slot_key, category)
+    program = _user_program(user_id) if slot_key.upper().startswith("POOL:BUSINESS_BREADTH") else None
+    universe = _resolve_slot_universe(slot_key, category, program)
     ql = (q or "").strip().lower()
 
     if not ql:
