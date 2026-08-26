@@ -8,6 +8,39 @@ major — see the Smeal breadth list") via `pool_ref`, passed through
 `_emit_semester` and rendered in `mobile/app/(tabs)/timeline.tsx`. B/C (real Smeal
 list) and a *verified* Smeal link remain future work.
 
+## Option B — accurate course list (prep, blocked on data)
+
+Planned next: replace the `_BUSINESS_DEPTS` heuristic with the **real Smeal
+Business Breadth list** so the selector/picker offers exactly the qualifying
+courses. Also unblocks the accurate auto-match and the verified card link.
+
+**Verified rule (bulletins.psu.edu + Smeal degree-requirement pages, Aug 2026):**
+6 credits of Business Breadth, **at least 3 credits at the 400 level**, from
+supporting coursework outside the student's own major. The bulletin does NOT
+enumerate the courses — it says *"See the Business Breadth Course list on the
+Smeal College website."*
+
+**Sourcing status — BLOCKED for automated fetch.** The authoritative list lives
+on `ugstudents.smeal.psu.edu` (Smeal "Undergraduate Student Exchange"
+degree-requirement pages). That subdomain (and `www.` / `undergrad.smeal.psu.edu`)
+fail TLS cert verification for WebFetch, and `web.archive.org` is also blocked.
+bulletins.psu.edu and the public Smeal pages only *reference* the list. → The list
+must be pulled by a human with PSU access (Matthew) and pasted, or fetched from a
+browser-reachable URL.
+
+**Ingestion plan (drop-in once the list lands):**
+- Data file `backend/data/business_breadth_courses.json` — schema:
+  `{"source_url": "...", "as_of": "YYYY-MM", "courses": [{"code": "MGMT 425",
+  "title": "...", "level": 400}, ...]}`. Codes are the source of truth; `level`
+  lets us enforce the ≥3-cr-at-400 rule later.
+- Pure loader `backend/business_breadth.py`: `breadth_codes(exclude_dept=None)` and
+  a `search(query, exclude_dept)` for the picker — no DB, unit-testable.
+- Wire-in (deferred until `courses.py` is free): `_assign_business_breadth` matches
+  against the list instead of `_BUSINESS_DEPTS`; `/courses/for-slot` returns
+  `search(...)` results for a `pool:business_breadth` slot_key; card links
+  `source_url`.
+- Validate every code against the catalog (like gen-ed) before trusting it.
+
 ## Problem
 
 "Business breadth" is a Smeal College requirement: take a spread of business
