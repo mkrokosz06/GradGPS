@@ -43,11 +43,17 @@ def get_user_choices(user_id: str) -> dict[str, dict]:
     {slot_kind, chosen_course?, pinned_term?}.
     """
     kwargs = {"KeyConditionExpression": DKey("user_id").eq(user_id)}
-    resp = user_choices_table.query(**kwargs)
-    items = list(resp.get("Items", []))
-    while "LastEvaluatedKey" in resp:
-        resp = user_choices_table.query(**kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
-        items.extend(resp.get("Items", []))
+    try:
+        resp = user_choices_table.query(**kwargs)
+        items = list(resp.get("Items", []))
+        while "LastEvaluatedKey" in resp:
+            resp = user_choices_table.query(**kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+            items.extend(resp.get("Items", []))
+    except Exception:
+        # The class-selector table may not exist / be IAM-granted yet in an env.
+        # A missing table must NEVER break the timeline — degrade to "no choices".
+        logger.warning("user_course_choices unavailable; treating as no choices", exc_info=True)
+        return {}
     return {
         it["slot_key"]: {
             "slot_kind":     it.get("slot_kind"),
@@ -95,7 +101,11 @@ def upsert_choice(body: ChoiceBody, user_id: str = Depends(get_user_id)):
     if pinned:
         item["pinned_term"] = pinned
 
-    user_choices_table.put_item(Item=item)
+    try:
+        user_choices_table.put_item(Item=item)
+    except Exception:
+        logger.warning("failed to persist course choice", exc_info=True)
+        raise HTTPException(status_code=503, detail="Couldn't save your choice right now — try again shortly.")
     return {"status": "ok", "slot_key": slot_key}
 
 
@@ -104,5 +114,9 @@ def delete_choice(slot_key: str = Query(...), user_id: str = Depends(get_user_id
     key = slot_key.strip()
     if not key:
         raise HTTPException(status_code=400, detail="Invalid slot_key.")
-    user_choices_table.delete_item(Key={"user_id": user_id, "slot_key": key})
+    try:
+        user_choices_table.delete_item(Key={"user_id": user_id, "slot_key": key})
+    except Exception:
+        logger.warning("failed to clear course choice", exc_info=True)
+        raise HTTPException(status_code=503, detail="Couldn't update your choice right now — try again shortly.")
     return {"status": "ok", "slot_key": key}
