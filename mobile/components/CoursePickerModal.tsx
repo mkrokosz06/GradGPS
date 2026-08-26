@@ -5,7 +5,7 @@ import {
 } from "react-native";
 import { TimelineCourse } from "../services/timelineService";
 import { ChoicePayload } from "../services/userChoicesService";
-import { searchSlotCourses, getGenEdDomains, type SlotCourse, type GenEdDomain } from "../services/courseService";
+import { searchSlotCourses, getGenEdDomains, getBreadthAreas, type SlotCourse, type GenEdDomain } from "../services/courseService";
 import { useAuth } from "../context/AuthContext";
 
 const WIN_H  = Dimensions.get("window").height;
@@ -40,6 +40,8 @@ export function CoursePickerModal({
   const options = course?.options ?? [];
   const searchable = !!course?.searchable;
   const isGenEd = course?.slot_kind === "gen_ed";
+  const isBreadth = course?.pool_ref === "business_breadth";
+  const useChips = isGenEd || isBreadth;   // pick a category/area chip, then a course
   const [selected, setSelected] = useState<string | null>(null);
   const [pinned, setPinned]     = useState(false);
   const [query, setQuery]       = useState("");
@@ -48,6 +50,7 @@ export function CoursePickerModal({
   const [needsQuery, setNeedsQuery] = useState(false);
   const [domains, setDomains]   = useState<GenEdDomain[]>([]);
   const [activeCat, setActiveCat] = useState<string | null>(null);
+  const [disclaimer, setDisclaimer] = useState<string>("");
 
   // Re-sync local state each time a new slot is opened. For gen-ed slots, load
   // the student's remaining domains (chips) and preselect the suggested one.
@@ -59,6 +62,7 @@ export function CoursePickerModal({
     setResults([]);
     setNeedsQuery(false);
     setDomains([]);
+    setDisclaimer("");
 
     const suggested = course.slot_key?.startsWith("gened:")
       ? course.slot_key.slice("gened:".length).split("#")[0].toUpperCase()
@@ -75,6 +79,14 @@ export function CoursePickerModal({
           });
         })
         .catch(() => {});
+    } else if (isBreadth && userId) {
+      getBreadthAreas(userId)
+        .then(({ areas, disclaimer: dc }) => {
+          setDomains(areas.map((a) => ({ code: a.area, label: a.area })));
+          setDisclaimer(dc || "");
+          setActiveCat((cur) => cur ?? areas[0]?.area ?? null);   // first area
+        })
+        .catch(() => {});
     }
   }, [visible, course?.slot_key]);
 
@@ -82,13 +94,13 @@ export function CoursePickerModal({
   // world-language pool searches its language courses directly).
   useEffect(() => {
     if (!visible || !searchable || !course?.slot_key || !userId) return;
-    if (isGenEd && !activeCat) return;   // wait for the domain to resolve
+    if (useChips && !activeCat) return;   // wait for the domain/area to resolve
     let active = true;
     setSearching(true);
     const t = setTimeout(async () => {
       try {
         const res = await searchSlotCourses(
-          userId, course.slot_key!, query.trim(), isGenEd ? activeCat ?? undefined : undefined,
+          userId, course.slot_key!, query.trim(), useChips ? activeCat ?? undefined : undefined,
         );
         if (!active) return;
         setResults(res.results);
@@ -100,7 +112,7 @@ export function CoursePickerModal({
       }
     }, 250);
     return () => { active = false; clearTimeout(t); };
-  }, [visible, searchable, course?.slot_key, query, userId, activeCat, isGenEd]);
+  }, [visible, searchable, course?.slot_key, query, userId, activeCat, isGenEd, isBreadth]);
 
   if (!course || !course.slot_key || !course.slot_kind) return null;
 
@@ -115,10 +127,14 @@ export function CoursePickerModal({
   const title = searchable
     ? isGenEd
       ? (activeLabel ? `Choose a ${activeLabel} course` : "Choose a gen-ed course")
+      : isBreadth
+      ? (activeLabel ? `${activeLabel} — pick a course` : "Choose a business breadth course")
       : course.course_code   // world-language pool: "World Language - Level Two…"
     : hasSwap ? "Choose your course" : course.course_code;
   const subtitle = searchable
-    ? "Search the courses that satisfy this requirement."
+    ? isBreadth
+      ? "Pick an area, then a course from its two-piece sequence (6 cr from one area)."
+      : "Search the courses that satisfy this requirement."
     : hasSwap ? "Pick which course fills this requirement."
     : course.course_title || "Lock this into a semester.";
 
@@ -173,7 +189,7 @@ export function CoursePickerModal({
 
           {searchable && (
             <View style={{ marginBottom: 8 }}>
-              {isGenEd && domains.length > 0 && (
+              {useChips && domains.length > 0 && (
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
@@ -188,12 +204,17 @@ export function CoursePickerModal({
                         activeOpacity={0.7}
                         style={[styles.chip, on && styles.chipOn]}
                       >
-                        <Text style={[styles.chipText, on && styles.chipTextOn]}>{d.code}</Text>
+                        <Text style={[styles.chipText, on && styles.chipTextOn]}>
+                          {isBreadth ? d.label : d.code}
+                        </Text>
                       </TouchableOpacity>
                     );
                   })}
                 </ScrollView>
               )}
+              {isBreadth && disclaimer ? (
+                <Text style={styles.disclaimer}>{disclaimer}</Text>
+              ) : null}
 
               <View style={styles.searchBar}>
                 <Text style={styles.searchIcon}>⌕</Text>
@@ -342,6 +363,7 @@ const styles = StyleSheet.create({
   searchInput: { flex: 1, paddingVertical: 11, fontSize: 14, color: "#111827" },
   searchClear: { fontSize: 13, color: "#94a3b8", paddingLeft: 8 },
   searchHint:  { fontSize: 13, color: "#94a3b8", textAlign: "center", marginTop: 16 },
+  disclaimer:  { fontSize: 11, color: "#b45309", lineHeight: 15, marginBottom: 8 },
   selectedNote: { fontSize: 12, color: "#64748b", marginTop: 2 },
   selectedCode: { color: "#1a3a6b", fontWeight: "700" },
 

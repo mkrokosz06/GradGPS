@@ -416,7 +416,7 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
           ))}
           {isBreadth ? (
             <Text className="text-gray-400 text-xs mt-0.5">
-              Business elective outside your major — see the Smeal breadth list
+              One 6-cr two-piece sequence from a single business area
             </Text>
           ) : !cats && course.course_title ? (
             <Text className="text-gray-400 text-xs mt-0.5">{course.course_title}</Text>

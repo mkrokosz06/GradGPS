@@ -54,6 +54,20 @@ export async function getGenEdDomains(userId: string): Promise<GenEdDomain[]> {
   return res.data.domains;
 }
 
+export type BreadthArea = { area: string; structure?: string | null; courses: SlotCourse[] };
+
+/** Business Breadth areas the student can pick from (own major area excluded),
+ *  each a two-piece sequence, plus a coverage disclaimer — the picker's chips. */
+export async function getBreadthAreas(
+  userId: string,
+): Promise<{ areas: BreadthArea[]; disclaimer: string }> {
+  const res = await api.get<{ areas: BreadthArea[]; disclaimer: string }>(
+    "/courses/breadth-areas",
+    { headers: { "x-user-id": userId } },
+  );
+  return res.data;
+}
+
 export type ProfessorRating = {
   id:                      string;
   name:                    string;
