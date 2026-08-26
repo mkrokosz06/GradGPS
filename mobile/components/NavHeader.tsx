@@ -48,8 +48,8 @@ export function NavHeader({ subtitle }: { subtitle?: string }) {
     closeMenu(() => router.navigate(route as any));
   }
 
-  // Hide the current page from the menu
-  const menuItems = ALL_ITEMS.filter((item) => !item.match.includes(pathname));
+  // Keep all items; highlight the active one instead of removing it
+  const isActive = (item: (typeof ALL_ITEMS)[number]) => item.match.includes(pathname);
 
   return (
     <>
@@ -86,18 +86,25 @@ export function NavHeader({ subtitle }: { subtitle?: string }) {
                 </TouchableOpacity>
               </View>
 
-              {/* Nav items (current page excluded) */}
+              {/* Nav items (active page highlighted) */}
               <View style={{ flex: 1, paddingTop: 6 }}>
-                {menuItems.map((item) => (
-                  <TouchableOpacity
-                    key={item.route}
-                    onPress={() => navigate(item.route)}
-                    activeOpacity={0.55}
-                    style={styles.menuItem}
-                  >
-                    <Text style={styles.menuLabel}>{item.label}</Text>
-                  </TouchableOpacity>
-                ))}
+                {ALL_ITEMS.map((item) => {
+                  const active = isActive(item);
+                  return (
+                    <TouchableOpacity
+                      key={item.route}
+                      onPress={() => (active ? closeMenu() : navigate(item.route))}
+                      activeOpacity={active ? 1 : 0.55}
+                      style={styles.menuItem}
+                    >
+                      <View style={[styles.itemInner, active && styles.activePill]}>
+                        <Text style={[styles.menuLabel, active && styles.menuLabelActive]}>
+                          {item.label}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
 
               {/* Legal footer */}
@@ -152,10 +159,16 @@ const styles = StyleSheet.create({
   panelTitle: { color: "#1a3a6b", fontSize: 20, fontWeight: "700" },
   closeBtn:   { color: "#94a3b8", fontSize: 26, lineHeight: 28 },
   menuItem:   {
-    paddingHorizontal: 24, paddingVertical: 17,
-    borderBottomWidth: 1, borderBottomColor: "#f8fafc",
+    paddingHorizontal: 16, paddingVertical: 6,
   },
+  itemInner:  {
+    alignSelf: "flex-start",
+    paddingHorizontal: 16, paddingVertical: 11,
+    borderRadius: 999,
+  },
+  activePill: { backgroundColor: "#1a3a6b" },
   menuLabel:  { color: "#1e293b", fontSize: 16, fontWeight: "500" },
+  menuLabelActive: { color: "#ffffff", fontWeight: "700" },
   legalFooter: {
     flexDirection: "row", alignItems: "center",
     paddingHorizontal: 24, paddingTop: 16,
