@@ -1,0 +1,350 @@
+{
+  "requirement": "Complete ONE two-piece sequence (6 credits) from a single area; at least 3 credits must be at the 400 level overall.",
+  "coverage": "Union of the sourced Smeal major lists. Per student, EXCLUDE the area matching their own major (exclude_area_by_program). Only 2 of 9 major lists sourced so far.",
+  "disclaimer": "Please double-check with your adviser — we may not have every approved Business Breadth course.",
+  "sources": [
+    "ugstudents.smeal.psu.edu/.../majors/accounting-degree-requirements (grouped two-piece sequences)",
+    "ugstudents.smeal.psu.edu/.../majors/finance-degree-requirements (flat list)"
+  ],
+  "as_of": "2026-08",
+  "exclude_area_by_program": {
+    "Accounting, B.S. (Business)": "Accounting",
+    "Finance, B.S. (Business)": "Finance",
+    "Marketing, B.S. (Business)": "Marketing",
+    "Management, B.S. (Business)": "Management",
+    "Supply Chain and Information Systems, B.S.": "Supply Chain and Information Systems",
+    "Business Analytics and Information Systems, B.S.": "Information Systems Management",
+    "Real Estate, B.S.": "Real Estate",
+    "Risk Management, B.S.": "Risk Management",
+    "Corporate Innovation and Entrepreneurship, B.S.": "Corporate Innovation and Entrepreneurship"
+  },
+  "areas": {
+    "Accounting": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "ACCTG 404",
+          "title": "Managerial Accounting: Economic Perspective",
+          "level_400": true
+        },
+        {
+          "code": "ACCTG 471",
+          "title": "Intermediate Financial Accounting I",
+          "level_400": true
+        },
+        {
+          "code": "ACCTG 472",
+          "title": "Intermediate Financial Accounting II",
+          "level_400": true
+        }
+      ]
+    },
+    "Business Law": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "BLAW 424",
+          "title": "Real Estate Law",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 425",
+          "title": "Business and Environmental Regulation",
+          "level_400": true,
+          "in_catalog": false
+        },
+        {
+          "code": "BLAW 441",
+          "title": "Business Law II: Agency, Employment and Business Structure",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 444",
+          "title": "Advanced UCC and Commercial Transactions",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 445",
+          "title": "Advanced Intellectual Property and Competition Law",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 446",
+          "title": "Employment Law",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 447",
+          "title": "Entertainment Law",
+          "level_400": true
+        },
+        {
+          "code": "BLAW 499",
+          "title": "Foreign Studies 1-/Maximum of 12",
+          "level_400": true
+        }
+      ]
+    },
+    "Business Sustainability": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "BA 441",
+          "title": "Strategies for Enterprise Sustainability",
+          "level_400": true
+        },
+        {
+          "code": "BA 442",
+          "title": "Sustainable Behavior of Consumers, Firms, and Societies",
+          "level_400": true
+        },
+        {
+          "code": "SCM 448",
+          "title": "Building Sustainable Supply Chains",
+          "level_400": true
+        }
+      ]
+    },
+    "Corporate Diversity": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "MGMT 320",
+          "title": "Establishing Workforce Diversity and Inclusion",
+          "level_400": false
+        },
+        {
+          "code": "MGMT 445",
+          "title": "Managing a Diverse Workforce",
+          "level_400": true
+        }
+      ]
+    },
+    "Corporate Innovation and Entrepreneurship": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "MGMT 425",
+          "title": "New Venture Creation",
+          "level_400": true
+        },
+        {
+          "code": "MGMT 453",
+          "title": "Creativity and Innovation",
+          "level_400": true
+        }
+      ]
+    },
+    "Finance": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "FIN 305",
+          "title": "Financial Management of the Business Enterprise",
+          "level_400": false
+        },
+        {
+          "code": "FIN 406",
+          "title": "Security Analysis and Portfolio Management",
+          "level_400": true
+        },
+        {
+          "code": "FIN 408",
+          "title": "Financial Markets and Institutions",
+          "level_400": true
+        }
+      ]
+    },
+    "Information Systems Management": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "MIS 301",
+          "title": "Business Analytics",
+          "level_400": false
+        },
+        {
+          "code": "MIS 431",
+          "title": "Business Data Management",
+          "level_400": true
+        },
+        {
+          "code": "MIS 437",
+          "title": "Programming Skills for Business",
+          "level_400": true
+        },
+        {
+          "code": "MIS 441",
+          "title": "Applied Artificial Intelligence and Machine Learning in Business",
+          "level_400": true
+        },
+        {
+          "code": "MIS 446",
+          "title": "Information Technology and Business Strategy",
+          "level_400": true
+        }
+      ]
+    },
+    "International Business": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "IB 303",
+          "title": "International Business Operations",
+          "level_400": false
+        },
+        {
+          "code": "IB 403",
+          "title": "International Business and National Policies",
+          "level_400": true
+        },
+        {
+          "code": "IB 404",
+          "title": "Contemporary Issues in International Business",
+          "level_400": true
+        },
+        {
+          "code": "IB 450",
+          "title": "The Business Enviornment of Europe",
+          "level_400": true
+        },
+        {
+          "code": "IB 460",
+          "title": "International Business in Emerging Nations",
+          "level_400": true
+        },
+        {
+          "code": "IB 470",
+          "title": "International Development in an African Context",
+          "level_400": true
+        },
+        {
+          "code": "IB 497",
+          "title": "Special Topics 1-/Maximum of 9",
+          "level_400": true
+        }
+      ]
+    },
+    "Management": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "MGMT 326",
+          "title": "Organizational Behavior and Design",
+          "level_400": false
+        },
+        {
+          "code": "MGMT 410",
+          "title": "Project Management",
+          "level_400": true
+        },
+        {
+          "code": "MGMT 420",
+          "title": "Negotiation and Conflict Management",
+          "level_400": true
+        },
+        {
+          "code": "MGMT 481",
+          "title": "Global Strategic Management",
+          "level_400": true
+        }
+      ]
+    },
+    "Marketing": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "MKTG 327",
+          "title": "Retailing",
+          "level_400": false
+        },
+        {
+          "code": "MKTG 330",
+          "title": "Consumer Behavior",
+          "level_400": false
+        },
+        {
+          "code": "MKTG 422",
+          "title": "Advertising and Sales Promotion Management",
+          "level_400": true
+        },
+        {
+          "code": "MKTG 445",
+          "title": "Global Marketing",
+          "level_400": true
+        }
+      ],
+      "structure": "Complete one of {MKTG 327, MKTG 330} AND one of {MKTG 422, MKTG 445}."
+    },
+    "Real Estate": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "RM 303",
+          "title": "Real Estate Fundamentals",
+          "level_400": false
+        },
+        {
+          "code": "RM 450",
+          "title": "Contemporary Issues in Real Estate Markets",
+          "level_400": true
+        }
+      ]
+    },
+    "Risk Management": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "RM 302",
+          "title": "Risk and Insurance",
+          "level_400": false
+        },
+        {
+          "code": "RM 440",
+          "title": "Risk, Strategy, and Decision Making",
+          "level_400": true
+        },
+        {
+          "code": "RM 475",
+          "title": "Quantitative Analysis for Business",
+          "level_400": true
+        }
+      ]
+    },
+    "Supply Chain and Information Systems": {
+      "pick": 2,
+      "courses": [
+        {
+          "code": "SCM 404",
+          "title": "Demand Fulfillment",
+          "level_400": true
+        },
+        {
+          "code": "SCM 405",
+          "title": "Manufacturing and Services Strategies",
+          "level_400": true
+        },
+        {
+          "code": "SCM 406",
+          "title": "Strategic Procurement",
+          "level_400": true
+        },
+        {
+          "code": "SCM 421",
+          "title": "Supply Chain Analytics",
+          "level_400": true
+        },
+        {
+          "code": "SCM 448",
+          "title": "Building Sustainable Supply Chains",
+          "level_400": true
+        }
+      ]
+    },
+    "Economics": {
+      "pick": 2,
+      "courses": [],
+      "structure": "Complete 3 cr of 300/400-level ECON + 3 cr of 400-level ECON."
+    }
+  }
+}
