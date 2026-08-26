@@ -23,7 +23,15 @@ export type SlotCourse = {
   multi_category: boolean;
 };
 
-export type GenEdDomain = { code: string; label: string };
+export type GenEdDomain = {
+  code:  string;
+  label: string;
+  // Credit accounting for the domain (absent on older backends).
+  required?:  number;   // credits the domain needs
+  completed?: number;   // credits already done on the transcript
+  selected?:  number;   // credits planned (picked in the timeline) but not yet taken
+  remaining?: number;   // required − completed − selected
+};
 
 /** Search the courses that can validly fill a class-selector slot (gen-ed slots
  *  and world-language pools). `q` filters server-side; `category` overrides the
@@ -45,11 +53,18 @@ export async function searchSlotCourses(
   return res.data;
 }
 
-/** The gen-ed domains the student still needs — the picker's domain chips. */
-export async function getGenEdDomains(userId: string): Promise<GenEdDomain[]> {
+/** The gen-ed domains the student still needs — the picker's domain chips. Pass
+ *  `excludeSlot` (the slot being edited) so its own pick doesn't hide its domain. */
+export async function getGenEdDomains(
+  userId: string,
+  excludeSlot?: string,
+): Promise<GenEdDomain[]> {
   const res = await api.get<{ domains: GenEdDomain[] }>(
     "/courses/gen-ed-domains",
-    { headers: { "x-user-id": userId } },
+    {
+      params: { exclude_slot: excludeSlot || undefined },
+      headers: { "x-user-id": userId },
+    },
   );
   return res.data.domains;
 }

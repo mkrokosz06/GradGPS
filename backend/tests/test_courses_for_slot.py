@@ -130,6 +130,74 @@ def test_search_caps_at_limit():
     assert len(r["results"]) == 10
 
 
+# ── remaining_gen_ed_domains: removal + credit accounting ────────────────────
+
+class _FakeTable:
+    def __init__(self, items):
+        self._items = items
+
+    def query(self, **_kwargs):
+        return {"Items": self._items}
+
+
+def _seed_domains(*, tx=None, choices=None, audit_groups=None):
+    """Wire the module's gen-ed catalog + patch its DB/audit deps for a hermetic
+    remaining_gen_ed_domains() call. Returns nothing — mutates module globals."""
+    courses._gen_ed_by_cat = {
+        "GHW": [{"course_code": "KINES 1", "course_title": "Wellness", "credits": 1.5, "multi_category": False}],
+        "GN":  [{"course_code": "ASTRO 1", "course_title": "Universe", "credits": 3.0, "multi_category": False}],
+        "US":  [{"course_code": "SOC 119", "course_title": "Race", "credits": 3.0, "multi_category": False}],
+    }
+    courses._gen_ed_labels = {"GHW": "Health & Wellness", "GN": "Natural Sciences", "US": "US Cultures"}
+    courses._gen_ed_rows = [{"program_name": "__GEN_ED__"}]  # truthy so the audit path runs
+    courses.transcript_table = _FakeTable(tx or [])
+    courses.run_gen_ed_audit = lambda rows, txc: {"groups": audit_groups or []}
+    courses.get_user_choices = lambda uid: (choices or {})
+
+
+_DEFAULT_GROUPS = [
+    {"name": "GHW: Health & Wellness", "threshold": 3, "credits_earned": 1.5, "satisfied": False},
+    {"name": "GN: Natural Sciences",   "threshold": 3, "credits_earned": 3.0, "satisfied": True},
+    {"name": "US: United States Cultures", "threshold": 3, "credits_earned": 0.0, "satisfied": False},
+]
+
+
+def test_satisfied_domain_is_dropped_others_carry_credits():
+    _seed_domains(audit_groups=_DEFAULT_GROUPS)
+    out = courses.remaining_gen_ed_domains("u1")
+    codes = [d["code"] for d in out]
+    assert codes == ["GHW", "US"]            # GN (satisfied) dropped
+    ghw = next(d for d in out if d["code"] == "GHW")
+    assert ghw == {"code": "GHW", "label": "Health & Wellness",
+                   "required": 3.0, "completed": 1.5, "selected": 0.0, "remaining": 1.5}
+
+
+def test_selected_picks_cover_a_domain_and_hide_it():
+    # 1.5 completed + a planned 1.5-cr GHW course = 3 → GHW is covered, hidden.
+    choices = {"gened:GHW#1": {"slot_kind": "gen_ed", "chosen_course": "KINES 1"}}
+    _seed_domains(audit_groups=_DEFAULT_GROUPS, choices=choices)
+    out = courses.remaining_gen_ed_domains("u1")
+    assert [d["code"] for d in out] == ["US"]
+
+
+def test_exclude_slot_keeps_its_own_domain_visible():
+    # Re-opening the very slot that holds the pick must still show GHW.
+    choices = {"gened:GHW#1": {"slot_kind": "gen_ed", "chosen_course": "KINES 1"}}
+    _seed_domains(audit_groups=_DEFAULT_GROUPS, choices=choices)
+    out = courses.remaining_gen_ed_domains("u1", exclude_slot="gened:GHW#1")
+    ghw = next((d for d in out if d["code"] == "GHW"), None)
+    assert ghw is not None and ghw["selected"] == 0.0 and ghw["remaining"] == 1.5
+
+
+def test_selected_pick_already_on_transcript_is_not_double_counted():
+    choices = {"gened:GHW#1": {"slot_kind": "gen_ed", "chosen_course": "KINES 1"}}
+    _seed_domains(audit_groups=_DEFAULT_GROUPS, choices=choices,
+                  tx=[{"course_code": "KINES 1"}])
+    out = courses.remaining_gen_ed_domains("u1")
+    ghw = next(d for d in out if d["code"] == "GHW")
+    assert ghw["selected"] == 0.0 and ghw["remaining"] == 1.5
+
+
 # ── plain-python runner ──────────────────────────────────────────────────────
 
 if __name__ == "__main__":

@@ -6,6 +6,7 @@ GET /courses/{code}/professor?name=Smith   — RMP ratings for a professor filte
 import re
 import asyncio
 import httpx
+from collections import defaultdict
 
 from fastapi import APIRouter, HTTPException, Query, Depends
 from boto3.dynamodb.conditions import Attr, Key
@@ -14,6 +15,7 @@ from db import requirements_table, transcript_table, users_table
 from deps import get_user_id
 from audit_engine import run_gen_ed_audit
 from sap_schedule import build_gen_ed_satisfied
+from routers.user_choices import get_user_choices
 import business_breadth as bb
 import rmp_client
 
@@ -127,17 +129,97 @@ def _load_lang() -> list[dict]:
     return _lang_courses
 
 
-def remaining_gen_ed_domains(user_id: str) -> list[dict]:
-    """The gen-ed domains this student hasn't satisfied yet, as [{code, label}]
-    in bulletin order — the chips shown in the picker."""
+def _gen_ed_reverse() -> dict[str, dict]:
+    """Reverse index of the gen-ed catalog: course code (upper) -> {credits, cats}.
+    `cats` is the list of domain tokens the course satisfies (>1 for interdomain
+    courses). Used to attribute a *selected* (planned-but-not-taken) course to the
+    domain(s) it fills."""
+    _load_gen_ed()
+    rev: dict[str, dict] = {}
+    for cat, courses in (_gen_ed_by_cat or {}).items():
+        for c in courses:
+            code = (c.get("course_code") or "").strip().upper()
+            if not code:
+                continue
+            e = rev.setdefault(code, {"credits": float(c.get("credits", 3) or 3), "cats": []})
+            if cat not in e["cats"]:
+                e["cats"].append(cat)
+    return rev
+
+
+def _selected_gen_ed_credits(user_id: str, taken_codes: set[str],
+                             exclude_slot: str | None) -> dict[str, float]:
+    """Credits the student has *selected* (planned in the timeline) toward each
+    gen-ed domain, from their saved class-selector choices. A pick already on the
+    transcript (in `taken_codes`) is skipped — the audit already counts it as
+    completed. `exclude_slot` drops one slot's own pick so re-opening that slot's
+    picker still shows its domain (you can always change your mind)."""
+    rev = _gen_ed_reverse()
+    out: dict[str, float] = defaultdict(float)
+    try:
+        choices = get_user_choices(user_id)
+    except Exception:
+        return out
+    for skey, ch in choices.items():
+        if ch.get("slot_kind") != "gen_ed" or skey == exclude_slot:
+            continue
+        code = (ch.get("chosen_course") or "").strip().upper()
+        info = rev.get(code) or rev.get(_normalize_code(code))
+        if not info or _normalize_code(code) in taken_codes:
+            continue
+        cats = info["cats"]
+        # Attribute the pick to the slot's own domain when the course fits it,
+        # else the first bulletin-ordered domain the course satisfies.
+        slot_tok = skey.split(":", 1)[1].split("#")[0].strip().upper() if ":" in skey else ""
+        target = slot_tok if slot_tok in cats else next((t for t in _DOMAIN_ORDER if t in cats), None)
+        if target:
+            out[target] += info["credits"]
+    return out
+
+
+def remaining_gen_ed_domains(user_id: str, exclude_slot: str | None = None) -> list[dict]:
+    """The gen-ed domains this student hasn't yet covered — the chips shown in the
+    picker. A domain drops out once it's satisfied by the transcript OR fully
+    covered by completed + *selected* (planned) credits. Each surviving domain
+    carries its credit accounting so the picker can show what's still needed:
+    `{code, label, required, completed, selected, remaining}`."""
     _load_gen_ed()
     tx = transcript_table.query(KeyConditionExpression=Key("user_id").eq(user_id)).get("Items", [])
     result = run_gen_ed_audit(_gen_ed_rows, tx) if _gen_ed_rows else {"groups": []}
     satisfied = build_gen_ed_satisfied(result)   # {token: bool}
+
+    # required / completed credits per domain, from the audit (source of truth).
+    credit_status: dict[str, dict] = {}
+    for g in result.get("groups", []):
+        tok = _cat_token(g.get("name", ""))
+        if g.get("threshold") is not None:
+            credit_status[tok] = {
+                "required":  float(g["threshold"]),
+                "completed": float(g.get("credits_earned", 0) or 0),
+            }
+
+    taken_codes = {_normalize_code(c.get("course_code", "")) for c in tx}
+    selected = _selected_gen_ed_credits(user_id, taken_codes, exclude_slot)
+
     out = []
     for token in _DOMAIN_ORDER:
-        if token in (_gen_ed_by_cat or {}) and not satisfied.get(token, False):
-            out.append({"code": token, "label": _gen_ed_labels.get(token, token)})
+        if token not in (_gen_ed_by_cat or {}):
+            continue
+        st = credit_status.get(token, {"required": 0.0, "completed": 0.0})
+        required  = st["required"]
+        completed = min(st["completed"], required) if required else st["completed"]
+        sel       = selected.get(token, 0.0)
+        # Covered — hide it — if the audit says so or planned picks close the gap.
+        if satisfied.get(token, False) or (required and completed + sel >= required):
+            continue
+        out.append({
+            "code":      token,
+            "label":     _gen_ed_labels.get(token, token),
+            "required":  round(required, 1),
+            "completed": round(completed, 1),
+            "selected":  round(sel, 1),
+            "remaining": round(max(required - completed - sel, 0.0), 1),
+        })
     return out
 
 
@@ -254,9 +336,15 @@ async def _get_description(code: str) -> str | None:
 # course code ("for-slot").
 
 @router.get("/gen-ed-domains")
-def gen_ed_domains(user_id: str = Depends(get_user_id)):
-    """The gen-ed domains this student still needs — the picker's domain chips."""
-    return {"domains": remaining_gen_ed_domains(user_id)}
+def gen_ed_domains(
+    exclude_slot: str | None = Query(
+        None, description="Slot_key to exclude its own pick from the 'covered' math "
+                          "(so re-opening that slot still shows its domain)."),
+    user_id: str = Depends(get_user_id),
+):
+    """The gen-ed domains this student still needs — the picker's domain chips,
+    each with credit accounting (`required`/`completed`/`selected`/`remaining`)."""
+    return {"domains": remaining_gen_ed_domains(user_id, exclude_slot)}
 
 
 @router.get("/breadth-areas")

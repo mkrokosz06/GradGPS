@@ -70,7 +70,7 @@ export function CoursePickerModal({
     setActiveCat(suggested && suggested !== "GENERAL" ? suggested : null);
 
     if (isGenEd && userId) {
-      getGenEdDomains(userId)
+      getGenEdDomains(userId, course.slot_key ?? undefined)
         .then((ds) => {
           setDomains(ds);
           setActiveCat((cur) => {
@@ -121,8 +121,19 @@ export function CoursePickerModal({
   const hasSwap  = options.length > 1;
   const canClear = !!course.chosen_code || !!course.pinned;
 
-  const activeLabel = domains.find((d) => d.code === activeCat)?.label
+  const activeDomain = isGenEd ? domains.find((d) => d.code === activeCat) : undefined;
+  const activeLabel = activeDomain?.label
     ?? (course.gen_ed_categories?.[0] ?? "").split(":")[0].trim();
+
+  // Credits still needed for the active gen-ed domain — "1.5 cr still needed",
+  // noting any credits already planned (selected) toward it.
+  const fmtCr = (n: number) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+  const creditsNote =
+    activeDomain && activeDomain.remaining != null
+      ? activeDomain.selected && activeDomain.selected > 0
+        ? `${fmtCr(activeDomain.remaining)} cr still needed · ${fmtCr(activeDomain.selected)} selected`
+        : `${fmtCr(activeDomain.remaining)} cr still needed`
+      : "";
 
   const title = searchable
     ? isGenEd
@@ -212,6 +223,9 @@ export function CoursePickerModal({
                   })}
                 </ScrollView>
               )}
+              {isGenEd && creditsNote ? (
+                <Text style={styles.creditsNote}>{creditsNote}</Text>
+              ) : null}
               {isBreadth && disclaimer ? (
                 <Text style={styles.disclaimer}>{disclaimer}</Text>
               ) : null}
@@ -364,6 +378,7 @@ const styles = StyleSheet.create({
   searchClear: { fontSize: 13, color: "#94a3b8", paddingLeft: 8 },
   searchHint:  { fontSize: 13, color: "#94a3b8", textAlign: "center", marginTop: 16 },
   disclaimer:  { fontSize: 11, color: "#b45309", lineHeight: 15, marginBottom: 8 },
+  creditsNote: { fontSize: 12, fontWeight: "700", color: "#1a3a6b", marginBottom: 8 },
   selectedNote: { fontSize: 12, color: "#64748b", marginTop: 2 },
   selectedCode: { color: "#1a3a6b", fontWeight: "700" },
 
