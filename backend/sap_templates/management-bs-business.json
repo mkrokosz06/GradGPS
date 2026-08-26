@@ -286,8 +286,11 @@
         {
           "type": "pool",
           "ref": "business_breadth",
-          "label": "Business Breadth Course",
-          "credits": 3.0
+          "label": "BA 411 or a Business Breadth course",
+          "credits": 3.0,
+          "codes": [
+            "BA 411"
+          ]
         },
         {
           "type": "gen_ed",
