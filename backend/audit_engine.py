@@ -33,6 +33,11 @@ _MANUAL_RENAME_PAIRS: list[tuple[str, str]] = [
     ("IST 456", "CYBER 456"),
     # ── SRA → CYBER rename (effective Fall 2025) ─────────────────────────────
     ("SRA 221", "CYBER 221"),
+    # ── LA 83 → LA 283 rename (Liberal Arts First-Year Seminar renumber) ─────
+    # Same 1.5-cr "First Year Seminar in the Liberal Arts"; PSU renumbered it.
+    # Bulletin SAP grids list both codes across cohort years, so without this
+    # equivalence a student who took it under one code is told to take the other.
+    ("LA 83", "LA 283"),
 ]
 
 # Bundled snapshot of the PSU bulletin cross-listings scrape. Used only when

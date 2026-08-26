@@ -3,7 +3,7 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.A.",
-  "total_credits": 128.0,
+  "total_credits": 126.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/african-american-studies-ba/",
   "scraped": true,
   "semesters": [
@@ -33,7 +33,7 @@
         },
         {
           "type": "course",
-          "code": "LA 83",
+          "code": "LA 283",
           "credits": 1.5
         },
         {
@@ -137,11 +137,6 @@
       "term_season": "SP",
       "credits": 16.5,
       "slots": [
-        {
-          "type": "course",
-          "code": "LA 283",
-          "credits": 1.5
-        },
         {
           "type": "course",
           "code": "SOC 207",
