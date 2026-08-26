@@ -449,7 +449,7 @@
       <div class="routemap-card">
         <div class="routemap-head">
           <span class="t" id="rm-title">Route: Enterprise Technology Integration, B.S.</span>
-          <span class="m" id="rm-meta">97 / 120 CR &middot; ETA MAY 2027</span>
+          <span class="m" id="rm-meta">90 / 120 CR &middot; ETA MAY 2027</span>
         </div>
         <svg id="rm-svg" viewBox="0 0 980 220" role="img" aria-label="Example degree route"></svg>
       </div>
@@ -632,35 +632,48 @@
 <script>
 (function () {
   // Rotating hero route map — one of four example students, random start.
-  var XS = [85, 180, 345, 455, 650, 760];
-  var YS = [158, 158, 118, 118, 78, 78];
+  // Eight stops = a full four-year degree (Fall/Spring, summers off), stepping
+  // up-right in four tiers of two.
+  var XS = [70, 165, 270, 365, 470, 565, 670, 765];
+  var YS = [172, 172, 132, 132, 92, 92, 52, 52];
   // Full route polyline from start to the destination pin.
-  var PTS = [[30, 158], [215, 158], [290, 118], [520, 118], [595, 78], [800, 78], [872, 40]];
+  var PTS = [[20, 172], [200, 172], [235, 132], [400, 132], [435, 92], [600, 92], [635, 52], [800, 52], [872, 36]];
 
+  // Every route is a full 120-credit, eight-semester degree with Fall 2026 the
+  // term in progress. Completed credits = sum of finished terms; the finished +
+  // in-progress + planned terms always total 120.
   var SCENARIOS = [
     {
+      // Senior — one semester from the finish line.
       major: "Enterprise Technology Integration, B.S.",
-      credits: "97 / 120", eta: "MAY 2027", pinDate: "May 2027", cur: 4,
-      stops: [["Fall 2024", "16 cr"], ["Spring 2025", "15 cr"], ["Fall 2025", "15 cr"],
-              ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"]]
+      credits: "90 / 120", eta: "MAY 2027", pinDate: "May 2027", cur: 6,
+      stops: [["Fall 2023", "15 cr"], ["Spring 2024", "16 cr"], ["Fall 2024", "15 cr"],
+              ["Spring 2025", "15 cr"], ["Fall 2025", "14 cr"], ["Spring 2026", "15 cr"],
+              ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"]]
     },
     {
-      major: "Marketing, B.S.",
-      credits: "40 / 120", eta: "MAY 2028", pinDate: "May 2028", cur: 2,
-      stops: [["Fall 2025", "17 cr"], ["Spring 2026", "16 cr"], ["Fall 2026", "in progress · 15 cr"],
-              ["Spring 2027", "planned"], ["Fall 2027", "planned"], ["Spring 2028", "planned"]]
-    },
-    {
+      // Junior — a December finisher (spring start).
       major: "Accounting, B.S.",
-      credits: "109 / 120", eta: "DEC 2026", pinDate: "Dec 2026", cur: 5,
-      stops: [["Spring 2024", "15 cr"], ["Fall 2024", "16 cr"], ["Spring 2025", "17 cr"],
-              ["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 11 cr"]]
+      credits: "75 / 120", eta: "DEC 2027", pinDate: "Dec 2027", cur: 5,
+      stops: [["Spring 2024", "15 cr"], ["Fall 2024", "16 cr"], ["Spring 2025", "14 cr"],
+              ["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 15 cr"],
+              ["Spring 2027", "planned"], ["Fall 2027", "planned"]]
     },
     {
+      // Sophomore — plenty of road ahead.
+      major: "Marketing, B.S.",
+      credits: "30 / 120", eta: "MAY 2029", pinDate: "May 2029", cur: 2,
+      stops: [["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 16 cr"],
+              ["Spring 2027", "planned"], ["Fall 2027", "planned"], ["Spring 2028", "planned"],
+              ["Fall 2028", "planned"], ["Spring 2029", "planned"]]
+    },
+    {
+      // Second-year — another December track.
       major: "Psychology, B.S.",
-      credits: "46 / 120", eta: "DEC 2027", pinDate: "Dec 2027", cur: 3,
-      stops: [["Spring 2025", "16 cr"], ["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"],
-              ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"], ["Fall 2027", "planned"]]
+      credits: "45 / 120", eta: "DEC 2028", pinDate: "Dec 2028", cur: 3,
+      stops: [["Spring 2025", "15 cr"], ["Fall 2025", "16 cr"], ["Spring 2026", "14 cr"],
+              ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"], ["Fall 2027", "planned"],
+              ["Spring 2028", "planned"], ["Fall 2028", "planned"]]
     }
   ];
 
