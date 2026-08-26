@@ -588,8 +588,9 @@ def match_template(
             kind, skey = slot_identity(slot, ordinal)
             item["slot_key"] = skey
             item["slot_kind"] = kind
-            if kind == "gen_ed":
-                # No bounded option list — the picker offers a course search instead.
+            if kind == "gen_ed" or (kind == "pool" and slot.get("ref") == "world_language"):
+                # No bounded option list — the picker offers a course search instead
+                # (gen-ed: pick a domain + course; world language: pick a language course).
                 item["searchable"] = True
             opts = slot_options(slot)
             if opts:

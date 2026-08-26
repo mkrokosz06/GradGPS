@@ -56,35 +56,67 @@ def test_resolve_non_gened_slot_is_empty():
     assert courses._resolve_slot_universe("one:MATH 110|MATH 140") == []
 
 
+def test_resolve_category_override_switches_domain():
+    _seed_cache()
+    # A GN slot, but the student picks GA — search should target GN not the slot.
+    u = courses._resolve_slot_universe("gened:US", category="GN")
+    assert {c["course_code"] for c in u} == {"ASTRO 1"}
+
+
+def test_resolve_world_language_pool():
+    courses._lang_courses = [
+        {"course_code": "SPAN 2", "course_title": "Intermediate Spanish", "credits": 4.0, "multi_category": False},
+        {"course_code": "FR 2", "course_title": "Intermediate French", "credits": 4.0, "multi_category": False},
+    ]
+    u = courses._resolve_slot_universe("pool:WORLD_LANGUAGE#s5")
+    assert {c["course_code"] for c in u} == {"SPAN 2", "FR 2"}
+    courses._lang_courses = None
+
+
 # ── courses_for_slot endpoint fn ─────────────────────────────────────────────
 
 def test_search_filters_code_and_title():
     _seed_cache()
-    r = courses.courses_for_slot(slot_key="gened:US", q="soc", limit=40, user_id="u1")
+    r = courses.courses_for_slot(slot_key="gened:US", q="soc", limit=40, category=None, user_id="u1")
     assert [c["course_code"] for c in r["results"]] == ["SOC 119"]
     assert r["needs_query"] is False
     # title match works too
-    r2 = courses.courses_for_slot(slot_key="gened:US", q="american", limit=40, user_id="u1")
+    r2 = courses.courses_for_slot(slot_key="gened:US", q="american", limit=40, category=None, user_id="u1")
     assert [c["course_code"] for c in r2["results"]] == ["AMST 100"]
 
 
 def test_empty_query_small_universe_returns_all_sorted():
     _seed_cache()
-    r = courses.courses_for_slot(slot_key="gened:US", q=None, limit=40, user_id="u1")
+    r = courses.courses_for_slot(slot_key="gened:US", q=None, limit=40, category=None, user_id="u1")
     assert [c["course_code"] for c in r["results"]] == ["AMST 100", "SOC 119"]
     assert r["needs_query"] is False
 
 
-def test_empty_query_large_universe_needs_query():
+def test_empty_query_huge_universe_needs_query():
+    # Only an unusually huge universe (>1600, i.e. the whole gen-ed union) gates
+    # on a query; single domains auto-show. The client never asks for the union.
     big = [
         {"course_code": f"GEN {i}", "course_title": "x", "credits": 3.0, "multi_category": False}
-        for i in range(201)
+        for i in range(1601)
     ]
     courses._gen_ed_by_cat = {}
     courses._gen_ed_all = big
-    r = courses.courses_for_slot(slot_key="gened:GENERAL#s0", q=None, limit=40, user_id="u1")
+    r = courses.courses_for_slot(slot_key="gened:GENERAL#s0", q=None, limit=40, category=None, user_id="u1")
     assert r["needs_query"] is True
     assert r["results"] == []
+
+
+def test_empty_query_domain_sized_universe_auto_shows():
+    # A big-but-domain-sized universe (e.g. IL ~1417) returns the full sorted list.
+    mid = [
+        {"course_code": f"IL {i:04d}", "course_title": "x", "credits": 3.0, "multi_category": False}
+        for i in range(1417)
+    ]
+    courses._gen_ed_by_cat = {"IL": mid}
+    courses._gen_ed_all = mid
+    r = courses.courses_for_slot(slot_key="gened:IL", q=None, limit=500, category=None, user_id="u1")
+    assert r["needs_query"] is False
+    assert len(r["results"]) == 1417
 
 
 def test_search_caps_at_limit():
@@ -94,7 +126,7 @@ def test_search_caps_at_limit():
     ]
     courses._gen_ed_by_cat = {"US": big}
     courses._gen_ed_all = big
-    r = courses.courses_for_slot(slot_key="gened:US", q="soc", limit=10, user_id="u1")
+    r = courses.courses_for_slot(slot_key="gened:US", q="soc", limit=10, category=None, user_id="u1")
     assert len(r["results"]) == 10
 
 

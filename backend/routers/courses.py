@@ -10,8 +10,10 @@ import httpx
 from fastapi import APIRouter, HTTPException, Query, Depends
 from boto3.dynamodb.conditions import Attr, Key
 
-from db import requirements_table
+from db import requirements_table, transcript_table
 from deps import get_user_id
+from audit_engine import run_gen_ed_audit
+from sap_schedule import build_gen_ed_satisfied
 import rmp_client
 
 router = APIRouter()
@@ -27,6 +29,19 @@ _course_cache: dict[str, dict] = {}
 # candidate list is a cheap in-memory lookup + substring filter.
 _gen_ed_by_cat: dict[str, list[dict]] | None = None
 _gen_ed_all: list[dict] | None = None
+_gen_ed_labels: dict[str, str] = {}      # token -> human label ("GN" -> "Natural Sciences")
+_gen_ed_rows: list[dict] = []            # raw __GEN_ED__ rows, for the per-user domain audit
+
+# Domain display order (matches the PSU bulletin grouping).
+_DOMAIN_ORDER = ["GQ", "GA", "GN", "GH", "GS", "GHW", "US", "IL"]
+
+# World-language subject codes (mirror sap_schedule._WORLD_LANGUAGE_DEPTS). A
+# world-language pool slot searches every course in these departments.
+_LANG_DEPTS = {
+    "ARAB", "ASL", "CHNS", "FR", "GER", "GREEK", "HEBR", "IT", "JAPNS", "KOR",
+    "LATIN", "PORT", "RUS", "SPAN", "UKR",
+}
+_lang_courses: list[dict] | None = None
 
 
 def _cat_token(group_name: str) -> str:
@@ -34,8 +49,14 @@ def _cat_token(group_name: str) -> str:
     return (group_name or "").split(":")[0].strip().upper().split(" ")[0] if group_name else ""
 
 
+def _cat_label(group_name: str) -> str:
+    """'GN: Natural Sciences' -> 'Natural Sciences' (the part after the token)."""
+    parts = (group_name or "").split(":", 1)
+    return parts[1].strip() if len(parts) == 2 and parts[1].strip() else _cat_token(group_name)
+
+
 def _load_gen_ed() -> None:
-    global _gen_ed_by_cat, _gen_ed_all
+    global _gen_ed_by_cat, _gen_ed_all, _gen_ed_labels, _gen_ed_rows
     if _gen_ed_by_cat is not None:
         return
     rows: list[dict] = []
@@ -47,9 +68,11 @@ def _load_gen_ed() -> None:
             ExclusiveStartKey=resp["LastEvaluatedKey"],
         )
         rows.extend(resp.get("Items", []))
+    _gen_ed_rows = rows
 
     by_cat: dict[str, dict[str, dict]] = {}   # cat -> code(upper) -> course (deduped)
     all_map: dict[str, dict] = {}
+    labels: dict[str, str] = {}
     for r in rows:
         # Only the searchable domain/culture pools — skip the fixed Communication
         # choose_one groups (bounded options) and the WAC rule row.
@@ -58,7 +81,9 @@ def _load_gen_ed() -> None:
         code = (r.get("course_code") or "").strip()
         if not code:
             continue
-        cat = _cat_token(r.get("requirement_group", ""))
+        grp = r.get("requirement_group", "")
+        cat = _cat_token(grp)
+        labels.setdefault(cat, _cat_label(grp))
         course = {
             "course_code":    code,
             "course_title":   r.get("course_title", ""),
@@ -70,18 +95,66 @@ def _load_gen_ed() -> None:
 
     _gen_ed_by_cat = {c: list(m.values()) for c, m in by_cat.items()}
     _gen_ed_all = list(all_map.values())
+    _gen_ed_labels = labels
 
 
-def _resolve_slot_universe(slot_key: str) -> list[dict]:
-    """Candidate courses that can fill a slot. v1: gen-ed slots only.
-    'gened:US' -> that category; 'gened:GENERAL#sN' -> all gen-ed courses."""
-    if not slot_key.startswith("gened:"):
-        return []
+def _load_lang() -> list[dict]:
+    """All world-language-department courses in the catalog (from the requirements
+    table), deduped by code. Loaded once and cached."""
+    global _lang_courses
+    if _lang_courses is not None:
+        return _lang_courses
+    seen: dict[str, dict] = {}
+    scan_kwargs = {"ProjectionExpression": "course_code, course_title, credits"}
+    while True:
+        resp = requirements_table.scan(**scan_kwargs)
+        for it in resp.get("Items", []):
+            code = (it.get("course_code") or "").strip().upper()
+            dept = code.split(" ")[0] if " " in code else ""
+            if dept in _LANG_DEPTS and code not in seen:
+                seen[code] = {
+                    "course_code":    code,
+                    "course_title":   it.get("course_title", ""),
+                    "credits":        float(it.get("credits", 3) or 3),
+                    "multi_category": False,
+                }
+        last = resp.get("LastEvaluatedKey")
+        if not last:
+            break
+        scan_kwargs["ExclusiveStartKey"] = last
+    _lang_courses = list(seen.values())
+    return _lang_courses
+
+
+def remaining_gen_ed_domains(user_id: str) -> list[dict]:
+    """The gen-ed domains this student hasn't satisfied yet, as [{code, label}]
+    in bulletin order — the chips shown in the picker."""
     _load_gen_ed()
-    token = slot_key[len("gened:"):].split("#")[0].strip().upper()
-    if token == "GENERAL":
-        return _gen_ed_all or []
-    return (_gen_ed_by_cat or {}).get(token, [])
+    tx = transcript_table.query(KeyConditionExpression=Key("user_id").eq(user_id)).get("Items", [])
+    result = run_gen_ed_audit(_gen_ed_rows, tx) if _gen_ed_rows else {"groups": []}
+    satisfied = build_gen_ed_satisfied(result)   # {token: bool}
+    out = []
+    for token in _DOMAIN_ORDER:
+        if token in (_gen_ed_by_cat or {}) and not satisfied.get(token, False):
+            out.append({"code": token, "label": _gen_ed_labels.get(token, token)})
+    return out
+
+
+def _resolve_slot_universe(slot_key: str, category: str | None = None) -> list[dict]:
+    """Candidate courses that can fill a slot.
+    - gen-ed slots: 'gened:US' -> that category; `category` overrides it so the
+      student can pick a different domain; 'gened:GENERAL' / no domain -> all.
+    - world-language pool slots -> every world-language-department course.
+    Anything else -> [] (not searchable in v1)."""
+    if slot_key.startswith("gened:"):
+        _load_gen_ed()
+        token = (category or "").strip().upper() or slot_key[len("gened:"):].split("#")[0].strip().upper()
+        if token in (_gen_ed_by_cat or {}):
+            return _gen_ed_by_cat[token]
+        return _gen_ed_all or []          # GENERAL / unknown -> whole gen-ed union
+    if slot_key.startswith("pool:WORLD_LANGUAGE"):
+        return _load_lang()
+    return []
 
 
 def _normalize_code(code: str) -> str:
@@ -155,24 +228,34 @@ async def _get_description(code: str) -> str | None:
 # NOTE: /for-slot MUST be declared before /{code}, else FastAPI matches it as a
 # course code ("for-slot").
 
+@router.get("/gen-ed-domains")
+def gen_ed_domains(user_id: str = Depends(get_user_id)):
+    """The gen-ed domains this student still needs — the picker's domain chips."""
+    return {"domains": remaining_gen_ed_domains(user_id)}
+
+
 @router.get("/for-slot")
 def courses_for_slot(
     slot_key: str = Query(..., description="The class-selector slot_key, e.g. 'gened:US'"),
     q: str | None = Query(None, description="Substring filter over code + title"),
-    limit: int = Query(40, ge=1, le=200),
+    category: str | None = Query(None, description="Override the gen-ed domain to search (e.g. 'GA')"),
+    limit: int = Query(500, ge=1, le=2000),
     user_id: str = Depends(get_user_id),
 ):
-    """Candidate courses a student can search to fill a slot. v1: gen-ed slots
-    only (named category or generic). Non-gen-ed slots return an empty list.
+    """Candidate courses a student can search to fill a slot: gen-ed slots (any
+    domain via `category`) and world-language pool slots. Other slots -> empty.
 
-    A large universe (generic 'any gen-ed') returns `needs_query: true` on an
-    empty `q` so the UI prompts the user to type instead of shipping ~3.9k rows.
+    On an empty `q` the full (domain-scoped) list is returned sorted so the UI can
+    show it immediately and scroll — only an unusually huge universe (the whole
+    gen-ed union, which the domain chips avoid) returns `needs_query: true`.
     """
-    universe = _resolve_slot_universe(slot_key)
+    universe = _resolve_slot_universe(slot_key, category)
     ql = (q or "").strip().lower()
 
     if not ql:
-        if len(universe) > 200:
+        # Single domains top out ~1.4k (IL); only the all-gen-ed union exceeds this,
+        # and the client always picks a domain, so it never asks for the union.
+        if len(universe) > 1600:
             return {"results": [], "needs_query": True}
         results = sorted(universe, key=lambda c: c["course_code"])
         return {"results": results, "needs_query": False}

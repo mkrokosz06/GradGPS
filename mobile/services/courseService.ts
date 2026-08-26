@@ -23,19 +23,35 @@ export type SlotCourse = {
   multi_category: boolean;
 };
 
-/** Search the courses that can validly fill a class-selector slot (v1: gen-ed
- *  slots). `q` filters server-side; `needs_query` is true when the universe is
- *  too large to return without a query (generic "any gen-ed" slots). */
+export type GenEdDomain = { code: string; label: string };
+
+/** Search the courses that can validly fill a class-selector slot (gen-ed slots
+ *  and world-language pools). `q` filters server-side; `category` overrides the
+ *  gen-ed domain to search; `needs_query` is true when the universe is too large
+ *  to return without a query. */
 export async function searchSlotCourses(
   userId: string,
   slotKey: string,
   q: string,
+  category?: string,
 ): Promise<{ results: SlotCourse[]; needs_query: boolean }> {
   const res = await api.get<{ results: SlotCourse[]; needs_query: boolean }>(
     "/courses/for-slot",
-    { params: { slot_key: slotKey, q: q || undefined }, headers: { "x-user-id": userId } },
+    {
+      params: { slot_key: slotKey, q: q || undefined, category: category || undefined },
+      headers: { "x-user-id": userId },
+    },
   );
   return res.data;
+}
+
+/** The gen-ed domains the student still needs — the picker's domain chips. */
+export async function getGenEdDomains(userId: string): Promise<GenEdDomain[]> {
+  const res = await api.get<{ domains: GenEdDomain[] }>(
+    "/courses/gen-ed-domains",
+    { headers: { "x-user-id": userId } },
+  );
+  return res.data.domains;
 }
 
 export type ProfessorRating = {

@@ -1,11 +1,15 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, TouchableOpacity, Modal, StyleSheet, ScrollView, ActivityIndicator, TextInput,
+  FlatList, Dimensions,
 } from "react-native";
 import { TimelineCourse } from "../services/timelineService";
 import { ChoicePayload } from "../services/userChoicesService";
-import { searchSlotCourses, type SlotCourse } from "../services/courseService";
+import { searchSlotCourses, getGenEdDomains, type SlotCourse, type GenEdDomain } from "../services/courseService";
 import { useAuth } from "../context/AuthContext";
+
+const WIN_H  = Dimensions.get("window").height;
+const LIST_H = Math.round(WIN_H * 0.42);   // tall, scrollable results area
 
 /**
  * Class selector — long-press (or tap the affordance on) a suggested course to
@@ -35,32 +39,57 @@ export function CoursePickerModal({
   const { userId } = useAuth();
   const options = course?.options ?? [];
   const searchable = !!course?.searchable;
+  const isGenEd = course?.slot_kind === "gen_ed";
   const [selected, setSelected] = useState<string | null>(null);
   const [pinned, setPinned]     = useState(false);
   const [query, setQuery]       = useState("");
   const [results, setResults]   = useState<SlotCourse[]>([]);
   const [searching, setSearching] = useState(false);
   const [needsQuery, setNeedsQuery] = useState(false);
+  const [domains, setDomains]   = useState<GenEdDomain[]>([]);
+  const [activeCat, setActiveCat] = useState<string | null>(null);
 
-  // Re-sync local state each time a new slot is opened.
+  // Re-sync local state each time a new slot is opened. For gen-ed slots, load
+  // the student's remaining domains (chips) and preselect the suggested one.
   useEffect(() => {
-    if (visible && course) {
-      setSelected(course.chosen_code ?? null);
-      setPinned(!!course.pinned);
-      setQuery("");
-      setResults([]);
-      setNeedsQuery(false);
+    if (!visible || !course) return;
+    setSelected(course.chosen_code ?? null);
+    setPinned(!!course.pinned);
+    setQuery("");
+    setResults([]);
+    setNeedsQuery(false);
+    setDomains([]);
+
+    const suggested = course.slot_key?.startsWith("gened:")
+      ? course.slot_key.slice("gened:".length).split("#")[0].toUpperCase()
+      : null;
+    setActiveCat(suggested && suggested !== "GENERAL" ? suggested : null);
+
+    if (isGenEd && userId) {
+      getGenEdDomains(userId)
+        .then((ds) => {
+          setDomains(ds);
+          setActiveCat((cur) => {
+            if (cur && ds.some((d) => d.code === cur)) return cur;
+            return ds[0]?.code ?? null;   // generic slot → first remaining domain
+          });
+        })
+        .catch(() => {});
     }
   }, [visible, course?.slot_key]);
 
-  // Debounced course search for searchable (gen-ed) slots.
+  // Debounced course search for searchable slots (gen-ed by active domain; a
+  // world-language pool searches its language courses directly).
   useEffect(() => {
     if (!visible || !searchable || !course?.slot_key || !userId) return;
+    if (isGenEd && !activeCat) return;   // wait for the domain to resolve
     let active = true;
     setSearching(true);
     const t = setTimeout(async () => {
       try {
-        const res = await searchSlotCourses(userId, course.slot_key!, query.trim());
+        const res = await searchSlotCourses(
+          userId, course.slot_key!, query.trim(), isGenEd ? activeCat ?? undefined : undefined,
+        );
         if (!active) return;
         setResults(res.results);
         setNeedsQuery(res.needs_query);
@@ -71,7 +100,7 @@ export function CoursePickerModal({
       }
     }, 250);
     return () => { active = false; clearTimeout(t); };
-  }, [visible, searchable, course?.slot_key, query, userId]);
+  }, [visible, searchable, course?.slot_key, query, userId, activeCat, isGenEd]);
 
   if (!course || !course.slot_key || !course.slot_kind) return null;
 
@@ -80,10 +109,13 @@ export function CoursePickerModal({
   const hasSwap  = options.length > 1;
   const canClear = !!course.chosen_code || !!course.pinned;
 
-  const catLabel = (course.gen_ed_categories?.[0] ?? "").split(":")[0].trim();
+  const activeLabel = domains.find((d) => d.code === activeCat)?.label
+    ?? (course.gen_ed_categories?.[0] ?? "").split(":")[0].trim();
 
   const title = searchable
-    ? (catLabel ? `Choose a ${catLabel} course` : "Choose a gen-ed course")
+    ? isGenEd
+      ? (activeLabel ? `Choose a ${activeLabel} course` : "Choose a gen-ed course")
+      : course.course_code   // world-language pool: "World Language - Level Two…"
     : hasSwap ? "Choose your course" : course.course_code;
   const subtitle = searchable
     ? "Search the courses that satisfy this requirement."
@@ -104,7 +136,7 @@ export function CoursePickerModal({
   return (
     <Modal visible={visible} transparent animationType="fade" statusBarTranslucent onRequestClose={onClose}>
       <View style={styles.backdrop}>
-        <View style={styles.card}>
+        <View style={[styles.card, searchable && { maxHeight: Math.round(WIN_H * 0.9), maxWidth: 460 }]}>
           <Text style={styles.title}>{title}</Text>
           <Text style={styles.subtitle}>{subtitle}</Text>
 
@@ -141,6 +173,28 @@ export function CoursePickerModal({
 
           {searchable && (
             <View style={{ marginBottom: 8 }}>
+              {isGenEd && domains.length > 0 && (
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ paddingBottom: 8, gap: 6 }}
+                >
+                  {domains.map((d) => {
+                    const on = d.code === activeCat;
+                    return (
+                      <TouchableOpacity
+                        key={d.code}
+                        onPress={() => setActiveCat(d.code)}
+                        activeOpacity={0.7}
+                        style={[styles.chip, on && styles.chipOn]}
+                      >
+                        <Text style={[styles.chipText, on && styles.chipTextOn]}>{d.code}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+                </ScrollView>
+              )}
+
               <View style={styles.searchBar}>
                 <Text style={styles.searchIcon}>⌕</Text>
                 <TextInput
@@ -160,19 +214,27 @@ export function CoursePickerModal({
                 )}
               </View>
 
-              <ScrollView style={styles.optionList} contentContainerStyle={{ paddingVertical: 4 }} keyboardShouldPersistTaps="handled">
-                {searching ? (
-                  <ActivityIndicator color="#1a3a6b" style={{ marginTop: 16 }} />
-                ) : needsQuery && !query.trim() ? (
-                  <Text style={styles.searchHint}>Type a course code or name to search.</Text>
-                ) : results.length === 0 ? (
-                  <Text style={styles.searchHint}>{query.trim() ? "No matching courses." : "No courses found."}</Text>
-                ) : (
-                  results.map((o, i) => {
+              {searching ? (
+                <ActivityIndicator color="#1a3a6b" style={{ marginTop: 24, height: LIST_H }} />
+              ) : needsQuery && !query.trim() ? (
+                <Text style={[styles.searchHint, { height: LIST_H }]}>Type a course code or name to search.</Text>
+              ) : results.length === 0 ? (
+                <Text style={[styles.searchHint, { height: LIST_H }]}>
+                  {query.trim() ? "No matching courses." : "No courses found."}
+                </Text>
+              ) : (
+                <FlatList
+                  style={{ height: LIST_H }}
+                  data={results}
+                  keyExtractor={(o, i) => `${o.course_code}_${i}`}
+                  keyboardShouldPersistTaps="handled"
+                  contentContainerStyle={{ paddingVertical: 4 }}
+                  initialNumToRender={14}
+                  windowSize={11}
+                  renderItem={({ item: o }) => {
                     const active = selected ? selected.toUpperCase() === o.course_code.toUpperCase() : false;
                     return (
                       <TouchableOpacity
-                        key={`${o.course_code}_${i}`}
                         style={[styles.option, active && styles.optionActive]}
                         activeOpacity={0.7}
                         onPress={() => setSelected(active ? null : o.course_code)}
@@ -181,16 +243,15 @@ export function CoursePickerModal({
                         <View style={{ flex: 1 }}>
                           <Text style={[styles.optionCode, active && styles.optionCodeActive]}>{o.course_code}</Text>
                           {o.course_title ? (
-                            <Text style={styles.optionTitle} numberOfLines={1}>{o.course_title}</Text>
+                            <Text style={styles.optionTitle} numberOfLines={2}>{o.course_title}</Text>
                           ) : null}
                         </View>
-                        {o.multi_category ? <Text style={styles.doubleDip}>⚡</Text> : null}
                         <Text style={styles.optionCr}>{o.credits} cr</Text>
                       </TouchableOpacity>
                     );
-                  })
-                )}
-              </ScrollView>
+                  }}
+                />
+              )}
 
               {selected && (
                 <Text style={styles.selectedNote}>Selected: <Text style={styles.selectedCode}>{selected}</Text></Text>
@@ -262,15 +323,21 @@ const styles = StyleSheet.create({
   radioActive:  { color: "#1a3a6b" },
   optionCode:       { fontSize: 14, fontWeight: "700", color: "#334155" },
   optionCodeActive: { color: "#1a3a6b" },
-  optionTitle:      { fontSize: 11, color: "#94a3b8", marginTop: 1 },
+  optionTitle:      { fontSize: 12, color: "#64748b", marginTop: 2, lineHeight: 16 },
   optionCr:         { fontSize: 11, color: "#94a3b8", marginLeft: 8 },
-  doubleDip:        { fontSize: 12, marginLeft: 6 },
 
   searchBar: {
     flexDirection: "row", alignItems: "center",
     borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 12,
     paddingHorizontal: 12, backgroundColor: "#f8fafc",
   },
+  chip: {
+    paddingHorizontal: 12, paddingVertical: 6, borderRadius: 999,
+    borderWidth: 1, borderColor: "#e2e8f0", backgroundColor: "#f8fafc",
+  },
+  chipOn:      { borderColor: "#1a3a6b", backgroundColor: "#1a3a6b" },
+  chipText:    { fontSize: 12, fontWeight: "700", color: "#64748b" },
+  chipTextOn:  { color: "#ffffff" },
   searchIcon:  { fontSize: 16, color: "#94a3b8", marginRight: 8 },
   searchInput: { flex: 1, paddingVertical: 11, fontSize: 14, color: "#111827" },
   searchClear: { fontSize: 13, color: "#94a3b8", paddingLeft: 8 },
