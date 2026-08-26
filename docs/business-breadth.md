@@ -1,12 +1,23 @@
 # Business Breadth — handling plan
 
-Status: **Options A + D implemented on `dev`** (2026-08-25). Option A —
-`_BUSINESS_DEPTS`, `_assign_business_breadth`, `_template_major_dept` in
-`sap_schedule.py` with tests in `tests/test_sap_schedule.py`. Option D — the
-timeline card now shows a directional subtitle ("Business elective outside your
-major — see the Smeal breadth list") via `pool_ref`, passed through
-`_emit_semester` and rendered in `mobile/app/(tabs)/timeline.tsx`. B/C (real Smeal
-list) and a *verified* Smeal link remain future work.
+Status: **Accurate area-based selector implemented on `dev`** (2026-08-26).
+Business Breadth is now modeled as its real Smeal shape — one 6-cr **two-piece
+sequence** from a single thematic **area** (own major excluded):
+- **Data**: `scripts/business_breadth_courses.json` (14 areas, sourced by hand;
+  builder `scripts/build_business_breadth.py`). Loader: `business_breadth.py`.
+- **Templates**: restored the `BA 411 (or Business Breadth Course)` alternative the
+  scraper flattened in 5 majors → every Smeal template has exactly 2 pure sequence
+  slots (120-cr totals intact).
+- **Matcher** (`sap_schedule._assign_business_breadth`): fills the two slots from
+  two leftover courses in ONE area; different areas don't complete the sequence.
+- **Endpoints**: `/courses/breadth-areas` (area chips + courses + disclaimer) and a
+  `pool:BUSINESS_BREADTH` branch in `/courses/for-slot`.
+- **Mobile**: `CoursePickerModal` area mode (pick area → course) + tappable card.
+- Tests green (sap_schedule 36, class_selector 13); tsc clean.
+
+Superseded the earlier dept-heuristic (Option A) and Option D subtitle. Remaining:
+only 2 of 9 majors' lists sourced (union + exclusion + disclaimer covers the gap);
+optional full cross-slot area-linking; a verified Smeal link.
 
 ## Option B — accurate course list (prep, blocked on data)
 
