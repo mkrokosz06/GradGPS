@@ -100,6 +100,8 @@
   .btn-line { color: var(--navy); border: 1.5px solid var(--line); background: #fff; }
   .btn-line:hover { border-color: var(--blue); }
   .site-nav .btn { padding: 8px 18px; }
+  /* .site-nav a (0,1,1) would otherwise override .btn-navy's white text with grey. */
+  .site-nav a.btn-navy, .site-nav a.btn-navy:hover { color: #fff; }
   @media (max-width: 720px) { .site-nav a:not(.btn) { display: none; } }
 
   /* ---------- hero ---------- */
