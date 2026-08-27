@@ -40,6 +40,26 @@ _MANUAL_RENAME_PAIRS: list[tuple[str, str]] = [
     ("LA 83", "LA 283"),
 ]
 
+# ── First-Year Seminar interchangeability (PSU subject) ──────────────────────
+# PSU's First-Year Seminar requirement is satisfied by ANY 1-credit first-year
+# seminar; each college/campus numbers its own under the PSU subject (PSU 5
+# Berks, PSU 7 Behrend, PSU 15 Liberal Arts, PSU 16 Science, PSU 17 IST, …).
+# Bulletin SAP grids hard-code the home college's number (Science plans list
+# PSU 16), so a student who took a DIFFERENT campus's seminar — routine for 2+2
+# and change-of-campus students — was told to retake it, and the timeline
+# scheduled a phantom PSU 16.  Treat the whole PSU FYS family as mutually
+# equivalent so any one satisfies the slot (the requirement is "take one").
+_FIRST_YEAR_SEMINARS = [
+    "PSU 1", "PSU 3", "PSU 5", "PSU 6", "PSU 7", "PSU 8", "PSU 9",
+    "PSU 12", "PSU 14", "PSU 15", "PSU 16", "PSU 17", "PSU 18",
+]
+_FIRST_YEAR_SEMINAR_PAIRS: list[tuple[str, str]] = [
+    (a, b)
+    for i, a in enumerate(_FIRST_YEAR_SEMINARS)
+    for b in _FIRST_YEAR_SEMINARS[i + 1:]
+]
+_MANUAL_RENAME_PAIRS += _FIRST_YEAR_SEMINAR_PAIRS
+
 # Bundled snapshot of the PSU bulletin cross-listings scrape. Used only when
 # the live __CROSSLISTINGS__ item in DynamoDB is absent/unreachable (fresh
 # local dev, tests) — monthly_refresh.py keeps the DynamoDB copy current.

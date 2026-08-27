@@ -26,7 +26,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from bs4 import BeautifulSoup
 
-from plan_templates import validate_template, fixed_codes, pinned_course_codes
+from plan_templates import validate_template, fixed_codes, pinned_course_codes, slot_credits
 
 _OUT_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "sap_templates")
 _CACHE_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".sap_cache")
@@ -40,6 +40,35 @@ PROGRAMS: list[dict] = [
      "url": "https://bulletins.psu.edu/undergraduate/colleges/smeal-business/marketing-bs/"},
     {"program_name": "Psychology, B.S. (Liberal Arts)", "degree": "B.S.",
      "url": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/psychology-bs/"},
+]
+
+# Programs whose bulletin page publishes SEVERAL suggested-plan grids (one per
+# option/campus/pathway) on a single page.  The default one-table scrape (and
+# `--all`) grabs only the FIRST grid, so an option student falls back to the
+# wrong plan — a Forensic Chemistry student was scheduled against the Forensic
+# Molecular Biology grid, surfacing phantom biology courses + a spurious 5th
+# year.  Each entry pins a specific grid by the substrings of its `<h3.toggle>`
+# heading and writes a subplan-tagged template (`subplan` MUST equal the value
+# stored on the user record so load_template's exact-subplan match wins).
+# University-Park grids only, per the UP-only template scope (docs/…-sap-hybrid).
+SUBPLAN_PROGRAMS: list[dict] = [
+    {"program_name": "Forensic Science, B.S.", "subplan": "Forensic Chemistry",
+     "degree": "B.S.",
+     "url": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/forensic-science-bs/",
+     "heading": ["Forensic Chemistry Option:", "University Park"],
+     # The bulletin's SUGGESTED-PLAN grid fills the biology requirement with the
+     # BIOL 114/115 + 234/235W sequence, but the same bulletin's "Requirements
+     # for the Major" table (which the audit uses, and which actually gates the
+     # degree) prescribes BIOL 110 + BIOL 230W for ALL options.  Left as scraped,
+     # those grid courses are never satisfiable (not real requirements) so the
+     # timeline schedules them forever and never shows the real BIOL 230W.
+     # Reconcile the slots to the authoritative requirement (net credits equal).
+     "corrections": [
+         {"replace": ["BIOL 114", "BIOL 115"],
+          "with": {"type": "course", "code": "BIOL 110", "credits": 4.0}},
+         {"replace": ["BIOL 234", "BIOL 235W"],
+          "with": {"type": "course", "code": "BIOL 230W", "credits": 4.0}},
+     ]},
 ]
 
 # Gen-ed category tokens the bulletin uses in parentheses, normalized to the
@@ -336,6 +365,65 @@ def scrape(program: dict) -> dict:
                        program.get("degree", ""), program["url"])
 
 
+def _grid_by_heading(html: str, must_contain: list[str]) -> tuple[str, str]:
+    """(grid HTML, heading text) of the sc_plangrid whose preceding `<h3.toggle>`
+    heading contains ALL of `must_contain` (case-insensitive).  Raises if none or
+    more than one matches — an ambiguous pin should fail loudly, not guess."""
+    soup = BeautifulSoup(html.replace("\xa0", " "), "html.parser")
+    hits: list[tuple[str, str]] = []
+    for t in soup.find_all("table", class_="sc_plangrid"):
+        h = t.find_previous(lambda tag: tag.name == "h3" and "toggle" in (tag.get("class") or []))
+        htext = h.get_text(" ", strip=True) if h else ""
+        if all(s.lower() in htext.lower() for s in must_contain):
+            hits.append((str(t), htext))
+    if len(hits) != 1:
+        raise ValueError(f"{len(hits)} plangrids match heading {must_contain} (want exactly 1)")
+    return hits[0]
+
+
+def _apply_corrections(semesters: list[dict], corrections: list[dict]) -> None:
+    """Reconcile scraped grid slots to the authoritative Requirements table where
+    a bulletin's suggested plan disagrees with its own major requirements (see the
+    `corrections` note in SUBPLAN_PROGRAMS).  Each correction removes the slots
+    whose course `code` is in `replace` and inserts `with` at the first one's
+    position.  Raises if a `replace` code isn't found — a silent no-op would let
+    a stale correction rot unnoticed after a bulletin re-scrape."""
+    def _codes(slot):
+        return [slot.get("code")] if slot.get("code") else slot.get("codes", [])
+    for corr in corrections or []:
+        want = set(corr["replace"])
+        for sem in semesters:
+            idxs = [i for i, s in enumerate(sem["slots"])
+                    if want & set(_codes(s))]
+            if idxs:
+                sem["slots"][idxs[0]] = dict(corr["with"])
+                for i in reversed(idxs[1:]):
+                    del sem["slots"][i]
+                sem["credits"] = round(sum(slot_credits(s) for s in sem["slots"]), 1)
+                break
+        else:
+            raise ValueError(f"correction target {sorted(want)} not found in grid")
+
+
+def scrape_subplan(spec: dict) -> dict:
+    """Scrape a single option/campus grid off a multi-plan page into a
+    subplan-tagged template (see SUBPLAN_PROGRAMS)."""
+    grid_html, heading = _grid_by_heading(fetch(spec["url"]), spec["heading"])
+    semesters = parse_plangrid(grid_html)
+    _apply_corrections(semesters, spec.get("corrections"))
+    return {
+        "program_name": spec["program_name"],
+        "subplan": spec["subplan"],
+        "catalog_year": "2024",
+        "degree": spec.get("degree") or _degree(spec["program_name"]),
+        "total_credits": round(sum(s["credits"] for s in semesters), 1),
+        "source": spec["url"],
+        "source_plan": heading,
+        "scraped": True,
+        "semesters": semesters,
+    }
+
+
 def discover_up_urls() -> list[str]:
     """All University Park program-page URLs from the bulletin sitemap."""
     xml = fetch(_SITEMAP)
@@ -407,7 +495,10 @@ def _validate(tpl: dict, known: set[str]) -> list[str]:
 
 def _write(tpl: dict):
     os.makedirs(_OUT_DIR, exist_ok=True)
-    path = os.path.join(_OUT_DIR, f"{_slug(tpl['program_name'])}.json")
+    slug = _slug(tpl["program_name"])
+    if tpl.get("subplan"):
+        slug = f"{slug}-{_slug(tpl['subplan'])}"   # keep base + option variants distinct
+    path = os.path.join(_OUT_DIR, f"{slug}.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(tpl, f, indent=2, ensure_ascii=False)
     return path
@@ -471,10 +562,12 @@ def main():
         _, known = _load_catalog()
 
     ok, failed = 0, 0
-    for prog in PROGRAMS:
-        name = prog["program_name"]
+    jobs = ([(p["program_name"], lambda p=p: scrape(p)) for p in PROGRAMS]
+            + [(f"{s['program_name']} [{s['subplan']}]", lambda s=s: scrape_subplan(s))
+               for s in SUBPLAN_PROGRAMS])
+    for name, do in jobs:
         try:
-            tpl = scrape(prog)
+            tpl = do()
         except Exception as e:  # noqa: BLE001
             print(f"SCRAPE-FAIL {name}: {e!r}"); failed += 1; continue
         problems = _validate(tpl, known)

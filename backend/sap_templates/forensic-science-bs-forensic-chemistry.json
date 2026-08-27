@@ -1,0 +1,305 @@
+{
+  "program_name": "Forensic Science, B.S.",
+  "subplan": "Forensic Chemistry",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 123.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/forensic-science-bs/",
+  "source_plan": "Forensic Chemistry Option: Forensic Science, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CRIM 100",
+            "CRIM 113"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 100",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 210",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 210",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 250"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 230W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 213W",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 212",
+            "PHYS 251"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 250",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 227",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 410",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 411",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 413",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 415W",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "PHIL 132",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FRNSC 400",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 425",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 475",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FRNSC 427W",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "FRNSC 485",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}
