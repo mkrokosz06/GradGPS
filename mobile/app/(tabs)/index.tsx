@@ -274,7 +274,7 @@ function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: T
             {course.course_code}
           </Text>
           {course.course_title ? (
-            <Text style={{ color: "#1a3a6b", fontSize: 12, marginLeft: 6, flex: 1 }} numberOfLines={1}>
+            <Text style={{ color: "#1a3a6b", fontSize: 13, fontWeight: "500", marginLeft: 6, flex: 1 }} numberOfLines={1}>
               {`- ${course.course_title}`}
             </Text>
           ) : null}

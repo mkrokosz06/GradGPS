@@ -389,6 +389,57 @@ def _past_display_credits(c: dict) -> float:
     return earned
 
 
+_catalog_title_map: dict[str, str] | None = None
+
+
+def _catalog_titles() -> dict[str, str]:
+    """course_code -> official title, from one cached scan of the requirements
+    table across all programs. A major's own rows sometimes lack a title (e.g. the
+    ETI junk rows), so prefer the best (longest non-empty) title seen anywhere."""
+    global _catalog_title_map
+    if _catalog_title_map is not None:
+        return _catalog_title_map
+    m: dict[str, str] = {}
+    scan_kwargs: dict = {"ProjectionExpression": "course_code, course_title"}
+    while True:
+        resp = requirements_table.scan(**scan_kwargs)
+        for it in resp.get("Items", []):
+            code = (it.get("course_code") or "").strip().upper()
+            title = (it.get("course_title") or "").strip()
+            if not code or not title or title.isdigit():
+                continue
+            if code not in m or len(title) > len(m[code]):
+                m[code] = title
+        last = resp.get("LastEvaluatedKey")
+        if not last:
+            break
+        scan_kwargs["ExclusiveStartKey"] = last
+    _catalog_title_map = m
+    return m
+
+
+_REAL_CODE_RE = re.compile(r"^[A-Z]{2,6}\s+\d")
+
+
+def _fill_future_titles(semesters: list[dict]) -> None:
+    """Backfill empty course_title on real (non-pool) recommended cards from the
+    catalog, so 'Plan your registration' shows names, not just codes."""
+    titles: dict[str, str] | None = None
+    for sem in semesters:
+        for c in sem.get("courses", []):
+            if c.get("course_title") or c.get("is_pool"):
+                continue
+            code = (c.get("course_code") or "").strip().upper()
+            if " OR " in code or not _REAL_CODE_RE.match(code):
+                continue
+            if titles is None:
+                titles = _catalog_titles()
+            norm = re.sub(r"[WHNMXY]$", "", code).strip()
+            t = titles.get(code) or titles.get(norm)
+            if t:
+                c["course_title"] = t
+
+
 def _expand_pool(entry: dict) -> list[dict]:
     """Split a pool entry into ~3-credit placeholder slots the packer can spread
     across semesters.  Non-pool entries pass through unchanged (single-item list).
@@ -1042,6 +1093,10 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         )
 
     semesters.extend(_apply_pins(future, pins))
+
+    # Recommended courses often come from major rows with no title — fill from the
+    # cross-program catalog so Home/Timeline show names next to the codes.
+    _fill_future_titles(semesters)
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(
