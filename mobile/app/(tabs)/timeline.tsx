@@ -15,6 +15,7 @@ import { CoursePickerModal } from "../../components/CoursePickerModal";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
+import { useInProgressEditor } from "../../components/InProgressEditor";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -370,7 +371,7 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
 
 // ── Course row ────────────────────────────────────────────────────────────────
 
-function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void }) {
+function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void; onEditInProgress?: (course: TimelineCourse) => void }) {
   const router = useRouter();
   const config = {
     done:        { dot: "✓", dotColor: "text-done",     textColor: "text-gray-800", bg: "bg-green-50" },
@@ -438,6 +439,8 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
   // A future slot the student can choose/pin: it carries a stable slot_key.
   const actionable = !!onEdit && !!course.slot_key && course.status === "missing";
   const hasSwap    = (course.options?.length ?? 0) > 1;
+  // An in-progress (registered) class the student can swap or drop.
+  const inProgressEditable = !!onEditInProgress && course.status === "in_progress";
 
   const handlePress = () => {
     if (pairCodes) {
@@ -451,7 +454,11 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
     <TouchableOpacity
       activeOpacity={0.7}
       onPress={handlePress}
-      onLongPress={actionable ? () => onEdit!(course) : undefined}
+      onLongPress={
+        actionable ? () => onEdit!(course)
+        : inProgressEditable ? () => onEditInProgress!(course)
+        : undefined
+      }
       delayLongPress={250}
       className={`flex-row items-center px-4 py-3 mb-1.5 rounded-xl border border-gray-100 ${config.bg}`}
     >
@@ -483,6 +490,15 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
             </Text>
             <Text className="text-navy text-xs"> ›</Text>
           </TouchableOpacity>
+        ) : inProgressEditable ? (
+          <TouchableOpacity
+            onPress={() => onEditInProgress!(course)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            className="mt-1 flex-row items-center bg-amber-50 px-2 py-0.5 rounded-full border border-amber-100"
+          >
+            <Text className="text-progress text-xs font-semibold">Edit</Text>
+            <Text className="text-progress text-xs"> ›</Text>
+          </TouchableOpacity>
         ) : null}
       </View>
     </TouchableOpacity>
@@ -496,11 +512,13 @@ function ContentPanel({
   refreshing,
   onRefresh,
   onEditCourse,
+  onEditInProgress,
 }: {
   semester: Semester;
   refreshing: boolean;
   onRefresh: () => void;
   onEditCourse?: (course: TimelineCourse, term: string, termLabel: string) => void;
+  onEditInProgress?: (course: TimelineCourse) => void;
 }) {
   const isCurrent  = semester.status === "current";
   const isUpcoming = semester.status === "upcoming";
@@ -547,6 +565,7 @@ function ContentPanel({
                   ? (course) => onEditCourse(course, semester.term, semester.label)
                   : undefined
               }
+              onEditInProgress={isCurrent ? onEditInProgress : undefined}
             />
           ))
         )}
@@ -627,6 +646,9 @@ export default function TimelineScreen() {
   useFocusEffect(useCallback(() => { fetchTimeline(); }, [fetchTimeline]));
 
   const onRefresh = useCallback(() => { setRefreshing(true); fetchTimeline(); }, [fetchTimeline]);
+
+  // Swap/drop for in-progress (registered) classes, straight from the cards.
+  const { openMenu: openInProgressMenu, modal: inProgressModal } = useInProgressEditor(userId, fetchTimeline);
 
   // Class-selector mutations: write, then re-pull so the plan reflows. The modal
   // stays on-screen (no navigation), so useFocusEffect won't fire — refetch here.
@@ -752,6 +774,7 @@ export default function TimelineScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+            onEditInProgress={openInProgressMenu}
           />
         ) : (
           <View className="flex-1 items-center justify-center">
@@ -770,6 +793,7 @@ export default function TimelineScreen() {
         onClear={clearChoice}
         onClose={() => setEditing(null)}
       />
+      {inProgressModal}
     </SafeAreaView>
   );
 }

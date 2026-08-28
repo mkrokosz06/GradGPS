@@ -15,6 +15,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getAudit, type AuditSummary } from "../../services/auditService";
 import { getTimeline, type TimelineData, type TimelineCourse, type Semester } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
+import { useInProgressEditor } from "../../components/InProgressEditor";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -100,7 +101,7 @@ function NoTranscriptBanner() {
 
 // ── State 3: Registration view ────────────────────────────────────────────────
 
-function CurrentSemesterStrip({ semester, credits }: { semester: Semester; credits: number }) {
+function CurrentSemesterStrip({ semester, credits, onEditInProgress }: { semester: Semester; credits: number; onEditInProgress?: (course: TimelineCourse) => void }) {
   const router   = useRouter();
   const courses  = semester.courses.filter((c) => !c.is_pool);
   const shown    = courses.slice(0, 3);
@@ -131,10 +132,27 @@ function CurrentSemesterStrip({ semester, credits }: { semester: Semester; credi
               <Text style={{ color: "#92400e", fontSize: 10, fontWeight: "700" }}>In Progress</Text>
             </View>
           </View>
-          <Text style={{ color: "#94a3b8", fontSize: 12 }}>
-            {shown.map((c) => c.course_code).join(" · ")}
-            {extra > 0 ? ` · +${extra} more` : ""}
-          </Text>
+          {onEditInProgress ? (
+            <View style={{ flexDirection: "row", flexWrap: "wrap", alignItems: "center" }}>
+              {shown.map((c, i) => (
+                <View key={`${c.course_code}_${i}`} style={{ flexDirection: "row", alignItems: "center" }}>
+                  {i > 0 ? <Text style={{ color: "#cbd5e1", fontSize: 12 }}> · </Text> : null}
+                  <TouchableOpacity
+                    onPress={() => onEditInProgress(c)}
+                    hitSlop={{ top: 6, bottom: 6, left: 4, right: 4 }}
+                  >
+                    <Text style={{ color: "#2a5298", fontSize: 12, fontWeight: "600" }}>{c.course_code}</Text>
+                  </TouchableOpacity>
+                </View>
+              ))}
+              {extra > 0 ? <Text style={{ color: "#94a3b8", fontSize: 12 }}>{` · +${extra} more`}</Text> : null}
+            </View>
+          ) : (
+            <Text style={{ color: "#94a3b8", fontSize: 12 }}>
+              {shown.map((c) => c.course_code).join(" · ")}
+              {extra > 0 ? ` · +${extra} more` : ""}
+            </Text>
+          )}
         </View>
         <View style={{ alignItems: "flex-end", marginLeft: 12 }}>
           <Text style={{ color: "#1a3a6b", fontSize: 18, fontWeight: "800" }}>{credits}</Text>
@@ -145,7 +163,7 @@ function CurrentSemesterStrip({ semester, credits }: { semester: Semester; credi
   );
 }
 
-function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void }) {
+function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void; onEditInProgress?: (course: TimelineCourse) => void }) {
   const router = useRouter();
   const type   = courseType(course);
 
@@ -216,6 +234,7 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
 
   const actionable = !!onEdit && !!course.slot_key && course.status === "missing";
   const hasSwap    = (course.options?.length ?? 0) > 1;
+  const inProgressEditable = !!onEditInProgress && course.status === "in_progress";
 
   const handlePress = () => {
     if (pairCodes) {
@@ -229,7 +248,11 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
     <TouchableOpacity
       activeOpacity={0.75}
       onPress={handlePress}
-      onLongPress={actionable ? () => onEdit!(course) : undefined}
+      onLongPress={
+        actionable ? () => onEdit!(course)
+        : inProgressEditable ? () => onEditInProgress!(course)
+        : undefined
+      }
       delayLongPress={250}
       style={{
         flexDirection: "row", alignItems: "center",
@@ -280,6 +303,19 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
               {hasSwap ? `${course.options!.length} options ›` : "Edit ›"}
             </Text>
           </TouchableOpacity>
+        ) : inProgressEditable ? (
+          <TouchableOpacity
+            onPress={() => onEditInProgress!(course)}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+            style={{
+              flexDirection: "row", alignItems: "center",
+              backgroundColor: "#fef6e7", borderRadius: 999,
+              paddingHorizontal: 8, paddingVertical: 2,
+              borderWidth: 1, borderColor: "#f5e2c0",
+            }}
+          >
+            <Text style={{ color: "#b45309", fontSize: 11, fontWeight: "700" }}>Edit ›</Text>
+          </TouchableOpacity>
         ) : (
           <Text style={{ color: "#6b7280", fontSize: 11 }}>Tap for ratings</Text>
         )}
@@ -292,10 +328,12 @@ function RegistrationSection({
   semester,
   audit,
   onEditCourse,
+  onEditInProgress,
 }: {
   semester: Semester;
   audit: AuditSummary;
   onEditCourse?: (course: TimelineCourse, term: string, termLabel: string) => void;
+  onEditInProgress?: (course: TimelineCourse) => void;
 }) {
   const router  = useRouter();
   const courses = semester.courses;
@@ -333,6 +371,7 @@ function RegistrationSection({
           key={`${c.course_code}_${i}`}
           course={c}
           onEdit={onEditCourse ? (course) => onEditCourse(course, semester.term, semester.label) : undefined}
+          onEditInProgress={onEditInProgress}
         />
       ))}
 
@@ -403,6 +442,9 @@ export default function HomeScreen() {
 
   useFocusEffect(useCallback(() => { fetchData(); }, [fetchData]));
   const onRefresh = useCallback(() => { setRefreshing(true); fetchData(); }, [fetchData]);
+
+  // Swap/drop for in-progress (registered) classes, straight from the cards.
+  const { openMenu: openInProgressMenu, modal: inProgressModal } = useInProgressEditor(userId, fetchData);
 
   // Class-selector mutations: write, re-pull so the plan reflows (the modal
   // stays on-screen, so useFocusEffect won't refire — refetch explicitly).
@@ -476,7 +518,7 @@ export default function HomeScreen() {
         </Text>
 
         {hasTranscript && currentSem ? (
-          <CurrentSemesterStrip semester={currentSem} credits={audit!.transcript_credits} />
+          <CurrentSemesterStrip semester={currentSem} credits={audit!.transcript_credits} onEditInProgress={openInProgressMenu} />
         ) : !hasTranscript ? (
           <NoTranscriptBanner />
         ) : null}
@@ -486,6 +528,7 @@ export default function HomeScreen() {
             semester={nextSem}
             audit={audit!}
             onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+            onEditInProgress={openInProgressMenu}
           />
         ) : (
           <AllDoneCard gradLabel={gradLabel} />
@@ -502,6 +545,7 @@ export default function HomeScreen() {
         onClear={clearChoice}
         onClose={() => setEditing(null)}
       />
+      {inProgressModal}
     </SafeAreaView>
   );
 }
