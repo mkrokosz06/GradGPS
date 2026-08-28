@@ -281,7 +281,7 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
             </Text>
           </TouchableOpacity>
         ) : (
-          <Text style={{ color: "#94a3b8", fontSize: 11 }}>Tap for ratings</Text>
+          <Text style={{ color: "#6b7280", fontSize: 11 }}>Tap for ratings</Text>
         )}
       </View>
     </TouchableOpacity>

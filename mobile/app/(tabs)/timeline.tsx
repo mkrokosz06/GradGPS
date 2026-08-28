@@ -464,7 +464,7 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
         {course.course_title ? (
           <Text className="text-gray-400 text-xs mt-0.5" numberOfLines={1}>{course.course_title}</Text>
         ) : null}
-        <Text className="text-gray-400 text-xs mt-0.5">tap for ratings ›</Text>
+        <Text className="text-gray-500 text-xs mt-0.5">Tap for ratings ›</Text>
       </View>
       <View className="ml-3 items-end justify-center">
         {course.grade ? (
