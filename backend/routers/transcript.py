@@ -13,7 +13,7 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from pydantic import BaseModel
 from decimal import Decimal
 
-from db import transcript_table, users_table, get_s3
+from db import transcript_table, users_table, get_s3, requirements_table
 from transcript_parser import (
     detect_kind, parse_with_detection, official_parse_looks_bad, _normalise_code,
 )
@@ -401,6 +401,39 @@ def _get_course(user_id: str, course_code: str) -> dict | None:
     return resp.get("Item")
 
 
+_title_cache: dict[str, dict] = {}
+
+
+def _catalog_meta(code: str) -> dict:
+    """Best-effort official title (+credits) for a course code from the requirements
+    catalog, cached. Manually added/swapped courses aren't in any transcript PDF, so
+    this is their only title source. Returns {} if the code isn't in the catalog."""
+    from boto3.dynamodb.conditions import Attr
+
+    norm = _normalise_code(code)
+    if norm in _title_cache:
+        return _title_cache[norm]
+    meta: dict = {}
+    scan_kwargs: dict = {
+        "FilterExpression": Attr("course_code").eq(norm),
+        "ProjectionExpression": "course_code, course_title, credits",
+    }
+    while True:
+        resp = requirements_table.scan(**scan_kwargs)
+        items = resp.get("Items", [])
+        if items:
+            it = items[0]
+            meta = {"title": it.get("course_title", "") or "",
+                    "credits": float(it.get("credits", 0) or 0)}
+            break
+        last = resp.get("LastEvaluatedKey")
+        if not last:
+            break
+        scan_kwargs["ExclusiveStartKey"] = last
+    _title_cache[norm] = meta
+    return meta
+
+
 def _display_credits(c: dict) -> float:
     """Credits to show on a card: earned for graded courses, attempted (the
     `credits` field) for in-progress ones whose earned is still 0."""
@@ -449,7 +482,7 @@ def add_course(body: CourseAdd, user_id: str = Depends(get_user_id)):
         "grade":          "",
         "credits_earned": credits,
         "credits":        credits,
-        "course_title":   "",
+        "course_title":   _catalog_meta(course_code).get("title", ""),
         "term":           body.term.strip(),
         "status":         "in_progress",
         "is_writing":     is_writing,
@@ -485,7 +518,7 @@ def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
         "grade":          "",
         "credits_earned": credits,
         "credits":        credits,
-        "course_title":   "",
+        "course_title":   _catalog_meta(new_code).get("title", ""),
         "term":           existing.get("term", ""),
         "status":         "in_progress",
         "is_writing":     is_writing,
