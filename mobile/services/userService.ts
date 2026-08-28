@@ -6,6 +6,23 @@ export type CreateUserResponse = {
   email:   string;
 };
 
+export type MeResponse = {
+  user_id: string;
+  name:    string;
+  email:   string;
+  major:   string | null;
+  subplan: string | null;
+};
+
+/**
+ * Fetch the caller's stored profile. Identity comes from the Bearer token the
+ * api interceptor attaches. Throws (404) when no profile record exists yet.
+ */
+export async function getMe(): Promise<MeResponse> {
+  const res = await api.get<MeResponse>("/users/me");
+  return res.data;
+}
+
 /**
  * Authenticated profile upsert. Identity comes from the Bearer token the
  * api interceptor attaches — the backend derives user_id from the verified

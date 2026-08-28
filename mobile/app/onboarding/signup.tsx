@@ -38,6 +38,18 @@ export default function SignupScreen() {
   const router = useRouter();
   const { signIn, signInWithIdToken, signInWithSession, signOut } = useAuth();
 
+  // Route a signed-in user by what the server already has on file, so returning
+  // users aren't force-marched back through onboarding they already finished.
+  function routeAfterSignIn(status: { hasMajor: boolean; hasTranscript: boolean }) {
+    if (status.hasMajor && status.hasTranscript) {
+      router.replace("/(tabs)/" as any);            // fully set up → Home
+    } else if (status.hasMajor) {
+      router.replace("/onboarding/upload" as any);  // resume at transcript upload
+    } else {
+      setShowTos(true);                             // brand-new account → agree, then pick a major
+    }
+  }
+
   const [googleLoading,  setGoogleLoading]  = useState(false);
   const [appleLoading,   setAppleLoading]   = useState(false);
   const [appleAvailable, setAppleAvailable] = useState(false);
@@ -76,7 +88,7 @@ export default function SignupScreen() {
         return;
       }
       signInWithIdToken(idToken)
-        .then(() => setShowTos(true))
+        .then(routeAfterSignIn)
         .catch((e: any) => {
           Alert.alert("Error", e?.response?.data?.detail ?? "Sign-in failed. Please try again.");
         })
@@ -114,11 +126,11 @@ export default function SignupScreen() {
       const appleName = cred.fullName
         ? [cred.fullName.givenName, cred.fullName.familyName].filter(Boolean).join(" ").trim()
         : "";
-      await signInWithIdToken(idToken, {
+      const status = await signInWithIdToken(idToken, {
         name:  appleName || undefined,
         email: cred.email || undefined,
       });
-      setShowTos(true);
+      routeAfterSignIn(status);
     } catch (e: any) {
       if (e?.code === "ERR_REQUEST_CANCELED") return; // user backed out
       Alert.alert("Error", e?.response?.data?.detail ?? "Apple sign-in failed. Please try again.");
@@ -150,8 +162,8 @@ export default function SignupScreen() {
     try {
       const cleanEmail = email.trim().toLowerCase();
       const session = await verifyEmailCode(cleanEmail, code.trim(), name.trim() || undefined);
-      await signInWithSession(session.session_token, { name: name.trim() || undefined, email: cleanEmail });
-      setShowTos(true);
+      const status = await signInWithSession(session.session_token, { name: name.trim() || undefined, email: cleanEmail });
+      routeAfterSignIn(status);
     } catch (e: any) {
       Alert.alert("Error", e?.response?.data?.detail ?? "That code didn't work. Please try again.");
     } finally {

@@ -2,8 +2,16 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { setAuthToken, setOnUnauthorized } from "../services/api";
 import { getStoredToken, storeToken, clearToken } from "../services/tokenStorage";
-import { upsertMe } from "../services/userService";
+import { upsertMe, getMe } from "../services/userService";
+import { getTranscript } from "../services/transcriptService";
 import { createSession, revokeSession } from "../services/authService";
+
+/**
+ * What the server already knows about a signing-in user, used to skip
+ * onboarding steps they've already completed (their data lives on the server;
+ * the local onboarding_done flag is wiped on sign-out).
+ */
+export type OnboardingStatus = { hasMajor: boolean; hasTranscript: boolean };
 
 type AuthState = {
   userId:             string | null;
@@ -17,17 +25,21 @@ type AuthState = {
    * Real sign-in: exchange a verified Google/Apple ID token for a session.
    * `profile` carries name/email the token itself omits — Apple only hands
    * over the user's name once, at first authorization, client-side.
+   * Resolves with the server-known onboarding status so the caller can route a
+   * returning user past steps they've already finished.
    */
-  signInWithIdToken:  (idToken: string, profile?: { name?: string; email?: string }) => Promise<void>;
+  signInWithIdToken:  (idToken: string, profile?: { name?: string; email?: string }) => Promise<OnboardingStatus>;
   /** Adopt a server-minted session token directly (email/OTP sign-in already returns one). */
-  signInWithSession:  (sessionToken: string, profile?: { name?: string; email?: string }) => Promise<void>;
+  signInWithSession:  (sessionToken: string, profile?: { name?: string; email?: string }) => Promise<OnboardingStatus>;
   completeOnboarding: () => Promise<void>;
   signOut:            () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthState>({
   userId: null, name: null, email: null, onboardingDone: false, loading: true,
-  signIn: async () => {}, signInWithIdToken: async () => {}, signInWithSession: async () => {},
+  signIn: async () => {},
+  signInWithIdToken: async () => ({ hasMajor: false, hasTranscript: false }),
+  signInWithSession: async () => ({ hasMajor: false, hasTranscript: false }),
   completeOnboarding: async () => {}, signOut: async () => {},
 });
 
@@ -86,7 +98,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    */
   async function signInWithIdToken(idToken: string, profile?: { name?: string; email?: string }) {
     const session = await createSession(idToken);
-    await signInWithSession(session.session_token, profile);
+    return signInWithSession(session.session_token, profile);
   }
 
   /**
@@ -94,8 +106,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
    * then upsert the profile — the backend answers with the canonical user_id.
    * Shared by the OIDC path (after the ID-token exchange) and email/OTP
    * sign-in (which returns a session token straight from /auth/email/verify).
+   *
+   * Also rehydrates onboarding progress from the server: a returning user's
+   * major/transcript live in DynamoDB, so we mark onboarding done locally when
+   * both are present and hand the status back so the caller can route them
+   * straight to Home instead of re-running the whole onboarding flow.
    */
-  async function signInWithSession(sessionToken: string, profile?: { name?: string; email?: string }) {
+  async function signInWithSession(sessionToken: string, profile?: { name?: string; email?: string }): Promise<OnboardingStatus> {
     await storeToken(sessionToken);
     setAuthToken(sessionToken);
     try {
@@ -106,6 +123,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ["user_email", user.email ?? ""],
       ]);
       setUserId(user.user_id); setName(user.name ?? null); setEmail(user.email ?? null);
+
+      const status = await resolveOnboarding(user.user_id);
+      if (status.hasMajor && status.hasTranscript) {
+        await AsyncStorage.setItem("onboarding_done", "1");
+        setOnboardingDone(true);
+      }
+      return status;
     } catch (e) {
       // Roll back a half-completed sign-in so we don't strand a dead session.
       await revokeSession();
@@ -113,6 +137,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setAuthToken(null);
       throw e;
     }
+  }
+
+  /**
+   * Ask the server what the caller has already completed. A missing profile
+   * (404 for a brand-new account) or a transient read error degrades to
+   * "not onboarded" — worst case the user just re-runs a step, never a crash.
+   */
+  async function resolveOnboarding(uid: string): Promise<OnboardingStatus> {
+    let hasMajor = false;
+    let hasTranscript = false;
+    try {
+      const me = await getMe();
+      hasMajor = !!me.major;
+    } catch {
+      // brand-new profile / transient error → treat as not yet onboarded
+    }
+    try {
+      const t = await getTranscript(uid);
+      hasTranscript = t.has_transcript;
+    } catch {
+      // no transcript yet (or read failed) → onboarding resumes at upload
+    }
+    return { hasMajor, hasTranscript };
   }
 
   async function completeOnboarding() {
