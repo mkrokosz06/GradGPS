@@ -49,33 +49,33 @@ def seed_transcript_from_hardcoded():
     """
     courses = [
         # SU 2024
-        {"course_code": "EDSGN 100", "grade": "A",  "credits_earned": 3.0, "term": "SU 2024", "status": "done"},
-        {"course_code": "ENGL 15",   "grade": "B",  "credits_earned": 3.0, "term": "SU 2024", "status": "done"},
+        {"course_code": "EDSGN 100", "grade": "A",  "credits_earned": 3.0, "credits": 3.0, "course_title": "Introduction to Engineering Design",         "term": "SU 2024", "status": "done"},
+        {"course_code": "ENGL 15",   "grade": "B",  "credits_earned": 3.0, "credits": 3.0, "course_title": "Rhetoric and Composition",                   "term": "SU 2024", "status": "done"},
         # FA 2024
-        {"course_code": "ANTH 140",  "grade": "B+", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "CHEM 110",  "grade": "D",  "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "ECON 102",  "grade": "B-", "credits_earned": 3.0, "term": "FA 2024", "status": "done"},
-        {"course_code": "ME 101",    "grade": "A",  "credits_earned": 1.0, "term": "FA 2024", "status": "done"},
+        {"course_code": "ANTH 140",  "grade": "B+", "credits_earned": 3.0, "credits": 3.0, "course_title": "Cultural Anthropology",                      "term": "FA 2024", "status": "done"},
+        {"course_code": "CHEM 110",  "grade": "D",  "credits_earned": 3.0, "credits": 3.0, "course_title": "Chemical Principles I",                      "term": "FA 2024", "status": "done"},
+        {"course_code": "ECON 102",  "grade": "B-", "credits_earned": 3.0, "credits": 3.0, "course_title": "Introductory Microeconomic Analysis",        "term": "FA 2024", "status": "done"},
+        {"course_code": "ME 101",    "grade": "A",  "credits_earned": 1.0, "credits": 1.0, "course_title": "Introduction to Mechanical Engineering",     "term": "FA 2024", "status": "done"},
         # SP 2025
-        {"course_code": "CAS 100C",  "grade": "B+", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "GEOSC 40",  "grade": "A",  "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "METEO 3",   "grade": "A-", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "MGMT 301",  "grade": "A-", "credits_earned": 3.0, "term": "SP 2025", "status": "done"},
-        {"course_code": "SCM 200",   "grade": "B+", "credits_earned": 4.0, "term": "SP 2025", "status": "done"},
+        {"course_code": "CAS 100C",  "grade": "B+", "credits_earned": 3.0, "credits": 3.0, "course_title": "Effective Speech",                           "term": "SP 2025", "status": "done"},
+        {"course_code": "GEOSC 40",  "grade": "A",  "credits_earned": 3.0, "credits": 3.0, "course_title": "The Sea Around Us",                          "term": "SP 2025", "status": "done"},
+        {"course_code": "METEO 3",   "grade": "A-", "credits_earned": 3.0, "credits": 3.0, "course_title": "Introductory Meteorology",                   "term": "SP 2025", "status": "done"},
+        {"course_code": "MGMT 301",  "grade": "A-", "credits_earned": 3.0, "credits": 3.0, "course_title": "Basic Management Concepts",                  "term": "SP 2025", "status": "done"},
+        {"course_code": "SCM 200",   "grade": "B+", "credits_earned": 4.0, "credits": 4.0, "course_title": "Introduction to Statistics for Business",    "term": "SP 2025", "status": "done"},
         # SU 2025
-        {"course_code": "MATH 140",  "grade": "C",  "credits_earned": 4.0, "term": "SU 2025", "status": "done"},
+        {"course_code": "MATH 140",  "grade": "C",  "credits_earned": 4.0, "credits": 4.0, "course_title": "Calculus With Analytic Geometry I",          "term": "SU 2025", "status": "done"},
         # FA 2025
-        {"course_code": "ACCTG 211", "grade": "C",  "credits_earned": 4.0, "term": "FA 2025", "status": "done"},
-        {"course_code": "ECON 104",  "grade": "C",  "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
-        {"course_code": "MKTG 301",  "grade": "C",  "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
-        {"course_code": "MUSIC 11",  "grade": "B+", "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
-        {"course_code": "THEA 101",  "grade": "B-", "credits_earned": 3.0, "term": "FA 2025", "status": "done"},
+        {"course_code": "ACCTG 211", "grade": "C",  "credits_earned": 4.0, "credits": 4.0, "course_title": "Financial and Managerial Accounting",        "term": "FA 2025", "status": "done"},
+        {"course_code": "ECON 104",  "grade": "C",  "credits_earned": 3.0, "credits": 3.0, "course_title": "Introductory Macroeconomic Analysis",        "term": "FA 2025", "status": "done"},
+        {"course_code": "MKTG 301",  "grade": "C",  "credits_earned": 3.0, "credits": 3.0, "course_title": "Principles of Marketing",                    "term": "FA 2025", "status": "done"},
+        {"course_code": "MUSIC 11",  "grade": "B+", "credits_earned": 3.0, "credits": 3.0, "course_title": "Introduction to Western Music",              "term": "FA 2025", "status": "done"},
+        {"course_code": "THEA 101",  "grade": "B-", "credits_earned": 3.0, "credits": 3.0, "course_title": "Introduction to Theatre",                    "term": "FA 2025", "status": "done"},
         # SP 2026 (in progress)
-        {"course_code": "CAMS 45",   "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
-        {"course_code": "CMPSC 131", "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
-        {"course_code": "HM 208",    "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
-        {"course_code": "KINES 11",  "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
-        {"course_code": "SOC 119",   "grade": "",   "credits_earned": 0.0, "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "CAMS 45",   "grade": "",   "credits_earned": 0.0, "credits": 3.0, "course_title": "The Ancient Mediterranean World",            "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "CMPSC 131", "grade": "",   "credits_earned": 0.0, "credits": 3.0, "course_title": "Programming and Computation I",              "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "HM 208",    "grade": "",   "credits_earned": 0.0, "credits": 3.0, "course_title": "Introduction to the Hospitality Industry",   "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "KINES 11",  "grade": "",   "credits_earned": 0.0, "credits": 1.5, "course_title": "Fitness and Wellness",                       "term": "SP 2026", "status": "in_progress"},
+        {"course_code": "SOC 119",   "grade": "",   "credits_earned": 0.0, "credits": 3.0, "course_title": "Race, Ethnicity, and Culture",              "term": "SP 2026", "status": "in_progress"},
     ]
     return courses
 
@@ -88,6 +88,8 @@ def seed_courses(courses):
                 "course_code":    c["course_code"],
                 "grade":          c.get("grade", ""),
                 "credits_earned": Decimal(str(c.get("credits_earned", 0))),
+                "credits":        Decimal(str(c.get("credits", c.get("credits_earned", 0)) or 0)),
+                "course_title":   c.get("course_title", ""),
                 "term":           c.get("term", ""),
                 "status":         c.get("status", "done"),
                 "is_writing":     bool(c.get("is_writing")),

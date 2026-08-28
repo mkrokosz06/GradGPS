@@ -149,7 +149,8 @@ def get_transcript(user_id: str = Depends(get_user_id)):
                 {
                     "course_code":    c.get("course_code", ""),
                     "grade":          c.get("grade", ""),
-                    "credits_earned": float(c.get("credits_earned", 0)),
+                    "credits_earned": _display_credits(c),
+                    "course_title":   c.get("course_title", ""),
                     "status":         c.get("status", "done"),
                     "source":         c.get("source", "parsed"),
                 }
@@ -335,6 +336,8 @@ async def upload_transcript(
                 "course_code":    c["course_code"],
                 "grade":          c.get("grade", ""),
                 "credits_earned": Decimal(str(c.get("credits_earned", 0))),
+                "credits":        Decimal(str(c.get("credits", c.get("credits_earned", 0)) or 0)),
+                "course_title":   c.get("course_title", ""),
                 "term":           c.get("term", ""),
                 "status":         c.get("status", "done"),
                 "is_writing":     bool(c.get("is_writing")),
@@ -398,12 +401,22 @@ def _get_course(user_id: str, course_code: str) -> dict | None:
     return resp.get("Item")
 
 
+def _display_credits(c: dict) -> float:
+    """Credits to show on a card: earned for graded courses, attempted (the
+    `credits` field) for in-progress ones whose earned is still 0."""
+    earned = float(c.get("credits_earned", 0) or 0)
+    if earned == 0 and c.get("status") == "in_progress":
+        return float(c.get("credits", 0) or 0)
+    return earned
+
+
 def _course_view(item: dict) -> dict:
     """Client-facing shape, matching the rows GET /transcript returns."""
     return {
         "course_code":    item.get("course_code", ""),
         "grade":          item.get("grade", ""),
-        "credits_earned": float(item.get("credits_earned", 0)),
+        "credits_earned": _display_credits(item),
+        "course_title":   item.get("course_title", ""),
         "status":         item.get("status", "in_progress"),
         "term":           item.get("term", ""),
         "source":         item.get("source", "parsed"),
@@ -435,6 +448,8 @@ def add_course(body: CourseAdd, user_id: str = Depends(get_user_id)):
         "course_code":    course_code,
         "grade":          "",
         "credits_earned": credits,
+        "credits":        credits,
+        "course_title":   "",
         "term":           body.term.strip(),
         "status":         "in_progress",
         "is_writing":     is_writing,
@@ -469,6 +484,8 @@ def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
         "course_code":    new_code,
         "grade":          "",
         "credits_earned": credits,
+        "credits":        credits,
+        "course_title":   "",
         "term":           existing.get("term", ""),
         "status":         "in_progress",
         "is_writing":     is_writing,

@@ -380,6 +380,15 @@ def _display_credits(c: dict) -> float:
     return float(c.get("credits", 3) or 3)
 
 
+def _past_display_credits(c: dict) -> float:
+    """Credit count to show on a completed/current transcript card: earned for
+    graded courses, attempted (`credits`) for in-progress ones (earned still 0)."""
+    earned = float(c.get("credits_earned", 0) or 0)
+    if earned == 0 and c.get("status") == "in_progress":
+        return float(c.get("credits", 0) or 0)
+    return earned
+
+
 def _expand_pool(entry: dict) -> list[dict]:
     """Split a pool entry into ~3-credit placeholder slots the packer can spread
     across semesters.  Non-pool entries pass through unchanged (single-item list).
@@ -943,7 +952,8 @@ def get_timeline(user_id: str = Depends(get_user_id)):
                 {
                     "course_code":    c.get("course_code", ""),
                     "grade":          c.get("grade", ""),
-                    "credits_earned": float(c.get("credits_earned", 0)),
+                    "credits_earned": _past_display_credits(c),
+                    "course_title":   c.get("course_title", ""),
                     "status":         c.get("status", "done"),
                 }
                 for c in courses

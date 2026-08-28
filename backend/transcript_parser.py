@@ -45,12 +45,12 @@ logging.getLogger("pdfplumber").setLevel(logging.WARNING)
 # (AP, ACE, ...) as an XFR placeholder "number" carrying the gen-ed attribute
 # letters it fulfils (XFRGH = GH credits) — real credits that must be counted.
 COURSE_PATTERN = re.compile(
-    r"^([A-Z]{2,6})\s+"           # dept code (EDSGN, CMPSC, FRNSC...)
-    r"(\d{1,3}[A-Z]{0,2}|XFR[A-Z]{0,4})\s+"  # course number (131, 415W, 100B) or XFR placeholder
-    r".+?"                         # description — non-greedy, any chars
-    r"\s+(\d+\.\d{3})"            # attempted credits  e.g. 3.000
-    r"\s+(\d+\.\d{3})"            # earned credits     e.g. 3.000  (0.000 if not done)
-    r"(?:\s+([A-DF][+-]?|TR))?"   # grade: A B+ C- D F TR — optional (absent if in-progress)
+    r"^(?P<dept>[A-Z]{2,6})\s+"           # dept code (EDSGN, CMPSC, FRNSC...)
+    r"(?P<number>\d{1,3}[A-Z]{0,2}|XFR[A-Z]{0,4})\s+"  # course number (131, 415W, 100B) or XFR placeholder
+    r"(?P<title>.+?)"              # course title/description — non-greedy, any chars
+    r"\s+(?P<attempted>\d+\.\d{3})"  # attempted credits  e.g. 3.000
+    r"\s+(?P<earned>\d+\.\d{3})"     # earned credits     e.g. 3.000  (0.000 if not done)
+    r"(?:\s+(?P<grade>[A-DF][+-]?|TR))?"  # grade: A B+ C- D F TR — optional (absent if in-progress)
     r"\s+[\d.]+$",                 # quality points (last column)
     re.MULTILINE
 )
@@ -104,7 +104,7 @@ def _normalise_term(match: re.Match) -> str:
 
 
 def _make_entry(dept: str, number: str, attempted: float, earned: float,
-                grade: str, term: str) -> dict | None:
+                grade: str, term: str, title: str = "") -> dict | None:
     """
     Build a course entry dict from parsed fields, or None if the row should be
     skipped (failed/forgiven, or no attempted credits). Shared by both parsers.
@@ -130,6 +130,10 @@ def _make_entry(dept: str, number: str, attempted: float, earned: float,
         "raw_code":       raw_code,
         "grade":          grade,
         "credits_earned": earned,
+        # Attempted credits — kept alongside earned so in-progress courses (earned
+        # == 0, no grade yet) still carry a credit count the UI can show.
+        "credits":        attempted,
+        "course_title":   " ".join((title or "").split()),
         "term":           term,
         "status":         status,
         # Writing Across the Curriculum designation: a W/M/X/Y suffix on the
@@ -162,6 +166,10 @@ def _accumulate(courses: list[dict], seen: dict[str, int], entry: dict) -> None:
             entry["credits_earned"] = (
                 float(entry.get("credits_earned", 0))
                 + float(existing.get("credits_earned", 0))
+            )
+            entry["credits"] = (
+                float(entry.get("credits", 0))
+                + float(existing.get("credits", 0))
             )
             courses[seen[norm_code]] = entry
         elif _STATUS_PRIORITY[entry["status"]] >= _STATUS_PRIORITY[existing["status"]]:
@@ -217,9 +225,10 @@ def parse_transcript(pdf_bytes: bytes, *, pages_text: list[str] | None = None) -
             continue
 
         entry = _make_entry(
-            dept=m.group(1), number=m.group(2),
-            attempted=float(m.group(3)), earned=float(m.group(4)),
-            grade=(m.group(5) or "").strip(), term=current_term,
+            dept=m.group("dept"), number=m.group("number"),
+            attempted=float(m.group("attempted")), earned=float(m.group("earned")),
+            grade=(m.group("grade") or "").strip(), term=current_term,
+            title=m.group("title"),
         )
         if entry is not None:
             _accumulate(courses, seen, entry)
@@ -290,9 +299,10 @@ def parse_official_transcript(pdf_bytes: bytes) -> list[dict]:
                         continue
 
                     entry = _make_entry(
-                        dept=m.group(1), number=m.group(2),
-                        attempted=float(m.group(3)), earned=float(m.group(4)),
-                        grade=(m.group(5) or "").strip(), term=current_term,
+                        dept=m.group("dept"), number=m.group("number"),
+                        attempted=float(m.group("attempted")), earned=float(m.group("earned")),
+                        grade=(m.group("grade") or "").strip(), term=current_term,
+                        title=m.group("title"),
                     )
                     if entry is not None:
                         _accumulate(courses, seen, entry)
