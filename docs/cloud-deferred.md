@@ -63,7 +63,9 @@ reseed (including the 20–40 min RMP rebuild). Real DynamoDB + S3 made that dis
 - ✅ **Token refresh / sessions — SHIPPED.** `POST /auth/session` exchanges the OIDC ID token for an
   opaque `sess_*` token (sessions table, DynamoDB TTL, 30-day sliding expiry); mobile stores it; the
   ~1 h logout is fixed. Verified live in prod.
-- ⬜ **Apple Sign In** still pending — needs a dev build + Apple Developer Program (TestFlight).
+- ✅ **Apple Sign In — SHIPPED.** `expo-apple-authentication` in `signup.tsx`, backend verifies Apple
+  ID tokens in `auth.py` (`apple:<sub>`). Native Apple button renders on iOS builds (dev/TestFlight/App
+  Store) where the module is available, not Expo Go/web. Name captured on first authorization only.
   Real Google auth on device also needs a dev build (Expo Go can't do the OAuth proxy).
 
 ## 4. 🟡 Always-on backend unlocks
