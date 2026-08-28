@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
-  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert,
+  StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
@@ -220,7 +220,15 @@ export default function SignupScreen() {
                   >
                     {googleLoading
                       ? <ActivityIndicator color="#0f172a" />
-                      : <Text style={styles.googleBtnText}>Continue with Google</Text>}
+                      : (
+                        <View style={styles.googleBtnInner}>
+                          <Image
+                            source={require("../../assets/google-logo.png")}
+                            style={styles.googleLogo}
+                          />
+                          <Text style={styles.googleBtnText}>Continue with Google</Text>
+                        </View>
+                      )}
                   </TouchableOpacity>
                 )}
               </View>
@@ -339,6 +347,8 @@ const styles = StyleSheet.create({
     paddingVertical: 16, alignItems: "center", backgroundColor: "#ffffff",
     height: 54, justifyContent: "center",
   },
+  googleBtnInner: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 12 },
+  googleLogo: { width: 20, height: 20, resizeMode: "contain" },
   googleBtnText: { color: "#0f172a", fontSize: 16, fontWeight: "700" },
   dividerRow:  { flexDirection: "row", alignItems: "center", gap: 12, marginVertical: 24 },
   dividerLine: { flex: 1, height: 1, backgroundColor: "#e2e8f0" },
