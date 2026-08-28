@@ -461,7 +461,7 @@ function CourseRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (cours
           {course.pinned ? <Text className="text-xs mr-1">📌</Text> : null}
           <Text className={`text-sm font-semibold ${config.textColor}`}>{course.course_code}</Text>
           {course.course_title ? (
-            <Text className="text-gray-400 text-xs ml-2 flex-1" numberOfLines={1}>{course.course_title}</Text>
+            <Text className={`text-xs ml-1.5 flex-1 ${config.textColor}`} numberOfLines={1}>{`- ${course.course_title}`}</Text>
           ) : null}
         </View>
         <Text className="text-gray-500 text-xs mt-0.5">Tap for ratings ›</Text>

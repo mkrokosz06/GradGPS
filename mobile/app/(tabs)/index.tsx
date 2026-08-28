@@ -251,8 +251,8 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
             {course.course_code}
           </Text>
           {course.course_title ? (
-            <Text style={{ color: "#64748b", fontSize: 12, marginLeft: 8, flex: 1 }} numberOfLines={1}>
-              {course.course_title}
+            <Text style={{ color: "#1a3a6b", fontSize: 12, marginLeft: 6, flex: 1 }} numberOfLines={1}>
+              {`- ${course.course_title}`}
             </Text>
           ) : null}
         </View>
