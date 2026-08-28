@@ -7,7 +7,7 @@ the remaining degree requirements.
 
 import math
 import re
-from collections import defaultdict
+from collections import Counter, defaultdict
 
 from fastapi import APIRouter, HTTPException, Depends
 from boto3.dynamodb.conditions import Key
@@ -394,12 +394,16 @@ _catalog_title_map: dict[str, str] | None = None
 
 def _catalog_titles() -> dict[str, str]:
     """course_code -> official title, from one cached scan of the requirements
-    table across all programs. A major's own rows sometimes lack a title (e.g. the
-    ETI junk rows), so prefer the best (longest non-empty) title seen anywhere."""
+    table across all programs. A code appears in many programs, and scraper
+    artifacts give a few of them garbage titles (e.g. IST 495 as ', 295A , or
+    295B *'), so pick the title the MOST programs agree on — a majority vote is
+    robust to those one-off junk titles in a way the old longest-wins heuristic
+    wasn't. Ties break toward the longer title. Titles with no letters ('*7')
+    and pure-digit titles (ETI junk rows) are dropped before voting."""
     global _catalog_title_map
     if _catalog_title_map is not None:
         return _catalog_title_map
-    m: dict[str, str] = {}
+    counts: dict[str, Counter] = defaultdict(Counter)
     scan_kwargs: dict = {"ProjectionExpression": "course_code, course_title"}
     while True:
         resp = requirements_table.scan(**scan_kwargs)
@@ -408,12 +412,17 @@ def _catalog_titles() -> dict[str, str]:
             title = (it.get("course_title") or "").strip()
             if not code or not title or title.isdigit():
                 continue
-            if code not in m or len(title) > len(m[code]):
-                m[code] = title
+            if not any(ch.isalpha() for ch in title):   # e.g. '*7'
+                continue
+            counts[code][title] += 1
         last = resp.get("LastEvaluatedKey")
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
+    m: dict[str, str] = {}
+    for code, ctr in counts.items():
+        # Most-agreed title wins; on a tie, prefer the longer one.
+        m[code] = max(ctr.items(), key=lambda kv: (kv[1], len(kv[0])))[0]
     _catalog_title_map = m
     return m
 
