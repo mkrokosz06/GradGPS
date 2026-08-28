@@ -250,12 +250,12 @@ function RegistrationCourseRow({ course, onEdit }: { course: TimelineCourse; onE
           <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
             {course.course_code}
           </Text>
+          {course.course_title ? (
+            <Text style={{ color: "#64748b", fontSize: 12, marginLeft: 8, flex: 1 }} numberOfLines={1}>
+              {course.course_title}
+            </Text>
+          ) : null}
         </View>
-        {course.course_title ? (
-          <Text style={{ color: "#64748b", fontSize: 12, marginTop: 2 }} numberOfLines={1}>
-            {course.course_title}
-          </Text>
-        ) : null}
       </View>
 
       <View style={{ alignItems: "flex-end", gap: 6, marginLeft: 10 }}>
