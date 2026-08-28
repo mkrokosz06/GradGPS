@@ -6,6 +6,10 @@ import {
   ActivityIndicator,
   Alert,
   ScrollView,
+  Modal,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as DocumentPicker from "expo-document-picker";
@@ -17,9 +21,13 @@ import {
   uploadTranscript,
   getTranscript,
   deleteTranscript,
+  addCourse,
+  swapCourse,
+  dropCourse,
   isOfficialAckError,
   type UploadResult,
   type TranscriptData,
+  type TranscriptCourse,
 } from "../../services/transcriptService";
 
 export default function UploadScreen() {
@@ -32,6 +40,85 @@ export default function UploadScreen() {
   const [deleting,   setDeleting]   = useState(false);
   const [result,     setResult]     = useState<UploadResult | null>(null);
   const [status,     setStatus]     = useState("Reading transcript…");
+
+  // Manual class editing (in-progress courses only)
+  type EditState = {
+    mode: "add" | "swap";
+    term: string;
+    originalCode?: string;
+    code: string;
+    credits: string;
+  };
+  const [edit,   setEdit]   = useState<EditState | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  async function refreshTranscript() {
+    try {
+      setTranscript(await getTranscript(userId!));
+    } catch {
+      /* leave the current view in place on a transient fetch error */
+    }
+  }
+
+  function openAdd(term: string) {
+    setEdit({ mode: "add", term, code: "", credits: "3" });
+  }
+
+  function openSwap(course: TranscriptCourse, term: string) {
+    setEdit({
+      mode: "swap",
+      term,
+      originalCode: course.course_code,
+      code: course.course_code,
+      credits: String(course.credits_earned),
+    });
+  }
+
+  async function saveEdit() {
+    if (!edit) return;
+    const code = edit.code.trim();
+    if (!code) { Alert.alert("Add a class", "Enter a course code, e.g. ETI 297."); return; }
+    const credits = parseFloat(edit.credits);
+    if (isNaN(credits) || credits <= 0) { Alert.alert("Add a class", "Enter valid credits (e.g. 3)."); return; }
+
+    setSaving(true);
+    try {
+      if (edit.mode === "add") {
+        await addCourse(userId!, code, edit.term, credits);
+      } else {
+        await swapCourse(userId!, edit.originalCode!, code, credits);
+      }
+      setEdit(null);
+      await refreshTranscript();
+    } catch (e: any) {
+      const detail = e?.response?.data?.detail;
+      Alert.alert("Couldn't save", typeof detail === "string" ? detail : "Something went wrong.");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function confirmDrop(course: TranscriptCourse) {
+    Alert.alert(
+      "Drop this class?",
+      `Remove ${course.course_code} from your in-progress semester? This updates your audit and timeline.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Drop", style: "destructive",
+          onPress: async () => {
+            try {
+              await dropCourse(userId!, course.course_code);
+              await refreshTranscript();
+            } catch (e: any) {
+              const detail = e?.response?.data?.detail;
+              Alert.alert("Couldn't drop", typeof detail === "string" ? detail : "Something went wrong.");
+            }
+          },
+        },
+      ],
+    );
+  }
 
   // Fetch transcript state whenever screen comes into focus
   useFocusEffect(useCallback(() => {
@@ -149,7 +236,11 @@ export default function UploadScreen() {
           </View>
 
           {/* Course list by term */}
-          {transcript.terms.map((termGroup) => (
+          {transcript.terms.map((termGroup) => {
+            // Only the in-progress semester is editable — a student can change
+            // classes they're registered for, not rewrite graded history.
+            const editable = termGroup.courses.some((c) => c.status === "in_progress");
+            return (
             <View key={termGroup.term} style={{ marginBottom: 20 }}>
               <Text style={{
                 color: "#94a3b8", fontSize: 11, fontWeight: "700",
@@ -162,7 +253,9 @@ export default function UploadScreen() {
                 borderWidth: 1, borderColor: "#f1f5f9",
                 overflow: "hidden",
               }}>
-                {termGroup.courses.map((course, i) => (
+                {termGroup.courses.map((course, i) => {
+                  const canEdit = editable && course.status === "in_progress";
+                  return (
                   <View
                     key={course.course_code}
                     style={{
@@ -172,24 +265,59 @@ export default function UploadScreen() {
                       borderBottomColor: "#f8fafc",
                     }}
                   >
-                    <View style={{ flex: 1 }}>
+                    <View style={{ flex: 1, flexDirection: "row", alignItems: "center", gap: 8 }}>
                       <Text style={{ color: "#1a3a6b", fontSize: 14, fontWeight: "700" }}>
                         {course.course_code}
                       </Text>
+                      {course.source === "manual" && (
+                        <Text style={{ color: "#2a5298", fontSize: 9, fontWeight: "800", letterSpacing: 0.5 }}>
+                          EDITED
+                        </Text>
+                      )}
                     </View>
-                    <View style={{ alignItems: "flex-end", gap: 2 }}>
-                      <Text style={{ color: "#374151", fontSize: 13, fontWeight: "600" }}>
-                        {course.grade || "—"}
-                      </Text>
-                      <Text style={{ color: "#94a3b8", fontSize: 11 }}>
-                        {course.credits_earned} cr
-                      </Text>
-                    </View>
+                    {canEdit ? (
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+                        <Text style={{ color: "#94a3b8", fontSize: 11 }}>
+                          {course.credits_earned} cr
+                        </Text>
+                        <TouchableOpacity onPress={() => openSwap(course, termGroup.term)} hitSlop={8}>
+                          <Text style={{ color: "#2a5298", fontSize: 13, fontWeight: "700" }}>Swap</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => confirmDrop(course)} hitSlop={8}>
+                          <Text style={{ color: "#e11d48", fontSize: 16, fontWeight: "700" }}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    ) : (
+                      <View style={{ alignItems: "flex-end", gap: 2 }}>
+                        <Text style={{ color: "#374151", fontSize: 13, fontWeight: "600" }}>
+                          {course.grade || "—"}
+                        </Text>
+                        <Text style={{ color: "#94a3b8", fontSize: 11 }}>
+                          {course.credits_earned} cr
+                        </Text>
+                      </View>
+                    )}
                   </View>
-                ))}
+                  );
+                })}
+                {editable && (
+                  <TouchableOpacity
+                    onPress={() => openAdd(termGroup.term)}
+                    style={{
+                      paddingVertical: 12, paddingHorizontal: 16,
+                      borderTopWidth: termGroup.courses.length > 0 ? 1 : 0,
+                      borderTopColor: "#f1f5f9",
+                    }}
+                  >
+                    <Text style={{ color: "#2a5298", fontSize: 13, fontWeight: "700" }}>
+                      + Add a class
+                    </Text>
+                  </TouchableOpacity>
+                )}
               </View>
             </View>
-          ))}
+            );
+          })}
 
           {/* Replace / Delete actions */}
           <View style={{ gap: 12, marginTop: 8 }}>
@@ -227,6 +355,88 @@ export default function UploadScreen() {
             </TouchableOpacity>
           </View>
         </ScrollView>
+
+        {/* Add / swap class modal */}
+        <Modal
+          visible={edit !== null}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setEdit(null)}
+        >
+          <KeyboardAvoidingView
+            behavior={Platform.OS === "ios" ? "padding" : undefined}
+            style={{ flex: 1, justifyContent: "center", backgroundColor: "rgba(0,0,0,0.4)" }}
+          >
+            <View style={{
+              marginHorizontal: 28, backgroundColor: "#ffffff",
+              borderRadius: 20, padding: 22,
+            }}>
+              <Text style={{ color: "#1a3a6b", fontSize: 18, fontWeight: "900", marginBottom: 4 }}>
+                {edit?.mode === "add" ? "Add a class" : "Swap class"}
+              </Text>
+              <Text style={{ color: "#94a3b8", fontSize: 12, marginBottom: 18 }}>
+                {edit ? termLabelFor(transcript, edit.term) : ""} · in progress
+              </Text>
+
+              <Text style={{ color: "#64748b", fontSize: 11, fontWeight: "700", marginBottom: 6 }}>
+                COURSE CODE
+              </Text>
+              <TextInput
+                value={edit?.code ?? ""}
+                onChangeText={(t) => setEdit((e) => (e ? { ...e, code: t } : e))}
+                placeholder="e.g. ETI 297"
+                autoCapitalize="characters"
+                autoCorrect={false}
+                style={{
+                  borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 12,
+                  paddingHorizontal: 14, paddingVertical: 12, fontSize: 15,
+                  color: "#1a3a6b", marginBottom: 16,
+                }}
+              />
+
+              <Text style={{ color: "#64748b", fontSize: 11, fontWeight: "700", marginBottom: 6 }}>
+                CREDITS
+              </Text>
+              <TextInput
+                value={edit?.credits ?? ""}
+                onChangeText={(t) => setEdit((e) => (e ? { ...e, credits: t } : e))}
+                placeholder="3"
+                keyboardType="numeric"
+                style={{
+                  borderWidth: 1, borderColor: "#e2e8f0", borderRadius: 12,
+                  paddingHorizontal: 14, paddingVertical: 12, fontSize: 15,
+                  color: "#1a3a6b", marginBottom: 22,
+                }}
+              />
+
+              <View style={{ flexDirection: "row", gap: 12 }}>
+                <TouchableOpacity
+                  onPress={() => setEdit(null)}
+                  disabled={saving}
+                  style={{
+                    flex: 1, paddingVertical: 13, borderRadius: 12,
+                    alignItems: "center", backgroundColor: "#f1f5f9",
+                  }}
+                >
+                  <Text style={{ color: "#64748b", fontSize: 14, fontWeight: "700" }}>Cancel</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={saveEdit}
+                  disabled={saving}
+                  style={{
+                    flex: 1, paddingVertical: 13, borderRadius: 12,
+                    alignItems: "center", backgroundColor: "#1a3a6b",
+                  }}
+                >
+                  {saving
+                    ? <ActivityIndicator color="#ffffff" size="small" />
+                    : <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>Save</Text>}
+                </TouchableOpacity>
+              </View>
+            </View>
+          </KeyboardAvoidingView>
+        </Modal>
+
         <LoadingOverlay visible={uploading} label={status} />
       </SafeAreaView>
     );
@@ -325,6 +535,10 @@ export default function UploadScreen() {
       <LoadingOverlay visible={uploading} label={status} />
     </SafeAreaView>
   );
+}
+
+function termLabelFor(transcript: TranscriptData | null, term: string): string {
+  return transcript?.terms.find((t) => t.term === term)?.label ?? term;
 }
 
 function StatBox({ label, value, color }: { label: string; value: number; color: string }) {

@@ -15,6 +15,16 @@ export type TranscriptCourse = {
   grade:          string;
   credits_earned: number;
   status:         string;
+  source?:        string;   // "parsed" | "manual" — manual = student-added/edited
+};
+
+export type EditedCourse = {
+  course_code:    string;
+  grade:          string;
+  credits_earned: number;
+  status:         string;
+  term:           string;
+  source:         string;
 };
 
 export type TranscriptTerm = {
@@ -62,6 +72,44 @@ export async function getTranscript(userId: string): Promise<TranscriptData> {
 
 export async function deleteTranscript(userId: string): Promise<void> {
   await api.delete("/transcript", {
+    headers: { "x-user-id": userId },
+  });
+}
+
+/** Add a class the student registered for (stored as an in-progress course). */
+export async function addCourse(
+  userId:  string,
+  courseCode: string,
+  term:    string,
+  credits: number,
+): Promise<EditedCourse> {
+  const res = await api.post<{ course: EditedCourse }>(
+    "/transcript/course",
+    { course_code: courseCode, term, credits_earned: credits },
+    { headers: { "x-user-id": userId } },
+  );
+  return res.data.course;
+}
+
+/** Swap an in-progress class for another (optionally changing credits). */
+export async function swapCourse(
+  userId:       string,
+  originalCode: string,
+  newCode:      string,
+  credits?:     number,
+): Promise<EditedCourse> {
+  const res = await api.patch<{ course: EditedCourse }>(
+    "/transcript/course",
+    { original_code: originalCode, course_code: newCode, credits_earned: credits },
+    { headers: { "x-user-id": userId } },
+  );
+  return res.data.course;
+}
+
+/** Drop an in-progress class from the transcript. */
+export async function dropCourse(userId: string, courseCode: string): Promise<void> {
+  await api.delete("/transcript/course", {
+    params: { course_code: courseCode },
     headers: { "x-user-id": userId },
   });
 }

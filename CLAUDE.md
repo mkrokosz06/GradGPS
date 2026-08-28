@@ -108,7 +108,7 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 |--------|--------|---------|
 | `audit.py` | `/audit` | Degree audit + subplan detection |
 | `timeline.py` | `/timeline` | Academic timeline (past + future semesters) |
-| `transcript.py` | `/transcript` | PDF upload, parse, store |
+| `transcript.py` | `/transcript` | PDF upload, parse, store + manual class editing (`POST`/`PATCH`/`DELETE /transcript/course`) |
 | `programs.py` | `/programs` | Major search/select |
 | `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
 | `users.py` | `/users` | User profile + `DELETE /users/me` account deletion (PDF, courses, profile, sessions) |
@@ -199,6 +199,24 @@ For University Park majors with a published PSU bulletin plan, the timeline refl
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
 **University Park scoping.** `is_up_program()` in `routers/programs.py` is the single authoritative definition of "a UP program" — a **denylist** of non-UP campus keywords (fail-safe: a re-scrape can't silently leak a campus we forgot to allowlist). SAP templates are UP-only.
+
+### Manual class editing (transcript course CRUD)
+Students who registered classes in summer sometimes swap one before the term starts — not worth
+re-uploading a whole transcript. `POST`/`PATCH`/`DELETE /transcript/course` (in `routers/transcript.py`)
+add/swap/drop individual `transcript_courses` rows. Because the audit (`audit.py`) and timeline
+(`timeline.py`) query that table **live** every request, an edit flows through to the audit, timeline,
+home dashboard, and gen-ed check with no extra wiring.
+- **Edit scope: in-progress only.** Endpoints refuse any row whose `status != "in_progress"`
+  (`_EDITABLE_STATUSES`) — graded/transfer history stays read-only so students can't fabricate grades.
+  Added courses are stored `status="in_progress"`, `grade=""`, `source="manual"`.
+- **Consistency with the parser.** `_clean_course_code()` reuses `transcript_parser._normalise_code`
+  and the `[WMXY]$` writing-suffix rule, so a hand-typed `IST 440W` stores identically to a parsed one
+  (`course_code="IST 440"`, `is_writing=True`). Section letters (`CAS 100A`) are preserved.
+- **Re-upload wipes manual edits** — the upload path deletes all rows first, which is correct: a fresh
+  transcript is the new source of truth. `source="manual"` is surfaced in `GET /transcript` (an "EDITED"
+  badge in the mobile UI) and future-proofs a "reset to uploaded" affordance.
+- **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
+  class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
 
 ### Auth (dev vs prod)
 - **Real auth**: Google/Apple OIDC ID tokens, verified in `backend/auth.py` (JWKS signature, aud, iss, exp). Canonical `user_id` = provider-scoped sub (`google:<sub>` / `apple:<sub>`). Client IDs in `backend/.env` (`GOOGLE_CLIENT_IDS`, `APPLE_CLIENT_IDS`). Mobile: `expo-auth-session` in `signup.tsx` → `signInWithIdToken()` in `AuthContext` → token in SecureStore (AsyncStorage on web) → axios interceptor sends `Authorization: Bearer`.

@@ -6,13 +6,17 @@ Transcript endpoints:
 """
 
 import os
+import re
 import asyncio
 import logging
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request, Form, Query
+from pydantic import BaseModel
 from decimal import Decimal
 
 from db import transcript_table, users_table, get_s3
-from transcript_parser import detect_kind, parse_with_detection, official_parse_looks_bad
+from transcript_parser import (
+    detect_kind, parse_with_detection, official_parse_looks_bad, _normalise_code,
+)
 from deps import get_user_id
 
 router = APIRouter()
@@ -35,6 +39,48 @@ OFFICIAL_DETECT = os.getenv("OFFICIAL_DETECT", "0") == "1"
 
 _SEASON_ORDER  = {"SP": 0, "SU": 1, "FA": 2}
 _SEASON_LABELS = {"SP": "Spring", "SU": "Summer", "FA": "Fall"}
+
+# Manual course editing (add / swap / drop) is limited to in-progress rows — a
+# student can change classes they're registered for but not rewrite graded
+# history. See the "edit scope" decision in CLAUDE.md / the timeline docs.
+_EDITABLE_STATUSES = {"in_progress"}
+_TERM_RE = re.compile(r"^(FA|SP|SU) \d{4}$")
+# DEPT NUMBER with an optional attribute-suffix letter (W/H/N/M/X/Y, e.g. IST 440W).
+_COURSE_CODE_RE = re.compile(r"^[A-Z]{1,6} [0-9]{1,4}[A-Z]?$")
+_MAX_COURSE_CREDITS = 12.0
+
+
+def _clean_course_code(raw: str) -> tuple[str, bool]:
+    """
+    Normalise a user-entered course code to storage form and derive its
+    writing-intensive flag, matching the transcript parser exactly:
+      - collapse/upcase to canonical "DEPT NUMBER"
+      - is_writing = a W/M/X/Y suffix on the number (captured before it's stripped)
+      - course_code = base code with a trailing W/H/N attribute letter removed
+
+    Returns (course_code, is_writing). Raises HTTPException(400) on a bad code.
+    """
+    code = re.sub(r"\s+", " ", (raw or "").strip().upper())
+    if not _COURSE_CODE_RE.match(code):
+        raise HTTPException(
+            status_code=400,
+            detail="Enter a course code like 'ETI 297' or 'IST 440W'.",
+        )
+    number = code.split(" ", 1)[1]
+    is_writing = bool(re.search(r"[WMXY]$", number))
+    return _normalise_code(code), is_writing
+
+
+class CourseAdd(BaseModel):
+    course_code:    str
+    term:           str
+    credits_earned: float = 3.0
+
+
+class CourseSwap(BaseModel):
+    original_code:  str
+    course_code:    str
+    credits_earned: float | None = None
 
 
 def _term_key(term: str) -> tuple:
@@ -105,6 +151,7 @@ def get_transcript(user_id: str = Depends(get_user_id)):
                     "grade":          c.get("grade", ""),
                     "credits_earned": float(c.get("credits_earned", 0)),
                     "status":         c.get("status", "done"),
+                    "source":         c.get("source", "parsed"),
                 }
                 for c in term_map[t]
             ],
@@ -337,3 +384,116 @@ async def upload_transcript(
             "Official transcripts are parsed best-effort - please double-check your course list."
         )
     return result
+
+
+# ── Manual course editing (in-progress / planned courses only) ─────────────────
+# Lets a student swap, drop, or add a class they're registered for without
+# re-uploading a whole transcript (e.g. switching a fall class over the summer).
+# The audit and timeline read transcript_courses live, so an edit here flows
+# through to every downstream view with no extra wiring. Graded/transfer history
+# stays read-only — only status="in_progress" rows can be touched.
+
+def _get_course(user_id: str, course_code: str) -> dict | None:
+    resp = transcript_table.get_item(Key={"user_id": user_id, "course_code": course_code})
+    return resp.get("Item")
+
+
+def _course_view(item: dict) -> dict:
+    """Client-facing shape, matching the rows GET /transcript returns."""
+    return {
+        "course_code":    item.get("course_code", ""),
+        "grade":          item.get("grade", ""),
+        "credits_earned": float(item.get("credits_earned", 0)),
+        "status":         item.get("status", "in_progress"),
+        "term":           item.get("term", ""),
+        "source":         item.get("source", "parsed"),
+    }
+
+
+def _validate_credits(credits: float) -> Decimal:
+    if credits is None or credits <= 0 or credits > _MAX_COURSE_CREDITS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Credits must be between 0 and {int(_MAX_COURSE_CREDITS)}.",
+        )
+    return Decimal(str(credits))
+
+
+@router.post("/course")
+def add_course(body: CourseAdd, user_id: str = Depends(get_user_id)):
+    """Add a class the student registered for (stored as in-progress + manual)."""
+    course_code, is_writing = _clean_course_code(body.course_code)
+    if not _TERM_RE.match((body.term or "").strip()):
+        raise HTTPException(status_code=400, detail="Invalid term (expected e.g. 'FA 2026').")
+    credits = _validate_credits(body.credits_earned)
+
+    if _get_course(user_id, course_code) is not None:
+        raise HTTPException(status_code=409, detail=f"{course_code} is already on your transcript.")
+
+    item = {
+        "user_id":        user_id,
+        "course_code":    course_code,
+        "grade":          "",
+        "credits_earned": credits,
+        "term":           body.term.strip(),
+        "status":         "in_progress",
+        "is_writing":     is_writing,
+        "source":         "manual",
+    }
+    transcript_table.put_item(Item=item)
+    return {"status": "ok", "course": _course_view(item)}
+
+
+@router.patch("/course")
+def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
+    """Swap an in-progress class for another (optionally changing its credits)."""
+    original_code, _ = _clean_course_code(body.original_code)
+    existing = _get_course(user_id, original_code)
+    if existing is None:
+        raise HTTPException(status_code=404, detail=f"{original_code} isn't on your transcript.")
+    if existing.get("status") not in _EDITABLE_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail="Only in-progress classes can be changed. Completed and transfer courses are read-only.",
+        )
+
+    new_code, is_writing = _clean_course_code(body.course_code)
+    credits = (
+        _validate_credits(body.credits_earned)
+        if body.credits_earned is not None
+        else Decimal(str(existing.get("credits_earned", 0)))
+    )
+
+    item = {
+        "user_id":        user_id,
+        "course_code":    new_code,
+        "grade":          "",
+        "credits_earned": credits,
+        "term":           existing.get("term", ""),
+        "status":         "in_progress",
+        "is_writing":     is_writing,
+        "source":         "manual",
+    }
+
+    if new_code != original_code:
+        if _get_course(user_id, new_code) is not None:
+            raise HTTPException(status_code=409, detail=f"{new_code} is already on your transcript.")
+        transcript_table.delete_item(Key={"user_id": user_id, "course_code": original_code})
+    transcript_table.put_item(Item=item)
+    return {"status": "ok", "course": _course_view(item)}
+
+
+@router.delete("/course")
+def drop_course(course_code: str = Query(...), user_id: str = Depends(get_user_id)):
+    """Drop an in-progress class from the transcript."""
+    code, _ = _clean_course_code(course_code)
+    existing = _get_course(user_id, code)
+    if existing is None:
+        raise HTTPException(status_code=404, detail=f"{code} isn't on your transcript.")
+    if existing.get("status") not in _EDITABLE_STATUSES:
+        raise HTTPException(
+            status_code=409,
+            detail="Only in-progress classes can be dropped. Completed and transfer courses are read-only.",
+        )
+    transcript_table.delete_item(Key={"user_id": user_id, "course_code": code})
+    return {"status": "ok", "course_code": code}
