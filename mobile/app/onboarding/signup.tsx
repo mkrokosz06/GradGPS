@@ -348,6 +348,11 @@ export default function SignupScreen() {
                   <Text style={styles.linkText}>Use a different email</Text>
                 </TouchableOpacity>
               </View>
+
+              <Text style={styles.junkNote}>
+                Don't see the email? Check your spam or junk folder — it can take a
+                minute to arrive.
+              </Text>
             </>
           )}
 
@@ -405,6 +410,7 @@ const styles = StyleSheet.create({
     color: "#0f172a", backgroundColor: "#f8fafc", fontWeight: "700",
   },
   codeActions: { flexDirection: "row", justifyContent: "space-between", marginTop: 20 },
+  junkNote:   { fontSize: 13, color: "#94a3b8", marginTop: 20, lineHeight: 19, textAlign: "center" },
   linkText:    { fontSize: 14, color: "#1a3a6b", fontWeight: "700" },
   legal: {
     marginTop: "auto", paddingTop: 28, fontSize: 12, color: "#cbd5e1",

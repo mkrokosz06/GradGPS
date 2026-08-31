@@ -24,9 +24,10 @@ from sessions import SESSION_PREFIX, resolve_session
 logger = logging.getLogger(__name__)
 
 # Google subs are numeric; Apple subs look like "001234.a1b2c3.0987"; our
-# prefix adds a colon; legacy dev ids use dashes. No slashes, no dots at the
-# start, nothing S3/URL-hostile.
-_USER_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:._-]{0,127}$")
+# prefix adds a colon; legacy dev ids use dashes; email ids are "email:<addr>"
+# so the address's "@" must be allowed. No slashes, no dots at the start,
+# nothing S3/URL-hostile.
+_USER_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:._@-]{0,127}$")
 
 
 def _dev_bypass_enabled() -> bool:
