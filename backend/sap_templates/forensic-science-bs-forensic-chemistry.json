@@ -184,8 +184,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective",
           "credits": 3.0
         }
       ]
@@ -221,8 +221,19 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Approved Supporting Course",
+          "codes": [
+            "BMB 428",
+            "CHEM 410",
+            "CHEM 412",
+            "CHEM 423W",
+            "CHEM 430",
+            "CHEM 431W",
+            "CHEM 450",
+            "CHEM 452"
+          ],
           "credits": 3.0
         },
         {
@@ -253,8 +264,19 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Approved Supporting Course",
+          "codes": [
+            "BMB 428",
+            "CHEM 410",
+            "CHEM 412",
+            "CHEM 423W",
+            "CHEM 430",
+            "CHEM 431W",
+            "CHEM 450",
+            "CHEM 452"
+          ],
           "credits": 3.0
         },
         {
@@ -263,8 +285,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective",
           "credits": 3.0
         }
       ]
@@ -285,8 +307,19 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Approved Supporting Course",
+          "codes": [
+            "BMB 428",
+            "CHEM 410",
+            "CHEM 412",
+            "CHEM 423W",
+            "CHEM 430",
+            "CHEM 431W",
+            "CHEM 450",
+            "CHEM 452"
+          ],
           "credits": 3.0
         },
         {
@@ -295,8 +328,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective",
           "credits": 3.0
         }
       ]
