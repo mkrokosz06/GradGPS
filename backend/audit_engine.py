@@ -40,18 +40,32 @@ _MANUAL_RENAME_PAIRS: list[tuple[str, str]] = [
     ("LA 83", "LA 283"),
 ]
 
-# ── First-Year Seminar interchangeability (PSU subject) ──────────────────────
+# ── First-Year Seminar interchangeability ────────────────────────────────────
 # PSU's First-Year Seminar requirement is satisfied by ANY 1-credit first-year
-# seminar; each college/campus numbers its own under the PSU subject (PSU 5
-# Berks, PSU 7 Behrend, PSU 15 Liberal Arts, PSU 16 Science, PSU 17 IST, …).
-# Bulletin SAP grids hard-code the home college's number (Science plans list
-# PSU 16), so a student who took a DIFFERENT campus's seminar — routine for 2+2
-# and change-of-campus students — was told to retake it, and the timeline
-# scheduled a phantom PSU 16.  Treat the whole PSU FYS family as mutually
-# equivalent so any one satisfies the slot (the requirement is "take one").
+# seminar (University policy is "take one"), but a bulletin SAP grid hard-codes
+# the home college's own number, so a student who took a DIFFERENT seminar is
+# told to retake it and the timeline schedules a phantom.
+#
+# Two families that we treat as one mutually-equivalent class:
+#   • PSU-subject campus/college seminars — each campus numbers its own (PSU 5
+#     Berks, PSU 7 Behrend, PSU 15 Liberal Arts, PSU 16 Science, PSU 17 IST, …);
+#     routine mismatch for 2+2 and change-of-campus students.
+#   • College of Engineering seminars — each engineering major lists its own
+#     (CHE 100 ChemE, BME 100 BME, AERSP 1 Aero, IE 100 IE, ME 101/102/190, …)
+#     plus the college-wide options (ENGR 100/180/192, ESC 120 "Design for
+#     Failure", EDSGN 11/13, PSU 12).  A ChemE transfer/change-of-major who took
+#     ESC 120 instead of CHE 100 was wrongly told to take CHE 100.
+# Codes are the authoritative bulletin First-Year Seminar list (EDSGN 100, the
+# 3-cr cornerstone design course, is NOT a seminar and is deliberately excluded).
 _FIRST_YEAR_SEMINARS = [
+    # PSU-subject campus/college seminars
     "PSU 1", "PSU 3", "PSU 5", "PSU 6", "PSU 7", "PSU 8", "PSU 9",
     "PSU 12", "PSU 14", "PSU 15", "PSU 16", "PSU 17", "PSU 18",
+    # College of Engineering seminars (bulletin First-Year Seminar course list)
+    "ENGR 100", "ENGR 180", "ENGR 192", "ESC 120",
+    "EDSGN 11", "EDSGN 13",
+    "AE 124", "AERSP 1", "BME 100", "CE 100S", "CHE 100",
+    "EE 9", "IE 100", "ME 101", "ME 102", "ME 190",
 ]
 _FIRST_YEAR_SEMINAR_PAIRS: list[tuple[str, str]] = [
     (a, b)

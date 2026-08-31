@@ -51,6 +51,20 @@ def test_equivalence_matching():
     assert is_taken("ETI 301", taken)
 
 
+def test_first_year_seminar_cross_family_equivalence():
+    # PSU's First-Year Seminar is "take one" — any first-year seminar satisfies a
+    # plan's specific seminar slot.  A ChemE student who took ESC 120 ("Design for
+    # Failure") instead of the plan's CHE 100 has satisfied it (Connor Jones beta
+    # report).  Engineering and PSU-subject seminars are one equivalence class.
+    taken = build_taken_set([{"course_code": "ESC 120", "status": "done"}])
+    assert is_taken("CHE 100", taken)      # engineering ↔ engineering
+    assert is_taken("PSU 16", taken)       # engineering ↔ PSU-subject
+    taken_psu = build_taken_set([{"course_code": "PSU 12", "status": "done"}])
+    assert is_taken("CHE 100", taken_psu)  # PSU-subject ↔ engineering
+    # EDSGN 100 is the 3-cr cornerstone design course, NOT a seminar — excluded.
+    assert not is_taken("EDSGN 100", taken)
+
+
 def test_transfer_counts_as_taken_missing_does_not():
     # Transfer credit counts — the audit engine treats it as done, and a
     # transferred course must not be re-scheduled by the timeline.
