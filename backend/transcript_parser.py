@@ -55,6 +55,23 @@ COURSE_PATTERN = re.compile(
     re.MULTILINE
 )
 
+# AP / test-credit granted-course line. In the "Test Credits" section, each award
+# renders as a header ("Advanced Placement ... 5.00"), a "Transferred to Term FA
+# 2024 as" line (which the term tracker picks up), then the *granted* PSU course:
+#   MATH 140 CALC ANLY GEOM I 4.000 TR
+# Unlike a normal row this has a SINGLE credit column and a TR grade with NO
+# earned/quality-points columns, so COURSE_PATTERN (which needs two credit columns
+# + points) never matches it and the AP credit is silently dropped. This pattern
+# catches exactly that shape (anchored on a trailing `TR`, so it can't collide with
+# normal transfer rows like "... 3.000 3.000 TR 0.000" which end in points).
+TEST_CREDIT_PATTERN = re.compile(
+    r"^(?P<dept>[A-Z]{2,6})\s+"
+    r"(?P<number>\d{1,3}[A-Z]{0,2}|XFR[A-Z]{0,4})\s+"
+    r"(?P<title>.+?)"
+    r"\s+(?P<credits>\d+\.\d{3})\s+TR$",
+    re.MULTILINE
+)
+
 # Grades that mean "failed / not completed" — don't count as done
 FAILING_GRADES = {"F", "W", "WN", "XF"}
 
@@ -157,11 +174,17 @@ def _accumulate(courses: list[dict], seen: dict[str, int], entry: dict) -> None:
     and is dropped before ever reaching here.
     """
     norm_code = entry["course_code"]
+    # Generic transfer placeholders (TRN XFRGEN, ENGL XFRGH, ...) are credit buckets,
+    # not real courses: a school can send several separate awards under the *same*
+    # placeholder code in the *same* term (Connor: 2+3+3 = 8 cr of general transfer
+    # credit). Those must sum, not collapse to one — so treat XFR placeholders as
+    # repeatable regardless of term.
+    is_xfr_placeholder = entry["raw_code"].split()[-1].upper().startswith("XFR")
     if norm_code in seen:
         existing = courses[seen[norm_code]]
         if (entry["status"] == existing["status"]
                 and entry["status"] in ("done", "transfer")
-                and entry.get("term") != existing.get("term")):
+                and (entry.get("term") != existing.get("term") or is_xfr_placeholder)):
             entry = dict(entry)
             entry["credits_earned"] = (
                 float(entry.get("credits_earned", 0))
@@ -221,17 +244,29 @@ def parse_transcript(pdf_bytes: bytes, *, pages_text: list[str] | None = None) -
             continue
 
         m = COURSE_PATTERN.match(line)
-        if not m:
+        if m:
+            entry = _make_entry(
+                dept=m.group("dept"), number=m.group("number"),
+                attempted=float(m.group("attempted")), earned=float(m.group("earned")),
+                grade=(m.group("grade") or "").strip(), term=current_term,
+                title=m.group("title"),
+            )
+            if entry is not None:
+                _accumulate(courses, seen, entry)
             continue
 
-        entry = _make_entry(
-            dept=m.group("dept"), number=m.group("number"),
-            attempted=float(m.group("attempted")), earned=float(m.group("earned")),
-            grade=(m.group("grade") or "").strip(), term=current_term,
-            title=m.group("title"),
-        )
-        if entry is not None:
-            _accumulate(courses, seen, entry)
+        # AP / test-credit granted course (single credit column + TR). Count the
+        # credit as both attempted and earned so it lands as a transfer credit.
+        tc = TEST_CREDIT_PATTERN.match(line)
+        if tc:
+            credits = float(tc.group("credits"))
+            entry = _make_entry(
+                dept=tc.group("dept"), number=tc.group("number"),
+                attempted=credits, earned=credits, grade="TR",
+                term=current_term, title=tc.group("title"),
+            )
+            if entry is not None:
+                _accumulate(courses, seen, entry)
 
     return courses
 
@@ -295,17 +330,28 @@ def parse_official_transcript(pdf_bytes: bytes) -> list[dict]:
                         # fall through in case the layout ever combines them.
 
                     m = COURSE_PATTERN.match(line)
-                    if not m:
+                    if m:
+                        entry = _make_entry(
+                            dept=m.group("dept"), number=m.group("number"),
+                            attempted=float(m.group("attempted")), earned=float(m.group("earned")),
+                            grade=(m.group("grade") or "").strip(), term=current_term,
+                            title=m.group("title"),
+                        )
+                        if entry is not None:
+                            _accumulate(courses, seen, entry)
                         continue
 
-                    entry = _make_entry(
-                        dept=m.group("dept"), number=m.group("number"),
-                        attempted=float(m.group("attempted")), earned=float(m.group("earned")),
-                        grade=(m.group("grade") or "").strip(), term=current_term,
-                        title=m.group("title"),
-                    )
-                    if entry is not None:
-                        _accumulate(courses, seen, entry)
+                    # AP / test-credit granted course (single credit column + TR).
+                    tc = TEST_CREDIT_PATTERN.match(line)
+                    if tc:
+                        credits = float(tc.group("credits"))
+                        entry = _make_entry(
+                            dept=tc.group("dept"), number=tc.group("number"),
+                            attempted=credits, earned=credits, grade="TR",
+                            term=current_term, title=tc.group("title"),
+                        )
+                        if entry is not None:
+                            _accumulate(courses, seen, entry)
 
     return courses
 

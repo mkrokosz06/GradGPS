@@ -50,6 +50,59 @@ NUTR XFRGHA Transfer Credit 3.000 3.000 TR 0.000
     assert by["NUTR XFRGHA"]["credits_earned"] == 3.0
 
 
+def test_generic_transfer_placeholder_sums_within_same_term():
+    # A school can send several separate general-transfer awards under the SAME
+    # placeholder code in the SAME term (real case: Ohio Univ, 2+3+3 = 8 cr).
+    # These are credit buckets, not a layout duplicate, so they must sum.
+    text = """
+Transfer Credit from Ohio Univ
+Spring 2026
+TRN XFRGEN TRN - General Transfer Credit 2.000 2.000 TR 0.000
+TRN XFRGEN TRN - General Transfer Credit 3.000 3.000 TR 0.000
+TRN XFRGEN TRN - General Transfer Credit 3.000 3.000 TR 0.000
+"""
+    courses = _parse(text)
+    assert len(courses) == 1
+    assert courses[0]["course_code"] == "TRN XFRGEN"
+    assert courses[0]["credits_earned"] == 8.0
+    assert courses[0]["status"] == "transfer"
+
+
+# ── AP / test credit (Test Credits section) ──────────────────────────────────
+
+def test_ap_test_credit_granted_course_is_parsed():
+    # AP/test credit renders the granted PSU course with a SINGLE credit column
+    # and a TR grade, no earned/quality-points columns. It must still be counted
+    # (as transfer credit), applied to the term it was transferred to.
+    text = """
+Test Credits
+Advanced Placement Mathematics: Calculus AB 01/01/2024 5.00
+Transferred to Term FA 2024 as
+MATH 140 CALC ANLY GEOM I 4.000 TR
+"""
+    courses = _parse(text)
+    assert len(courses) == 1
+    c = courses[0]
+    assert c["course_code"] == "MATH 140"
+    assert c["status"] == "transfer"
+    assert c["credits_earned"] == 4.0
+    assert c["term"] == "FA 2024"
+
+
+def test_normal_transfer_row_not_matched_as_test_credit():
+    # A full transfer row ends in quality points, not TR — it must parse via the
+    # normal path (both credit columns), not be mis-caught by the test-credit rule.
+    text = """
+Transfer Credit from Somewhere
+Spring 2026
+ART 1 Intro Vis Arts 3.000 3.000 TR 0.000
+"""
+    courses = _parse(text)
+    assert len(courses) == 1
+    assert courses[0]["course_code"] == "ART 1"
+    assert courses[0]["credits_earned"] == 3.0
+
+
 # ── repeatable courses (same code, different terms) ──────────────────────────
 
 def test_repeatable_course_credits_are_summed_across_terms():
