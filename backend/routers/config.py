@@ -1,29 +1,24 @@
 """
 App-config router — small public endpoint the mobile client polls at launch.
 
-Currently serves the version gate: the minimum app version allowed to run and
-the latest available version, both read from the environment so they can be
-bumped without a code deploy (App Runner env var change → restart).
+Serves the version gate: the minimum app version allowed to run, the latest
+available version, and where "Update" sends the user. Values resolve from a
+stored admin override (set live from the dashboard) → env var → fail-open
+default; see app_config.py. Fail-open defaults ("0.0.0") mean an unset gate
+never blocks or nags anyone.
 
-Defaults are fail-open ("0.0.0"): if nothing is set, no client is ever blocked
-or nagged. Set MIN_SUPPORTED_APP_VERSION / LATEST_APP_VERSION in prod to arm it.
+  - min_supported_version: below this, the app hard-blocks with an update screen.
+  - latest_version:        below this (but >= min), a dismissible "update" nudge.
+  - ios_update_url:        where "Update" sends the user (empty → TestFlight).
 """
 
-import os
-
 from fastapi import APIRouter
+
+from app_config import get_app_config
 
 router = APIRouter()
 
 
 @router.get("/app")
 def app_config():
-    return {
-        # Below this, the app hard-blocks with an update screen.
-        "min_supported_version": os.getenv("MIN_SUPPORTED_APP_VERSION", "0.0.0"),
-        # Below this (but >= min), the app shows a dismissible "update available" nudge.
-        "latest_version": os.getenv("LATEST_APP_VERSION", "0.0.0"),
-        # Where the "Update" button sends the user (TestFlight public link now,
-        # App Store URL later). Empty → the client falls back to opening TestFlight.
-        "ios_update_url": os.getenv("IOS_UPDATE_URL", ""),
-    }
+    return get_app_config()

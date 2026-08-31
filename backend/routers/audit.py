@@ -3,12 +3,13 @@ GET /audit
 Returns the full degree audit for the authenticated user.
 """
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
 from deps import get_user_id
+from client_meta import touch_client_meta
 
 GEN_ED_PROGRAM = "__GEN_ED__"
 
@@ -124,12 +125,19 @@ def _pick_best_option(rows: list[dict], taken_codes: set[str]) -> list[dict]:
 
 
 @router.get("")
-def get_audit(user_id: str = Depends(get_user_id)):
+def get_audit(
+    user_id: str = Depends(get_user_id),
+    x_app_version: str | None = Header(None, alias="x-app-version"),
+):
     # ── 1. Get user's selected major + subplan ────────────────────────────────
     user_resp = users_table.get_item(Key={"user_id": user_id})
     user = user_resp.get("Item")
     if not user:
         raise HTTPException(status_code=404, detail="User not found. Complete onboarding first.")
+
+    # Record which app build this user is on (throttled; the home screen hits
+    # this endpoint on every launch). `user` is already in hand, so no extra read.
+    touch_client_meta(user_id, user, x_app_version)
 
     major   = user.get("major")
     subplan = user.get("subplan")

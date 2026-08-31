@@ -9,11 +9,12 @@ POST   /users/create — LEGACY, dev-bypass only (email-derived ids); removed
 import os
 import logging
 from datetime import datetime, timezone
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 
 from db import users_table, transcript_table, sessions_table, user_choices_table, get_s3
 from deps import get_current_user, get_user_id
+from client_meta import touch_client_meta
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -30,7 +31,11 @@ class ProfileBody(BaseModel):
 
 
 @router.post("/me")
-def upsert_me(body: ProfileBody, user: dict = Depends(get_current_user)):
+def upsert_me(
+    body: ProfileBody,
+    user: dict = Depends(get_current_user),
+    x_app_version: str | None = Header(None, alias="x-app-version"),
+):
     """
     Create-or-update the caller's profile. Identity comes from the verified
     token (or dev bypass) — never from the request body. Verified token
@@ -69,6 +74,10 @@ def upsert_me(body: ProfileBody, user: dict = Depends(get_current_user)):
         }
         users_table.put_item(Item=merged)
 
+    # Stamp the app build on the row (throttled). `existing` is the pre-update
+    # record, so a version bump since last seen is detected correctly.
+    touch_client_meta(user_id, existing, x_app_version)
+
     return {
         "user_id": user_id,
         "name":    merged.get("name", ""),
@@ -78,10 +87,14 @@ def upsert_me(body: ProfileBody, user: dict = Depends(get_current_user)):
 
 
 @router.get("/me")
-def get_me(user_id: str = Depends(get_user_id)):
+def get_me(
+    user_id: str = Depends(get_user_id),
+    x_app_version: str | None = Header(None, alias="x-app-version"),
+):
     user = users_table.get_item(Key={"user_id": user_id}).get("Item")
     if not user:
         raise HTTPException(status_code=404, detail="User not found.")
+    touch_client_meta(user_id, user, x_app_version)
     return {
         "user_id": user["user_id"],
         "name":    user.get("name", ""),

@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as Application from "expo-application";
 import { API_BASE } from "../constants/api";
 
 const api = axios.create({
@@ -6,6 +7,11 @@ const api = axios.create({
   timeout: 15_000,
   headers: { "Content-Type": "application/json" },
 });
+
+// Native marketing version of the running build (CFBundleShortVersionString on
+// iOS). Null on Expo web / dev — we just omit the header there. Sent on every
+// request so the backend can record which build each user is on (admin dash).
+const APP_VERSION = Application.nativeApplicationVersion ?? "";
 
 // ── Auth header injection ────────────────────────────────────────────────────
 // Set by AuthContext. When a real ID token exists it is sent as
@@ -21,6 +27,9 @@ export function setAuthToken(token: string | null) {
 api.interceptors.request.use((config) => {
   if (authToken) {
     config.headers.Authorization = `Bearer ${authToken}`;
+  }
+  if (APP_VERSION) {
+    config.headers["X-App-Version"] = APP_VERSION;
   }
   return config;
 });

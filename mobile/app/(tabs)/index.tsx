@@ -38,36 +38,55 @@ function courseType(c: TimelineCourse): { label: string; bg: string; color: stri
 function WelcomeState() {
   const router = useRouter();
   return (
-    <View style={{ flex: 1, backgroundColor: "#1a3a6b", paddingHorizontal: 32, justifyContent: "center" }}>
-      <Text style={{
-        color: "#E8C84B", fontSize: 12, fontWeight: "800",
-        letterSpacing: 2.5, marginBottom: 20,
+    <ScrollView
+      contentContainerStyle={{
+        flexGrow: 1, paddingHorizontal: 16, paddingTop: 8,
+        paddingBottom: 48, justifyContent: "center",
+      }}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={{
+        backgroundColor: "#ffffff", borderRadius: 20,
+        paddingHorizontal: 24, paddingVertical: 32,
+        borderWidth: 1, borderColor: "#eef2f7",
       }}>
-        GRADGPS
-      </Text>
-      <Text style={{
-        color: "#ffffff", fontSize: 38, fontWeight: "900",
-        lineHeight: 44, marginBottom: 16,
-      }}>
-        Your Penn State degree, mapped.
-      </Text>
-      <Text style={{
-        color: "rgba(255,255,255,0.55)", fontSize: 15,
-        lineHeight: 23, marginBottom: 52,
-      }}>
-        Build your 4-year plan, track your progress, and find the best professors — all in one place.
-      </Text>
-      <TouchableOpacity
-        activeOpacity={0.85}
-        onPress={() => router.navigate("/major" as any)}
-        style={{
-          backgroundColor: "#E8C84B", borderRadius: 14,
-          paddingVertical: 17, alignItems: "center",
-        }}
-      >
-        <Text style={{ color: "#1a3a6b", fontSize: 16, fontWeight: "800" }}>Get started →</Text>
-      </TouchableOpacity>
-    </View>
+        <View style={{
+          alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 8,
+          backgroundColor: "#fffbeb", borderRadius: 999,
+          paddingHorizontal: 12, paddingVertical: 6, marginBottom: 20,
+          borderWidth: 1, borderColor: "#fde68a",
+        }}>
+          <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: "#E8C84B" }} />
+          <Text style={{ color: "#92400e", fontSize: 11, fontWeight: "800", letterSpacing: 1.5 }}>
+            GET STARTED
+          </Text>
+        </View>
+        <Text style={{
+          color: "#1a3a6b", fontSize: 30, fontWeight: "900",
+          lineHeight: 36, marginBottom: 12, letterSpacing: -0.5,
+        }}>
+          Your Penn State degree, mapped.
+        </Text>
+        <Text style={{
+          color: "#64748b", fontSize: 15, lineHeight: 23, marginBottom: 28,
+        }}>
+          Build your 4-year plan, track your progress, and find the best professors — all in one place.
+        </Text>
+        <TouchableOpacity
+          activeOpacity={0.85}
+          onPress={() => router.navigate("/major" as any)}
+          style={{
+            backgroundColor: "#1a3a6b", borderRadius: 14,
+            paddingVertical: 16, alignItems: "center",
+          }}
+        >
+          <Text style={{ color: "#ffffff", fontSize: 16, fontWeight: "800" }}>Choose your major →</Text>
+        </TouchableOpacity>
+        <Text style={{ color: "#94a3b8", fontSize: 12, textAlign: "center", marginTop: 14 }}>
+          Takes about a minute.
+        </Text>
+      </View>
+    </ScrollView>
   );
 }
 
@@ -488,7 +507,8 @@ export default function HomeScreen() {
   // State 1 — no major
   if (!hasMajor) {
     return (
-      <SafeAreaView style={{ flex: 1 }} edges={["top", "left", "right"]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
+        <NavHeader />
         <WelcomeState />
       </SafeAreaView>
     );

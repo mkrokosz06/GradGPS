@@ -1,20 +1,24 @@
 """
 Admin endpoints — local use only.
-GET /admin/            — serve dashboard HTML
-GET /admin/stats       — aggregate counts
-GET /admin/users       — all users with transcript metadata
-GET /admin/majors      — all programs with signup + course counts
-GET /admin/courses     — paginated/searchable course rows
+GET  /admin/            — serve dashboard HTML
+GET  /admin/stats       — aggregate counts (+ app-version distribution)
+GET  /admin/users       — all users with transcript + app-version metadata
+GET  /admin/majors      — all programs with signup + course counts
+GET  /admin/courses     — paginated/searchable course rows
+GET  /admin/app-config  — current version gate
+POST /admin/app-config  — publish the version gate (drives the update banner)
 """
 
 from datetime import datetime, timezone, timedelta
 
 from fastapi import APIRouter, Query, Depends
 from fastapi.responses import FileResponse
+from pydantic import BaseModel
 from pathlib import Path
 
 from db import requirements_table, users_table, transcript_table
 from deps import require_admin
+from app_config import APP_CONFIG_KEY, get_app_config, set_app_config
 
 router = APIRouter()
 
@@ -67,7 +71,7 @@ def get_stats():
     """
     users = _scan_all(
         users_table,
-        ProjectionExpression="user_id, major, transcript_parsed_at, created_at",
+        ProjectionExpression="user_id, major, transcript_parsed_at, created_at, app_version",
     )
 
     now         = datetime.now(timezone.utc)
@@ -81,8 +85,14 @@ def get_stats():
     new_today        = 0
     new_this_week    = 0
     dated_users      = 0
+    version_counts: dict[str, int] = {}   # app_version -> user count
 
     for u in users:
+        if u.get("user_id") == APP_CONFIG_KEY:
+            continue  # reserved config row, not a real user
+        ver = u.get("app_version") or "unknown"
+        version_counts[ver] = version_counts.get(ver, 0) + 1
+
         has_major      = bool(u.get("major"))
         has_transcript = bool(u.get("transcript_parsed_at"))
         if has_major:
@@ -103,7 +113,8 @@ def get_stats():
                 new_this_week += 1
 
     return {
-        "total_users":      len(users),
+        # sum of version_counts == real users (sentinel row already skipped)
+        "total_users":      sum(version_counts.values()),
         "added_major":      added_major,
         "added_transcript": added_transcript,
         "activated":        activated,       # major OR transcript
@@ -112,6 +123,11 @@ def get_stats():
         "new_this_week":    new_this_week,
         # how many rows carry a created_at yet (transparency for the time buckets)
         "dated_users":      dated_users,
+        # app-version distribution, most-common first: [{version, count}, …]
+        "versions": [
+            {"version": v, "count": c}
+            for v, c in sorted(version_counts.items(), key=lambda kv: (-kv[1], kv[0]))
+        ],
     }
 
 
@@ -121,6 +137,8 @@ def get_users():
     users = _scan_all(users_table)
     result = []
     for u in users:
+        if u.get("user_id") == APP_CONFIG_KEY:
+            continue  # reserved config row, not a real user
         result.append({
             "user_id":              u.get("user_id"),
             "name":                 u.get("name", ""),
@@ -128,6 +146,8 @@ def get_users():
             "subplan":              u.get("subplan", ""),
             "transcript_parsed_at": u.get("transcript_parsed_at", ""),
             "transcript_s3_key":    u.get("transcript_s3_key", ""),
+            "app_version":          u.get("app_version", ""),
+            "last_seen":            u.get("last_seen", ""),
         })
     result.sort(key=lambda x: x["transcript_parsed_at"] or "", reverse=True)
     return {"users": result, "count": len(result)}
@@ -213,3 +233,36 @@ def get_courses(
     page  = items[offset: offset + limit]
 
     return {"courses": page, "total": total, "offset": offset, "limit": limit}
+
+
+# ---------------------------------------------------------------------------
+# App version gate — drives the mobile UpdateGate (banner + hard block)
+# ---------------------------------------------------------------------------
+
+class AppConfigBody(BaseModel):
+    # All optional — only provided fields are published. Versions are dotted
+    # strings ("1.3.0"); the client compares them numerically (configService).
+    min_supported_version: str | None = None
+    latest_version:        str | None = None
+    ios_update_url:        str | None = None
+
+
+@router.get("/app-config", dependencies=_admin)
+def read_app_config():
+    """Current version gate (stored override → env → default)."""
+    return get_app_config()
+
+
+@router.post("/app-config", dependencies=_admin)
+def publish_app_config(body: AppConfigBody):
+    """
+    Publish the version gate live. Bumping `latest_version` above the build a
+    user is running makes their app show the dismissible "update available"
+    banner on next launch; `min_supported_version` hard-blocks below it. No
+    redeploy — the change is live as soon as clients next poll /config/app.
+    """
+    return set_app_config(
+        min_supported_version=body.min_supported_version,
+        latest_version=body.latest_version,
+        ios_update_url=body.ios_update_url,
+    )

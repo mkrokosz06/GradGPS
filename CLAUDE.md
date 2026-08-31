@@ -231,6 +231,24 @@ home dashboard, and gen-ed check with no extra wiring.
   `services/api.ts`) and routes back to sign-in.
 - **Admin**: `/admin/*` gated by `require_admin` — open under dev bypass, else `ADMIN_USER_IDS` allowlist (comma-separated provider-scoped ids).
 
+### App version gate & client version reporting
+The mobile `UpdateGate` (`components/UpdateGate.tsx`) polls `GET /config/app` at launch and
+compares the running build to `latest_version` (dismissible "update available" banner) and
+`min_supported_version` (hard block). Two related pieces:
+- **Admin-published gate.** `GET /config/app` resolves each field **stored override → env var →
+  fail-open default** (`backend/app_config.py`). The override lives as a singleton row in the
+  **users** table (`user_id="__APP_CONFIG__"`, same sentinel pattern as `__GEN_ED__`) so an admin
+  can bump the banner live from the dashboard with **no redeploy** — the App Runner role already
+  writes the users table, so no new IAM/table. `GET`/`POST /admin/app-config` read/publish it; the
+  "App Version & Updates" panel in `static/admin.html` is the UI. The sentinel row is filtered out
+  of `/admin/users` and `/admin/stats`.
+- **Client version reporting.** The mobile app tags every request with an `X-App-Version` header
+  (`services/api.ts`, from `Application.nativeApplicationVersion`). `client_meta.touch_client_meta()`
+  stamps `app_version` + `last_seen` onto the user row — called only from endpoints the app already
+  hits on launch (`GET /audit`, `GET`/`POST /users/me`), never the hot auth path, and **throttled**
+  to ~one write per user per active day. The admin dashboard shows a per-user version column and a
+  build-distribution bar (`/admin/stats` → `versions`).
+
 ### Official vs unofficial transcripts
 Students sometimes upload their **official** transcript instead of the unofficial LionPATH one. Official transcripts have a different layout that the plain-text parser mangles (validated against a real signed sample: 13 partly-wrong courses, every term `Unknown`). Handling:
 - **Detection** — `official_detector.detect_official(pdf_bytes, full_text)` returns a scored `OfficialDetection`. Byte anchor is `/ByteRange` + `adbe.pkcs7` (a certified PDF; **do not** test the spaced `/Type /Sig` — the real sample has `/Type/Sig` with no space) worth +4, plus the "OFFICIAL TRANSCRIPT" header (+3), registrar language (capped +2), and a `UNOFFICIAL` hard veto (−5). Threshold 4 → the signature bytes alone trigger.
