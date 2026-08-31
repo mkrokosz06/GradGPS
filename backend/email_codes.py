@@ -12,10 +12,19 @@ import hashlib
 import secrets
 import time
 
+from botocore.exceptions import ClientError
+
 from db import sessions_table
 
 CODE_TTL_SECONDS = 600   # 10 minutes
 MAX_ATTEMPTS     = 5     # wrong guesses before the code is burned
+# A second /start within this window (double-tapped button, button + keyboard
+# "done", a client retry) must NOT mint a fresh code and orphan the one already
+# emailed — otherwise the user receives a code that was overwritten in the DB
+# and gets "invalid or expired" for typing exactly what they were sent. Inside
+# the window `issue_code` keeps the live code; outside it (or once expired) a
+# genuine "resend" still gets a new one.
+REISSUE_MIN_INTERVAL = 15  # seconds
 
 
 def _key(email: str) -> dict:
@@ -28,22 +37,41 @@ def _code_hash(email: str, code: str) -> str:
     return hashlib.sha256(f"{email}:{code}".encode()).hexdigest()
 
 
-def issue_code(email: str) -> str:
-    """Generate, store, and return a fresh 6-digit code for `email`.
+def issue_code(email: str) -> str | None:
+    """Generate and store a fresh 6-digit code for `email`.
 
-    Overwrites any outstanding code for the same email (only the latest is
-    valid). Returns the plaintext code for the caller to email.
+    Returns the plaintext code for the caller to email, or ``None`` when a code
+    was issued less than ``REISSUE_MIN_INTERVAL`` seconds ago — in that case the
+    live code is left untouched and the caller must NOT send another email (the
+    already-delivered code is still the valid one). A conditional write makes
+    this safe against truly concurrent /start calls: only one wins, and only its
+    plaintext is ever returned/emailed.
+
+    A code older than the window (or already expired) is replaced, so a genuine
+    "resend" still gets a new code.
     """
     code = f"{secrets.randbelow(1_000_000):06d}"
     now = int(time.time())
-    sessions_table.put_item(Item={
-        **_key(email),
-        "kind":       "email_code",
-        "code_hash":  _code_hash(email, code),
-        "attempts":   0,
-        "created_at": now,
-        "expires_at": now + CODE_TTL_SECONDS,  # doubles as the DynamoDB TTL
-    })
+    try:
+        sessions_table.put_item(
+            Item={
+                **_key(email),
+                "kind":       "email_code",
+                "code_hash":  _code_hash(email, code),
+                "attempts":   0,
+                "created_at": now,
+                "expires_at": now + CODE_TTL_SECONDS,  # doubles as the DynamoDB TTL
+            },
+            # Overwrite only when there's no code yet or the existing one is
+            # older than the reissue window; a recent code makes this a no-op.
+            ConditionExpression="attribute_not_exists(token_hash) OR #ca <= :cutoff",
+            ExpressionAttributeNames={"#ca": "created_at"},
+            ExpressionAttributeValues={":cutoff": now - REISSUE_MIN_INTERVAL},
+        )
+    except ClientError as e:
+        if e.response.get("Error", {}).get("Code") == "ConditionalCheckFailedException":
+            return None
+        raise
     return code
 
 

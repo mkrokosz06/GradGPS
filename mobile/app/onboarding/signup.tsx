@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   View, Text, TextInput, TouchableOpacity, ScrollView,
   StyleSheet, KeyboardAvoidingView, Platform, ActivityIndicator, Alert, Image,
@@ -62,6 +62,13 @@ export default function SignupScreen() {
   const [emailStep, setEmailStep] = useState<"form" | "code">("form");
   const [emailLoading,  setEmailLoading]  = useState(false);
   const [verifyLoading, setVerifyLoading] = useState(false);
+
+  // Guards against a double-fired code request (button tap + keyboard "done",
+  // a fast double-tap, "resend" spam). A second concurrent /start would mint a
+  // new code that overwrites the one already emailed, so the user's code reads
+  // as "invalid or expired". A ref (not state) blocks synchronously, before the
+  // disabled prop can re-render.
+  const startInFlight = useRef(false);
 
   // Sign in with Apple is iOS-only and needs the native module present.
   useEffect(() => {
@@ -143,6 +150,8 @@ export default function SignupScreen() {
   async function handleStartEmail() {
     if (!name.trim())  { Alert.alert("Required", "Please enter your name."); return; }
     if (!email.includes("@")) { Alert.alert("Invalid", "Please enter a valid email address."); return; }
+    if (startInFlight.current) return;   // ignore a duplicate concurrent request
+    startInFlight.current = true;
     setEmailLoading(true);
     try {
       await startEmailAuth(email.trim().toLowerCase());
@@ -152,6 +161,7 @@ export default function SignupScreen() {
       Alert.alert("Error", e?.response?.data?.detail ?? "Couldn't send a code. Please try again.");
     } finally {
       setEmailLoading(false);
+      startInFlight.current = false;
     }
   }
 
@@ -172,11 +182,15 @@ export default function SignupScreen() {
   }
 
   async function handleResendCode() {
+    if (startInFlight.current) return;   // ignore a duplicate concurrent request
+    startInFlight.current = true;
     try {
       await startEmailAuth(email.trim().toLowerCase());
       Alert.alert("Code sent", "We emailed you a new code.");
     } catch (e: any) {
       Alert.alert("Error", e?.response?.data?.detail ?? "Couldn't resend the code.");
+    } finally {
+      startInFlight.current = false;
     }
   }
 

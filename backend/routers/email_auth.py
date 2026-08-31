@@ -129,6 +129,10 @@ def email_start(body: StartBody, request: Request):
         )
 
     code = issue_code(email)
+    if code is None:
+        # A code was just issued (double-submit / retry); the one already sent
+        # is still valid. Don't mint or email a second one that would orphan it.
+        return {"ok": True}
 
     sender = os.getenv("SUPPORT_FROM_EMAIL", "").strip()
     if not sender or _dev_mode():
