@@ -587,6 +587,10 @@ def match_template(
                 item["chosen_code"] = chosen
                 if kind != "course":
                     item["course_code"] = chosen
+                    # Drop the placeholder ("Choose a … course" / the pair label) so
+                    # _fill_future_titles backfills the chosen course's real catalog
+                    # title instead of leaving the stale "choose" prompt on the card.
+                    item["course_title"] = ""
                     if kind in ("pool", "gen_ed", "elective"):
                         item["is_pool"] = False
 

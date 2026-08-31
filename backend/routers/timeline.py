@@ -789,6 +789,9 @@ def _build_layer1_future(
                 # the gen-ed audit stays the source of truth for completion).
                 slot["course_code"] = chosen
                 slot["chosen_code"] = chosen
+                # Drop the "Choose a … course" placeholder so _fill_future_titles
+                # backfills the chosen course's real catalog title on the card.
+                slot["course_title"] = ""
                 slot["is_pool"] = False
             gen_ed_slots.append(slot)
 

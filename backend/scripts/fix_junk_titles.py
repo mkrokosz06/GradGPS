@@ -37,6 +37,25 @@ _JUNK_RE = re.compile(r"[\d\s./-]*")
 _PLACEHOLDER_RE = re.compile(r"^\d+\s*(additional\s+)?credits\b", re.IGNORECASE)
 _BASE_RE = re.compile(r"^([A-Z]+ \d+)[A-Z]*$")
 
+# Bulletin footnotes / cross-listing fragments that the scraper wrote into the
+# title field instead of the course name — e.g. CAS 100's
+# "Note:  , , or  may not be counted as part of the minor.", the leading-comma
+# fragments left when a course code is stripped (", 100B , or 100C ‡"), and the
+# footnote dagger markers (†/‡, plus the U+FFFD replacement char) the scraper
+# left as titles. High-precision so it never flags a real title (verified
+# against the full catalog — 0 legitimate titles caught).
+_FOOTNOTE_RES = (
+    re.compile(r"[†‡�]"),  # footnote markers/garbage: "(GWS) ‡†", "†"
+    re.compile(r"^\s*,"),            # leading-comma fragment: ", 100B , or 100C ‡"
+    re.compile(r"(?i)^\s*note\s*:"), # explicit footnote: "Note:  , , or  may not…"
+    re.compile(r",\s*,"),            # empty enumeration gap where codes were stripped
+    re.compile(r"(?i)^\s*students\s+may\b"),  # leaked minor policy: "Students may count up to…"
+)
+
+
+def _is_footnote(title: str) -> bool:
+    return any(rx.search(title) for rx in _FOOTNOTE_RES)
+
 # PSU-wide reserved course numbers (bulletin has no per-department listing)
 _POLICY_NUMBERS = {
     "94": "Research Project",
@@ -52,7 +71,9 @@ def _is_junk(title) -> bool:
     if not title:
         return True
     t = str(title).strip()
-    return _JUNK_RE.fullmatch(t) is not None or _PLACEHOLDER_RE.match(t) is not None
+    return (_JUNK_RE.fullmatch(t) is not None
+            or _PLACEHOLDER_RE.match(t) is not None
+            or _is_footnote(t))
 
 
 def _base(code: str) -> str | None:
