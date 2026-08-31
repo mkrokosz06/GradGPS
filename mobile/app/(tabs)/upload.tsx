@@ -212,25 +212,22 @@ export default function UploadScreen() {
   // ── View mode: transcript exists ───────────────────────────────────────────
   if (transcript?.has_transcript) {
     return (
-      <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
         <NavHeader subtitle="Transcript" />
         <ScrollView
           className="flex-1"
           contentContainerStyle={{ padding: 24, paddingBottom: 60 }}
           showsVerticalScrollIndicator={false}
         >
-          {/* Header card */}
-          <View style={{
-            backgroundColor: "#1a3a6b", borderRadius: 20,
-            padding: 22, marginBottom: 24,
-          }}>
-            <Text style={{ color: "#E8C84B", fontSize: 11, fontWeight: "800", letterSpacing: 1.5, marginBottom: 8 }}>
+          {/* Header — light dashboard treatment (matches Home / Account) */}
+          <View style={{ marginBottom: 24 }}>
+            <Text style={{ color: "#94a3b8", fontSize: 11, fontWeight: "700", letterSpacing: 0.9, marginBottom: 6 }}>
               YOUR TRANSCRIPT
             </Text>
-            <Text style={{ color: "#ffffff", fontSize: 26, fontWeight: "900" }}>
+            <Text style={{ color: "#1a3a6b", fontSize: 26, fontWeight: "900" }}>
               {transcript.courses_total} courses
             </Text>
-            <Text style={{ color: "rgba(255,255,255,0.5)", fontSize: 13, marginTop: 4 }}>
+            <Text style={{ color: "#64748b", fontSize: 13, marginTop: 4 }}>
               {transcript.terms.length} semester{transcript.terms.length !== 1 ? "s" : ""} on record
             </Text>
           </View>
