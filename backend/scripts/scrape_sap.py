@@ -68,7 +68,16 @@ SUBPLAN_PROGRAMS: list[dict] = [
           "with": {"type": "course", "code": "BIOL 110", "credits": 4.0}},
          {"replace": ["BIOL 234", "BIOL 235W"],
           "with": {"type": "course", "code": "BIOL 230W", "credits": 4.0}},
-     ]},
+     ],
+     # The grid schedules the option's advanced-chem electives as generic
+     # "Supporting Course (consult your adviser)" cells; the concrete list lives
+     # only in the bulletin's "Approved Supporting Courses" footnote. Stamp the
+     # codes on so the picker + auto-satisfy work (pick 3, 9-11 cr).
+     "supporting": {
+         "label": "Approved Supporting Course",
+         "codes": ["BMB 428", "CHEM 410", "CHEM 412", "CHEM 423W",
+                   "CHEM 430", "CHEM 431W", "CHEM 450", "CHEM 452"],
+     }},
 ]
 
 # Gen-ed category tokens the bulletin uses in parentheses, normalized to the
@@ -211,8 +220,20 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
         if codes:
             slot["codes"] = codes
         return slot
-    if low in ("elective", "electives") or (low.startswith("elective") and not codes):
-        return {"type": "elective", "label": "Elective", "credits": credits}
+    # A "Supporting Course (consult your adviser)" cell — an advisor-approved
+    # course from a program-specific pool whose members live only in a bulletin
+    # footnote, never in the grid. Keep it a `pool` (NOT gen_ed, or a spare
+    # gen-ed course would wrongly satisfy it and it would never schedule); a
+    # SUBPLAN_PROGRAMS `supporting` spec stamps the concrete codes on afterward
+    # (see _apply_supporting).
+    if "supporting course" in low or (low.startswith("supporting") and not codes):
+        return {"type": "pool", "ref": "supporting", "label": text, "credits": credits}
+    # A free-elective cell: bare "Elective"/"Electives", or any "… Elective …"
+    # phrasing with no codes ("General Elective Course"). Without the broad
+    # no-codes match these fall through to the default gen_ed return and get
+    # soaked up by spare gen-ed courses instead of a real elective.
+    if "elective" in low and not codes:
+        return {"type": "elective", "label": text or "Elective", "credits": credits}
     if "general education" in low or (gened and not codes):
         return {"type": "gen_ed", "category": gened, "credits": credits}
     if len(codes) >= 2:
@@ -405,12 +426,33 @@ def _apply_corrections(semesters: list[dict], corrections: list[dict]) -> None:
             raise ValueError(f"correction target {sorted(want)} not found in grid")
 
 
+def _apply_supporting(semesters: list[dict], supporting: dict | None) -> None:
+    """Stamp the program's footnote-sourced 'Approved Supporting Courses' codes
+    onto the generic `supporting` pool slots _classify emitted (the grid names
+    the pool only as 'Supporting Course', never its members).  Raises if the spec
+    is present but no supporting slot exists — a stale spec shouldn't rot silently
+    after a bulletin re-scrape."""
+    if not supporting:
+        return
+    hit = False
+    for sem in semesters:
+        for slot in sem["slots"]:
+            if slot.get("type") == "pool" and slot.get("ref") == "supporting":
+                slot["codes"] = list(supporting["codes"])
+                if supporting.get("label"):
+                    slot["label"] = supporting["label"]
+                hit = True
+    if not hit:
+        raise ValueError("supporting spec set but no 'supporting' pool slot in grid")
+
+
 def scrape_subplan(spec: dict) -> dict:
     """Scrape a single option/campus grid off a multi-plan page into a
     subplan-tagged template (see SUBPLAN_PROGRAMS)."""
     grid_html, heading = _grid_by_heading(fetch(spec["url"]), spec["heading"])
     semesters = parse_plangrid(grid_html)
     _apply_corrections(semesters, spec.get("corrections"))
+    _apply_supporting(semesters, spec.get("supporting"))
     return {
         "program_name": spec["program_name"],
         "subplan": spec["subplan"],
