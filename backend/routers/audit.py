@@ -10,6 +10,7 @@ from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
 from deps import get_user_id
 from client_meta import touch_client_meta
+from substitutions import get_substitutions
 
 GEN_ED_PROGRAM = "__GEN_ED__"
 
@@ -187,7 +188,11 @@ def get_audit(
         gen_ed_rows.extend(gen_ed_resp.get("Items", []))
 
     # ── 6. Run audits ─────────────────────────────────────────────────────────
-    result = run_audit(requirement_rows, transcript_courses)
+    # Student-declared course substitutions ("my ESC 120 counts for CHE 100") are
+    # per-user equivalences folded into the taken-set — see substitutions.py.
+    declared_subs = get_substitutions(user_id)
+
+    result = run_audit(requirement_rows, transcript_courses, declared_subs)
     result["major"]   = major    # always use the stored value, not run_audit's fallback
     result["subplan"] = subplan
 
@@ -199,7 +204,7 @@ def get_audit(
     )
 
     if gen_ed_rows:
-        gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses)
+        gen_ed_result = run_gen_ed_audit(gen_ed_rows, transcript_courses, declared_subs)
         result["gen_ed"] = gen_ed_result
     else:
         result["gen_ed"] = None

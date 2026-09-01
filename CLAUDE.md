@@ -98,6 +98,7 @@ logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into th
 | `plan_templates.py` | Loads/validates Suggested Academic Plan (SAP) JSON templates from `sap_templates/` (see below) |
 | `sap_schedule.py` | SAP match stage — `match_template()` decides which template slots the student has already satisfied (pure, DB-free) |
 | `rmp_client.py` | RateMyProfessors lookup client (used by the `/courses` router) |
+| `substitutions.py` | Course-substitution store — per-user course equivalences (`requirement_code -> substitute_course`) |
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
 
@@ -111,6 +112,7 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 | `transcript.py` | `/transcript` | PDF upload, parse, store + manual class editing (`POST`/`PATCH`/`DELETE /transcript/course`) |
 | `programs.py` | `/programs` | Major search/select |
 | `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
+| `substitutions.py` | `/substitutions` | Course substitutions — "the class I took counts for that requirement" (see below) |
 | `users.py` | `/users` | User profile + `DELETE /users/me` account deletion (PDF, courses, profile, sessions) |
 | `admin.py` | `/admin` | Admin utilities |
 | `support.py` | `/support` | Support/contact form (mobile app + gradgps.com). Emails `SUPPORT_EMAIL` via SES with the sender as Reply-To; unset `SUPPORT_EMAIL` (local dev) = log only. No auth required (website form is anonymous); in-memory rate limit + honeypot field. SES setup: identity `mkrokosz06@gmail.com` verified, `ses:SendEmail` on the App Runner role (`GradGPSSupportSES` inline policy). |
@@ -217,6 +219,43 @@ home dashboard, and gen-ed check with no extra wiring.
   badge in the mobile UI) and future-proofs a "reset to uploaded" affordance.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
+
+### Course substitutions (the advisor workaround)
+Departments routinely accept one course in place of a requirement — Connor took **ESC 120
+"Design for Failure"**, which his adviser counts for **CHE 100** — but the catalog only knows the
+requirement's own code, so GradGPS kept telling him to take CHE 100 and the timeline scheduled a
+phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap themselves.
+
+- **A substitution is a per-user course equivalence** — exactly the shape of the built-in
+  `_EQUIVALENCE_PAIRS` in `audit_engine.py` (IST→ETI renames, cross-listings, first-year seminars),
+  just declared by one student for one requirement. So it is applied at the same choke point:
+  `_build_taken(transcript_courses, substitutions)` registers the requirement's code against the
+  substitute course's transcript entry. Every downstream consumer — major audit, gen-ed audit,
+  timeline, home dashboard, SAP template matcher — inherits it with no extra wiring. `run_audit()`,
+  `run_gen_ed_audit()` and `sap_schedule.build_taken_set()` all take an optional `substitutions` arg
+  (omitting it is a byte-identical no-op).
+- **The substitute must be on the transcript**, and it is registered with `setdefault` — so a
+  substitution can only ever re-point credit the student already earned into a slot nothing else
+  filled, never overwrite a course they really took. A stale declaration satisfies nothing.
+  `min_grade` still applies; an in-progress substitute reads as in-progress.
+- **Guardrails** (`routers/substitutions.py`): codes are format-validated, self-substitution is
+  refused, one course may back only one requirement (no silent double-count), and `MAX_PER_USER = 20`
+  keeps the feature from being used to mark a whole degree complete. The mobile UI labels it as the
+  student's own declaration, not an approved exception.
+- **Storage reuses the `user_course_choices` table** under a `sub:` slot_key namespace rather than
+  adding a table — prod DynamoDB IAM is per-table scoped, so a new table needs an infra change first,
+  and a substitution is the same kind of row the table already holds (a student's decision about
+  their own plan). `routers/user_choices.get_user_choices()` skips that namespace, and its
+  `PUT`/`DELETE` refuse a `sub:`-prefixed slot_key.
+- **`GET /substitutions/candidates?requirement_code=…`** returns the student's own transcript
+  courses, **ones the audit hasn't already credited first** — that's almost always the course the
+  adviser approved. Already-credited courses stay in the list (advisers do approve double-counts) but
+  carry an `already_used` flag the UI badges.
+- **Mobile**: `services/substitutionService.ts` + `components/SubstitutionModal.tsx`. Entry point is
+  a row in `CoursePickerModal` ("I already took a class that counts for this"), shown for
+  named-course slots only (a gen-ed/pool slot is a category — you pick a course for it there
+  instead). Wired on both the timeline and home screens; saving refetches so the plan reflows.
+- Tests: `backend/tests/test_substitutions.py` (runs under pytest or plain `python`).
 
 ### Auth (dev vs prod)
 - **Real auth**: Google/Apple OIDC ID tokens, verified in `backend/auth.py` (JWKS signature, aud, iss, exp). Canonical `user_id` = provider-scoped sub (`google:<sub>` / `apple:<sub>`). Client IDs in `backend/.env` (`GOOGLE_CLIENT_IDS`, `APPLE_CLIENT_IDS`). Mobile: `expo-auth-session` in `signup.tsx` → `signInWithIdToken()` in `AuthContext` → token in SecureStore (AsyncStorage on web) → axios interceptor sends `Authorization: Bearer`.

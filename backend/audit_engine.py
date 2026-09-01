@@ -926,11 +926,18 @@ for _a, _b in _EQUIVALENCE_PAIRS:
     _COURSE_ALIASES.setdefault(_b, []).append(_a)
 
 
-def _build_taken(transcript_courses: list[dict]) -> dict:
+def _build_taken(transcript_courses: list[dict], substitutions: dict | None = None) -> dict:
     """
     Build taken lookup from transcript, including confirmed course equivalences.
     Cross-listed courses (CRIM/CRIMJ) and renamed prefixes (IST→ETI/HCDD/CYBER)
     are registered under all equivalent codes so the audit matches correctly.
+
+    `substitutions` is the student's own declared course equivalences
+    (requirement_code -> substitute_course, see substitutions.py). They are
+    applied exactly like a catalog equivalence: the requirement's code is
+    registered against the substitute course's transcript entry, but only if
+    that course is genuinely on the transcript, and never over a code the
+    student actually took.
     """
     taken: dict = {}
     for c in transcript_courses:
@@ -944,7 +951,19 @@ def _build_taken(transcript_courses: list[dict]) -> dict:
         taken[code] = entry
         for alias in _COURSE_ALIASES.get(code, []):
             taken.setdefault(alias, entry)
+
+    # Student-declared substitutions, applied last so they can only ever fill a
+    # code nothing else did (setdefault), and only when the substitute course is
+    # really on the transcript.
+    for req_code, sub_code in (substitutions or {}).items():
+        entry = taken.get(_norm_sub_code(sub_code))
+        if entry:
+            taken.setdefault(_norm_sub_code(req_code), entry)
     return taken
+
+
+def _norm_sub_code(code: str) -> str:
+    return re.sub(r"\s+", " ", (code or "").strip().upper())
 
 
 def _grade_meets(earned_grade: str, min_grade: str) -> bool:
@@ -957,7 +976,8 @@ def _grade_meets(earned_grade: str, min_grade: str) -> bool:
         return True   # unknown grade format — don't block
 
 
-def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> dict:
+def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict],
+                     substitutions: dict | None = None) -> dict:
     """
     Like run_audit, but enforces cross-group course exclusivity for gen ed:
     once a course is consumed to satisfy one group it cannot satisfy another.
@@ -967,7 +987,7 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
       2. choose_credits / choose_courses pools
     """
     # Build taken lookup (includes department prefix aliases)
-    taken = _build_taken(transcript_courses)
+    taken = _build_taken(transcript_courses, substitutions)
 
     # Group rows by section
     groups_map: dict[str, list[dict]] = defaultdict(list)
@@ -1041,7 +1061,8 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
     }
 
 
-def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> dict:
+def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
+              substitutions: dict | None = None) -> dict:
     """
     Parameters
     ----------
@@ -1067,7 +1088,7 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict]) -> d
     # ── Build lookup from student transcript ──────────────────────────────────
     # course_code → {"status": ..., "grade": ..., "credits_earned": ...}
     # Includes department prefix aliases (e.g. CRIMJ -> CRIM)
-    taken = _build_taken(transcript_courses)
+    taken = _build_taken(transcript_courses, substitutions)
 
     # ── Group requirement rows by section ────────────────────────────────────
     # Preserve insertion order (rows come sorted by group_course SK from DynamoDB)

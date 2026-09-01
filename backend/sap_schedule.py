@@ -70,14 +70,23 @@ def _equivalents(code: str) -> set[str]:
     return {b} | _EQUIV.get(b, set())
 
 
-def build_taken_set(transcript_courses: list[dict]) -> set[str]:
+def build_taken_set(transcript_courses: list[dict],
+                    substitutions: dict | None = None) -> set[str]:
     """Base course codes the student has completed or is taking, expanded with
     known equivalences so a renamed/cross-listed course still matches a template.
-    Transfer credit counts — the audit engine treats it as done."""
+    Transfer credit counts — the audit engine treats it as done.
+
+    `substitutions` (requirement_code -> substitute_course, see substitutions.py)
+    are the student's own declared equivalences and expand the set the same way a
+    catalog equivalence does — but only when the substitute course is genuinely
+    taken, so a stale declaration can't satisfy a template slot on its own."""
     taken: set[str] = set()
     for c in transcript_courses:
         if c.get("status") in ("done", "in_progress", "transfer"):
             taken |= _equivalents(c.get("course_code", ""))
+    for req_code, sub_code in (substitutions or {}).items():
+        if _base(sub_code) in taken:
+            taken |= _equivalents(req_code)
     return taken
 
 

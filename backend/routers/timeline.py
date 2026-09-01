@@ -21,6 +21,7 @@ from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_used_codes, build_satisfied_req_codes,
                           build_gen_ed_courses, match_template)
 from routers.user_choices import get_user_choices
+from substitutions import get_substitutions
 
 router = APIRouter()
 
@@ -1049,7 +1050,12 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             detail=f"No requirements found for major: {major}. "
                    "Re-seed the database (setup_tables → load_catalog → seed_gen_ed → seed_matthew).",
         )
-    audit_result = run_audit(requirement_rows, transcript_courses)
+    # Student-declared substitutions ("my ESC 120 counts for CHE 100") are
+    # per-user course equivalences (substitutions.py) applied to the taken-set,
+    # so a substituted requirement stops being scheduled here just as a
+    # cross-listed one does.
+    declared_subs = get_substitutions(user_id)
+    audit_result = run_audit(requirement_rows, transcript_courses, declared_subs)
 
     # ── 4b. Gen ed audit (used by both the SAP-template and Layer 1 paths) ──
     gen_ed_resp = requirements_table.query(
@@ -1063,7 +1069,8 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         )
         gen_ed_rows.extend(gen_ed_resp.get("Items", []))
     gen_ed_result = (
-        run_gen_ed_audit(gen_ed_rows, transcript_courses) if gen_ed_rows else {"groups": []}
+        run_gen_ed_audit(gen_ed_rows, transcript_courses, declared_subs)
+        if gen_ed_rows else {"groups": []}
     )
 
     # ── 5. Build future semesters ────────────────────────────────────────────
@@ -1085,7 +1092,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         # The major audit is the source of truth for course equivalences/pairs
         # (MATH 110/140, STAT 200/SCM 200): fold its satisfied requirement codes
         # into the taken set so the template stops re-scheduling met requirements.
-        taken = (build_taken_set(transcript_courses)
+        taken = (build_taken_set(transcript_courses, declared_subs)
                  | build_satisfied_req_codes(audit_result))
         records = match_template(
             template,

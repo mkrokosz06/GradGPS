@@ -12,6 +12,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { CoursePickerModal } from "../../components/CoursePickerModal";
+import { SubstitutionModal } from "../../components/SubstitutionModal";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
@@ -583,6 +584,7 @@ export default function TimelineScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ course: TimelineCourse; term: string; label: string } | null>(null);
+  const [substituting, setSubstituting] = useState<{ code: string; title?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const { userId } = useAuth();
   const timelineScrollRef = useRef<ScrollView>(null);
@@ -662,6 +664,14 @@ export default function TimelineScreen() {
     } catch { /* leave the modal open so the user can retry */ }
     finally { setSaving(false); }
   }, [userId, fetchTimeline]);
+
+  // "I already took a class that counts for this" — hand the requirement off to
+  // the substitution picker. Closing the class selector first keeps one modal
+  // on screen at a time.
+  const openSubstitute = useCallback((code: string, title?: string) => {
+    setEditing(null);
+    setSubstituting({ code, title });
+  }, []);
 
   const clearChoice = useCallback(async (slotKey: string) => {
     if (!userId) return;
@@ -783,6 +793,14 @@ export default function TimelineScreen() {
         )}
       </View>
 
+      <SubstitutionModal
+        visible={!!substituting}
+        requirementCode={substituting?.code ?? null}
+        requirementTitle={substituting?.title}
+        onSaved={fetchTimeline}
+        onClose={() => setSubstituting(null)}
+      />
+
       <CoursePickerModal
         visible={!!editing}
         course={editing?.course ?? null}
@@ -791,6 +809,7 @@ export default function TimelineScreen() {
         busy={saving}
         onApply={applyChoice}
         onClear={clearChoice}
+        onSubstitute={openSubstitute}
         onClose={() => setEditing(null)}
       />
       {inProgressModal}

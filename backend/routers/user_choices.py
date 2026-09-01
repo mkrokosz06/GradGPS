@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 _VALID_SLOT_KINDS = {"course", "choose_one", "pool", "gen_ed", "elective"}
 _TERM_RE = re.compile(r"^(FA|SP|SU) \d{4}$")
 
+# Reserved slot_key namespace owned by substitutions.py.
+_SUB_PREFIX = "sub:"
+
 
 class ChoiceBody(BaseModel):
     slot_key:      str
@@ -54,6 +57,9 @@ def get_user_choices(user_id: str) -> dict[str, dict]:
         # A missing table must NEVER break the timeline — degrade to "no choices".
         logger.warning("user_course_choices unavailable; treating as no choices", exc_info=True)
         return {}
+    # Course substitutions share this table under a `sub:` slot_key namespace
+    # (see substitutions.py) — they're a different kind of decision and must not
+    # leak into the timeline's choice/pin maps.
     return {
         it["slot_key"]: {
             "slot_kind":     it.get("slot_kind"),
@@ -61,6 +67,7 @@ def get_user_choices(user_id: str) -> dict[str, dict]:
             "pinned_term":   it.get("pinned_term"),
         }
         for it in items
+        if not str(it.get("slot_key", "")).startswith(_SUB_PREFIX)
     }
 
 
@@ -77,7 +84,7 @@ def list_choices(user_id: str = Depends(get_user_id)):
 @router.put("")
 def upsert_choice(body: ChoiceBody, user_id: str = Depends(get_user_id)):
     slot_key = body.slot_key.strip()
-    if not slot_key or "/" in slot_key:
+    if not slot_key or "/" in slot_key or slot_key.startswith(_SUB_PREFIX):
         raise HTTPException(status_code=400, detail="Invalid slot_key.")
     if body.slot_kind not in _VALID_SLOT_KINDS:
         raise HTTPException(status_code=400, detail="Invalid slot_kind.")
@@ -112,7 +119,7 @@ def upsert_choice(body: ChoiceBody, user_id: str = Depends(get_user_id)):
 @router.delete("")
 def delete_choice(slot_key: str = Query(...), user_id: str = Depends(get_user_id)):
     key = slot_key.strip()
-    if not key:
+    if not key or key.startswith(_SUB_PREFIX):
         raise HTTPException(status_code=400, detail="Invalid slot_key.")
     try:
         user_choices_table.delete_item(Key={"user_id": user_id, "slot_key": key})
