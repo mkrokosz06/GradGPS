@@ -296,22 +296,6 @@ export function CoursePickerModal({
             </View>
           )}
 
-          {/* "I already took something that counts for this" — the advisor
-              workaround. Only offered for a slot that names a real course; a
-              gen-ed or open-elective slot is a category, and the student picks a
-              course for it above instead. */}
-          {onSubstitute && !searchable && (
-            <TouchableOpacity
-              style={styles.subRow}
-              activeOpacity={0.7}
-              onPress={() => onSubstitute(selected ?? course!.course_code, course!.course_title)}
-            >
-              <Text style={styles.subGlyph}>↔</Text>
-              <Text style={styles.subText}>I already took a class that counts for this</Text>
-              <Text style={styles.subChevron}>›</Text>
-            </TouchableOpacity>
-          )}
-
           {/* Pin toggle */}
           <TouchableOpacity
             style={[styles.pinRow, pinned && styles.pinRowActive]}
@@ -329,6 +313,34 @@ export function CoursePickerModal({
               Your pinned term had already passed, so this moved to the earliest upcoming semester.
             </Text>
           ) : null}
+
+          {/* "I already took something that counts for this" — the advisor
+              workaround. It leaves this modal for the substitution picker, so it
+              deliberately reads as a navigation row (icon chip + chevron) rather
+              than a third toggle stacked with the options and the pin. Only
+              offered for a slot naming a real course; a gen-ed or open-elective
+              slot is a category, and the student picks a course for it above. */}
+          {onSubstitute && !searchable && (
+            <>
+              <View style={styles.divider} />
+              <TouchableOpacity
+                style={styles.subRow}
+                activeOpacity={0.6}
+                onPress={() => onSubstitute(selected ?? course!.course_code, course!.course_title)}
+              >
+                <View style={styles.subIcon}>
+                  <Text style={styles.subIconGlyph}>⇄</Text>
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.subTitle}>Already took a class for this?</Text>
+                  <Text style={styles.subCaption}>
+                    Count a course your adviser approved instead.
+                  </Text>
+                </View>
+                <Text style={styles.subChevron}>›</Text>
+              </TouchableOpacity>
+            </>
+          )}
 
           {/* Actions */}
           <TouchableOpacity style={styles.primaryBtn} onPress={save} activeOpacity={0.85} disabled={busy}>
@@ -415,15 +427,21 @@ const styles = StyleSheet.create({
 
   note: { fontSize: 11, color: "#b45309", marginTop: 6, marginBottom: 2, lineHeight: 16 },
 
+  divider: { height: 1, backgroundColor: "#f1f5f9", marginTop: 16, marginBottom: 2 },
   subRow: {
     flexDirection: "row", alignItems: "center",
-    paddingVertical: 12, paddingHorizontal: 12,
-    borderRadius: 12, borderWidth: 1, borderColor: "#e2e8f0",
-    backgroundColor: "#f8fafc", marginTop: 4,
+    paddingVertical: 12, paddingHorizontal: 2,
   },
-  subGlyph:   { fontSize: 15, color: "#1a3a6b", marginRight: 10, fontWeight: "700" },
-  subText:    { flex: 1, fontSize: 13, fontWeight: "600", color: "#334155" },
-  subChevron: { fontSize: 16, color: "#94a3b8" },
+  subIcon: {
+    width: 30, height: 30, borderRadius: 9,
+    backgroundColor: "#e8eef7",
+    alignItems: "center", justifyContent: "center",
+    marginRight: 11,
+  },
+  subIconGlyph: { fontSize: 15, lineHeight: 19, color: "#1a3a6b", fontWeight: "700" },
+  subTitle:     { fontSize: 13, fontWeight: "700", color: "#1e293b" },
+  subCaption:   { fontSize: 11.5, color: "#94a3b8", marginTop: 2, lineHeight: 15 },
+  subChevron:   { fontSize: 20, color: "#cbd5e1", fontWeight: "600", marginLeft: 8 },
 
   primaryBtn: {
     backgroundColor: "#1a3a6b", borderRadius: 14,
