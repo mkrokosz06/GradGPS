@@ -13,6 +13,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { NavHeader } from "../../components/NavHeader";
 import { CoursePickerModal } from "../../components/CoursePickerModal";
 import { SubstitutionModal } from "../../components/SubstitutionModal";
+import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
 import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
@@ -427,8 +428,11 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
     const isBreadth = course.pool_ref === "business_breadth";
     // Searchable gen-ed slots are actionable: long-press / tap the chip to search
     // for a course to fill the category.
+    // An adviser-defined credential requirement is actionable too, but it has no
+    // options and nothing to search — tapping it opens the confirm screen instead.
     const poolActionable = !!onEdit && !!course.slot_key && course.status === "missing"
-      && (!!course.searchable || (course.options?.length ?? 0) > 1);
+      && (!!course.searchable || (course.options?.length ?? 0) > 1
+          || !!course.needs_confirmation);
     return (
       <TouchableOpacity
         activeOpacity={poolActionable ? 0.7 : 1}
@@ -619,6 +623,9 @@ export default function TimelineScreen() {
   const [refreshing, setRefreshing] = useState(false);
   const [selectedTerm, setSelectedTerm] = useState<string | null>(null);
   const [editing, setEditing] = useState<{ course: TimelineCourse; term: string; label: string } | null>(null);
+  // Adviser-defined credential requirement being confirmed (a different modal:
+  // there is no course list to pick from, only the student's own transcript).
+  const [confirming, setConfirming] = useState<TimelineCourse | null>(null);
   const [substituting, setSubstituting] = useState<{ code: string; title?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const { userId } = useAuth();
@@ -818,7 +825,11 @@ export default function TimelineScreen() {
             semester={selectedSemester}
             refreshing={refreshing}
             onRefresh={onRefresh}
-            onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+            onEditCourse={(course, term, label) =>
+              course.needs_confirmation
+                ? setConfirming(course)
+                : setEditing({ course, term, label })
+            }
             onEditInProgress={openInProgressMenu}
           />
         ) : (
@@ -846,6 +857,16 @@ export default function TimelineScreen() {
         onClear={clearChoice}
         onSubstitute={openSubstitute}
         onClose={() => setEditing(null)}
+      />
+
+      <CredentialRequirementModal
+        visible={!!confirming}
+        program={confirming?.credential ?? null}
+        requirementGroup={confirming?.course_code ?? null}
+        requirementText={confirming?.course_title}
+        threshold={confirming?.requirement_credits ?? confirming?.credits_earned ?? 0}
+        onSaved={fetchTimeline}
+        onClose={() => setConfirming(null)}
       />
       {inProgressModal}
     </SafeAreaView>

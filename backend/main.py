@@ -9,7 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from pathlib import Path
 
-from routers import audit, transcript, programs, timeline, admin, users, courses, session, support, email_auth, config, user_choices, substitutions
+from routers import audit, transcript, programs, timeline, admin, users, courses, session, support, email_auth, config, user_choices, substitutions, credential_choices
 
 app = FastAPI(title="DegreeCheck API", version="0.1.0")
 
@@ -45,6 +45,7 @@ app.include_router(support.router,    prefix="/support",     tags=["Support"])
 app.include_router(config.router,     prefix="/config",      tags=["Config"])
 app.include_router(user_choices.router, prefix="/user-choices", tags=["User Choices"])
 app.include_router(substitutions.router, prefix="/substitutions", tags=["Substitutions"])
+app.include_router(credential_choices.router, prefix="/credential-choices", tags=["Credentials"])
 
 # Charlie (multi-school "add my school" agent) is dormant unless explicitly
 # enabled. It stays OFF in production: the router is never imported or mounted,

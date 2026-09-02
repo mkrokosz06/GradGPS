@@ -13,6 +13,7 @@ from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 
 import credential_catalog
+import credential_choices
 from db import users_table, transcript_table, sessions_table, user_choices_table, get_s3
 from deps import get_current_user, get_user_id
 from client_meta import touch_client_meta
@@ -155,6 +156,12 @@ def set_my_credentials(
             status_code=400,
             detail="That is already your major — pick a different minor or certificate.",
         )
+
+    # Dropping a credential drops the courses the student attested for it — otherwise
+    # re-adding it later would silently resurrect stale claims.
+    for previous in (user.get("credentials") or []):
+        if previous.get("program") and previous["program"] not in seen:
+            credential_choices.remove_credential(user_id, previous["program"])
 
     credentials = [
         {"program": n, "kind": credential_catalog.get_credential(n)["kind"]}

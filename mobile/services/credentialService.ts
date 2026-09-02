@@ -35,6 +35,8 @@ export type CredentialAudit = {
   credits_earned: number;
   catalog_credits: { min: number; max: number };
   manual_credits: number;
+  /** How many of those adviser-deferred credits the student has confirmed. */
+  confirmed_credits?: number;
   url: string;
   groups: any[];
 };

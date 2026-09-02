@@ -8,6 +8,7 @@ import { getAudit, getCachedAudit, type AuditSummary } from "../../services/audi
 import { deleteAccount } from "../../services/userService";
 import { setCredentials, credentialErrorMessage } from "../../services/credentialService";
 import { CredentialPickerModal } from "../../components/CredentialPickerModal";
+import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
 
 function classYear(credits: number): string {
   if (credits < 30)  return "Freshman";
@@ -28,6 +29,24 @@ export default function AccountScreen() {
   // it re-reads after every change.
   const [pickerOpen, setPickerOpen]   = useState(false);
   const [savingCreds, setSavingCreds] = useState(false);
+  // The adviser-defined requirement the student is confirming courses for.
+  const [confirming, setConfirming] = useState<
+    { program: string; group: string; text: string; threshold: number } | null
+  >(null);
+
+  /** The one adviser-defined requirement on a credential, if it still needs courses. */
+  function openRequirement(c: any) {
+    const g = (c.groups ?? []).find(
+      (x: any) => x.group_type === "unstructured_credits",
+    );
+    if (!g) return;
+    setConfirming({
+      program: c.program,
+      group: g.name,
+      text: g.pool_text ?? "",
+      threshold: g.threshold ?? 0,
+    });
+  }
   const credentials = audit?.credentials ?? [];
 
   async function saveCredentials(programs: string[]) {
@@ -199,10 +218,16 @@ export default function AccountScreen() {
                     </Text>
                     <Text style={{ color: "#2a5298", fontSize: 11, marginTop: 2 }}>
                       {c.done} of {c.done + c.in_progress + c.missing} requirements done
-                      {c.manual_credits
-                        ? ` · ${c.manual_credits} cr to confirm with your adviser`
-                        : ""}
                     </Text>
+                    {c.manual_credits ? (
+                      <TouchableOpacity onPress={() => openRequirement(c)} style={{ marginTop: 4 }}>
+                        <Text style={{ color: "#1a3a6b", fontSize: 11, fontWeight: "700" }}>
+                          {(c.confirmed_credits ?? 0) >= c.manual_credits
+                            ? `✓ ${c.manual_credits} cr confirmed with your adviser`
+                            : `${c.confirmed_credits ?? 0} of ${c.manual_credits} cr chosen with your adviser ›`}
+                        </Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                   <TouchableOpacity
                     onPress={() => removeCredential(c.program)}
@@ -301,6 +326,16 @@ export default function AccountScreen() {
         alreadyDeclared={credentials.map((c) => c.program)}
         onPick={addCredential}
         onClose={() => setPickerOpen(false)}
+      />
+
+      <CredentialRequirementModal
+        visible={!!confirming}
+        program={confirming?.program ?? null}
+        requirementGroup={confirming?.group ?? null}
+        requirementText={confirming?.text}
+        threshold={confirming?.threshold ?? 0}
+        onSaved={async () => { if (userId) setAudit(await getAudit(userId)); }}
+        onClose={() => setConfirming(null)}
       />
     </SafeAreaView>
   );

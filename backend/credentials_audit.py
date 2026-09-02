@@ -16,6 +16,7 @@ from __future__ import annotations
 import logging
 
 import credential_catalog
+import credential_choices
 from audit_engine import run_audit
 
 logger = logging.getLogger(__name__)
@@ -23,7 +24,8 @@ logger = logging.getLogger(__name__)
 
 def audit_declared_credentials(user: dict,
                                transcript_courses: list[dict],
-                               substitutions: dict | None = None) -> list[dict]:
+                               substitutions: dict | None = None,
+                               attested: dict[str, list[str]] | None = None) -> list[dict]:
     """Audit every credential the user has declared.
 
     Returns [] when none are declared — the no-op that keeps this feature additive
@@ -43,7 +45,11 @@ def audit_declared_credentials(user: dict,
             logger.warning("declared credential not in catalog: %s", name)
             continue
         meta, rows = loaded
-        audit = run_audit(rows, transcript_courses, substitutions)
+        # Courses the student named for this credential's adviser-defined
+        # requirements (credential_choices.py). Narrowed to this credential so the
+        # engine never has to know which one it is auditing.
+        by_group = credential_choices.for_credential(attested or {}, name)
+        audit = run_audit(rows, transcript_courses, substitutions, by_group)
         audit.update({
             "program":         meta["program_name"],
             "kind":            meta["kind"],
@@ -52,6 +58,11 @@ def audit_declared_credentials(user: dict,
             # the app never claims an adviser-approved requirement is met on its own.
             "manual_credits":  meta["manual_credits"],
             "url":             meta["url"],
+            # How many of those adviser-defined credits the student has confirmed,
+            # so the UI can show progress rather than a permanent open item.
+            "confirmed_credits": round(sum(
+                g.get("credits_earned", 0) for g in audit["groups"]
+                if g.get("group_type") == "unstructured_credits"), 1),
         })
         out.append(audit)
     return out

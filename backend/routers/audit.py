@@ -10,6 +10,7 @@ from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
+import credential_choices
 from credentials_audit import audit_declared_credentials
 from deps import get_user_id
 from client_meta import touch_client_meta
@@ -221,6 +222,7 @@ def get_audit(
     # varies by department and isn't in the catalog, and the alternative would silently
     # pick which program loses the course. The UI labels it instead.
     result["credentials"] = audit_declared_credentials(
-        user, transcript_courses, declared_subs)
+        user, transcript_courses, declared_subs,
+        credential_choices.get_credential_choices(user_id))
 
     return result

@@ -22,6 +22,7 @@ from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_gen_ed_courses, build_gen_ed_open, match_template)
 from routers.user_choices import get_user_choices
 from substitutions import get_substitutions
+import credential_choices
 from credentials_audit import audit_declared_credentials
 
 router = APIRouter()
@@ -1302,7 +1303,9 @@ def get_timeline(user_id: str = Depends(get_user_id)):
 
     # Declared minors / certificates schedule after the major's plan is built, so the
     # major stays authoritative and credential work fills the headroom left over.
-    credential_audits = audit_declared_credentials(user, transcript_courses, declared_subs)
+    credential_audits = audit_declared_credentials(
+        user, transcript_courses, declared_subs,
+        credential_choices.get_credential_choices(user_id))
     terms_before = len(future)
     future = _merge_credential_slots(future, credential_audits, course_choices)
     # Declaring a credential can genuinely push graduation out. Report it so the client

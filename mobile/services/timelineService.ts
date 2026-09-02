@@ -41,6 +41,8 @@ export type TimelineCourse = {
   // An adviser-defined credential requirement: shown in the bulletin's own words
   // and never auto-satisfied, so there is no course picker to offer.
   needs_confirmation?:  boolean;
+  /** The requirement's full size, so a partly-confirmed one can show "6 of 9". */
+  requirement_credits?: number | null;
 };
 
 export type Semester = {

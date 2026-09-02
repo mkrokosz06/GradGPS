@@ -1062,7 +1062,8 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
 
 
 def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
-              substitutions: dict | None = None) -> dict:
+              substitutions: dict | None = None,
+              attested_by_group: dict[str, list[str]] | None = None) -> dict:
     """
     Parameters
     ----------
@@ -1072,6 +1073,11 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
 
     transcript_courses : list of dicts from transcript parser / DynamoDB
         Keys: course_code, grade, credits_earned, status (done/in_progress/transfer)
+
+    attested_by_group : requirement_group -> course codes the student declared for it
+        Only `unstructured_credits` groups read this — the adviser-defined minor
+        requirements PSU never resolves into a course list (credential_choices.py).
+        Omitting it is a byte-identical no-op.
 
     Returns
     -------
@@ -1128,7 +1134,8 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             # Homogeneous — simple path
             (gtype, _) = next(iter(type_buckets))
             threshold  = group_meta[group_name]["group_threshold"]
-            result     = _eval_type(gtype, rows, taken, threshold)
+            result     = _eval_type(gtype, rows, taken, threshold,
+                                    (attested_by_group or {}).get(group_name))
 
             d, ip, m = _pool_counts(gtype, result)
             total_done    += d
@@ -1152,7 +1159,7 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             # Credential pools carry the bulletin's own wording so the UI can show the
             # requirement as written ("Select 6 credits ... in consultation with the
             # minor adviser") rather than a generic placeholder.
-            for extra in ("pool_text", "needs_confirmation"):
+            for extra in ("pool_text", "needs_confirmation", "credits_needed"):
                 if result.get(extra):
                     gr[extra] = result[extra]
             group_results.append(gr)
@@ -1397,28 +1404,64 @@ def _eval_dept_credits(rows: list[dict], taken: dict, threshold) -> dict:
     }
 
 
-def _eval_unstructured_credits(rows: list[dict], taken: dict, threshold) -> dict:
+def _eval_unstructured_credits(rows: list[dict], taken: dict, threshold,
+                               attested: list[str] | None = None) -> dict:
     """A requirement PSU defers to an adviser — "Select 6 credits from an approved list
     in consultation with the minor adviser".
 
     The bulletin states the *size* but not the *rule*, so there is nothing to evaluate:
     this is **never** satisfied automatically.  Inventing a rule here would tell a student
-    they had finished a minor they had not.  It reports as outstanding, carrying the
-    bulletin's own wording for the UI to show, and is satisfied only by courses the
-    student explicitly attests to.
+    they had finished a minor they had not.
+
+    It is satisfied only by courses the student explicitly names (`credential_choices.py`),
+    and only those actually on their transcript — so the credits counted are real earned
+    credits, never a guess about a course they might take.  `needs_confirmation` stays
+    true whatever the progress, because the UI must keep presenting this as the student's
+    own claim rather than something GradGPS verified.
     """
     spec = _pool_spec(rows)
     thr  = float(threshold) if threshold else 0.0
+
+    seen: set[int] = set()
+    credits_earned = credits_in_progress = 0.0
+    done = ip = 0
+    items = []
+
+    for code in (attested or []):
+        entry = taken.get(_norm_sub_code(code))
+        if entry is None or id(entry) in seen:
+            continue                     # not on the transcript, or an alias duplicate
+        seen.add(id(entry))
+        status = entry.get("status", "done")
+        cr     = float(entry.get("credits_earned", 0) or 0) or 3.0
+        if status in ("done", "transfer"):
+            credits_earned += cr
+            done += 1
+        elif status == "in_progress":
+            credits_in_progress += cr
+            ip += 1
+        else:
+            continue
+        items.append({
+            "course_code":  code,
+            "course_title": entry.get("course_title", ""),
+            "credits":      cr,
+            "status":       status,
+            "grade":        entry.get("grade", ""),
+            "attested":     True,
+        })
+
+    satisfied = bool(thr) and credits_earned >= thr
     return {
-        "satisfied":           False,
-        "credits_earned":      0.0,
-        "credits_in_progress": 0.0,
-        "credits_needed":      thr,
+        "satisfied":           satisfied,
+        "credits_earned":      round(min(credits_earned, thr) if thr else credits_earned, 1),
+        "credits_in_progress": round(credits_in_progress, 1),
+        "credits_needed":      round(max(0.0, thr - credits_earned), 1),
         "threshold":           threshold,
-        "done":                0,
-        "in_progress":         0,
-        "missing":             1,
-        "items":               [],
+        "done":                done,
+        "in_progress":         ip,
+        "missing":             0 if satisfied else 1,
+        "items":               items,
         "needs_confirmation":  True,
         "pool_text":           spec.get("pool_text", ""),
     }
@@ -1656,7 +1699,8 @@ def _eval_choose_courses_consumed(rows: list[dict], taken: dict, threshold) -> d
 
 # ── Dispatch helper ─────────────────────────────────────────────────────────
 
-def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
+def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold,
+               attested: list[str] | None = None) -> dict:
     if gtype == "required":
         return _eval_required(rows, taken)
     elif gtype == "choose_one":
@@ -1670,7 +1714,7 @@ def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
     elif gtype == "dept_credits":
         return _eval_dept_credits(rows, taken, threshold)
     elif gtype == "unstructured_credits":
-        return _eval_unstructured_credits(rows, taken, threshold)
+        return _eval_unstructured_credits(rows, taken, threshold, attested)
     else:
         return _eval_required(rows, taken)   # fallback
 

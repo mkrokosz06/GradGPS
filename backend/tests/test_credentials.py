@@ -187,6 +187,77 @@ def test_every_catalog_credential_audits_without_error():
         assert result["missing"] > 0, f"{name} reports nothing missing on an empty transcript"
 
 
+# ── Student-confirmed (adviser-defined) requirements ─────────────────────────
+
+def _adviser_group(rows):
+    return [r for r in rows if r["group_type"] == "unstructured_credits"][0]
+
+
+def test_attested_courses_satisfy_an_adviser_defined_requirement():
+    """The whole point of Phase 4: without this, the 53 credentials carrying one of
+    these could never read as complete, whatever the student took."""
+    _meta, rows = cc.load_credential("Art, Minor")
+    group = _adviser_group(rows)["requirement_group"]
+    courses = tx(("MUSIC 11", "done", "B", 3), ("THEA 101", "done", "B", 3),
+                 ("ANTH 140", "done", "B", 3))
+
+    unconfirmed = run_audit(rows, courses)
+    assert group_named(unconfirmed, "unstructured_credits")[0]["satisfied"] is False
+
+    confirmed = run_audit(rows, courses,
+                          attested_by_group={group: ["MUSIC 11", "THEA 101", "ANTH 140"]})
+    pool = group_named(confirmed, "unstructured_credits")[0]
+    assert pool["satisfied"] is True
+    assert pool["credits_earned"] == 9.0
+    assert {i["course_code"] for i in pool["items"]} == {"MUSIC 11", "THEA 101", "ANTH 140"}
+
+
+def test_partial_confirmation_reports_progress_not_completion():
+    _meta, rows = cc.load_credential("Art, Minor")
+    group = _adviser_group(rows)["requirement_group"]
+    result = run_audit(rows, tx(("MUSIC 11", "done", "B", 3)),
+                       attested_by_group={group: ["MUSIC 11"]})
+    pool = group_named(result, "unstructured_credits")[0]
+    assert pool["satisfied"] is False
+    assert pool["credits_earned"] == 3.0 and pool["credits_needed"] == 6.0
+
+
+def test_a_course_not_on_the_transcript_counts_for_nothing():
+    """The API refuses it, but the engine must not credit a stale claim either —
+    a student who dropped the course should stop getting credit for it."""
+    _meta, rows = cc.load_credential("Art, Minor")
+    group = _adviser_group(rows)["requirement_group"]
+    result = run_audit(rows, [], attested_by_group={group: ["ART 230", "ART 240"]})
+    pool = group_named(result, "unstructured_credits")[0]
+    assert pool["credits_earned"] == 0.0 and pool["satisfied"] is False
+
+
+def test_confirmation_never_stops_being_the_students_own_claim():
+    """`needs_confirmation` stays true even when satisfied: the UI must keep framing
+    it as the student's declaration, not something GradGPS verified."""
+    _meta, rows = cc.load_credential("Art, Minor")
+    group = _adviser_group(rows)["requirement_group"]
+    result = run_audit(rows, tx(("MUSIC 11", "done", "B", 9)),
+                       attested_by_group={group: ["MUSIC 11"]})
+    pool = group_named(result, "unstructured_credits")[0]
+    assert pool["satisfied"] is True and pool["needs_confirmation"] is True
+
+
+def test_attested_map_for_another_credential_is_ignored():
+    """`for_credential` narrows by program, so one minor's claims can't satisfy
+    another's requirement of the same name."""
+    import credential_choices as choices
+    m = {choices.group_key("Art, Minor", "G"): ["MUSIC 11"]}
+    assert choices.for_credential(m, "Art, Minor") == {"G": ["MUSIC 11"]}
+    assert choices.for_credential(m, "Economics, Minor") == {}
+
+
+def test_omitting_attested_courses_is_a_no_op():
+    _meta, rows = cc.load_credential("Art, Minor")
+    courses = tx(("ART 110", "done", "A", 3))
+    assert run_audit(rows, courses) == run_audit(rows, courses, attested_by_group={})
+
+
 # ── Timeline merge ───────────────────────────────────────────────────────────
 
 from routers.timeline import _merge_credential_slots      # noqa: E402

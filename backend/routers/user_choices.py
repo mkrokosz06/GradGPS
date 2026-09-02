@@ -30,6 +30,13 @@ _TERM_RE = re.compile(r"^(FA|SP|SU) \d{4}$")
 
 # Reserved slot_key namespace owned by substitutions.py.
 _SUB_PREFIX = "sub:"
+# Reserved slot_key namespace owned by credential_choices.py — the courses a student
+# attests to for an adviser-defined minor/certificate requirement.  Like `sub:`, these
+# are a different kind of decision and must not leak into the timeline's choice/pin maps.
+# Note the exact colon: a credential *slot* on the timeline is `credslot:<program>:…`
+# and is an ordinary class-selector decision, so it is deliberately NOT reserved.
+_CRED_PREFIX = "cred:"
+_RESERVED_PREFIXES = (_SUB_PREFIX, _CRED_PREFIX)
 
 
 class ChoiceBody(BaseModel):
@@ -67,7 +74,7 @@ def get_user_choices(user_id: str) -> dict[str, dict]:
             "pinned_term":   it.get("pinned_term"),
         }
         for it in items
-        if not str(it.get("slot_key", "")).startswith(_SUB_PREFIX)
+        if not str(it.get("slot_key", "")).startswith(_RESERVED_PREFIXES)
     }
 
 
@@ -84,7 +91,7 @@ def list_choices(user_id: str = Depends(get_user_id)):
 @router.put("")
 def upsert_choice(body: ChoiceBody, user_id: str = Depends(get_user_id)):
     slot_key = body.slot_key.strip()
-    if not slot_key or "/" in slot_key or slot_key.startswith(_SUB_PREFIX):
+    if not slot_key or "/" in slot_key or slot_key.startswith(_RESERVED_PREFIXES):
         raise HTTPException(status_code=400, detail="Invalid slot_key.")
     if body.slot_kind not in _VALID_SLOT_KINDS:
         raise HTTPException(status_code=400, detail="Invalid slot_kind.")
@@ -119,7 +126,7 @@ def upsert_choice(body: ChoiceBody, user_id: str = Depends(get_user_id)):
 @router.delete("")
 def delete_choice(slot_key: str = Query(...), user_id: str = Depends(get_user_id)):
     key = slot_key.strip()
-    if not key or key.startswith(_SUB_PREFIX):
+    if not key or key.startswith(_RESERVED_PREFIXES):
         raise HTTPException(status_code=400, detail="Invalid slot_key.")
     try:
         user_choices_table.delete_item(Key={"user_id": user_id, "slot_key": key})
