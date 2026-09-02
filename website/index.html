@@ -1,406 +1,141 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!--#include head-common-->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="GradGPS is a free, AI-powered iPhone app for Penn State students. Its AI advisor reads your transcript, audits it against your major's real requirements, and plots a semester-by-semester route to graduation. Now in open beta on TestFlight." />
-<meta name="theme-color" content="#1a3a6b" />
-<link rel="canonical" href="https://gradgps.com/" />
-<link rel="icon" type="image/png" href="/logo.png" />
+<meta name="theme-color" content="#FAFBFD" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101B2E" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/logo.png" type="image/png" sizes="256x256" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-<link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/barlow-500.woff2" as="font" type="font/woff2" crossorigin />
-<link rel="preload" href="/fonts/barlow-semi-condensed-600.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="manifest" href="/site.webmanifest" />
 <link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
-<meta property="og:type" content="website" />
+<link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/styles.css" />
 <meta property="og:site_name" content="GradGPS" />
-<meta property="og:title" content="GradGPS — Your AI degree advisor for Penn State" />
-<meta property="og:description" content="A free iPhone app that reads your transcript, audits it against your major's real requirements, and maps your route to graduation. In open beta on TestFlight." />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<!--#endinclude head-common-->
+<title>GradGPS — Your AI-powered college adviser for Penn State</title>
+<meta name="description" content="An AI-powered college adviser for Penn State students, free on iPhone. It reads your transcript, audits it against your major's real requirements, and maps every remaining semester to graduation." />
+<link rel="canonical" href="https://gradgps.com/" />
+<meta property="og:title" content="GradGPS — Your AI-powered college adviser for Penn State" />
+<meta property="og:description" content="An AI-powered college adviser that reads your transcript, audits it against your major's real requirements, and maps your route to graduation. Free, on iPhone, in open beta." />
 <meta property="og:url" content="https://gradgps.com/" />
 <meta property="og:image" content="https://gradgps.com/og.png" />
+<meta property="og:image:type" content="image/png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="GradGPS — You are here. Graduation is that way." />
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="GradGPS — Your AI degree advisor for Penn State" />
-<meta name="twitter:description" content="A free iPhone app that reads your transcript, audits it against your major's real requirements, and maps your route to graduation. In open beta on TestFlight." />
-<meta name="twitter:image" content="https://gradgps.com/og.png" />
-<title>GradGPS — Your AI degree advisor for Penn State</title>
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"SoftwareApplication","name":"GradGPS","operatingSystem":"iOS","applicationCategory":"EducationalApplication","description":"AI-powered degree audit and semester-by-semester graduation planner for Penn State students.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"screenshot":"https://gradgps.com/shots/app-timeline.png","url":"https://gradgps.com/"}
-</script>
-<style>
-  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/barlow-400.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/barlow-500.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/barlow-semi-condensed-600.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/barlow-semi-condensed-700.woff2) format("woff2"); }
-
-  :root {
-    --paper:    #FAFBFD;
-    --ink:      #16233A;
-    --ink-soft: #52627D;
-    --navy:     #1a3a6b;
-    --blue:     #2a5298;
-    --tint:     #EDF2FA;
-    --line:     #DCE3EE;
-    --done:     #16a34a;
-    --progress: #d97706;
-    --missing:  #6E7684;
-    --display: "Barlow Semi Condensed", "Arial Narrow", "Segoe UI", sans-serif;
-    --sans: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
-    --mono: "Cascadia Code", ui-monospace, "SF Mono", Consolas, Menlo, monospace;
-  }
-
-  * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
-  body {
-    margin: 0;
-    background-color: var(--paper);
-    background-image: radial-gradient(rgba(26, 58, 107, 0.07) 1px, transparent 1.5px);
-    background-size: 26px 26px;
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 17px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  img { max-width: 100%; }
-  a { color: inherit; }
-  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
-
-  .wrap { max-width: 1060px; margin: 0 auto; padding: 0 24px; }
-
-  /* ---------- header ---------- */
-  .site-head {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(250, 251, 253, 0.88);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  .site-head .wrap { display: flex; align-items: center; gap: 28px; height: 62px; }
-  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
-  .brand img { width: 32px; height: 32px; border-radius: 7px; display: block; }
-  .brand span {
-    font-family: var(--display); font-weight: 700; font-size: 22px;
-    letter-spacing: 0.01em; color: var(--navy);
-  }
-  .brand span b { color: var(--blue); font-weight: 700; }
-  .site-nav { display: flex; align-items: center; gap: 26px; }
-  .site-nav a { color: var(--ink-soft); text-decoration: none; font-size: 15px; font-weight: 500; }
-  .site-nav a:hover { color: var(--navy); }
-  .btn {
-    display: inline-block; text-decoration: none; font-weight: 600;
-    font-family: var(--sans);
-    border-radius: 10px; padding: 12px 24px; font-size: 15.5px;
-    transition: transform 0.12s ease, box-shadow 0.12s ease, background-color 0.12s ease;
-  }
-  .btn:hover { transform: translateY(-1px); }
-  .btn-navy { background: var(--navy); color: #fff; box-shadow: 0 3px 12px rgba(26, 58, 107, 0.25); }
-  .btn-navy:hover { background: var(--blue); }
-  .btn-line { color: var(--navy); border: 1.5px solid var(--line); background: #fff; }
-  .btn-line:hover { border-color: var(--blue); }
-  .site-nav .btn { padding: 8px 18px; }
-  /* .site-nav a (0,1,1) would otherwise override .btn-navy's white text with grey. */
-  .site-nav a.btn-navy, .site-nav a.btn-navy:hover { color: #fff; }
-  @media (max-width: 720px) { .site-nav a:not(.btn) { display: none; } }
-
-  /* ---------- hero ---------- */
-  .hero { padding: 70px 0 34px; text-align: center; }
-  .hero-copy { max-width: 40em; margin: 0 auto; }
-  .hero .eyebrow { justify-content: center; }
-  .hero-brand {
-    display: inline-flex; align-items: center; gap: 15px;
-    text-decoration: none; margin: 0 0 26px;
-  }
-  .hero-brand img { width: 64px; height: 64px; border-radius: 15px; display: block; }
-  .hero-brand span {
-    font-family: var(--display); font-weight: 700; line-height: 1;
-    font-size: clamp(38px, 5vw, 56px); letter-spacing: -0.015em; color: var(--navy);
-  }
-  .hero-brand span b { color: var(--blue); font-weight: 700; }
-  .hero p.lede { margin-left: auto; margin-right: auto; }
-  .hero-ctas { justify-content: center; }
-  .hero-shots { margin-top: 56px; }
-  .hero-shots .shots-grid { max-width: 940px; margin: 0 auto; }
-  @media (min-width: 781px) {
-    .hero-shots .shot:nth-child(2) { transform: translateY(-28px); }
-    .hero-shots .shot:nth-child(1),
-    .hero-shots .shot:nth-child(3) { transform: translateY(12px); }
-  }
-  .eyebrow {
-    display: inline-flex; align-items: center; gap: 8px;
-    font-size: 13px; font-weight: 600; letter-spacing: 0.13em;
-    text-transform: uppercase; color: var(--blue);
-    margin: 0 0 22px;
-  }
-  .eyebrow::before {
-    content: ""; width: 26px; border-top: 2px dashed var(--blue); opacity: 0.6;
-  }
-  .ai-chip {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--display); font-size: 12px; font-weight: 700;
-    letter-spacing: 0.1em; color: #fff;
-    background: linear-gradient(100deg, var(--navy), var(--blue));
-    padding: 5px 13px 5px 11px; border-radius: 999px;
-    box-shadow: 0 4px 14px rgba(42, 82, 152, 0.35);
-  }
-  .ai-chip svg { width: 13px; height: 13px; }
-  .hero h1 {
-    font-family: var(--display); font-weight: 700;
-    font-size: clamp(46px, 7vw, 78px);
-    line-height: 0.98; letter-spacing: -0.005em;
-    margin: 0 0 22px; text-wrap: balance; max-width: 13em;
-  }
-  .hero h1 .dest { color: var(--blue); }
-  .hero p.lede {
-    font-size: 19px; color: var(--ink-soft); max-width: 33em; margin: 0 0 30px;
-  }
-  .hero-ctas { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; }
-  .hero-note { font-size: 14px; color: var(--missing); margin: 16px 0 0; }
-
-  /* ---------- route map ---------- */
-  .routemap-card {
-    background: #fff; border: 1px solid var(--line); border-radius: 18px;
-    padding: 30px 22px 18px;
-    box-shadow: 0 20px 50px rgba(22, 35, 58, 0.07);
-    overflow-x: auto;
-  }
-  .routemap-head {
-    display: flex; align-items: baseline; justify-content: space-between; gap: 16px;
-    padding: 0 10px 4px;
-  }
-  .routemap-head .t { font-family: var(--display); font-weight: 600; font-size: 17px; letter-spacing: 0.02em; }
-  .routemap-head .m { font-family: var(--mono); font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .routemap-card svg { display: block; min-width: 760px; width: 100%; height: auto; }
-  .routemap-card text { font-family: var(--sans); }
-  .rm-label { font-size: 13px; font-weight: 600; fill: var(--ink); }
-  .rm-sub { font-size: 11px; fill: var(--ink-soft); }
-  .rm-flag { font-family: var(--display); font-size: 12.5px; font-weight: 700; letter-spacing: 0.08em; fill: #b45309; }
-  .rm-dest { font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.05em; fill: var(--navy); }
-
-  #rm-svg, #rm-title, #rm-meta { transition: opacity 0.3s ease; }
-  @media (prefers-reduced-motion: no-preference) {
-    .rm-traveled { animation: draw 1.6s ease-out 0.2s forwards; }
-    @keyframes draw { to { stroke-dashoffset: 0; } }
-    .rm-pulse { animation: pulse 2.2s ease-out 1.8s infinite; transform-origin: center; transform-box: fill-box; }
-    @keyframes pulse { 0% { opacity: 0.55; transform: scale(0.6); } 70% { opacity: 0; transform: scale(1.7); } 100% { opacity: 0; } }
-  }
-
-  /* ---------- trip stats ---------- */
-  .stats .wrap {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    background: #fff; border: 1px solid var(--line); border-radius: 14px;
-    padding: 22px 10px; margin-top: 8px;
-  }
-  .stat { text-align: center; padding: 4px 12px; }
-  .stat + .stat { border-left: 1px solid var(--line); }
-  .stat .n {
-    font-family: var(--display); font-weight: 700; font-size: 34px; color: var(--navy);
-    font-variant-numeric: tabular-nums; line-height: 1.05;
-  }
-  .stat .l { font-size: 13px; color: var(--ink-soft); margin-top: 3px; }
-  @media (max-width: 720px) {
-    .stats .wrap { grid-template-columns: repeat(2, 1fr); row-gap: 18px; }
-    .stat:nth-child(3) { border-left: none; }
-  }
-
-  /* ---------- sections ---------- */
-  section.block { padding: 96px 0 0; }
-  .kicker {
-    font-size: 13px; font-weight: 600; letter-spacing: 0.13em;
-    text-transform: uppercase; color: var(--blue); margin: 0 0 10px;
-  }
-  h2 {
-    font-family: var(--display); font-weight: 700;
-    font-size: clamp(32px, 4.2vw, 46px); line-height: 1.04;
-    margin: 0 0 14px; text-wrap: balance; letter-spacing: -0.003em;
-  }
-  .section-lede { color: var(--ink-soft); max-width: 40em; margin: 0 0 44px; font-size: 18px; }
-
-  /* ---------- directions (how it works) ---------- */
-  .directions { max-width: 640px; }
-  .dir-row { display: flex; gap: 22px; position: relative; padding-bottom: 34px; }
-  .dir-row:last-child { padding-bottom: 0; }
-  .dir-row::before {
-    content: ""; position: absolute; left: 25px; top: 52px; bottom: 6px;
-    border-left: 2.5px dashed var(--line);
-  }
-  .dir-row:last-child::before { display: none; }
-  .dir-badge {
-    flex: none; width: 52px; height: 52px; border-radius: 50%;
-    background: #fff; border: 2px solid var(--navy); color: var(--navy);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 4px 12px rgba(22, 35, 58, 0.10);
-  }
-  .dir-badge svg { width: 22px; height: 22px; }
-  .dir-row:last-child .dir-badge { background: var(--navy); color: #fff; }
-  .dir-body h3 {
-    font-family: var(--display); font-weight: 600; font-size: 21px;
-    margin: 3px 0 6px; letter-spacing: 0.005em;
-  }
-  .dir-body p { margin: 0; color: var(--ink-soft); font-size: 16px; }
-  .dir-body .then {
-    display: inline-block; font-family: var(--mono); font-size: 11.5px;
-    color: var(--blue); letter-spacing: 0.06em; text-transform: uppercase;
-    margin-bottom: 2px;
-  }
-
-  /* ---------- screenshots ---------- */
-  .shots-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px 34px; align-items: start; }
-  .shot { text-align: center; }
-  .phone {
-    max-width: 280px; margin: 0 auto;
-    border: 9px solid var(--ink); border-radius: 40px; overflow: hidden;
-    background: #fff; box-shadow: 0 24px 60px rgba(22, 35, 58, 0.16);
-  }
-  .phone img { display: block; width: 100%; height: auto; }
-  .shot h3 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 18px 0 4px; }
-  .shot p { margin: 0 auto; color: var(--ink-soft); font-size: 15px; max-width: 24em; }
-  @media (max-width: 780px) {
-    .shots-grid {
-      display: flex; overflow-x: auto; gap: 22px;
-      scroll-snap-type: x mandatory; padding-bottom: 10px;
-      margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://gradgps.com/#org",
+      "name": "GradGPS",
+      "url": "https://gradgps.com/",
+      "logo": { "@type": "ImageObject", "url": "https://gradgps.com/icon-512.png", "width": 512, "height": 512 },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "email": "support@gradgps.com",
+        "url": "https://gradgps.com/support",
+        "availableLanguage": "English"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://gradgps.com/#website",
+      "url": "https://gradgps.com/",
+      "name": "GradGPS",
+      "publisher": { "@id": "https://gradgps.com/#org" }
+    },
+    {
+      "@type": "MobileApplication",
+      "@id": "https://gradgps.com/#app",
+      "name": "GradGPS",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "iOS",
+      "url": "https://gradgps.com/",
+      "installUrl": "https://testflight.apple.com/join/ZeYCnfcF",
+      "description": "Degree audit and semester-by-semester graduation planner for Penn State students.",
+      "screenshot": [
+        "https://gradgps.com/shots/app-timeline.png",
+        "https://gradgps.com/shots/app-home.png"
+      ],
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+      "publisher": { "@id": "https://gradgps.com/#org" }
     }
-    .shot { flex: 0 0 78%; scroll-snap-align: center; }
-  }
-
-  /* ---------- legend (features) ---------- */
-  .legend-panel {
-    background: #fff; border: 1px solid var(--line); border-radius: 18px;
-    padding: 8px 34px;
-  }
-  .legend-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 56px; }
-  .leg { display: flex; gap: 18px; align-items: flex-start; padding: 26px 0; }
-  .legend-grid .leg { border-top: 1px solid var(--line); }
-  .legend-grid .leg:nth-child(-n+2) { border-top: none; }
-  .leg-sym { flex: none; width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
-  .leg-sym svg { width: 36px; height: 36px; }
-  .leg h3 { font-family: var(--display); font-weight: 600; font-size: 19px; margin: 0 0 5px; letter-spacing: 0.005em; }
-  .leg p { margin: 0; color: var(--ink-soft); font-size: 15px; line-height: 1.55; }
-  .leg code {
-    font-family: var(--mono); font-size: 12.5px;
-    background: var(--tint); border: 1px solid var(--line);
-    padding: 1px 6px; border-radius: 6px; white-space: nowrap;
-  }
-  @media (max-width: 780px) {
-    .legend-grid { grid-template-columns: 1fr; }
-    .legend-grid .leg:nth-child(2) { border-top: 1px solid var(--line); }
-    .legend-panel { padding: 4px 22px; }
-  }
-
-  /* ---------- support ---------- */
-  .support-grid {
-    display: grid; grid-template-columns: 0.9fr 1.1fr; gap: 48px;
-    align-items: start;
-  }
-  @media (max-width: 820px) { .support-grid { grid-template-columns: 1fr; gap: 12px; } }
-  .support-form {
-    background: #fff; border: 1px solid var(--line); border-radius: 18px;
-    padding: 30px 30px 28px;
-    box-shadow: 0 20px 50px rgba(22, 35, 58, 0.07);
-    display: flex; flex-direction: column; gap: 16px;
-  }
-  .field { display: flex; flex-direction: column; gap: 6px; }
-  .field label {
-    font-family: var(--display); font-weight: 600; font-size: 14px;
-    letter-spacing: 0.05em; text-transform: uppercase; color: var(--ink);
-  }
-  .field input, .field textarea {
-    font-family: var(--sans); font-size: 16px; color: var(--ink);
-    background: var(--paper); border: 1.5px solid var(--line); border-radius: 10px;
-    padding: 11px 14px; width: 100%;
-  }
-  .field textarea { min-height: 140px; resize: vertical; }
-  .field input:focus, .field textarea:focus {
-    outline: none; border-color: var(--blue);
-    box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.15);
-  }
-  .support-form button {
-    font-family: var(--sans); cursor: pointer; border: none; align-self: flex-start;
-  }
-  .support-form button:disabled { opacity: 0.6; cursor: default; transform: none; }
-  .form-status { font-size: 15px; margin: 0; min-height: 1.4em; }
-  .form-status.err { color: #b42318; }
-  .form-status.ok { color: #15803d; font-weight: 500; }
-  .hp-field {
-    position: absolute !important; left: -9999px !important;
-    width: 1px; height: 1px; overflow: hidden;
-  }
-  .support-aside p { color: var(--ink-soft); font-size: 16px; max-width: 30em; }
-
-  /* ---------- cta ---------- */
-  .cta { padding: 110px 0 100px; text-align: center; }
-  .cta .pin { width: 68px; height: 68px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 14px 34px rgba(22, 35, 58, 0.22); }
-  .cta h2 { font-size: clamp(38px, 5vw, 58px); }
-  .cta p { color: var(--ink-soft); max-width: 32em; margin: 0 auto 32px; font-size: 18px; }
-  .cta .hero-note { margin-top: 16px; }
-
-  /* ---------- footer ---------- */
-  .site-foot { border-top: 1px solid var(--line); background: #fff; color: var(--ink-soft); font-size: 13.5px; }
-  .site-foot .wrap {
-    padding: 26px 24px 30px;
-    display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center;
-  }
-  .site-foot .copy { margin-right: auto; }
-  .site-foot a { text-decoration: none; }
-  .site-foot a:hover { color: var(--navy); text-decoration: underline; }
-  .site-foot .disclaimer { flex-basis: 100%; font-size: 12.5px; color: var(--missing); }
-</style>
+  ]
+}
+</script>
 </head>
-<body>
+<body class="page-home">
+<!--#include header-->
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-head">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="GradGPS home">
+    <a class="brand" href="/" aria-label="GradGPS home">
       <img src="/logo.png" width="32" height="32" alt="" />
       <span>Grad<b>GPS</b></span>
     </a>
-    <nav class="site-nav" aria-label="Site">
-      <a href="#how">How it works</a>
-      <a href="#legend">Features</a>
-      <a href="#support">Support</a>
-      <a class="btn btn-navy" href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">Get the beta</a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/support">Support</a></li>
+      </ul>
+      <a class="btn btn-navy nav-cta" href="/beta">Get the beta</a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        Menu
+      </button>
     </nav>
   </div>
 </header>
+<!--#endinclude header-->
 
-<main id="top">
+<main id="main">
   <section class="hero">
     <div class="wrap">
       <div class="hero-copy">
-        <a class="hero-brand" href="#top" aria-label="GradGPS home">
+        <a class="hero-brand" href="/" aria-label="GradGPS home">
           <img src="/logo.png" width="64" height="64" alt="" />
           <span>Grad<b>GPS</b></span>
         </a>
-        <p class="eyebrow"><span class="ai-chip"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2 7.5L21.5 12 14 14.5 12 22l-2-7.5L2.5 12 10 9.5z"/></svg>AI-powered</span>Degree navigation for Penn State &middot; in open beta</p>
-        <h1>You are here. <span class="dest">Graduation is that&nbsp;way.</span></h1>
+        <h1>Your AI-powered <span class="dest">college&nbsp;adviser.</span></h1>
         <p class="lede">
-          GradGPS is a free iPhone app that puts an AI degree advisor in your pocket: it reads
-          your transcript, checks it against your major&rsquo;s real requirements, and maps
-          every remaining semester to graduation.
+          <span class="lede-lead">You are here. Graduation is that way.</span>
+          GradGPS reads your actual transcript, checks it against your major&rsquo;s actual
+          requirements, and maps every remaining semester to graduation &mdash; in about a minute,
+          on your phone.
         </p>
         <div class="hero-ctas">
-          <a class="btn btn-navy" href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">Get it on TestFlight</a>
-          <a class="btn btn-line" href="#how">How it works</a>
+          <a class="btn btn-navy" href="/beta">Get the beta</a>
+          <a class="btn btn-line" href="/how-it-works">How it works</a>
         </div>
-        <p class="hero-note">Free for students &middot; iPhone &middot; works with your LionPATH transcript<br />
-        The button opens TestFlight &mdash; Apple&rsquo;s free beta-app installer. Two taps, about a minute.</p>
+        <p class="hero-note">Free for students &middot; iPhone &middot; works with your LionPATH transcript</p>
       </div>
       <div class="hero-shots">
         <div class="shots-grid">
           <div class="shot">
-            <div class="phone"><img src="/shots/app-home.png" width="780" height="1688" fetchpriority="high" alt="GradGPS home screen: current semester in progress and a recommended Fall 2026 registration plan of five courses" /></div>
-            <h3>Plan your registration</h3>
+            <div class="phone"><img src="/shots/app-home.png" width="780" height="1535" fetchpriority="high" alt="GradGPS home screen: Fall 2026 in progress at 64 credits, and a recommended Spring 2027 registration plan of five courses including IST 242 and ETI 300W" /></div>
+            <h2>Plan your registration</h2>
             <p>Next semester picked from what&rsquo;s actually left &mdash; required courses first, choose-one alternatives spelled out.</p>
           </div>
           <div class="shot">
-            <div class="phone"><img src="/shots/app-timeline.png" width="780" height="1688" fetchpriority="high" alt="GradGPS timeline screen: credit progress bar and a semester timeline with a you-are-here marker on Spring 2026" /></div>
-            <h3>Follow the timeline</h3>
+            <div class="phone"><img src="/shots/app-timeline.png" width="780" height="1535" alt="GradGPS timeline screen: 64 credits earned of 120, with a you-are-here marker on Fall 2026 and that term's four courses listed below" /></div>
+            <h2>Follow the timeline</h2>
             <p>Every semester from first to final &mdash; past ones checked off, you-are-here marked, future ones planned.</p>
           </div>
           <div class="shot">
-            <div class="phone"><img src="/shots/app-account.png" width="780" height="1688" fetchpriority="high" alt="GradGPS account screen: 52 of 120 credits, with requirements done, in progress, and remaining" /></div>
-            <h3>Watch it add up</h3>
+            <div class="phone"><img src="/shots/app-account.png" width="780" height="1535" alt="GradGPS account screen: 64 of 120 credits, with 8 requirements done, 2 in progress, and 18 remaining" /></div>
+            <h2>Watch it add up</h2>
             <p>Credits earned and requirements done, in progress, and remaining &mdash; refreshed with every upload.</p>
           </div>
         </div>
@@ -417,9 +152,8 @@
     </div>
   </div>
 
-  <section class="block" id="how">
+  <section class="block">
     <div class="wrap">
-      <p class="kicker">Directions</p>
       <h2>Three steps from transcript to graduation.</h2>
       <p class="section-lede">
         No spreadsheets, no guessing which requirements you&rsquo;ve already knocked out,
@@ -431,7 +165,7 @@
           <div class="dir-body">
             <span class="then">Start</span>
             <h3>Upload your transcript</h3>
-            <p>Grab the app on <a href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">TestFlight</a>, export your unofficial transcript from LionPATH (Academic Records &rarr; Unofficial Transcript &mdash; free and instant), and drop it in. Every course, credit, and grade parsed in seconds.</p>
+            <p>Export your unofficial transcript from LionPATH and drop it in. Every course, credit, and grade parsed in seconds.</p>
           </div>
         </div>
         <div class="dir-row">
@@ -447,359 +181,62 @@
           <div class="dir-body">
             <span class="then">Arrive</span>
             <h3>Follow your route</h3>
-            <p>Your AI advisor hands you a full degree audit plus a semester-by-semester timeline to graduation, recalculated every time your record changes.</p>
+            <p>A full degree audit plus a semester-by-semester timeline to graduation, recalculated every time your record changes.</p>
           </div>
         </div>
       </div>
+      <p style="margin-top: 34px;"><a class="btn btn-line" href="/how-it-works">See how the audit works</a></p>
     </div>
   </section>
 
-  <section class="block" id="route">
-    <div class="wrap">
-      <p class="kicker">Live example</p>
-      <h2>Watch a real route come together.</h2>
-      <p class="section-lede">
-        Every stop is a semester &mdash; completed ones checked off, a &ldquo;you are here&rdquo;
-        marker on the term in progress, and a dashed line running all the way to your graduation pin.
-      </p>
-      <div class="routemap-card">
-        <div class="routemap-head">
-          <span class="t" id="rm-title">Route: Enterprise Technology Integration, B.S.</span>
-          <span class="m" id="rm-meta">90 / 120 CR &middot; ETA MAY 2027</span>
-        </div>
-        <svg id="rm-svg" viewBox="0 0 980 220" role="img" aria-label="Example degree route"></svg>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="legend">
-    <div class="wrap">
-      <p class="kicker">Map legend</p>
-      <h2>An AI advisor that has actually read the bulletin.</h2>
-      <p class="section-lede">
-        No hallucinated course lists. The AI reads your transcript PDF, matches every course
-        against the real Penn State catalog &mdash; not a simplified copy &mdash; and plans
-        your remaining semesters, so the route it gives you is one the registrar would
-        agree with.
-      </p>
-      <div class="legend-panel">
-        <div class="legend-grid">
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 36 36"><circle cx="18" cy="18" r="10" fill="#16a34a"/><path d="M 13.5 18 l 3.2 3.2 l 6 -6.8" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
-            <div>
-              <h3>A real degree audit</h3>
-              <p>Every requirement group in your major, checked against your record &mdash; including alternatives like <code>MATH 110</code> or <code>MATH 140</code>, and credit pools that let you choose.</p>
-            </div>
-          </div>
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#1a3a6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88" fill="#2a5298" stroke="none"/></svg></div>
-            <div>
-              <h3>Gen eds, handled</h3>
-              <p>Arts, sciences, humanities, cultures, quantification, writing-intensive &mdash; all eight domains tracked, with the one-course-one-category rules applied correctly.</p>
-            </div>
-          </div>
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="#1a3a6b" stroke-width="2.6" stroke-linecap="round"><path d="M 5 28 H 15 L 22 18 H 31" stroke-dasharray="0.1 6.2" stroke-width="3"/><circle cx="5" cy="28" r="2.6" fill="#1a3a6b" stroke="none"/><circle cx="31" cy="18" r="2.6" fill="#1a3a6b" stroke="none"/></svg></div>
-            <div>
-              <h3>Official plan sequencing</h3>
-              <p>Where Penn State publishes a Suggested Academic Plan, your timeline follows it &mdash; prerequisites in order, credits balanced, reflowed around what you&rsquo;ve already taken.</p>
-            </div>
-          </div>
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 36 36"><path d="M18 6.5l3.4 6.9 7.6 1.1-5.5 5.4 1.3 7.6-6.8-3.6-6.8 3.6 1.3-7.6-5.5-5.4 7.6-1.1z" fill="none" stroke="#1a3a6b" stroke-width="2.4" stroke-linejoin="round"/></svg></div>
-            <div>
-              <h3>Know your professors</h3>
-              <p>Professor ratings appear right on each course, so when your route says &ldquo;take STAT 200,&rdquo; you also know who to take it with.</p>
-            </div>
-          </div>
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#1a3a6b" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg></div>
-            <div>
-              <h3>Reroutes in real time</h3>
-              <p>Change your major, add a class, drop one &mdash; your AI advisor rebuilds the audit and timeline instantly. Your plan is never a stale PDF from freshman orientation.</p>
-            </div>
-          </div>
-          <div class="leg">
-            <div class="leg-sym" aria-hidden="true"><svg viewBox="0 0 36 36" fill="none" stroke="#1a3a6b" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="16" width="20" height="13" rx="2.5"/><path d="M12 16v-4a6 6 0 0 1 12 0v4"/></svg></div>
-            <div>
-              <h3>Private by default</h3>
-              <p>Sign in with Google. Your transcript belongs to you &mdash; it&rsquo;s used to build your plan and nothing else, and you can delete it any time.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="block" id="support">
-    <div class="wrap">
-      <div class="support-grid">
-        <div class="support-aside">
-          <p class="kicker">Support</p>
-          <h2>Hit a detour? Tell us.</h2>
-          <p>
-            Wrong course on your timeline, a transcript that won&rsquo;t parse, a requirement
-            the audit got wrong &mdash; send it over and we&rsquo;ll take a look. Include your
-            major if it&rsquo;s about the audit; that&rsquo;s usually the first thing we check.
-          </p>
-          <p>Replies go straight to the email you enter, usually within a day or two.</p>
-        </div>
-        <form class="support-form" id="support-form" novalidate>
-          <div class="field">
-            <label for="sf-email">Your email</label>
-            <input id="sf-email" name="email" type="email" required autocomplete="email" placeholder="you@example.com" />
-          </div>
-          <div class="field">
-            <label for="sf-subject">Subject</label>
-            <input id="sf-subject" name="subject" type="text" maxlength="200" placeholder="What's it about?" />
-          </div>
-          <div class="field">
-            <label for="sf-message">Message</label>
-            <textarea id="sf-message" name="message" required maxlength="5000" placeholder="What happened, and what did you expect instead?"></textarea>
-          </div>
-          <div class="hp-field" aria-hidden="true">
-            <label for="sf-website">Website</label>
-            <input id="sf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
-          </div>
-          <p class="form-status" id="sf-status" role="status"></p>
-          <button class="btn btn-navy" type="submit" id="sf-submit">Send message</button>
-        </form>
-      </div>
-    </div>
-  </section>
-
-  <section class="cta" id="beta">
+  <section class="cta">
     <div class="wrap">
       <img class="pin" src="/logo.png" width="68" height="68" alt="" aria-hidden="true" />
       <h2>Stop guessing. Start navigating.</h2>
-      <p>GradGPS is in open beta &mdash; free for Penn State students, on iPhone today. Tap the button, install it through Apple&rsquo;s TestFlight, and let your AI advisor map your route to graduation in under a minute. Built by a Penn State student who got tired of guessing what still counts.</p>
-      <a class="btn btn-navy" href="https://testflight.apple.com/join/ZeYCnfcF" target="_blank" rel="noopener">Get GradGPS on TestFlight</a>
+      <p>GradGPS is in open beta &mdash; free for Penn State students, on iPhone today. Built by a Penn State student who got tired of guessing what still counts.</p>
+      <a class="btn btn-navy" href="/beta">Get the beta</a>
       <p class="hero-note">Free &middot; no credit card, obviously &middot; Android is on the roadmap</p>
     </div>
   </section>
 </main>
 
+<!--#include footer-->
 <footer class="site-foot">
   <div class="wrap">
-    <span class="copy">&copy; 2026 GradGPS &middot; gradgps.com</span>
-    <a href="#top">Back to top</a>
-    <a href="#support">Contact</a>
-    <a href="/privacy">Privacy Policy</a>
-    <span class="disclaimer">GradGPS is an independent student tool and is not affiliated with or endorsed by The Pennsylvania State University. Always confirm your final plan with your academic adviser.</span>
+    <div class="foot-cols">
+      <nav class="foot-col" aria-labelledby="foot-product">
+        <p class="foot-h" id="foot-product">Product</p>
+        <ul>
+          <li><a href="/how-it-works">How it works</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/beta">Get the beta</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-company">
+        <p class="foot-h" id="foot-company">Company</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="mailto:support@gradgps.com">support@gradgps.com</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-legal">
+        <p class="foot-h" id="foot-legal">Legal</p>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Use</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="foot-legal-note">
+      &copy; 2026 GradGPS &middot; gradgps.com &middot; Built in State College, PA.
+      GradGPS is an independent student project and is <strong>not affiliated with, endorsed by, or
+      sponsored by The Pennsylvania State University</strong>. It is a planning aid, not official
+      academic advising &mdash; always confirm your final plan with your adviser.
+    </p>
   </div>
 </footer>
-
-<script>
-(function () {
-  var API = "https://kjn2ysmnjr.us-east-1.awsapprunner.com";
-  var form = document.getElementById("support-form");
-  var status = document.getElementById("sf-status");
-  var submit = document.getElementById("sf-submit");
-
-  function setStatus(text, kind) {
-    status.textContent = text;
-    status.className = "form-status" + (kind ? " " + kind : "");
-  }
-
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    var email = document.getElementById("sf-email").value.trim();
-    var message = document.getElementById("sf-message").value.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
-      setStatus("Please enter a valid email address.", "err");
-      return;
-    }
-    if (message.length < 10) {
-      setStatus("Please describe your issue in a bit more detail.", "err");
-      return;
-    }
-    submit.disabled = true;
-    setStatus("Sending…", "");
-    fetch(API + "/support/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email: email,
-        subject: document.getElementById("sf-subject").value.trim() || null,
-        message: message,
-        website: document.getElementById("sf-website").value || null
-      })
-    }).then(function (res) {
-      if (res.ok) {
-        form.reset();
-        setStatus("Message sent — we'll reply to " + email + ".", "ok");
-        return;
-      }
-      return res.json().catch(function () { return null; }).then(function (data) {
-        var detail = data && typeof data.detail === "string"
-          ? data.detail
-          : "Something went wrong on our end (error " + res.status + ") — please try again in a minute.";
-        setStatus(detail, "err");
-      });
-    }).catch(function () {
-      setStatus("Couldn't reach the server — check your connection and try again.", "err");
-    }).finally(function () {
-      submit.disabled = false;
-    });
-  });
-})();
-</script>
-
-<script>
-(function () {
-  // Rotating hero route map — one of four example students, random start.
-  // Eight stops = a full four-year degree (Fall/Spring, summers off), stepping
-  // up-right in four tiers of two.
-  var XS = [70, 165, 270, 365, 470, 565, 670, 765];
-  var YS = [172, 172, 132, 132, 92, 92, 52, 52];
-  // Full route polyline from start to the destination pin.
-  var PTS = [[20, 172], [200, 172], [235, 132], [400, 132], [435, 92], [600, 92], [635, 52], [800, 52], [872, 36]];
-
-  // Every route is a full 120-credit, eight-semester degree with Fall 2026 the
-  // term in progress. Completed credits = sum of finished terms; the finished +
-  // in-progress + planned terms always total 120.
-  var SCENARIOS = [
-    {
-      // Senior — one semester from the finish line.
-      major: "Enterprise Technology Integration, B.S.",
-      credits: "90 / 120", eta: "MAY 2027", pinDate: "May 2027", cur: 6,
-      stops: [["Fall 2023", "15 cr"], ["Spring 2024", "16 cr"], ["Fall 2024", "15 cr"],
-              ["Spring 2025", "15 cr"], ["Fall 2025", "14 cr"], ["Spring 2026", "15 cr"],
-              ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"]]
-    },
-    {
-      // Junior — a December finisher (spring start).
-      major: "Accounting, B.S.",
-      credits: "75 / 120", eta: "DEC 2027", pinDate: "Dec 2027", cur: 5,
-      stops: [["Spring 2024", "15 cr"], ["Fall 2024", "16 cr"], ["Spring 2025", "14 cr"],
-              ["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 15 cr"],
-              ["Spring 2027", "planned"], ["Fall 2027", "planned"]]
-    },
-    {
-      // Sophomore — plenty of road ahead.
-      major: "Marketing, B.S.",
-      credits: "30 / 120", eta: "MAY 2029", pinDate: "May 2029", cur: 2,
-      stops: [["Fall 2025", "15 cr"], ["Spring 2026", "15 cr"], ["Fall 2026", "in progress · 16 cr"],
-              ["Spring 2027", "planned"], ["Fall 2027", "planned"], ["Spring 2028", "planned"],
-              ["Fall 2028", "planned"], ["Spring 2029", "planned"]]
-    },
-    {
-      // Second-year — another December track.
-      major: "Psychology, B.S.",
-      credits: "45 / 120", eta: "DEC 2028", pinDate: "Dec 2028", cur: 3,
-      stops: [["Spring 2025", "15 cr"], ["Fall 2025", "16 cr"], ["Spring 2026", "14 cr"],
-              ["Fall 2026", "in progress · 15 cr"], ["Spring 2027", "planned"], ["Fall 2027", "planned"],
-              ["Spring 2028", "planned"], ["Fall 2028", "planned"]]
-    }
-  ];
-
-  var svg = document.getElementById("rm-svg");
-  var title = document.getElementById("rm-title");
-  var meta = document.getElementById("rm-meta");
-  if (!svg || !title || !meta) return;
-  var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-
-  function pathD(points) {
-    return points.map(function (p, i) { return (i ? "L " : "M ") + p[0] + " " + p[1]; }).join(" ");
-  }
-
-  // Split the route polyline at the current stop (always on a horizontal segment).
-  function splitAt(k) {
-    var cx = XS[k], cy = YS[k];
-    var trav = [PTS[0]], i = 1;
-    for (; i < PTS.length; i++) {
-      var prev = PTS[i - 1], pt = PTS[i];
-      if (prev[1] === cy && pt[1] === cy && prev[0] <= cx && cx <= pt[0]) {
-        trav.push([cx, cy]);
-        break;
-      }
-      trav.push(pt);
-    }
-    return { trav: trav, ahead: [[cx, cy]].concat(PTS.slice(i)) };
-  }
-
-  function stopMarkup(k, s) {
-    var x = XS[k], y = YS[k];
-    var label = '<text class="rm-label" x="' + x + '" y="' + (y + 30) + '" text-anchor="middle">' + s.stops[k][0] + "</text>" +
-                '<text class="rm-sub" x="' + x + '" y="' + (y + 46) + '" text-anchor="middle">' + s.stops[k][1] + "</text>";
-    if (k < s.cur) {
-      return "<g><circle cx=\"" + x + "\" cy=\"" + y + "\" r=\"9\" fill=\"#16a34a\"/>" +
-        '<path d="M ' + (x - 4) + " " + y + ' l 3 3 l 5.5 -6" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>' +
-        label + "</g>";
-    }
-    if (k === s.cur) {
-      return '<g><circle class="rm-pulse" cx="' + x + '" cy="' + y + '" r="14" fill="none" stroke="#d97706" stroke-width="3"/>' +
-        '<circle cx="' + x + '" cy="' + y + '" r="9" fill="#fff" stroke="#d97706" stroke-width="3.5"/>' +
-        '<text class="rm-flag" x="' + x + '" y="' + (y - 32) + '" text-anchor="middle">YOU ARE HERE</text>' +
-        label + "</g>";
-    }
-    return '<g><circle cx="' + x + '" cy="' + y + '" r="8" fill="#fff" stroke="#9ca3af" stroke-width="3"/>' + label + "</g>";
-  }
-
-  function render(s) {
-    var split = splitAt(s.cur);
-    var parts = [
-      '<path class="rm-traveled" d="' + pathD(split.trav) + '" fill="none" stroke="#1a3a6b" stroke-width="5" stroke-linecap="round"/>',
-      '<path d="' + pathD(split.ahead) + '" fill="none" stroke="#2a5298" stroke-width="4" stroke-linecap="round" stroke-dasharray="2 11" opacity="0.75"/>'
-    ];
-    for (var k = 0; k < s.stops.length; k++) parts.push(stopMarkup(k, s));
-    parts.push(
-      '<g><path d="M 890 8 c -11.5 0 -20 8.5 -20 19 c 0 13 20 32 20 32 s 20 -19 20 -32 c 0 -10.5 -8.5 -19 -20 -19 z" fill="#1a3a6b"/>' +
-      '<circle cx="890" cy="27" r="7.5" fill="#fff"/>' +
-      '<text class="rm-dest" x="890" y="92" text-anchor="middle">GRADUATION</text>' +
-      '<text class="rm-sub" x="890" y="108" text-anchor="middle">' + s.pinDate + "</text></g>"
-    );
-    svg.innerHTML = parts.join("");
-    // On narrow screens the card scrolls horizontally — center the current stop
-    // so "YOU ARE HERE" is visible instead of the leftmost (past) semesters.
-    var card = svg.closest(".routemap-card");
-    if (card && card.scrollWidth > card.clientWidth + 8) {
-      var scale = (svg.clientWidth || 980) / 980;
-      card.scrollLeft = Math.max(0, XS[s.cur] * scale - card.clientWidth / 2);
-    }
-    svg.setAttribute("aria-label",
-      "Example route for " + s.major + ": " + s.cur + " semesters completed, one in progress, graduating " + s.pinDate);
-    title.textContent = "Route: " + s.major;
-    meta.textContent = s.credits + " CR · ETA " + s.eta;
-    if (!reduced) {
-      var trav = svg.querySelector(".rm-traveled");
-      var len = Math.ceil(trav.getTotalLength());
-      trav.style.strokeDasharray = len;
-      trav.style.strokeDashoffset = len;
-    }
-  }
-
-  var i = Math.floor(Math.random() * SCENARIOS.length);
-  render(SCENARIOS[i]);
-
-  if (!reduced) {
-    // Rotate through the example students, but respect WCAG 2.2.2: pause while
-    // hovered/focused, skip ticks in hidden tabs, and stop after two full cycles.
-    var paused = false, shown = 0;
-    var card = svg.closest(".routemap-card");
-    if (card) {
-      card.addEventListener("mouseenter", function () { paused = true; });
-      card.addEventListener("mouseleave", function () { paused = false; });
-      card.addEventListener("focusin", function () { paused = true; });
-      card.addEventListener("focusout", function () { paused = false; });
-    }
-    var timer = setInterval(function () {
-      if (paused || document.visibilityState === "hidden") return;
-      if (++shown >= SCENARIOS.length * 2) clearInterval(timer);
-      svg.style.opacity = "0";
-      title.style.opacity = "0";
-      meta.style.opacity = "0";
-      setTimeout(function () {
-        i = (i + 1) % SCENARIOS.length;
-        render(SCENARIOS[i]);
-        svg.style.opacity = "1";
-        title.style.opacity = "1";
-        meta.style.opacity = "1";
-      }, 320);
-    }, 8000);
-  }
-})();
-</script>
-
+<script src="/site.js" defer></script>
+<!--#endinclude footer-->
 </body>
 </html>

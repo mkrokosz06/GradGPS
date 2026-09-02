@@ -1,108 +1,77 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!--#include head-common-->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta name="description" content="GradGPS Privacy Policy — what we collect, how we use it, and how to delete your data." />
-<meta name="theme-color" content="#1a3a6b" />
-<link rel="canonical" href="https://gradgps.com/privacy" />
-<link rel="icon" type="image/png" href="/logo.png" />
+<meta name="theme-color" content="#FAFBFD" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101B2E" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/logo.png" type="image/png" sizes="256x256" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/styles.css" />
+<meta property="og:site_name" content="GradGPS" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<!--#endinclude head-common-->
 <title>Privacy Policy — GradGPS</title>
-<style>
-  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/barlow-400.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 500; font-display: swap; src: url(/fonts/barlow-500.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 600; font-display: swap; src: url(/fonts/barlow-semi-condensed-600.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/barlow-semi-condensed-700.woff2) format("woff2"); }
-
-  :root {
-    --paper:    #FAFBFD;
-    --ink:      #16233A;
-    --ink-soft: #52627D;
-    --navy:     #1a3a6b;
-    --blue:     #2a5298;
-    --tint:     #EDF2FA;
-    --line:     #DCE3EE;
-    --missing:  #6E7684;
-    --display: "Barlow Semi Condensed", "Arial Narrow", "Segoe UI", sans-serif;
-    --sans: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
-  }
-
-  * { box-sizing: border-box; }
-  body {
-    margin: 0;
-    background-color: var(--paper);
-    background-image: radial-gradient(rgba(26, 58, 107, 0.07) 1px, transparent 1.5px);
-    background-size: 26px 26px;
-    color: var(--ink);
-    font-family: var(--sans);
-    font-size: 17px;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-  a { color: inherit; }
-  :focus-visible { outline: 3px solid var(--blue); outline-offset: 2px; border-radius: 4px; }
-
-  .wrap { max-width: 760px; margin: 0 auto; padding: 0 24px; }
-
-  .site-head {
-    position: sticky; top: 0; z-index: 50;
-    background: rgba(250, 251, 253, 0.88);
-    backdrop-filter: blur(10px);
-    border-bottom: 1px solid var(--line);
-  }
-  .site-head .wrap { display: flex; align-items: center; gap: 28px; height: 62px; }
-  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
-  .brand span {
-    font-family: var(--display); font-weight: 700; font-size: 22px;
-    letter-spacing: 0.01em; color: var(--navy);
-  }
-  .brand span b { color: var(--blue); font-weight: 700; }
-  .site-nav a { color: var(--ink-soft); text-decoration: none; font-size: 15px; font-weight: 500; }
-  .site-nav a:hover { color: var(--navy); }
-
-  main { padding: 64px 0 90px; }
-  h1 {
-    font-family: var(--display); font-weight: 700;
-    font-size: clamp(36px, 5vw, 52px); line-height: 1.04;
-    margin: 0 0 8px; letter-spacing: -0.003em;
-  }
-  .updated { color: var(--missing); font-size: 14px; margin: 0 0 40px; }
-  h2 {
-    font-family: var(--display); font-weight: 600; font-size: 23px;
-    margin: 38px 0 8px; letter-spacing: 0.005em;
-  }
-  p, li { color: var(--ink-soft); font-size: 16px; }
-  p { margin: 0 0 14px; }
-  ul { margin: 0 0 14px; padding-left: 22px; }
-  li { margin-bottom: 6px; }
-  li::marker { color: var(--blue); }
-
-  .site-foot { border-top: 1px solid var(--line); background: #fff; color: var(--ink-soft); font-size: 13.5px; }
-  .site-foot .wrap {
-    padding: 26px 24px 30px;
-    display: flex; flex-wrap: wrap; gap: 10px 26px; align-items: center;
-  }
-  .site-foot .copy { margin-right: auto; }
-  .site-foot a { text-decoration: none; }
-  .site-foot a:hover { color: var(--navy); text-decoration: underline; }
-</style>
+<meta name="description" content="GradGPS Privacy Policy — what we collect, how we use it, and how to delete your data." />
+<link rel="canonical" href="https://gradgps.com/privacy" />
+<meta property="og:title" content="Privacy Policy — GradGPS" />
+<meta property="og:description" content="What GradGPS collects, how it's used, and how to delete it." />
+<meta property="og:url" content="https://gradgps.com/privacy" />
+<meta property="og:image" content="https://gradgps.com/og.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="GradGPS — You are here. Graduation is that way." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradgps.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Privacy Policy", "item": "https://gradgps.com/privacy" }
+  ]
+}
+</script>
 </head>
-<body>
+<body class="page-privacy">
+<!--#include header-->
+<a class="skip-link" href="#main">Skip to main content</a>
 <header class="site-head">
   <div class="wrap">
     <a class="brand" href="/" aria-label="GradGPS home">
+      <img src="/logo.png" width="32" height="32" alt="" />
       <span>Grad<b>GPS</b></span>
     </a>
-    <nav class="site-nav" aria-label="Site">
-      <a href="/#support">Contact</a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/support">Support</a></li>
+      </ul>
+      <a class="btn btn-navy nav-cta" href="/beta">Get the beta</a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        Menu
+      </button>
     </nav>
   </div>
 </header>
+<!--#endinclude header-->
 
-<main>
-  <div class="wrap">
+<main id="main">
+  <div class="wrap page-head">
     <h1>Privacy Policy</h1>
+  </div>
+
+  <div class="wrap prose">
     <p class="updated">Last updated: August 30, 2026</p>
 
     <h2>1. Who We Are</h2>
@@ -111,7 +80,7 @@
       based in the United States (the &ldquo;we,&rdquo; &ldquo;us,&rdquo; or &ldquo;operator&rdquo;
       referred to in this policy). You can reach us at
       <a href="mailto:support@gradgps.com">support@gradgps.com</a> or through the
-      <a href="/#support">contact form</a> at gradgps.com.
+      <a href="/support">contact form</a> at gradgps.com.
     </p>
     <p>
       GradGPS is a student-built tool and is <strong>not affiliated with, endorsed by, or sponsored
@@ -209,7 +178,7 @@
       with your account (your Google, Apple, or email account) secure and do not share it with others.
     </p>
 
-    <h2>9. Children's Privacy</h2>
+    <h2>9. Children&rsquo;s Privacy</h2>
     <p>
       GradGPS is intended for current and prospective college students and is not directed at
       children. We do not knowingly collect data from anyone under 13 years of age. If you believe
@@ -226,17 +195,48 @@
     <p>
       If you have questions or want to request data deletion, contact us at
       <a href="mailto:support@gradgps.com">support@gradgps.com</a>, through the Contact Support
-      screen in the app, or the <a href="/#support">contact form</a> at gradgps.com.
+      screen in the app, or the <a href="/support">contact form</a> at gradgps.com.
     </p>
   </div>
 </main>
 
+<!--#include footer-->
 <footer class="site-foot">
   <div class="wrap">
-    <span class="copy">&copy; 2026 GradGPS &middot; gradgps.com</span>
-    <a href="/">Home</a>
-    <a href="/#support">Contact</a>
+    <div class="foot-cols">
+      <nav class="foot-col" aria-labelledby="foot-product">
+        <p class="foot-h" id="foot-product">Product</p>
+        <ul>
+          <li><a href="/how-it-works">How it works</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/beta">Get the beta</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-company">
+        <p class="foot-h" id="foot-company">Company</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="mailto:support@gradgps.com">support@gradgps.com</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-legal">
+        <p class="foot-h" id="foot-legal">Legal</p>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Use</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="foot-legal-note">
+      &copy; 2026 GradGPS &middot; gradgps.com &middot; Built in State College, PA.
+      GradGPS is an independent student project and is <strong>not affiliated with, endorsed by, or
+      sponsored by The Pennsylvania State University</strong>. It is a planning aid, not official
+      academic advising &mdash; always confirm your final plan with your adviser.
+    </p>
   </div>
 </footer>
+<script src="/site.js" defer></script>
+<!--#endinclude footer-->
 </body>
 </html>

@@ -1,46 +1,113 @@
 <!doctype html>
 <html lang="en">
 <head>
+<!--#include head-common-->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#FAFBFD" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101B2E" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/logo.png" type="image/png" sizes="256x256" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/styles.css" />
+<meta property="og:site_name" content="GradGPS" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<!--#endinclude head-common-->
+<title>Page not found — GradGPS</title>
+<meta name="description" content="That page doesn't exist on gradgps.com." />
+<!-- No canonical here, and no redirect to "/" — either one would make Google
+     treat this as a soft 404. GitHub Pages serves it with a real 404 status. -->
 <meta name="robots" content="noindex" />
-<meta name="theme-color" content="#1a3a6b" />
-<link rel="icon" type="image/png" href="/logo.png" />
-<title>Wrong turn — GradGPS</title>
-<style>
-  @font-face { font-family: "Barlow"; font-style: normal; font-weight: 400; font-display: swap; src: url(/fonts/barlow-400.woff2) format("woff2"); }
-  @font-face { font-family: "Barlow Semi Condensed"; font-style: normal; font-weight: 700; font-display: swap; src: url(/fonts/barlow-semi-condensed-700.woff2) format("woff2"); }
-  * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
-    background-color: #FAFBFD;
-    background-image: radial-gradient(rgba(26, 58, 107, 0.07) 1px, transparent 1.5px);
-    background-size: 26px 26px;
-    color: #16233A;
-    font-family: "Barlow", "Segoe UI", system-ui, -apple-system, sans-serif;
-    text-align: center; padding: 24px;
-  }
-  img { width: 64px; height: 64px; border-radius: 14px; margin-bottom: 18px; }
-  h1 {
-    font-family: "Barlow Semi Condensed", "Arial Narrow", "Segoe UI", sans-serif;
-    font-weight: 700; font-size: clamp(40px, 7vw, 64px); line-height: 1; margin: 0 0 12px;
-  }
-  h1 span { color: #2a5298; }
-  p { color: #52627D; font-size: 18px; margin: 0 0 28px; }
-  a.btn {
-    display: inline-block; text-decoration: none; font-weight: 600; color: #fff;
-    background: #1a3a6b; border-radius: 10px; padding: 12px 24px; font-size: 15.5px;
-    box-shadow: 0 3px 12px rgba(26, 58, 107, 0.25);
-  }
-  a.btn:hover { background: #2a5298; }
-</style>
 </head>
-<body>
-<main>
-  <img src="/logo.png" alt="" />
-  <h1>Wrong turn. <span>Recalculating&hellip;</span></h1>
-  <p>This page isn&rsquo;t on the map.</p>
-  <a class="btn" href="/">Back to the route</a>
+<body class="page-404">
+<!--#include header-->
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="GradGPS home">
+      <img src="/logo.png" width="32" height="32" alt="" />
+      <span>Grad<b>GPS</b></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/support">Support</a></li>
+      </ul>
+      <a class="btn btn-navy nav-cta" href="/beta">Get the beta</a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        Menu
+      </button>
+    </nav>
+  </div>
+</header>
+<!--#endinclude header-->
+
+<main id="main">
+  <div class="wrap page-head">
+    <p class="eyebrow">Error 404</p>
+    <h1>You&rsquo;ve gone off the route.</h1>
+    <p class="lede">
+      That page doesn&rsquo;t exist &mdash; it may have moved, or the link may have a typo in it.
+    </p>
+  </div>
+
+  <div class="wrap prose">
+    <p>Try one of these instead:</p>
+    <ul>
+      <li><a href="/">Home</a> &mdash; what GradGPS is, in about thirty seconds</li>
+      <li><a href="/how-it-works">How it works</a> &mdash; the audit, the timeline, and where it stops short</li>
+      <li><a href="/beta">Get the beta</a> &mdash; install it on your iPhone</li>
+      <li><a href="/faq">FAQ</a> &mdash; cost, privacy, supported majors</li>
+      <li><a href="/support">Support</a> &mdash; tell us what broke</li>
+    </ul>
+  </div>
 </main>
+
+<!--#include footer-->
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-cols">
+      <nav class="foot-col" aria-labelledby="foot-product">
+        <p class="foot-h" id="foot-product">Product</p>
+        <ul>
+          <li><a href="/how-it-works">How it works</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/beta">Get the beta</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-company">
+        <p class="foot-h" id="foot-company">Company</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="mailto:support@gradgps.com">support@gradgps.com</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-legal">
+        <p class="foot-h" id="foot-legal">Legal</p>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Use</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="foot-legal-note">
+      &copy; 2026 GradGPS &middot; gradgps.com &middot; Built in State College, PA.
+      GradGPS is an independent student project and is <strong>not affiliated with, endorsed by, or
+      sponsored by The Pennsylvania State University</strong>. It is a planning aid, not official
+      academic advising &mdash; always confirm your final plan with your adviser.
+    </p>
+  </div>
+</footer>
+<script src="/site.js" defer></script>
+<!--#endinclude footer-->
 </body>
 </html>

@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url>
-    <loc>https://gradgps.com/</loc>
-    <lastmod>2026-08-22</lastmod>
-  </url>
-  <url>
-    <loc>https://gradgps.com/privacy</loc>
-    <lastmod>2026-08-22</lastmod>
-  </url>
+  <url><loc>https://gradgps.com/</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/how-it-works</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/beta</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/faq</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/about</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/support</loc><lastmod>2026-09-01</lastmod></url>
+  <url><loc>https://gradgps.com/privacy</loc><lastmod>2026-08-30</lastmod></url>
+  <url><loc>https://gradgps.com/terms</loc><lastmod>2026-09-01</lastmod></url>
 </urlset>

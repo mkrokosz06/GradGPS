@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!--#include head-common-->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#FAFBFD" media="(prefers-color-scheme: light)" />
+<meta name="theme-color" content="#101B2E" media="(prefers-color-scheme: dark)" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" />
+<link rel="icon" href="/logo.png" type="image/png" sizes="256x256" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+<link rel="manifest" href="/site.webmanifest" />
+<link rel="preload" href="/fonts/barlow-semi-condensed-700.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="preload" href="/fonts/barlow-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="stylesheet" href="/styles.css" />
+<meta property="og:site_name" content="GradGPS" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:type" content="website" />
+<meta name="twitter:card" content="summary_large_image" />
+<!--#endinclude head-common-->
+<title>Support — GradGPS</title>
+<meta name="description" content="Report a wrong requirement, a transcript that won't parse, or anything else broken in GradGPS. Replies go to the email you enter, usually within a day or two." />
+<link rel="canonical" href="https://gradgps.com/support" />
+<meta property="og:title" content="Support — GradGPS" />
+<meta property="og:description" content="Report a wrong requirement, a transcript that won't parse, or anything else broken." />
+<meta property="og:url" content="https://gradgps.com/support" />
+<meta property="og:image" content="https://gradgps.com/og.png" />
+<meta property="og:image:type" content="image/png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="GradGPS — You are here. Graduation is that way." />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://gradgps.com/" },
+    { "@type": "ListItem", "position": 2, "name": "Support", "item": "https://gradgps.com/support" }
+  ]
+}
+</script>
+</head>
+<body class="page-support">
+<!--#include header-->
+<a class="skip-link" href="#main">Skip to main content</a>
+<header class="site-head">
+  <div class="wrap">
+    <a class="brand" href="/" aria-label="GradGPS home">
+      <img src="/logo.png" width="32" height="32" alt="" />
+      <span>Grad<b>GPS</b></span>
+    </a>
+    <nav class="site-nav" aria-label="Primary">
+      <ul class="nav-links" id="nav-menu">
+        <li><a href="/how-it-works">How it works</a></li>
+        <li><a href="/faq">FAQ</a></li>
+        <li><a href="/about">About</a></li>
+        <li><a href="/support" aria-current="page">Support</a></li>
+      </ul>
+      <a class="btn btn-navy nav-cta" href="/beta">Get the beta</a>
+      <button class="nav-toggle" id="nav-toggle" type="button" aria-expanded="false" aria-controls="nav-menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true" focusable="false"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+        Menu
+      </button>
+    </nav>
+  </div>
+</header>
+<!--#endinclude header-->
+
+<main id="main">
+  <div class="wrap page-head">
+    <h1>Hit a detour? Tell us.</h1>
+    <p class="lede">
+      Wrong course on your timeline, a transcript that won&rsquo;t parse, a requirement the audit got
+      wrong &mdash; send it over and we&rsquo;ll take a look.
+    </p>
+  </div>
+
+  <div class="wrap" style="padding-top: 34px; padding-bottom: 40px;">
+    <div class="support-grid">
+      <div class="support-aside">
+        <p>
+          <strong>Include your major</strong> if it&rsquo;s about the audit &mdash; that&rsquo;s the first thing
+          we check, and it usually explains the problem on its own.
+        </p>
+        <p>
+          If a specific course is wrong, naming it (<code class="c">ETI 300W</code>, <code class="c">MATH 110</code>)
+          gets it fixed much faster than &ldquo;my timeline looks weird.&rdquo;
+        </p>
+        <p>Replies go straight to the email you enter, usually within a day or two.</p>
+        <p>
+          Prefer email? <a href="mailto:support@gradgps.com" style="color: var(--blue);">support@gradgps.com</a>.
+        </p>
+        <p>
+          Not at Penn State and want your school added? Send it with the school name in the subject line.
+        </p>
+      </div>
+
+      <form class="support-form" id="support-form" novalidate>
+        <div class="field">
+          <label for="sf-email">Your email</label>
+          <input id="sf-email" name="email" type="email" required aria-required="true"
+                 autocomplete="email" aria-describedby="sf-email-error" />
+          <p class="field-error" id="sf-email-error"></p>
+        </div>
+        <div class="field">
+          <label for="sf-subject">Subject <span class="opt">(optional)</span></label>
+          <input id="sf-subject" name="subject" type="text" maxlength="200" />
+        </div>
+        <div class="field">
+          <label for="sf-message">Message</label>
+          <textarea id="sf-message" name="message" required aria-required="true"
+                    maxlength="5000" aria-describedby="sf-message-hint sf-message-error"></textarea>
+          <p class="field-error" id="sf-message-hint" style="color: var(--missing);">What happened, and what did you expect instead?</p>
+          <p class="field-error" id="sf-message-error"></p>
+        </div>
+        <div class="hp-field" aria-hidden="true">
+          <label for="sf-website">Website</label>
+          <input id="sf-website" name="website" type="text" tabindex="-1" autocomplete="off" />
+        </div>
+        <p class="form-status" id="sf-status" role="status"></p>
+        <button class="btn btn-navy" type="submit" id="sf-submit">Send message</button>
+      </form>
+    </div>
+  </div>
+
+  <section class="block" style="padding-top: 20px;">
+    <div class="wrap">
+      <div class="prose">
+        <h2>Before you write</h2>
+        <p>
+          A few things that come up often enough to be worth checking first &mdash; the
+          <a href="/faq">FAQ</a> covers the rest.
+        </p>
+        <ul>
+          <li><strong>Upload the unofficial transcript,</strong> not the official one. LionPATH &rarr; Academic Records &rarr; Unofficial Transcript.</li>
+          <li><strong>A course your department approved as a substitute</strong> can be declared in the app &mdash; you don&rsquo;t need us for that, and the plan reflows around it immediately.</li>
+          <li><strong>If your major has no official plan modelled yet,</strong> the timeline packs by credit load rather than following a published sequence. That&rsquo;s expected, not a bug.</li>
+        </ul>
+        <h2>Deleting your account</h2>
+        <p>
+          You don&rsquo;t need to email us for this. The Account screen in the app deletes your transcript,
+          parsed courses, profile, and sessions permanently. Details in the
+          <a href="/privacy">privacy policy</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!--#include footer-->
+<footer class="site-foot">
+  <div class="wrap">
+    <div class="foot-cols">
+      <nav class="foot-col" aria-labelledby="foot-product">
+        <p class="foot-h" id="foot-product">Product</p>
+        <ul>
+          <li><a href="/how-it-works">How it works</a></li>
+          <li><a href="/faq">FAQ</a></li>
+          <li><a href="/beta">Get the beta</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-company">
+        <p class="foot-h" id="foot-company">Company</p>
+        <ul>
+          <li><a href="/about">About</a></li>
+          <li><a href="/support">Support</a></li>
+          <li><a href="mailto:support@gradgps.com">support@gradgps.com</a></li>
+        </ul>
+      </nav>
+      <nav class="foot-col" aria-labelledby="foot-legal">
+        <p class="foot-h" id="foot-legal">Legal</p>
+        <ul>
+          <li><a href="/privacy">Privacy Policy</a></li>
+          <li><a href="/terms">Terms of Use</a></li>
+        </ul>
+      </nav>
+    </div>
+    <p class="foot-legal-note">
+      &copy; 2026 GradGPS &middot; gradgps.com &middot; Built in State College, PA.
+      GradGPS is an independent student project and is <strong>not affiliated with, endorsed by, or
+      sponsored by The Pennsylvania State University</strong>. It is a planning aid, not official
+      academic advising &mdash; always confirm your final plan with your adviser.
+    </p>
+  </div>
+</footer>
+<script src="/site.js" defer></script>
+<!--#endinclude footer-->
+</body>
+</html>
