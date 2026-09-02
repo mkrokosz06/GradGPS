@@ -196,6 +196,24 @@ For University Park majors with a published PSU bulletin plan, the timeline refl
 3. `match_template()` walks the template in order and marks each slot satisfied or not. `consumed` prevents one taken course from satisfying two slots. World-language pools and free electives are satisfied from **leftover** courses — transcript courses neither a template slot nor an audit consumed (`build_used_codes()` over the major + gen-ed audit results). Language slots take one leftover course each from the student's majority language dept (`_WORLD_LANGUAGE_DEPTS`, PSU-specific and deliberately conservative); elective slots draw on the surplus credit pool. Other un-anchored pools (business breadth) are still always scheduled.
 4. `_reflow_template()` drops satisfied slots (transcript history) and pulls later semesters forward to fill the gap. A no-transcript student reproduces the official plan exactly; a partially-complete student sees remaining semesters pulled earlier. Light leftover fragments (< `_MERGE_MIN = 10` cr) merge forward; a required internship is lifted into its own summer term between junior and senior year.
 
+**Phantom generic gen-ed slots.** A bulletin plan lists most gen-ed credits as *category-less*
+"General Education" cells (ETI's has 15 of them = 45 cr). `_assign_generic_gen_ed()` retires one per
+completed gen-ed course, but a student who covered all eight domains with fewer courses (interdomain
+courses count in two) was left with slots the class selector could not fill — the picker opened with
+no domain chips and no results. `build_gen_ed_open()` (`sap_schedule.py`) reports whether any
+**searchable** domain pool (the `choose_credits` groups) is still unmet; when none is, the leftover
+generic slots are retired. The domain thresholds themselves sum to PSU's 45 gen-ed credits, so
+"every domain satisfied" already means the credits are there. Fixed Communication groups and the WAC
+rule are deliberately excluded from that test — they are not domains a picker can offer courses for.
+
+**Bounded pools are pickable, not just readable.** A requirement pool with a small enumerated course
+list (≤15 options — the mobile dropdown) now carries a class-selector identity from `_collect_missing()`:
+`slot_key = pool:<GROUP_NAME>`, `slot_kind = "pool"`, `options = pool_courses`. `_expand_pool()` gives
+each slice its own `#i` key so a course picked for one slice doesn't appear on all of them, and
+`_apply_pool_choice()` swaps the placeholder for the chosen course (display/scheduling only — the audit
+still decides whether the pool is satisfied). This is what makes a minor's "choose 2 of these 5"
+actionable; the timeline's dropdown rows and the home screen's pool row open the same picker.
+
 **Template schema & authoring.** Slot types: `course`, `choose_one`, `gen_ed`, `pool`, `elective` (`VALID_SLOT_TYPES` in `plan_templates.py`). `validate_template()` does structural + **grand-total** credit checks only — per-semester `credits` are advisory because PSU bulletin SAPs are frequently internally inconsistent per-semester but correct at the 120-credit total.
 
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
@@ -256,7 +274,9 @@ work fills the leftover headroom, and only then are terms added. Departmental po
 existing `_expand_pool()` so a 6-credit requirement can fill two semesters' headroom instead of
 forcing a new year; an adviser-deferred block is **never** split. Summer terms are skipped (a summer
 term in the plan is there for a reason — the SAP path lifts a required internship into one). Slots
-carry a `cred:`-namespaced `slot_key`, so class-selector pin/swap works unchanged, and a
+carry a `credslot:`-namespaced `slot_key`, so class-selector pin/swap works unchanged (`cred:` itself
+is *reserved* in `user_choices.py` for adviser attestations, and a slot keyed under it could never be
+saved — hence the distinct prefix), and a
 `credential` tag the mobile card badges. `credential_added_terms` reports when declaring a credential
 genuinely pushes graduation out, rather than letting a term appear unexplained.
 

@@ -302,11 +302,14 @@ function TimelineNode({
 
 // ── Pool dropdown row ─────────────────────────────────────────────────────────
 
-function PoolDropdownRow({ course }: { course: TimelineCourse }) {
+function PoolDropdownRow({ course, onEdit }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void }) {
   const [expanded, setExpanded] = useState(false);
   const poolCourses = course.pool_courses ?? [];
   const needed      = course.pool_needed_credits ?? course.pool_needed_courses ?? 0;
   const unit        = course.pool_needed_credits != null ? "cr" : "courses";
+  // A bounded pool is a decision, not just a reading list: tapping any listed
+  // course opens the picker so the student can lock in the one they'll take.
+  const selectable  = !!onEdit && !!course.slot_key && course.status === "missing";
 
   return (
     <View className="mb-1.5">
@@ -331,7 +334,16 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
             {course.course_code}
           </Text>
         </View>
-        <Text style={{ fontSize: 11, color: "#cbd5e1" }}>{poolCourses.length} options</Text>
+        {selectable ? (
+          <View style={{
+            marginLeft: 8, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 999,
+            backgroundColor: "#eff6ff", borderWidth: 1, borderColor: "#dbeafe",
+          }}>
+            <Text style={{ fontSize: 11, fontWeight: "600", color: "#1a3a6b" }}>Choose ›</Text>
+          </View>
+        ) : (
+          <Text style={{ fontSize: 11, color: "#cbd5e1" }}>{poolCourses.length} options</Text>
+        )}
       </TouchableOpacity>
 
       {expanded && (
@@ -341,8 +353,10 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
           paddingLeft: 12,
         }}>
           {poolCourses.map((c, i) => (
-            <View
+            <TouchableOpacity
               key={i}
+              activeOpacity={selectable ? 0.7 : 1}
+              onPress={selectable ? () => onEdit!(course) : undefined}
               style={{
                 flexDirection: "row", alignItems: "center",
                 paddingVertical: 8,
@@ -362,7 +376,7 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
                 ) : null}
               </View>
               <Text style={{ fontSize: 11, color: "#94a3b8", marginLeft: 8 }}>{c.credits} cr</Text>
-            </View>
+            </TouchableOpacity>
           ))}
         </View>
       )}
@@ -402,7 +416,7 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
   if (course.is_pool) {
     // Small named pool (e.g. option-specific courses) → expandable dropdown
     if (course.pool_courses && course.pool_courses.length > 0) {
-      return <PoolDropdownRow course={course} />;
+      return <PoolDropdownRow course={course} onEdit={onEdit} />;
     }
 
     // Gen Ed multi-category or large pool summary → flat display
@@ -413,7 +427,8 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
     const isBreadth = course.pool_ref === "business_breadth";
     // Searchable gen-ed slots are actionable: long-press / tap the chip to search
     // for a course to fill the category.
-    const poolActionable = !!onEdit && !!course.slot_key && !!course.searchable && course.status === "missing";
+    const poolActionable = !!onEdit && !!course.slot_key && course.status === "missing"
+      && (!!course.searchable || (course.options?.length ?? 0) > 1);
     return (
       <TouchableOpacity
         activeOpacity={poolActionable ? 0.7 : 1}

@@ -19,7 +19,7 @@ from deps import get_user_id
 from plan_templates import load_template
 from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_used_codes, build_satisfied_req_codes,
-                          build_gen_ed_courses, match_template)
+                          build_gen_ed_courses, build_gen_ed_open, match_template)
 from routers.user_choices import get_user_choices
 from substitutions import get_substitutions
 from credentials_audit import audit_declared_credentials
@@ -224,6 +224,7 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                                 for it in pool_items
                                 if it.get("status") == "missing"
                             ]
+                            _make_pool_selectable(entry)
                         missing.append(entry)
             elif gtype == "choose_courses":
                 # Satisfied choose_courses pools are skipped entirely (like choose_credits).
@@ -249,6 +250,7 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                                 for it in pool_items
                                 if it.get("status") == "missing"
                             ]
+                            _make_pool_selectable(entry)
                         missing.append(entry)
             elif gtype in ("dept_credits", "unstructured_credits"):
                 # Credential pools (minors/certificates). Both are rules rather than
@@ -270,6 +272,10 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                             # so the UI must ask the student rather than offer a picker.
                             "needs_confirmation":  gtype == "unstructured_credits",
                             "searchable":          gtype == "dept_credits",
+                            # The requirement's FULL size, kept alongside the
+                            # remaining `credits` so the confirm screen can show
+                            # "6 of 9" once the student has confirmed part of it.
+                            "requirement_credits": src.get("threshold"),
                         }
                         missing.append(entry)
             else:
@@ -473,6 +479,45 @@ def _fill_future_titles(semesters: list[dict]) -> None:
                 c["course_title"] = t
 
 
+def _make_pool_selectable(entry: dict) -> None:
+    """Give a bounded pool (a dropdown of >1 concrete course) a class-selector
+    identity, so the student can say which of the listed courses they'll take
+    rather than only reading the list."""
+    opts = entry.get("pool_courses") or []
+    if len(opts) < 2:
+        return
+    entry["slot_key"]  = _pool_slot_key(entry.get("course_code", ""))
+    entry["slot_kind"] = "pool"
+    entry["options"]   = opts
+
+
+def _pool_slot_key(name: str) -> str:
+    """Stable class-selector identity for a bounded requirement pool, derived from
+    the requirement group's own name ('Supporting Courses' -> 'pool:SUPPORTING_COURSES').
+    The name is what the catalog keys the group on, so it survives a reflow the way
+    a course code does."""
+    tok = re.sub(r"[^A-Z0-9]+", "_", (name or "").strip().upper()).strip("_")
+    return f"pool:{tok or 'POOL'}"
+
+
+def _apply_pool_choice(slot: dict, course_choices: dict[str, str] | None) -> None:
+    """Fill a bounded pool slot with the course the student picked from its
+    dropdown.  Display/scheduling only — the audit stays the source of truth for
+    whether the pool is actually satisfied — so this mirrors the gen-ed pick:
+    the placeholder becomes a real course card (title backfilled by
+    `_fill_future_titles`) that keeps its `options` so the pick can be changed."""
+    chosen = (course_choices or {}).get(slot.get("slot_key") or "")
+    if not chosen:
+        return
+    opts = slot.get("options") or []
+    if not any(_strip_w(chosen) == _strip_w(o.get("course_code", "")) for o in opts):
+        return                              # stale pick (the pool changed) — ignore
+    slot["chosen_code"]  = chosen
+    slot["course_code"]  = chosen
+    slot["course_title"] = ""
+    slot["is_pool"]      = False
+
+
 def _expand_pool(entry: dict) -> list[dict]:
     """Split a pool entry into ~3-credit placeholder slots the packer can spread
     across semesters.  Non-pool entries pass through unchanged (single-item list).
@@ -506,9 +551,13 @@ def _expand_pool(entry: dict) -> list[dict]:
             remaining -= take
 
     slots: list[dict] = []
-    for cr in sizes:
+    for i, cr in enumerate(sizes):
         slot = dict(entry)
         slot["credits"] = cr
+        # A split pool needs one slot_key per slice, else a course picked for the
+        # first slice would show up on every one of them.
+        if entry.get("slot_key") and len(sizes) > 1:
+            slot["slot_key"] = f"{entry['slot_key']}#{i}"
         crd = int(cr) if float(cr).is_integer() else cr
         if entry.get("pool_needed_courses"):
             slot["pool_needed_courses"] = 1
@@ -566,6 +615,9 @@ def _emit_semester(term: str, courses: list[dict]) -> dict:
                 # own words and never auto-satisfied, so the UI asks the student
                 # instead of offering a course picker.
                 "needs_confirmation":  c.get("needs_confirmation", False),
+                # The requirement's FULL size, alongside the remaining `credits_earned`,
+                # so the confirm screen can show "6 of 9" once partly confirmed.
+                "requirement_credits": c.get("requirement_credits"),
             }
             for c in courses
         ],
@@ -828,7 +880,9 @@ def _build_layer1_future(
     # instead of dumping it whole into one.
     pool_slots: list[dict] = []
     for p in raw_pools:
-        pool_slots.extend(_expand_pool(p))
+        for piece in _expand_pool(p):
+            _apply_pool_choice(piece, course_choices)
+            pool_slots.append(piece)
 
     # For BS/BA degrees, if the catalogued requirements total less than 120 credits
     # (open electives aren't listed in every catalog), add free-elective placeholder
@@ -932,7 +986,8 @@ def _merge_credential_slots(future: list[dict], credential_audits: list[dict],
                 piece["credential_short"] = short
                 base_key = slot.get("slot_key") or f"code:{code}"
                 suffix   = f":{i}" if len(pieces) > 1 else ""
-                piece["slot_key"] = f"cred:{program}:{base_key}{suffix}"
+                piece["slot_key"] = f"credslot:{program}:{base_key}{suffix}"
+                _apply_pool_choice(piece, course_choices)
                 pending.append(piece)
 
     if not pending:
@@ -1235,6 +1290,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             used_codes=build_used_codes(audit_result, gen_ed_result),
             gen_ed_courses=build_gen_ed_courses(gen_ed_result),
             course_choices=course_choices,
+            gen_ed_open=build_gen_ed_open(gen_ed_result),
         )
         future = _reflow_template(records, base_term)
     else:

@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from routers.timeline import (
     _expand_pool,
+    _collect_missing,
+    _apply_pool_choice,
     _slice_even,
     _sort_named,
     _build_future_semesters,
@@ -309,6 +311,63 @@ def test_reflow_rebalance_compresses_behind_student_and_places_internship():
     su_i = terms.index(su[0]["term"])
     assert terms[su_i + 1].startswith("FA")       # summer validly precedes a Fall
     assert academic[-1]["term"] == "SP 2028"      # graduates senior spring, not later
+
+
+# ── Bounded pools are pickable ───────────────────────────────────────────────
+
+def _pool_audit(gtype="choose_credits"):
+    """An audit result with one unsatisfied 3-option pool."""
+    thresh = {"choose_credits": 6, "choose_courses": 2}[gtype]
+    return {"groups": [{
+        "name": "Supporting Courses",
+        "group_type": gtype,
+        "satisfied": False,
+        "threshold": thresh,
+        "credits_earned": 0,
+        "done": 0,
+        "items": [
+            {"course_code": "STAT 200", "course_title": "Stats", "credits": 3, "status": "missing"},
+            {"course_code": "SCM 200",  "course_title": "SCM",   "credits": 3, "status": "missing"},
+            {"course_code": "DS 200",   "course_title": "DS",    "credits": 3, "status": "missing"},
+        ],
+    }]}
+
+
+def test_bounded_pool_carries_selector_metadata():
+    entry = _collect_missing(_pool_audit())[0]
+    assert entry["slot_key"] == "pool:SUPPORTING_COURSES"
+    assert entry["slot_kind"] == "pool"
+    assert [o["course_code"] for o in entry["options"]] == ["STAT 200", "SCM 200", "DS 200"]
+
+
+def test_bounded_choose_courses_pool_is_selectable_too():
+    entry = _collect_missing(_pool_audit("choose_courses"))[0]
+    assert entry["slot_kind"] == "pool"
+    assert len(entry["options"]) == 3
+
+
+def test_split_pool_gets_one_slot_key_per_slice():
+    entry = _collect_missing(_pool_audit())[0]     # 6 cr -> two 3-cr slices
+    slices = _expand_pool(entry)
+    assert [s["slot_key"] for s in slices] == [
+        "pool:SUPPORTING_COURSES#0", "pool:SUPPORTING_COURSES#1",
+    ]
+
+
+def test_pool_choice_fills_only_its_own_slice():
+    slices = _expand_pool(_collect_missing(_pool_audit())[0])
+    for sl in slices:
+        _apply_pool_choice(sl, {"pool:SUPPORTING_COURSES#1": "SCM 200"})
+    assert slices[0]["is_pool"] is True and "chosen_code" not in slices[0]
+    assert slices[1]["course_code"] == "SCM 200"
+    assert slices[1]["is_pool"] is False
+    assert slices[1]["options"]                      # still swappable
+
+
+def test_pool_choice_outside_the_pool_is_ignored():
+    sl = _expand_pool(_collect_missing(_pool_audit())[0])[0]
+    _apply_pool_choice(sl, {"pool:SUPPORTING_COURSES#0": "ENGL 15"})
+    assert sl["is_pool"] is True and "chosen_code" not in sl
 
 
 # ── Tiny runner so this works without pytest installed ──────────────────────

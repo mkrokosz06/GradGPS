@@ -256,8 +256,29 @@ def test_credential_slots_carry_a_namespaced_slot_key():
     audit["program"], audit["kind"] = "Economics, Minor", "minor"
     merged = _merge_credential_slots([_sem("FA 2026")], [audit])
     keys = [c.get("slot_key") for s in merged for c in s["courses"] if c.get("credential")]
-    assert keys and all(k and k.startswith("cred:Economics, Minor:") for k in keys)
+    assert keys and all(k and k.startswith("credslot:Economics, Minor:") for k in keys)
     assert len(set(keys)) == len(keys), "expanded pool slices need distinct keys"
+
+
+def test_bounded_credential_pool_is_pickable():
+    """A minor's "choose 2 of these 5" pool is a decision the student makes — each
+    slice carries the option list and takes a stored pick, keyed under the
+    credential's own namespace."""
+    _meta, rows = cc.load_credential("Agronomy, Minor")
+    audit = run_audit(rows, [])
+    audit["program"], audit["kind"] = "Agronomy, Minor", "minor"
+    merged = _merge_credential_slots([_sem("FA 2026")], [audit])
+    pools = [c for s in merged for c in s["courses"]
+             if c.get("options") and str(c.get("slot_key", "")).startswith("credslot:")]
+    assert pools, "bounded credential pool should carry swap options"
+    key = pools[0]["slot_key"]
+    pick = pools[0]["options"][0]["course_code"]
+
+    merged = _merge_credential_slots([_sem("FA 2026")], [audit], {key: pick})
+    chosen = [c for s in merged for c in s["courses"] if c.get("slot_key") == key][0]
+    assert chosen["course_code"] == pick
+    assert chosen["chosen_code"] == pick
+    assert chosen["is_pool"] is False
 
 
 def test_adviser_deferred_requirement_is_scheduled_whole_and_flagged():

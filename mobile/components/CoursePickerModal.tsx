@@ -51,6 +51,7 @@ export function CoursePickerModal({
   const [searching, setSearching] = useState(false);
   const [needsQuery, setNeedsQuery] = useState(false);
   const [domains, setDomains]   = useState<GenEdDomain[]>([]);
+  const [chipsResolved, setChipsResolved] = useState(false);
   const [activeCat, setActiveCat] = useState<string | null>(null);
   const [disclaimer, setDisclaimer] = useState<string>("");
 
@@ -64,6 +65,7 @@ export function CoursePickerModal({
     setResults([]);
     setNeedsQuery(false);
     setDomains([]);
+    setChipsResolved(false);
     setDisclaimer("");
 
     const suggested = course.slot_key?.startsWith("gened:")
@@ -77,10 +79,14 @@ export function CoursePickerModal({
           setDomains(ds);
           setActiveCat((cur) => {
             if (cur && ds.some((d) => d.code === cur)) return cur;
-            return ds[0]?.code ?? null;   // generic slot → first remaining domain
+            // Keep the slot's own suggested domain when the student has no
+            // remaining ones — a search over every gen-ed course still beats a
+            // modal with nothing in it.
+            return ds[0]?.code ?? cur;
           });
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => setChipsResolved(true));
     } else if (isBreadth && userId) {
       getBreadthAreas(userId)
         .then(({ areas, disclaimer: dc }) => {
@@ -88,7 +94,8 @@ export function CoursePickerModal({
           setDisclaimer(dc || "");
           setActiveCat((cur) => cur ?? areas[0]?.area ?? null);   // first area
         })
-        .catch(() => {});
+        .catch(() => {})
+        .finally(() => setChipsResolved(true));
     }
   }, [visible, course?.slot_key]);
 
@@ -96,7 +103,10 @@ export function CoursePickerModal({
   // world-language pool searches its language courses directly).
   useEffect(() => {
     if (!visible || !searchable || !course?.slot_key || !userId) return;
-    if (useChips && !activeCat) return;   // wait for the domain/area to resolve
+    // Wait for the domain/area chips to resolve; once they have, search anyway
+    // even if none came back (an all-domains-complete student still gets results
+    // instead of an empty modal).
+    if (useChips && !activeCat && !chipsResolved) return;
     let active = true;
     setSearching(true);
     const t = setTimeout(async () => {
@@ -114,7 +124,7 @@ export function CoursePickerModal({
       }
     }, 250);
     return () => { active = false; clearTimeout(t); };
-  }, [visible, searchable, course?.slot_key, query, userId, activeCat, isGenEd, isBreadth]);
+  }, [visible, searchable, course?.slot_key, query, userId, activeCat, chipsResolved, isGenEd, isBreadth]);
 
   if (!course || !course.slot_key || !course.slot_kind) return null;
 
@@ -320,7 +330,7 @@ export function CoursePickerModal({
               than a third toggle stacked with the options and the pin. Only
               offered for a slot naming a real course; a gen-ed or open-elective
               slot is a category, and the student picks a course for it above. */}
-          {onSubstitute && !searchable && (
+          {onSubstitute && !searchable && (!course.is_pool || !!selected) && (
             <>
               <View style={styles.divider} />
               <TouchableOpacity

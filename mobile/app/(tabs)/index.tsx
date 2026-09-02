@@ -204,7 +204,8 @@ function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: T
     }
 
     // Searchable gen-ed slots are actionable — tap/long-press to search for a course.
-    const poolActionable = !!onEdit && !!course.slot_key && !!course.searchable && course.status === "missing";
+    const poolActionable = !!onEdit && !!course.slot_key && course.status === "missing"
+      && (!!course.searchable || (course.options?.length ?? 0) > 1);
     return (
       <TouchableOpacity
         activeOpacity={poolActionable ? 0.75 : 1}

@@ -143,7 +143,7 @@ is not in it. Options, in order of preference:
 
 Ship 2 first, then 1 — 2 is correct-but-blunt, and it makes the feature real while the harder
 version is built. Either way, credential slots must carry a stable `slot_key`
-(`cred:<program>:<code>`) so the class selector's pin/swap machinery works on them unchanged.
+(`credslot:<program>:<code>`) so the class selector's pin/swap machinery works on them unchanged.
 
 **Response:** add `"credentials": [{program, kind, remaining_credits}]` to the timeline summary so
 the mobile app can badge credential courses on the timeline and home cards.

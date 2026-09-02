@@ -19,6 +19,7 @@ from sap_schedule import (
     _codes_match,
     build_taken_set,
     build_gen_ed_courses,
+    build_gen_ed_open,
     build_gen_ed_satisfied,
     build_satisfied_req_codes,
     build_used_codes,
@@ -502,6 +503,42 @@ def test_generic_gen_ed_slots_satisfied_from_completed_gen_ed_courses():
     # slot → two of the three generic slots satisfied, one still scheduled.
     assert sum(1 for r in ge_slots if r["satisfied"]) == 2
     assert {r["matched_code"] for r in ge_slots if r["satisfied"]} == {"ANTH 140", "MUSIC 11"}
+
+
+def test_generic_gen_ed_slots_dropped_when_no_domain_is_open():
+    # Every gen-ed domain covered (interdomain courses can cover eight domains
+    # with fewer courses than the plan has generic cells): the leftover generic
+    # slots are phantom work the picker has nothing to fill, so they go.
+    tpl = {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "gen_ed", "credits": 3},
+        {"type": "gen_ed", "credits": 3},
+    ]}]}
+    recs = match_template(tpl, taken=set(), gen_ed_courses=["ANTH 140"],
+                          gen_ed_open=False)
+    assert all(r["satisfied"] for r in recs)
+
+    # A domain still open → the surplus slot stays scheduled (today's behavior).
+    recs = match_template(tpl, taken=set(), gen_ed_courses=["ANTH 140"],
+                          gen_ed_open=True)
+    assert [r["satisfied"] for r in recs] == [True, False]
+
+
+def test_build_gen_ed_open_reads_the_searchable_domain_pools():
+    open_res = {"groups": [
+        {"name": "GA: Arts", "group_type": "choose_credits", "satisfied": True},
+        {"name": "GN: Natural Sciences", "group_type": "choose_credits", "satisfied": False},
+    ]}
+    assert build_gen_ed_open(open_res) is True
+
+    # Fixed Communication groups and the WAC rule are not searchable domains, so
+    # an unmet one does not keep a generic gen-ed slot alive.
+    closed_res = {"groups": [
+        {"name": "GA: Arts", "group_type": "choose_credits", "satisfied": True},
+        {"name": "GWS: Writing/Speaking", "group_type": "choose_one", "satisfied": False},
+        {"name": "Writing Across the Curriculum", "group_type": "writing_intensive",
+         "satisfied": False},
+    ]}
+    assert build_gen_ed_open(closed_res) is False
 
 
 def test_build_gen_ed_courses_distinct_completed_only():

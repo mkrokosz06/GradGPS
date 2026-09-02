@@ -174,6 +174,24 @@ def build_gen_ed_courses(gen_ed_result: dict) -> list[str]:
     return out
 
 
+def build_gen_ed_open(gen_ed_result: dict) -> bool:
+    """Whether the student still has gen-ed work a picker could offer them — i.e.
+    any of the searchable domain pools (GA/GN/GH/GS/GHW/GQ/US/IL, the
+    `choose_credits` groups) is still unmet.
+
+    A PSU bulletin plan lists most gen-ed credits as category-less "General
+    Education" cells.  `_assign_generic_gen_ed` retires one per completed gen-ed
+    course, but a student who covered eight domains with fewer courses (interdomain
+    courses count twice) is left with generic slots the class selector has nothing
+    to fill — every domain chip is gone, so the picker opens empty.  When no domain
+    is open, those slots are phantom and get dropped.
+    """
+    for g in (gen_ed_result or {}).get("groups", []):
+        if g.get("group_type") == "choose_credits" and not g.get("satisfied"):
+            return True
+    return False
+
+
 def build_used_codes(*audit_results: dict) -> set[str]:
     """Base codes of every course an audit consumed (major and/or gen-ed result).
     Surplus detection subtracts these so a course that filled a requirement the
@@ -385,7 +403,8 @@ def _assign_dept_level(records: list[dict], leftovers: list[dict]) -> None:
             leftovers.remove(hit)   # its credits can't also count as elective
 
 
-def _assign_generic_gen_ed(records: list[dict], gen_ed_courses: list[str]) -> None:
+def _assign_generic_gen_ed(records: list[dict], gen_ed_courses: list[str],
+                           gen_ed_open: bool = True) -> None:
     """Satisfy the template's category-less generic gen-ed slots from the
     student's completed gen-ed courses, one course per slot in plan order.
 
@@ -406,6 +425,11 @@ def _assign_generic_gen_ed(records: list[dict], gen_ed_courses: list[str]) -> No
             code = pool.pop(0)
             rec["satisfied"], rec["item"] = True, None
             rec["matched_code"] = code
+        elif not gen_ed_open:
+            # No gen-ed domain is still open, so this slot is a leftover of the
+            # template's credit accounting, not real work — and the picker would
+            # open with nothing to choose.  Retire it.
+            rec["satisfied"], rec["item"] = True, None
 
 
 def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
@@ -528,6 +552,7 @@ def match_template(
     used_codes: set[str] | None = None,
     gen_ed_courses: list[str] | None = None,
     course_choices: dict[str, str] | None = None,
+    gen_ed_open: bool = True,
 ) -> list[dict]:
     """Walk the template in order and produce one record per slot:
 
@@ -619,7 +644,7 @@ def match_template(
     # equivalence (MATH 140 -> the template's MATH 110 slot) is NOT excluded: it's
     # a genuine extra gen-ed course still available for a generic slot, so a
     # student who has finished gen-eds isn't left with phantom gen-ed slots.
-    if gen_ed_courses:
+    if gen_ed_courses or not gen_ed_open:
         named_codes: set[str] = set()
         for r in records:
             s = r["slot"]
@@ -628,8 +653,8 @@ def match_template(
             elif s.get("type") in ("choose_one", "pool"):
                 for c in s.get("codes", []):
                     named_codes.add(_base(c))
-        pool = [c for c in gen_ed_courses if _base(c) not in named_codes]
-        _assign_generic_gen_ed(records, pool)
+        pool = [c for c in (gen_ed_courses or []) if _base(c) not in named_codes]
+        _assign_generic_gen_ed(records, pool, gen_ed_open)
 
     if transcript_courses:
         leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
