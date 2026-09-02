@@ -1119,7 +1119,9 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
         type_buckets: dict[tuple, list[dict]] = defaultdict(list)
         for row in rows:
             gtype = row.get("group_type", "required")
-            thr_key = int(row["group_threshold"]) if gtype in ("choose_credits", "choose_courses") and row.get("group_threshold") else None
+            thr_key = int(row["group_threshold"]) if gtype in (
+            "choose_credits", "choose_courses", "dept_credits", "unstructured_credits"
+        ) and row.get("group_threshold") else None
             type_buckets[(gtype, thr_key)].append(row)
 
         if len(type_buckets) == 1:
@@ -1147,6 +1149,12 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             }
             if "credits_in_progress" in result:
                 gr["credits_in_progress"] = result["credits_in_progress"]
+            # Credential pools carry the bulletin's own wording so the UI can show the
+            # requirement as written ("Select 6 credits ... in consultation with the
+            # minor adviser") rather than a generic placeholder.
+            for extra in ("pool_text", "needs_confirmation"):
+                if result.get(extra):
+                    gr[extra] = result[extra]
             group_results.append(gr)
 
         else:
@@ -1220,7 +1228,8 @@ def _pool_counts(gtype: str, result: dict) -> tuple[int, int, int]:
     requirement slot — not one slot per pool item.  This prevents inflating
     the "missing" count with unchosen electives from a satisfied pool.
     """
-    if gtype in ("choose_credits", "choose_courses", "writing_intensive"):
+    if gtype in ("choose_credits", "choose_courses", "writing_intensive",
+                 "dept_credits", "unstructured_credits"):
         if result["satisfied"]:
             return 1, 0, 0
         elif result["in_progress"] > 0:
@@ -1273,6 +1282,148 @@ def _eval_writing_intensive(taken: dict, threshold) -> dict:
     }
 
 
+# ── Credential pools (minors / certificates) ─────────────────────────────────
+# Two group types the majors' catalog never needed.  Both are *rules*, not course
+# lists, so they are evaluated against the taken-set the way
+# `_eval_writing_intensive()` evaluates the W designation.
+
+_DEPT_CODE_RE = re.compile(r"^([A-Z][A-Z\-]{0,7})\s*(\d{1,3})([A-Z]*)$")
+
+
+def _split_course_code(code: str) -> tuple[str, int, str] | None:
+    """"PSYCH 301W" -> ("PSYCH", 301, "W").  None if it isn't a course code."""
+    m = _DEPT_CODE_RE.match(re.sub(r"\s+", " ", (code or "").strip().upper()))
+    return (m.group(1), int(m.group(2)), m.group(3)) if m else None
+
+
+def _in_dept_pool(code: str, spec: dict) -> bool:
+    """Whether a transcript course falls inside a departmental pool."""
+    parsed = _split_course_code(code)
+    if not parsed:
+        return False
+    dept, number, _suffix = parsed
+
+    subjects = set(spec.get("depts") or ([spec["dept"]] if spec.get("dept") else []))
+    if subjects and dept not in subjects:
+        return False
+    if spec.get("min_level") is not None and number < spec["min_level"]:
+        return False
+    if spec.get("max_level") is not None and number > spec["max_level"]:
+        return False
+    for excluded in spec.get("exclude", []):
+        ex = _split_course_code(excluded)
+        if ex and ex[:2] == (dept, number):
+            return False
+    return True
+
+
+def _pool_spec(rows: list[dict]) -> dict:
+    """The rule carried on a pool's sentinel row (see credential_catalog._pool_row)."""
+    row = rows[0] if rows else {}
+    return {k: row[k] for k in
+            ("dept", "depts", "min_level", "max_level", "sub_level", "sub_credits",
+             "exclude", "pool_text")
+            if row.get(k) not in (None, [], "")}
+
+
+def _eval_dept_credits(rows: list[dict], taken: dict, threshold) -> dict:
+    """N credits of coursework in a subject — "Select 11 credits (at least 6 at the
+    400 level) in PSYCH".
+
+    Most PSU minors are "a few prescribed courses, then N credits in the subject", and
+    that N cannot be expressed as a course list, so no existing group type fits.  Returns
+    the same shape as `_eval_choose_credits()` so every caller keeps working.
+    """
+    spec = _pool_spec(rows)
+    thr  = float(threshold) if threshold else 0.0
+
+    # `taken` holds alias keys pointing at the SAME entry dict (CRIMJ 100 / CRIM 100),
+    # so entries are de-duplicated by identity exactly as _eval_writing_intensive does.
+    seen: set[int] = set()
+    credits_earned = credits_in_progress = 0.0
+    level_credits = 0.0
+    done = ip = 0
+    items = []
+
+    sub_level   = spec.get("sub_level")
+    sub_credits = float(spec.get("sub_credits") or 0)
+
+    for code, entry in sorted(taken.items()):
+        if id(entry) in seen or not _in_dept_pool(code, spec):
+            continue
+        seen.add(id(entry))
+        status = entry.get("status", "done")
+        cr     = float(entry.get("credits_earned", 0) or 0) or 3.0
+
+        if status in ("done", "transfer"):
+            credits_earned += cr
+            done += 1
+            parsed = _split_course_code(code)
+            if sub_level and parsed and parsed[1] >= sub_level:
+                level_credits += cr
+        elif status == "in_progress":
+            credits_in_progress += cr
+            ip += 1
+        else:
+            continue
+
+        items.append({
+            "course_code":  code,
+            "course_title": entry.get("course_title", ""),
+            "credits":      cr,
+            "status":       status,
+            "grade":        entry.get("grade", ""),
+        })
+
+    credits_needed = max(0.0, thr - credits_earned)
+    satisfied = credits_earned >= thr if thr else True
+    # "at least 6 credits at the 400 level" gates satisfaction too: 11 credits of
+    # 100-level PSYCH does not complete the Psychology minor.
+    if satisfied and sub_credits and level_credits < sub_credits:
+        satisfied = False
+        credits_needed = max(credits_needed, sub_credits - level_credits)
+
+    return {
+        "satisfied":           satisfied,
+        "credits_earned":      round(min(credits_earned, thr) if thr else credits_earned, 1),
+        "credits_in_progress": round(credits_in_progress, 1),
+        "credits_needed":      round(credits_needed, 1),
+        "threshold":           threshold,
+        "done":                done,
+        "in_progress":         ip,
+        "missing":             0 if satisfied else 1,
+        "items":               items,
+        "pool_text":           spec.get("pool_text", ""),
+    }
+
+
+def _eval_unstructured_credits(rows: list[dict], taken: dict, threshold) -> dict:
+    """A requirement PSU defers to an adviser — "Select 6 credits from an approved list
+    in consultation with the minor adviser".
+
+    The bulletin states the *size* but not the *rule*, so there is nothing to evaluate:
+    this is **never** satisfied automatically.  Inventing a rule here would tell a student
+    they had finished a minor they had not.  It reports as outstanding, carrying the
+    bulletin's own wording for the UI to show, and is satisfied only by courses the
+    student explicitly attests to.
+    """
+    spec = _pool_spec(rows)
+    thr  = float(threshold) if threshold else 0.0
+    return {
+        "satisfied":           False,
+        "credits_earned":      0.0,
+        "credits_in_progress": 0.0,
+        "credits_needed":      thr,
+        "threshold":           threshold,
+        "done":                0,
+        "in_progress":         0,
+        "missing":             1,
+        "items":               [],
+        "needs_confirmation":  True,
+        "pool_text":           spec.get("pool_text", ""),
+    }
+
+
 # ── Exclusive dispatch helper (gen ed — cross-group course consumption) ──────
 
 def _eval_type_exclusive(
@@ -1315,6 +1466,10 @@ def _eval_type_with_consumed(gtype: str, rows: list[dict], taken: dict, threshol
         return _eval_choose_credits_consumed(rows, taken, threshold)
     elif gtype == "choose_courses":
         return _eval_choose_courses_consumed(rows, taken, threshold)
+    elif gtype == "dept_credits":
+        return _eval_dept_credits(rows, taken, threshold)
+    elif gtype == "unstructured_credits":
+        return _eval_unstructured_credits(rows, taken, threshold)
     else:
         return _eval_required_consumed(rows, taken)
 
@@ -1512,6 +1667,10 @@ def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold) -> dict:
         return _eval_choose_courses(rows, taken, threshold)
     elif gtype == "writing_intensive":
         return _eval_writing_intensive(taken, threshold)
+    elif gtype == "dept_credits":
+        return _eval_dept_credits(rows, taken, threshold)
+    elif gtype == "unstructured_credits":
+        return _eval_unstructured_credits(rows, taken, threshold)
     else:
         return _eval_required(rows, taken)   # fallback
 

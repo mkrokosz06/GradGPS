@@ -22,6 +22,7 @@ from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_gen_ed_courses, match_template)
 from routers.user_choices import get_user_choices
 from substitutions import get_substitutions
+from credentials_audit import audit_declared_credentials
 
 router = APIRouter()
 
@@ -248,6 +249,28 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                                 for it in pool_items
                                 if it.get("status") == "missing"
                             ]
+                        missing.append(entry)
+            elif gtype in ("dept_credits", "unstructured_credits"):
+                # Credential pools (minors/certificates). Both are rules rather than
+                # course lists, so there is nothing to enumerate into `pool_courses` —
+                # the slot carries the bulletin's own wording instead.
+                if not src.get("satisfied"):
+                    needed = src.get("credits_needed")
+                    if needed is None:
+                        needed = src.get("threshold") or 3
+                    if needed > 0:
+                        wording = src.get("pool_text") or group.get("name", "")
+                        entry = {
+                            "course_code":         group.get("name", "Requirements"),
+                            "course_title":        wording or f"Choose {int(needed)} more credits",
+                            "credits":             needed,
+                            "is_pool":             True,
+                            "pool_needed_credits": int(needed),
+                            # An adviser-defined requirement can never be auto-filled,
+                            # so the UI must ask the student rather than offer a picker.
+                            "needs_confirmation":  gtype == "unstructured_credits",
+                            "searchable":          gtype == "dept_credits",
+                        }
                         missing.append(entry)
             else:
                 for item in items:
@@ -539,6 +562,10 @@ def _emit_semester(term: str, courses: list[dict]) -> dict:
                 "chosen_code":         c.get("chosen_code"),
                 "pinned":              c.get("pinned", False),
                 "searchable":          c.get("searchable", False),
+                # An adviser-defined credential requirement: shown in the bulletin's
+                # own words and never auto-satisfied, so the UI asks the student
+                # instead of offering a course picker.
+                "needs_confirmation":  c.get("needs_confirmation", False),
             }
             for c in courses
         ],
@@ -854,6 +881,112 @@ def _build_layer1_future(
     )
 
 
+def _merge_credential_slots(future: list[dict], credential_audits: list[dict],
+                            course_choices: dict[str, str] | None = None) -> list[dict]:
+    """Fold a declared minor's / certificate's remaining courses into the plan.
+
+    Applied *after* both timeline paths converge, so the SAP-template path and the
+    Layer 1 packer behave identically here: the major's plan is built first and stays
+    authoritative, and credential work fills the remaining headroom.
+
+    Slots keep a `credential` tag (the UI badges the course with it, so a student can
+    see why a course they didn't expect is in their plan) and a `cred:`-prefixed
+    `slot_key`, which the existing class-selector pin/swap machinery handles unchanged.
+
+    A course the major already schedules is NOT added twice — it appears once and
+    counts for both, which is the same double-count stance the audit takes.
+    """
+    if not credential_audits:
+        return future                      # byte-identical no-op
+
+    already = {
+        (c.get("course_code") or "").strip().upper()
+        for sem in future for c in sem.get("courses", [])
+    }
+
+    pending: list[dict] = []
+    for cred in credential_audits:
+        program = cred.get("program", "")
+        short   = program.split(",")[0].strip()
+        for slot in _collect_missing(cred, course_choices):
+            code = (slot.get("course_code") or "").strip().upper()
+            if not slot.get("is_pool") and code in already:
+                continue
+            already.add(code)
+
+            # Split a departmental pool into ~3-credit slots the same way major pools
+            # are split (_expand_pool), so a 6-credit minor requirement can fill the
+            # headroom of two existing semesters instead of forcing a whole new term.
+            # An adviser-defined requirement is NOT split: it is one block the student
+            # settles with their adviser, and slicing it would misrepresent it.
+            pieces = ([slot] if slot.get("needs_confirmation") or not slot.get("is_pool")
+                      else _expand_pool(slot))
+
+            for i, piece in enumerate(pieces):
+                piece = dict(piece)
+                # _expand_pool re-labels each slice generically; the bulletin's own
+                # wording is the requirement, so keep it.
+                if slot.get("course_title"):
+                    piece["course_title"] = slot["course_title"]
+                piece["credential"]       = program
+                piece["credential_short"] = short
+                base_key = slot.get("slot_key") or f"code:{code}"
+                suffix   = f":{i}" if len(pieces) > 1 else ""
+                piece["slot_key"] = f"cred:{program}:{base_key}{suffix}"
+                pending.append(piece)
+
+    if not pending:
+        return future
+
+    # Fill the headroom in already-planned semesters before adding any new term —
+    # a minor should lengthen the plan only when it genuinely cannot fit.
+    for sem in future:
+        if not pending:
+            break
+        # Skip summer. The plan deliberately avoids it (_next_term jumps SP->FA), and a
+        # summer term that IS in the plan is there for a specific reason — the SAP path
+        # lifts a required internship into one — so it is not spare capacity for a minor.
+        if str(sem.get("term", "")).startswith("SU"):
+            continue
+        while pending and _semester_credits(sem["courses"]) + \
+                float(pending[0].get("credits") or 3) <= _MAX_CREDITS:
+            sem["courses"].append(_future_course(pending.pop(0)))
+        sem["credits"] = _semester_credits(sem["courses"])
+
+    # Anything left needs new terms.  Declaring a minor late genuinely can add a
+    # semester; the client is told so via `added_terms` rather than finding a
+    # mystery term in the plan.
+    term = future[-1]["term"] if future else "FA 2026"
+    while pending:
+        term = _next_term(term)
+        courses, credits = [], 0.0
+        while pending and credits + float(pending[0].get("credits") or 3) <= _TARGET_CREDITS:
+            slot = pending.pop(0)
+            courses.append(_future_course(slot))
+            credits += float(slot.get("credits") or 3)
+        if not courses:                     # a single slot bigger than the target
+            courses.append(_future_course(pending.pop(0)))
+        # Built directly rather than through _emit_semester: these courses are already
+        # in the mobile schema, and re-emitting would drop the `credential` tag.
+        future.append({
+            "term":    term,
+            "label":   _term_label(term),
+            "status":  "upcoming",
+            "credits": _semester_credits(courses),
+            "courses": courses,
+        })
+
+    return future
+
+
+def _future_course(slot: dict) -> dict:
+    """One credential slot in the mobile-facing course schema."""
+    emitted = _emit_semester("X", [slot])["courses"][0]
+    emitted["credential"]       = slot.get("credential")
+    emitted["credential_short"] = slot.get("credential_short")
+    return emitted
+
+
 def _semester_credits(courses: list[dict]) -> float:
     return round(sum(float(c.get("credits_earned", 3) or 3) for c in courses), 1)
 
@@ -1111,6 +1244,15 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             course_choices=course_choices,
         )
 
+    # Declared minors / certificates schedule after the major's plan is built, so the
+    # major stays authoritative and credential work fills the headroom left over.
+    credential_audits = audit_declared_credentials(user, transcript_courses, declared_subs)
+    terms_before = len(future)
+    future = _merge_credential_slots(future, credential_audits, course_choices)
+    # Declaring a credential can genuinely push graduation out. Report it so the client
+    # can say so, rather than letting an extra term appear in the plan unexplained.
+    credential_added_terms = max(0, len(future) - terms_before)
+
     semesters.extend(_apply_pins(future, pins))
 
     # Recommended courses often come from major rows with no title — fill from the
@@ -1129,4 +1271,16 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         "subplan":             subplan,
         "transcript_credits":  transcript_credits,
         "semesters":           semesters,
+        # Strictly additive: an older mobile build ignores this, and a student who
+        # has declared nothing gets an empty list.
+        "credential_added_terms": credential_added_terms,
+        "credentials":         [
+            {
+                "program":           c["program"],
+                "kind":              c["kind"],
+                "remaining":         c["missing"],
+                "manual_credits":    c["manual_credits"],
+            }
+            for c in credential_audits
+        ],
     }

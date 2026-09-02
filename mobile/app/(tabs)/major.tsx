@@ -194,6 +194,17 @@ export default function MajorScreen() {
           <TouchableOpacity onPress={() => setScreen("search")}>
             <Text style={{ color: "#94a3b8", fontSize: 13, marginTop: 4 }}>Change Major</Text>
           </TouchableOpacity>
+
+          {/* The moment a student is most likely to be thinking about their minor. */}
+          <TouchableOpacity
+            onPress={() => router.navigate("/(tabs)/account" as any)}
+            style={{ marginTop: 22 }}
+          >
+            <Text style={{ color: "#64748b", fontSize: 12.5, textAlign: "center" }}>
+              Have a minor or certificate?{" "}
+              <Text style={{ color: "#1a3a6b", fontWeight: "700" }}>Add it in Account</Text>
+            </Text>
+          </TouchableOpacity>
         </View>
       </SafeAreaView>
     );
@@ -232,6 +243,22 @@ export default function MajorScreen() {
               </TouchableOpacity>
             ) : null}
         </View>
+      </View>
+
+      {/* Minors and certificates are declared on Account, not here: this screen sets
+          the ONE major the whole plan is built from, and the picker deliberately
+          contains no minors (see is_degree_program in routers/programs.py). */}
+      <View style={{ paddingHorizontal: 20, paddingTop: 12, paddingBottom: 4 }}>
+        <Text style={{ color: "#64748b", fontSize: 12, lineHeight: 17 }}>
+          Have a minor or certificate?{" "}
+          <Text
+            style={{ color: "#1a3a6b", fontWeight: "700" }}
+            onPress={() => router.navigate("/(tabs)/account" as any)}
+          >
+            Add it in Account
+          </Text>
+          {" "}— your timeline updates to include it.
+        </Text>
       </View>
 
       {/* Results list */}

@@ -3,11 +3,14 @@ GET /audit
 Returns the full degree audit for the authenticated user.
 """
 
+import logging
+
 from fastapi import APIRouter, HTTPException, Depends, Header
 from boto3.dynamodb.conditions import Key
 
 from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
+from credentials_audit import audit_declared_credentials
 from deps import get_user_id
 from client_meta import touch_client_meta
 from substitutions import get_substitutions
@@ -15,6 +18,7 @@ from substitutions import get_substitutions
 GEN_ED_PROGRAM = "__GEN_ED__"
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 
 import re as _re
@@ -209,61 +213,14 @@ def get_audit(
     else:
         result["gen_ed"] = None
 
+    # ── 7. Declared minors / certificates ─────────────────────────────────────
+    # One extra audit per credential, over the SAME transcript and the SAME declared
+    # substitutions — `run_audit()` is pure, so a credential is just a different set of
+    # requirement rows (credential_catalog.py, a bundled file rather than the table).
+    # A course may count toward both the major and a credential: PSU's double-count rule
+    # varies by department and isn't in the catalog, and the alternative would silently
+    # pick which program loses the course. The UI labels it instead.
+    result["credentials"] = audit_declared_credentials(
+        user, transcript_courses, declared_subs)
+
     return result
-
-
-@router.get("/subplans")
-def get_subplans(major: str):
-    """
-    Returns the available subplans for a given major by inspecting the
-    requirement group names in the catalog.
-
-    Example: major="Forensic Science, B.S."
-    Returns: ["Forensic Chemistry", "Forensic Molecular Biology"]
-    """
-    if not major or not major.strip():
-        raise HTTPException(status_code=422, detail="major must not be empty.")
-    resp = requirements_table.query(
-        KeyConditionExpression=Key("program_name").eq(major),
-        ProjectionExpression="requirement_group",
-    )
-    items = resp.get("Items", [])
-    while "LastEvaluatedKey" in resp:
-        resp = requirements_table.query(
-            KeyConditionExpression=Key("program_name").eq(major),
-            ProjectionExpression="requirement_group",
-            ExclusiveStartKey=resp["LastEvaluatedKey"]
-        )
-        items.extend(resp.get("Items", []))
-
-    import re
-
-    subplans = set()
-
-    # Group names that are NOT subplans — generic section headers used across
-    # all programs. Any name that matches one of these words is skipped.
-    skip_words = {
-        "common", "all options", "university park", "commonwealth",
-        "math 22", "general", "requirements", "core", "elective",
-        "suggested", "curriculum",
-    }
-
-    for item in items:
-        g  = item.get("requirement_group", "")
-        gl = g.lower()
-
-        # Skip campus-specific / suggested-plan duplicates
-        if " at " in gl:
-            continue
-        # Skip generic section headers
-        if any(w in gl for w in skip_words):
-            continue
-
-        # Extract the subplan name: take text before the first "(" or ":"
-        name = re.split(r"[(:（]", g)[0].strip()
-        # Remove trailing "Option" word to get just the subplan label
-        name = re.sub(r"\s+option$", "", name, flags=re.IGNORECASE).strip()
-        if name:
-            subplans.add(name)
-
-    return {"major": major, "subplans": sorted(subplans)}

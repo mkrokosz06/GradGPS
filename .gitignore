@@ -51,3 +51,7 @@ data/
 
 # SAP scraper fetch cache
 backend/scripts/.sap_cache/
+
+# Credential catalog builder: downloaded bulletin pages (regenerable, ~10MB).
+# The catalog itself is committed at backend/credential_data/.
+credentials/.cache/

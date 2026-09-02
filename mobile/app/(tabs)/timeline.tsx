@@ -372,6 +372,24 @@ function PoolDropdownRow({ course }: { course: TimelineCourse }) {
 
 // ── Course row ────────────────────────────────────────────────────────────────
 
+/**
+ * Marks a course that a declared minor / certificate put in the plan, so a student
+ * can see why a course they didn't expect from their major is there.
+ */
+function CredentialChip({ course }: { course: TimelineCourse }) {
+  if (!course.credential_short) return null;
+  // The program name carries its own kind ("Art, Minor" / "Earth Sustainability,
+  // Certificate"), so read it from there rather than assuming "minor".
+  const kind = /certificate/i.test(course.credential ?? "") ? "certificate" : "minor";
+  return (
+    <View className="self-start mt-1 px-2 py-0.5 rounded-full bg-violet-50 border border-violet-100">
+      <Text className="text-[10px] font-semibold text-violet-700">
+        {course.credential_short} {kind}
+      </Text>
+    </View>
+  );
+}
+
 function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCourse; onEdit?: (course: TimelineCourse) => void; onEditInProgress?: (course: TimelineCourse) => void }) {
   const router = useRouter();
   const config = {
@@ -423,6 +441,7 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
           ) : !cats && course.course_title ? (
             <Text className="text-gray-400 text-xs mt-0.5">{course.course_title}</Text>
           ) : null}
+          <CredentialChip course={course} />
         </View>
         {poolActionable ? (
           <View className="ml-2 mt-0.5 flex-row items-center bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
@@ -473,6 +492,7 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
           ) : null}
         </View>
         <Text className="text-gray-500 text-xs mt-0.5">Tap for ratings ›</Text>
+        <CredentialChip course={course} />
       </View>
       <View className="ml-3 items-end justify-center">
         {course.grade ? (

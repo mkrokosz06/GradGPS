@@ -200,6 +200,80 @@ For University Park majors with a published PSU bulletin plan, the timeline refl
 
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
+### Minors & certificates (credentials)
+
+A student declares minors/certificates **from the Account page** (never onboarding — signup stays
+"one major, one transcript, done"); the audit reports progress and the timeline schedules the
+remaining courses. Design doc: `docs/minors-certificates.md`.
+
+**Requirements are a bundled file, not table rows.** `backend/credential_data/credential_requirements.json`
+(207 University Park credentials) + `credential_catalog.py`, the same pattern as `sap_templates/` +
+`plan_templates.py`. `run_audit()` is pure — it takes requirement-row dicts, not a table handle — so
+`to_requirement_rows()` converts JSON groups in memory and **the engine cannot tell a credential from
+a major**. A bundled file avoids the per-table prod IAM grant and a prod seeding run on every data
+refresh, and it diffs in git so a re-scrape is a reviewable PR. The `requirements` table still holds
+the *old, broken* credential rows from `load_catalog.py`; nothing queries them any more.
+
+> **The scraped credential rows were unusable** — only 52% had a plausible credit total and
+> *Arts Entrepreneurship, Minor* demanded 660 credits, because `scrape_psu.py` reads pages as text
+> and only resets group state on an `<h2>`–`<h5>`, while credential pages carry one heading and put
+> all structure inside a single `table.sc_courselist`. The rebuild lives in **`credentials/`**
+> (own README) and parses the CourseLeaf classes instead. **204 of the 205 credentials that publish
+> a credit total now agree with PSU's own published number**; `python credentials/scrape_credentials.py
+> --report` reprints that figure, so a PSU page edit that breaks a parse shows up as a drop in the
+> number rather than as a wrong plan in a student's timeline.
+
+**Two new group types** in `audit_engine.py`, both modelled on `_eval_writing_intensive()` (a *rule*
+evaluated against the taken-set rather than a course list):
+- `dept_credits` — "Select 11 credits (at least 6 at the 400 level) in PSYCH". Handles single/multi
+  subject, level floors and ranges, exclusions, and the "at least N at level L" sub-constraint, which
+  **gates satisfaction** (11 credits of 100-level PSYCH does not finish the Psychology minor).
+  Courses named elsewhere in the credential are excluded — PSU's word is "*Additional*".
+- `unstructured_credits` — a requirement PSU defers to an adviser ("Select 6 credits from an approved
+  list in consultation with the minor adviser"). **Never auto-satisfied**: the bulletin states the
+  size but not the rule, and inventing one would tell a student they'd finished a minor they hadn't.
+  It carries the bulletin's exact wording and is flagged `needs_confirmation` for the UI. 53 of the
+  207 credentials have one (median 9 cr).
+
+**Storage**: a `credentials: [{program, kind}]` list on the existing **users** row, capped at 3
+(`MAX_CREDENTIALS` in `routers/users.py`) — same reasoning as `MAX_PER_USER` on substitutions. No new
+table, so no infra change. Absent/empty is a byte-identical no-op, which is what makes this safe to
+ship to live beta users.
+
+| Endpoint | Purpose |
+|---|---|
+| `GET /programs/credentials?q=` | Declarable minors/certificates. Deliberately separate from `/programs/all`, which still returns **degree programs only** so an older build can never put a minor in the major slot. |
+| `PUT /users/me/credentials` | Replace the whole list (idempotent). Validates catalog membership, the cap, duplicates, and "not your major". |
+
+`credentials_audit.audit_declared_credentials()` is shared by `routers/audit.py` and
+`routers/timeline.py` so the two can never disagree. **A course may count toward both the major and a
+credential** — PSU's double-count rule varies by department and isn't in the catalog, and enforcing
+one would silently pick which program loses the course; the UI labels the overlap instead.
+
+**Timeline** — `_merge_credential_slots()` runs *after* both timeline paths converge, so the SAP and
+Layer 1 paths behave identically: the major's plan is built first and stays authoritative, credential
+work fills the leftover headroom, and only then are terms added. Departmental pools are split by the
+existing `_expand_pool()` so a 6-credit requirement can fill two semesters' headroom instead of
+forcing a new year; an adviser-deferred block is **never** split. Summer terms are skipped (a summer
+term in the plan is there for a reason — the SAP path lifts a required internship into one). Slots
+carry a `cred:`-namespaced `slot_key`, so class-selector pin/swap works unchanged, and a
+`credential` tag the mobile card badges. `credential_added_terms` reports when declaring a credential
+genuinely pushes graduation out, rather than letting a term appear unexplained.
+
+**Mobile**: `services/credentialService.ts`, `components/CredentialPickerModal.tsx`, the
+"Minors & Certificates" card in `app/(tabs)/account.tsx`, a pointer on `app/(tabs)/major.tsx` (search
+screen + "Major Saved" screen), and a violet chip on timeline cards.
+
+Tests: `backend/tests/test_credentials.py` (18, pytest or plain `python`) plus 31 parser tests in
+`credentials/tests/`.
+
+**Degree-program scoping.** `is_degree_program()` in `routers/programs.py` keeps minors/certificates
+out of the **major** list (`/programs/all`, `/programs/search`: 487 → 225 programs) and `POST
+/programs/select` refuses one with a 400, because the major is the single program the whole plan is
+built from. They are now offered separately via `GET /programs/credentials` (above). It keys off the
+row's `degree` attribute with the `", Minor"` / `", Certificate"` name suffix as a fallback, keeping
+anything unlabelled — dropping only what is positively identified as non-degree.
+
 **University Park scoping.** `is_up_program()` in `routers/programs.py` is the single authoritative definition of "a UP program" — a **denylist** of non-UP campus keywords (fail-safe: a re-scrape can't silently leak a campus we forgot to allowlist). SAP templates are UP-only.
 
 ### Manual class editing (transcript course CRUD)

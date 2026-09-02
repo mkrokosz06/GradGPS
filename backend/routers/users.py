@@ -12,6 +12,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, HTTPException, Depends, Header
 from pydantic import BaseModel
 
+import credential_catalog
 from db import users_table, transcript_table, sessions_table, user_choices_table, get_s3
 from deps import get_current_user, get_user_id
 from client_meta import touch_client_meta
@@ -101,7 +102,76 @@ def get_me(
         "email":   user.get("email", ""),
         "major":   user.get("major"),
         "subplan": user.get("subplan"),
+        # Declared minors / certificates. Strictly additive: an older mobile build
+        # ignores the field, and an account that has declared none omits it entirely.
+        "credentials": user.get("credentials", []),
     }
+
+
+# A student may stack a couple of credentials, but not an unbounded list — the same
+# reasoning as MAX_PER_USER in substitutions.py: it is a declaration about themselves,
+# and an uncapped list makes the timeline meaningless.
+MAX_CREDENTIALS = 3
+
+
+class CredentialsBody(BaseModel):
+    programs: list[str]
+
+
+@router.put("/me/credentials")
+def set_my_credentials(
+    body: CredentialsBody,
+    user_id: str = Depends(get_user_id),
+):
+    """Declare the caller's minors / certificates.
+
+    Replaces the whole list rather than adding one at a time — idempotent, and there is
+    no add/remove race for a client to lose. Declaring a credential never changes the
+    major; it is additional coursework (see docs/minors-certificates.md).
+    """
+    seen: list[str] = []
+    for name in body.programs:
+        name = (name or "").strip()
+        if not name or name in seen:
+            continue
+        if not credential_catalog.is_credential(name):
+            raise HTTPException(
+                status_code=400,
+                detail=f"{name} is not a minor or certificate GradGPS supports.",
+            )
+        seen.append(name)
+
+    if len(seen) > MAX_CREDENTIALS:
+        raise HTTPException(
+            status_code=400,
+            detail=f"You can declare up to {MAX_CREDENTIALS} minors or certificates.",
+        )
+
+    user = users_table.get_item(Key={"user_id": user_id}).get("Item")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if user.get("major") in seen:
+        raise HTTPException(
+            status_code=400,
+            detail="That is already your major — pick a different minor or certificate.",
+        )
+
+    credentials = [
+        {"program": n, "kind": credential_catalog.get_credential(n)["kind"]}
+        for n in seen
+    ]
+    if credentials:
+        users_table.update_item(
+            Key={"user_id": user_id},
+            UpdateExpression="SET credentials = :c",
+            ExpressionAttributeValues={":c": credentials},
+        )
+    else:
+        users_table.update_item(
+            Key={"user_id": user_id},
+            UpdateExpression="REMOVE credentials",
+        )
+    return {"status": "ok", "credentials": credentials}
 
 
 @router.delete("/me")

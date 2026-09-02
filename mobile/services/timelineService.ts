@@ -34,6 +34,13 @@ export type TimelineCourse = {
   pinned?:              boolean;
   pin_moved?:           boolean;
   searchable?:          boolean;
+  // Set when the slot comes from a declared minor / certificate rather than the
+  // major, so the card can say which one put it in the plan.
+  credential?:          string | null;
+  credential_short?:    string | null;
+  // An adviser-defined credential requirement: shown in the bulletin's own words
+  // and never auto-satisfied, so there is no course picker to offer.
+  needs_confirmation?:  boolean;
 };
 
 export type Semester = {

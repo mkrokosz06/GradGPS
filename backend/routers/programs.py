@@ -4,10 +4,13 @@ GET  /programs/search?q=forensic — filter cached list, case-insensitive substr
 POST /programs/select            — save a user's major selection
 """
 
+import re
+
 from fastapi import APIRouter, Query, HTTPException, Depends
 from pydantic import BaseModel
 from boto3.dynamodb.conditions import Key
 
+import credential_catalog
 from db import requirements_table, users_table
 from deps import get_user_id
 
@@ -64,6 +67,38 @@ def is_up_program(name: str) -> bool:
     )
 
 
+# ── Degree-program scoping ───────────────────────────────────────────────────
+# The scraped catalog carries minors and certificates alongside degree majors
+# (197 minors, ~30 certificates).  They are NOT selectable yet: the app models
+# exactly one program per student — `run_audit()` audits a single
+# `program_name`, and the timeline is built from that one audit — so a student
+# who picked "Psychology, Minor" as their major would get an audit against 18
+# credits and read as nearly graduated.  Until minors/certificates are modelled
+# as their own thing (a separate field + a second audit pass), keep them out of
+# the picker entirely.
+_NON_DEGREE_TYPES = {"minor", "certificate"}
+
+# Belt-and-braces: catalog rows written outside load_catalog.py may lack the
+# `degree` attribute, but PSU program names carry the qualifier themselves.
+_NON_DEGREE_NAME_RE = re.compile(r",\s*(minor|certificate)\b", re.I)
+
+
+def is_degree_program(name: str, degrees: set[str]) -> bool:
+    """Whether a catalog program is a degree major (vs. a minor/certificate).
+
+    `degrees` is every non-empty `degree` value seen on that program's rows.
+    A program is dropped only when it is positively identified as non-degree
+    and nothing claims otherwise — an unlabelled program (1681 catalog rows
+    have a blank degree) stays in, which is the fail-safe direction.
+    """
+    if _NON_DEGREE_NAME_RE.search(name):
+        return False
+    lowered = {d.strip().lower() for d in degrees if d and d.strip()}
+    if not lowered:
+        return True
+    return not lowered <= _NON_DEGREE_TYPES
+
+
 # In-memory cache populated on first request — avoids a 10-page DynamoDB scan per search
 _programs_cache: list[str] | None = None
 
@@ -72,19 +107,27 @@ def _load_all_programs() -> list[str]:
     global _programs_cache
     if _programs_cache is not None:
         return _programs_cache
-    all_names: set[str] = set()
-    scan_kwargs: dict = {"ProjectionExpression": "program_name"}
+    degrees_by_name: dict[str, set[str]] = {}
+    # "degree" is a DynamoDB reserved word — must go through an expression name.
+    scan_kwargs: dict = {
+        "ProjectionExpression": "program_name, #deg",
+        "ExpressionAttributeNames": {"#deg": "degree"},
+    }
     while True:
         resp = requirements_table.scan(**scan_kwargs)
-        all_names.update(item["program_name"] for item in resp.get("Items", []))
+        for item in resp.get("Items", []):
+            degrees_by_name.setdefault(item["program_name"], set()).add(
+                item.get("degree") or ""
+            )
         last = resp.get("LastEvaluatedKey")
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
-    # Exclude sentinel rows (__GEN_ED__, __CROSSLISTINGS__) and non-UP programs
+    # Exclude sentinel rows (__GEN_ED__, __CROSSLISTINGS__), non-UP programs,
+    # and non-degree programs (minors/certificates)
     _programs_cache = sorted(
-        n for n in all_names
-        if not n.startswith("__") and is_up_program(n)
+        n for n, degs in degrees_by_name.items()
+        if not n.startswith("__") and is_up_program(n) and is_degree_program(n, degs)
     )
     return _programs_cache
 
@@ -104,6 +147,18 @@ def search_programs(q: str = Query(..., min_length=1)):
     return {"results": names, "count": len(names)}
 
 
+@router.get("/credentials")
+def search_credentials(q: str | None = Query(None)):
+    """Minors and certificates a student can declare (see credential_catalog.py).
+
+    Deliberately a *separate* endpoint from the major list: a credential is declared
+    alongside a major, not instead of one, and `/programs/all` must keep returning only
+    degree programs so an older mobile build can never put a minor in the major slot.
+    """
+    results = credential_catalog.list_credentials(q)
+    return {"results": results, "count": len(results)}
+
+
 class SelectMajorBody(BaseModel):
     major:   str
     subplan: str | None = None   # e.g. "Forensic Chemistry" — optional at selection time
@@ -121,6 +176,16 @@ def select_major(
     )
     if not resp.get("Items"):
         raise HTTPException(status_code=404, detail=f"Major not found: {body.major}")
+
+    # Minors/certificates are in the catalog but not selectable as a major (see
+    # _NON_DEGREE_TYPES).  The picker already hides them, but an older mobile
+    # build could still post one, so refuse it here too.
+    if not is_degree_program(body.major, {r.get("degree") or "" for r in resp["Items"]}):
+        raise HTTPException(
+            status_code=400,
+            detail=f"{body.major} is a minor or certificate, not a degree program. "
+                   "GradGPS doesn't support these yet — pick your degree major.",
+        )
 
     # Validate subplan actually exists in the requirement groups for this major
     # before persisting it, so a stale subplan from a previous major can't leak.

@@ -6,6 +6,8 @@ import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { getAudit, getCachedAudit, type AuditSummary } from "../../services/auditService";
 import { deleteAccount } from "../../services/userService";
+import { setCredentials, credentialErrorMessage } from "../../services/credentialService";
+import { CredentialPickerModal } from "../../components/CredentialPickerModal";
 
 function classYear(credits: number): string {
   if (credits < 30)  return "Freshman";
@@ -20,6 +22,51 @@ export default function AccountScreen() {
     () => (userId ? getCachedAudit(userId) : null),
   );
   const [deleting, setDeleting] = useState(false);
+
+  // Declared minors / certificates. The audit is the source of truth (it carries
+  // each credential's progress), so this screen never keeps a separate copy —
+  // it re-reads after every change.
+  const [pickerOpen, setPickerOpen]   = useState(false);
+  const [savingCreds, setSavingCreds] = useState(false);
+  const credentials = audit?.credentials ?? [];
+
+  async function saveCredentials(programs: string[]) {
+    setSavingCreds(true);
+    try {
+      await setCredentials(userId!, programs);
+      // Refetch rather than patching local state: declaring a credential changes
+      // the audit (and the timeline on its next focus), and the server is the
+      // authority on what it computed.
+      if (userId) setAudit(await getAudit(userId));
+    } catch (e) {
+      Alert.alert("Error", credentialErrorMessage(e));
+    } finally {
+      setSavingCreds(false);
+    }
+  }
+
+  async function addCredential(programName: string) {
+    setPickerOpen(false);
+    await saveCredentials([...credentials.map((c) => c.program), programName]);
+  }
+
+  function removeCredential(programName: string) {
+    Alert.alert(
+      "Remove this?",
+      `${programName} will be removed from your plan, and its courses will leave your timeline.`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () =>
+            saveCredentials(
+              credentials.map((c) => c.program).filter((p) => p !== programName),
+            ),
+        },
+      ],
+    );
+  }
 
   function confirmDeleteAccount() {
     Alert.alert(
@@ -119,6 +166,67 @@ export default function AccountScreen() {
           </View>
         )}
 
+        {/* Minors & certificates — declared here, never during onboarding */}
+        {audit && (
+          <View
+            style={{
+              backgroundColor: "#f0f4ff",
+              borderRadius: 16, padding: 18,
+              borderWidth: 1, borderColor: "#dbeafe",
+              marginBottom: 16,
+            }}
+          >
+            <Text style={{ color: "#94a3b8", fontSize: 11, fontWeight: "700", marginBottom: 5, letterSpacing: 0.8 }}>
+              MINORS & CERTIFICATES
+            </Text>
+
+            {credentials.length === 0 ? (
+              <Text style={{ color: "#64748b", fontSize: 12, lineHeight: 17, marginBottom: 10 }}>
+                Taking a minor or certificate? Add it and its remaining courses join your timeline.
+              </Text>
+            ) : (
+              credentials.map((c) => (
+                <View
+                  key={c.program}
+                  style={{
+                    flexDirection: "row", alignItems: "center",
+                    paddingVertical: 9, borderBottomWidth: 1, borderBottomColor: "#e0e9ff",
+                  }}
+                >
+                  <View style={{ flex: 1, marginRight: 10 }}>
+                    <Text style={{ color: "#1a3a6b", fontSize: 13, fontWeight: "600", lineHeight: 18 }}>
+                      {c.program}
+                    </Text>
+                    <Text style={{ color: "#2a5298", fontSize: 11, marginTop: 2 }}>
+                      {c.done} of {c.done + c.in_progress + c.missing} requirements done
+                      {c.manual_credits
+                        ? ` · ${c.manual_credits} cr to confirm with your adviser`
+                        : ""}
+                    </Text>
+                  </View>
+                  <TouchableOpacity
+                    onPress={() => removeCredential(c.program)}
+                    disabled={savingCreds}
+                    hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                  >
+                    <Text style={{ color: "#94a3b8", fontSize: 17 }}>×</Text>
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+
+            <TouchableOpacity
+              onPress={() => setPickerOpen(true)}
+              disabled={savingCreds}
+              style={{ paddingTop: 12 }}
+            >
+              <Text style={{ color: "#1a3a6b", fontSize: 13, fontWeight: "700" }}>
+                {savingCreds ? "Saving…" : "+ Add a minor or certificate"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Credit progress bar */}
         {audit && (
           <View
@@ -187,6 +295,13 @@ export default function AccountScreen() {
           </Text>
         </TouchableOpacity>
       </ScrollView>
+
+      <CredentialPickerModal
+        visible={pickerOpen}
+        alreadyDeclared={credentials.map((c) => c.program)}
+        onPick={addCredential}
+        onClose={() => setPickerOpen(false)}
+      />
     </SafeAreaView>
   );
 }

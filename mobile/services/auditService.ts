@@ -1,4 +1,5 @@
 import api from "./api";
+import type { CredentialAudit } from "./credentialService";
 
 export type AuditSummary = {
   major:              string;
@@ -8,6 +9,9 @@ export type AuditSummary = {
   done:               number;
   in_progress:        number;
   missing:            number;
+  /** Declared minors / certificates, each with its own audit. Absent on older
+   *  backends, so every consumer must tolerate undefined. */
+  credentials?:       CredentialAudit[];
 };
 
 // Last successful audit per user, so screens can render instantly on focus
