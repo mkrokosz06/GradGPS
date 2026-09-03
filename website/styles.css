@@ -340,9 +340,16 @@ h2 {
   .shots-grid {
     display: flex; overflow-x: auto; gap: 22px;
     scroll-snap-type: x mandatory; padding-bottom: 10px;
-    margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+    margin: 0 -24px;
   }
   .shot { flex: 0 0 78%; scroll-snap-align: center; }
+  /* The first/last card can only reach the centre if there is empty track
+     beside it, so give each an outer margin of half the leftover width
+     ((100% - 78%) / 2). Percentages resolve against the same content box as
+     the flex-basis, so the maths stays exact at any viewport. Container
+     padding would shrink that box and break the 78%, hence margins. */
+  .shots-grid > .shot:first-child { margin-left: 11%; }
+  .shots-grid > .shot:last-child { margin-right: 11%; }
 }
 
 /* ---------- legend (features) ---------- */
