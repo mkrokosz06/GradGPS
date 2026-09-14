@@ -1553,6 +1553,51 @@ def _eval_required_consumed(rows: list[dict], taken: dict) -> dict:
             "missing": missing, "credits_earned": credits_earned, "items": items}
 
 
+# ── Compound choose-one branches ─────────────────────────────────────────────
+# PSU writes alternatives whose branches are themselves pairs of courses:
+#   "ACCTG 211 or ACCTG 211H or (ACCTG 201 and ACCTG 202)"
+# A flat pair_group_id can't say that, so a student holding only ACCTG 201 used
+# to read as finished and the timeline never scheduled ACCTG 202.
+#
+# Rows sharing a pair_group_id AND a non-empty pair_branch_id form ONE branch,
+# satisfied only when every member is done/in-progress. A row with no branch id
+# is its own singleton branch — which is exactly the pre-existing semantics, so
+# a catalog with zero branch ids behaves identically (see
+# test_audit_engine.py::test_legacy_choose_one_characterization).
+
+
+def _branch_key(row: dict, idx: int):
+    """Branch identity for one row of a pair. No branch id -> its own branch."""
+    bid = row.get("pair_branch_id")
+    return ("branch", str(bid)) if bid else ("solo", idx)
+
+
+def _branch_status(members: list[dict], taken: dict, status_fn) -> str:
+    """
+    done        every member complete
+    in_progress every member complete or in progress
+    partial     some but not all — deliberately NEVER promotes the pair, which
+                is the entire fix: half a compound branch satisfies nothing
+    missing     nothing started
+    """
+    statuses = [status_fn(row, taken) for row in members]
+    if all(s == "done" for s in statuses):
+        return "done"
+    if all(s in ("done", "in_progress") for s in statuses):
+        return "in_progress"
+    if any(s in ("done", "in_progress") for s in statuses):
+        return "partial"
+    return "missing"
+
+
+def _earned(members: list[dict], taken: dict) -> float:
+    """Credits earned across a branch — the sum, so 201+202 counts 6, not 3."""
+    return sum(
+        taken.get(m.get("course_code", "").strip().upper(), {}).get("credits_earned", 0)
+        for m in members
+    )
+
+
 def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
     pairs: dict = defaultdict(list)
     unpaired = []
@@ -1572,16 +1617,25 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
         best_credits = 0.0
         best_code    = ""
 
-        for row in pair_rows:
-            code   = row.get("course_code", "").strip().upper()
-            status = _course_status_consumed(row, taken)
-            if status == "done" and pair_status != "done":
+        keyed    = [(_branch_key(row, i), row) for i, row in enumerate(pair_rows)]
+        branches: dict = {}
+        for key, row in keyed:
+            branches.setdefault(key, []).append(row)
+        bstatus = {k: _branch_status(m, taken, _course_status_consumed)
+                   for k, m in branches.items()}
+
+        # Kept deliberately in lockstep with _eval_choose_one. No gen-ed row
+        # carries a branch id today; without this the first one added would
+        # silently evaluate under the old any-one-wins rule.
+        for key, members in branches.items():
+            lead = members[0].get("course_code", "").strip().upper()
+            if bstatus[key] == "done" and pair_status != "done":
                 pair_status  = "done"
-                best_code    = code
-                best_credits = taken.get(code, {}).get("credits_earned", 0)
-            elif status == "in_progress" and pair_status == "missing":
+                best_code    = lead
+                best_credits = _earned(members, taken)
+            elif bstatus[key] == "in_progress" and pair_status == "missing":
                 pair_status = "in_progress"
-                best_code   = code
+                best_code   = lead
 
         if pair_status == "done":
             done += 1
@@ -1591,7 +1645,7 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
         else:
             missing += 1
 
-        for row in pair_rows:
+        for key, row in keyed:
             code = row.get("course_code", "").strip().upper()
             pitem = {
                 "course_code":   code,
@@ -1605,6 +1659,9 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
             }
             if row.get("multi_category"):
                 pitem["multi_category"] = True
+            if row.get("pair_branch_id"):
+                pitem["pair_branch_id"] = str(row["pair_branch_id"])
+                pitem["branch_status"]  = bstatus[key]
             items.append(pitem)
 
     for row in unpaired:
@@ -1820,17 +1877,26 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
         best_code   = ""
         best_credits = 0.0
 
-        for row in pair_rows:
-            code   = row.get("course_code", "").strip().upper()
-            status = _course_status(row, taken)
-            if status == "done" and pair_status != "done":
+        keyed    = [(_branch_key(row, i), row) for i, row in enumerate(pair_rows)]
+        branches: dict = {}
+        for key, row in keyed:
+            branches.setdefault(key, []).append(row)
+        bstatus = {k: _branch_status(m, taken, _course_status)
+                   for k, m in branches.items()}
+
+        # One vote per BRANCH, not per row. With no branch ids every row is its
+        # own branch and this is the original loop, in the original order.
+        for key, members in branches.items():
+            lead = members[0].get("course_code", "").strip().upper()
+            if bstatus[key] == "done" and pair_status != "done":
                 pair_status  = "done"
-                best_grade   = taken.get(code, {}).get("grade", "")
-                best_code    = code
-                best_credits = taken.get(code, {}).get("credits_earned", 0)
-            elif status == "in_progress" and pair_status == "missing":
+                best_grade   = taken.get(lead, {}).get("grade", "")
+                best_code    = lead
+                best_credits = _earned(members, taken)
+            elif bstatus[key] == "in_progress" and pair_status == "missing":
                 pair_status = "in_progress"
-                best_code   = code
+                best_code   = lead
+            # "partial" intentionally falls through — see _branch_status.
 
         if pair_status == "done":
             done += 1
@@ -1841,9 +1907,9 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
             missing += 1
 
         # Add all courses in the pair to items, mark the satisfied one
-        for row in pair_rows:
+        for key, row in keyed:
             code = row.get("course_code", "").strip().upper()
-            items.append({
+            item = {
                 "course_code":   code,
                 "course_title":  row.get("course_title", ""),
                 "credits":       float(row["credits"]) if row.get("credits") else None,
@@ -1852,7 +1918,12 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
                 "grade":         taken.get(code, {}).get("grade", ""),
                 "pair_group_id": pid,
                 "pair_status":   pair_status,   # overall pair outcome
-            })
+            }
+            # Only compound rows gain these — a legacy item is byte-identical.
+            if row.get("pair_branch_id"):
+                item["pair_branch_id"] = str(row["pair_branch_id"])
+                item["branch_status"]  = bstatus[key]
+            items.append(item)
 
     # Handle unpaired rows as required
     for row in unpaired:

@@ -292,6 +292,33 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                         # course in the pair has been completed or is in-progress)
                         if item.get("pair_status") in ("done", "in_progress"):
                             continue
+
+                        # A compound branch the student has already STARTED is a
+                        # choice already made. PSU's "ACCTG 211 or (ACCTG 201 and
+                        # ACCTG 202)" with 201 done means they owe 202 — not a
+                        # fresh choice between 202 and 211. Schedule the rest of
+                        # that branch and take the whole pair off the table, so
+                        # the plan never offers the alternative they've passed on.
+                        started = [it for it in items
+                                   if it.get("pair_group_id") == pid
+                                   and it.get("branch_status") == "partial"]
+                        if started:
+                            for it in started:
+                                code = it.get("course_code", "")
+                                if it.get("status") != "missing" or code in seen_codes:
+                                    continue
+                                seen_codes.add(code)
+                                missing.append({
+                                    "course_code":  code,
+                                    "course_title": it.get("course_title", ""),
+                                    "credits":      it.get("credits") or 3,
+                                    "slot_key":     f"course:{_strip_w(code)}",
+                                    "slot_kind":    "course",
+                                })
+                            for it in items:
+                                if it.get("pair_group_id") == pid:
+                                    seen_codes.add(it.get("course_code", ""))
+                            continue
                         # Find the other option to label it
                         partner = next(
                             (it for it in items

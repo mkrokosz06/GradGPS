@@ -309,6 +309,39 @@ home dashboard, and gen-ed check with no extra wiring.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
 
+### Compound choose-one branches — "A or B or (C and D)"
+
+PSU writes alternatives whose branches are themselves *pairs* of courses:
+`Accounting - ACCTG 211 or ACCTG 211H or (ACCTG 201 and ACCTG 202)`. A flat `pair_group_id` links
+only **flat** alternatives, so the scraper stored that as `choose_one(ACCTG 201, ACCTG 211)` — and a
+student holding just ACCTG 201 read as **finished** while still owing ACCTG 202. The audit told them
+they needed *less* than they did, which is the dangerous direction.
+
+Rows sharing a `pair_group_id` **and** a non-empty **`pair_branch_id`** now form one branch, satisfied
+only when *every* member is done/in-progress. A row without one is its own singleton branch — exactly
+the previous semantics. `_branch_status()` returns `done` / `in_progress` / **`partial`** / `missing`,
+and **`partial` never promotes the pair**: that is the entire fix. Branch credits are summed (201+202
+counts 6, not 3).
+
+- **Both evaluators change in lockstep** — `_eval_choose_one()` *and* `_eval_choose_one_consumed()`
+  (the gen-ed exclusivity twin 240 lines away). No gen-ed row carries a branch id today; without the
+  twin, the first one added would silently evaluate under the old any-one-wins rule.
+- **Timeline** — a branch the student has *started* is a choice already made: `_collect_missing()`
+  emits the still-missing members of **that** branch as ordinary `course:` slots and takes the whole
+  pair off the table, so the plan surfaces ACCTG 202 and never re-offers ACCTG 211. A student who has
+  started nothing still gets a normal `choose_one` slot. Everything emitted uses the **existing** slot
+  vocabulary, and `mobile/` reads neither `pair_group_id` nor `pair_status` (zero hits), so an older
+  TestFlight build renders a compound branch as plain course cards.
+- **Backward compatibility is proven, not asserted.** `test_legacy_choose_one_characterization` runs
+  all **729** done/in-progress/absent combinations over a branch-id-free fixture against a *frozen copy*
+  of the pre-change loop and asserts equality; legacy items also gain no new keys. With zero rows
+  patched the change is a no-op, so **the engine ships ahead of any data patch**.
+- `credential_catalog.to_requirement_rows()` passes `pair_branch_id` through — `run_audit()` is shared
+  and cannot tell a credential from a major.
+
+Data comes later: a `patch_compound_alternatives()` (pair IDs 900+) in the `patch_known_alternatives()`
+mould, plus a scraper fix. **Nothing in the catalog carries a branch id yet.**
+
 ### Course title & credits come from the bulletin, not the catalog
 
 The `requirements` table stores one row per **(program, requirement slot, course)**, so a widely

@@ -164,6 +164,12 @@ def to_requirement_rows(entry: dict) -> list[dict]:
                 "min_grade":         group.get("min_grade", ""),
                 "pair_group_id":     course.get("pair_group_id"),
             }
+            # run_audit() is shared with majors and cannot tell a credential from
+            # one, so a compound branch must survive the conversion. No credential
+            # JSON carries one today — this is here so the first that does isn't
+            # silently flattened back into "any one of these will do".
+            if course.get("pair_branch_id"):
+                row["pair_branch_id"] = course["pair_branch_id"]
             if course.get("co_requisites"):
                 row["co_requisites"] = course["co_requisites"]
 
