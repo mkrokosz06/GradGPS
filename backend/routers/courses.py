@@ -9,8 +9,11 @@ docs/professor-ratings.md for why they were withdrawn.
 """
 
 import re
+import json
 import asyncio
+import logging
 import httpx
+from pathlib import Path
 from collections import defaultdict
 
 from fastapi import APIRouter, HTTPException, Query, Depends
@@ -24,6 +27,7 @@ from routers.user_choices import get_user_choices
 import business_breadth as bb
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 # ── In-memory cache: course_code -> {course_title, credits} ──────────────────
 # Avoids re-scanning the 31k-row requirements table on every tap.
@@ -273,17 +277,47 @@ def _normalize_code(code: str) -> str:
     return re.sub(r"[WHN]$", "", code.strip().upper()).strip()
 
 
-# The same course appears once per program that requires it, and those rows do
-# not agree: of MATH 140's 478 rows, 355 say 4 credits, 37 say 3, 14 say 1 and
-# 70 say nothing at all. Taking the first row found is therefore a coin flip —
-# and when it landed on a null-credit row the course screen reported "0 credits"
-# for a 4-credit course (the credits badge then hides itself entirely).
+# Course title + credits come from the PSU bulletin, not the requirements table.
 #
-# So vote across the rows instead. Vote over *all* of them, not a sample: the
-# rows are laid out by program, so an early sample is biased, and some courses
-# are close-run. STAT 200 splits 182 rows saying 4 against 174 saying 3 — the
-# bulletin says 4, and a 25-row sample got it wrong. The result is cached per
-# course, so the full scan is paid once per container, not once per tap.
+# The table stores one row per (program, requirement slot, course), so a widely
+# required course has hundreds of rows — MATH 140 has 478 across 138 programs,
+# because a bulletin page repeats a shared requirement once per subplan. Those
+# rows were scraped at different times from inconsistently formatted pages and
+# they disagree: of MATH 140's 478, 355 say 4 credits, 37 say 3, 14 say 1, and
+# 70 carry no credits at all. Taking the first row found was a coin flip, and
+# when it landed on a null-credit row the screen showed "0 credits" for a
+# 4-credit course (the mobile badge is guarded on `credits > 0`, so it silently
+# vanished). Voting across the rows fixed that but not the underlying data: in
+# production STAT 200 splits 217 rows saying 3 against 139 saying 4, and the
+# bulletin says 4 — a majority of wrong rows is still wrong.
+#
+# scripts/bulletin_courses.json carries PSU's own published number for all 9,479
+# undergraduate courses (scripts/scrape_bulletin_courses.py). Look there first;
+# it is authoritative and it is a dict lookup rather than a 35k-row table scan.
+# The vote stays as the fallback for anything the bulletin doesn't list.
+
+_BULLETIN_PATH = Path(__file__).resolve().parent.parent / "scripts" / "bulletin_courses.json"
+_bulletin: dict[str, dict] | None = None
+
+
+def _bulletin_courses() -> dict[str, dict]:
+    """Lazily load the bulletin file; an unreadable file just means fall back."""
+    global _bulletin
+    if _bulletin is None:
+        try:
+            _bulletin = json.loads(_BULLETIN_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            logger.exception("Could not read %s — falling back to catalog rows",
+                             _BULLETIN_PATH)
+            _bulletin = {}
+    return _bulletin
+
+
+def _credits_label(credits, credits_max=None) -> str:
+    """Display string: '4', '1.5', or '1.5-3' for a variable-credit course."""
+    def fmt(v):
+        return str(int(v)) if float(v) == int(v) else str(float(v))
+    return f"{fmt(credits)}-{fmt(credits_max)}" if credits_max else fmt(credits)
 
 
 def _mode(values: list) -> object | None:
@@ -297,12 +331,26 @@ def _mode(values: list) -> object | None:
 
 
 async def _get_course_meta(code: str) -> dict | None:
-    """Scan requirements table for the course, cache result."""
+    """Course title + credits: the bulletin if it knows the course, else a vote
+    across the catalog rows. Cached either way."""
     norm = _normalize_code(code)
     if norm in _course_cache:
         return _course_cache[norm]
 
-    # Full paginated scan — every matching row gets a vote (see above).
+    # 1. The bulletin — authoritative, and O(1).
+    rec = _bulletin_courses().get(norm)
+    if rec and rec.get("credits") is not None:
+        credits = rec["credits"]
+        meta = {
+            "course_code":   norm,
+            "course_title":  rec.get("title", ""),
+            "credits":       int(credits) if credits == int(credits) else float(credits),
+            "credits_label": _credits_label(credits, rec.get("credits_max")),
+        }
+        _course_cache[norm] = meta
+        return meta
+
+    # 2. Fallback: full paginated scan, every matching row gets a vote (see above).
     scan_kwargs: dict = {
         "FilterExpression": Attr("course_code").eq(norm),
         "ProjectionExpression": "course_code, course_title, credits",
@@ -330,9 +378,10 @@ async def _get_course_meta(code: str) -> dict | None:
         credits = int(credits) if credits == int(credits) else float(credits)
 
     meta = {
-        "course_code":  matches[0].get("course_code", norm),
-        "course_title": title or "",
-        "credits":      credits,
+        "course_code":   matches[0].get("course_code", norm),
+        "course_title":  title or "",
+        "credits":       credits,
+        "credits_label": _credits_label(credits) if credits else "",
     }
     _course_cache[norm] = meta
     return meta

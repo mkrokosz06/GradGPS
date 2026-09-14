@@ -159,7 +159,9 @@ export default function CourseDetailScreen() {
               <View style={{ flexDirection: "row", marginBottom: detail.description ? 12 : 0 }}>
                 <View style={{ backgroundColor: "#dbeafe", paddingHorizontal: 10, paddingVertical: 4, borderRadius: 8 }}>
                   <Text style={{ fontSize: 12, fontWeight: "700", color: "#1a3a6b" }}>
-                    {detail.credits} credits
+                    {/* credits_label carries "1.5-3" for variable-credit courses;
+                        older backends send only the number. */}
+                    {detail.credits_label ?? detail.credits} credits
                   </Text>
                 </View>
               </View>

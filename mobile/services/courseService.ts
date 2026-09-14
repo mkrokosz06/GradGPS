@@ -13,6 +13,9 @@ export type CourseDetail = {
   course_code:  string;
   course_title: string;
   credits:      number;
+  /** Display string for the credit value — "4", or "1.5-3" for a course PSU
+   *  publishes as variable-credit. Absent on older backends. */
+  credits_label?: string;
   description:  string | null;
 };
 

@@ -309,6 +309,37 @@ home dashboard, and gen-ed check with no extra wiring.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
 
+### Course title & credits come from the bulletin, not the catalog
+
+The `requirements` table stores one row per **(program, requirement slot, course)**, so a widely
+required course has hundreds of rows — MATH 140 has **478 across 138 programs**, because a bulletin
+page repeats a shared requirement once per subplan (Information Technology B.S. alone carries 26
+`MATH 140` rows, each its own `choose_one` pair, all of them "MATH 110 or MATH 140"). Those rows were
+scraped at different times from inconsistently formatted pages and **they disagree**: of MATH 140's
+478, 355 say 4 credits, 37 say 3, 14 say 1, and 70 carry no credits at all.
+
+`_get_course_meta()` used to take `items[0]` and coerce a missing value to 0, so the credits a student
+saw came down to scan order — and a null row rendered as "0 credits", which the mobile badge
+(guarded on `credits > 0`) hid entirely. Voting across the rows fixed the zeros but not the data:
+prod's STAT 200 splits **217 rows saying 3 against 139 saying 4**, and PSU publishes 4.
+
+So **`backend/scripts/bulletin_courses.json` is now the source of truth** for title + credits —
+PSU's own published number for all **9,479** undergraduate courses, built by
+`python scripts/scrape_bulletin_courses.py` (~5-10 min). The lookup is a dict hit rather than a
+35k-row table scan, so the course screen got ~2000x faster too (≈4-6 s cold → ≈2 ms). The majority
+vote survives as the fallback for anything the bulletin doesn't list (e.g. `IST 301`, renamed to
+`ETI 301`), and an unreadable data file degrades to that fallback rather than 500-ing.
+
+> **Why the scraper reads `.course_codetitle` and `.course_credits` separately:** the old
+> `scrape_course_titles.py` took `.courseblocktitle` as one text blob and regex-stripped the credits
+> back out, which is how KINES 1 got stored as *"Introduction to Outdoor Pursuits 1.5-/Maxi"*. The
+> bulletin puts the two in separate elements — reading each directly fixed **2,904 mangled titles,
+> 31% of the file**. `scrape_bulletin_courses.py` writes `bulletin_course_titles.json` too, so
+> `fix_junk_titles.py` keeps working and gets the corrected titles.
+
+Variable-credit courses (2,270 of them) carry `credits_max`; the API adds a `credits_label`
+("4", or "1.5-3") which the mobile badge prefers when present.
+
 ### Professor ratings — withdrawn (Sept 2026)
 
 The course screen used to show RateMyProfessors ratings. It was removed because RMP's Terms of Use

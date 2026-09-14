@@ -4,10 +4,14 @@ Tests for _get_course_meta — the course detail resolver behind GET /courses/{c
 The same course has one catalog row per program that requires it, and those rows
 disagree with each other. The resolver used to take whichever row the scan found
 first, so MATH 140 could report "0 credits" (70 of its 478 rows carry no credits
-value at all) and the mobile credits badge would hide itself. It now votes across
-every matching row.
+value at all) and the mobile credits badge would hide itself.
 
-Hermetic — requirements_table.scan is faked, so no DynamoDB is touched.
+Credits and titles now come from scripts/bulletin_courses.json — PSU's own
+published numbers — with a majority vote across the catalog rows kept as the
+fallback for anything the bulletin doesn't list. Both paths are covered below.
+
+Hermetic — requirements_table.scan and the bulletin dict are both faked, so no
+DynamoDB and no data file are touched.
 
 Runnable two ways:
   * pytest:        cd backend && python -m pytest tests/test_course_meta.py -v
@@ -17,6 +21,7 @@ Runnable two ways:
 import os
 import sys
 import asyncio
+import pathlib
 from decimal import Decimal
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -48,16 +53,21 @@ def _row(credits=None, title="Calculus", code="MATH 140"):
     return r
 
 
-def _meta(pages, code="MATH 140"):
-    """Run _get_course_meta against faked scan pages, with a cold cache."""
+def _meta(pages, code="MATH 140", bulletin=None):
+    """
+    Run _get_course_meta against faked scan pages and a faked bulletin, cold cache.
+    `bulletin` defaults to empty, which forces the catalog-vote fallback path.
+    """
     courses._course_cache.clear()
-    real = courses.requirements_table
+    real_tbl, real_bul = courses.requirements_table, courses._bulletin
     fake = _FakeTable(pages)
     courses.requirements_table = fake
+    courses._bulletin = bulletin if bulletin is not None else {}
     try:
         return asyncio.run(courses._get_course_meta(code)), fake
     finally:
-        courses.requirements_table = real
+        courses.requirements_table = real_tbl
+        courses._bulletin = real_bul
         courses._course_cache.clear()
 
 
@@ -75,7 +85,69 @@ def test_mode_of_empty_is_none():
     assert courses._mode([]) is None
 
 
-# ── the bug this fixes ───────────────────────────────────────────────────────
+# ── the bulletin path (authoritative) ────────────────────────────────────────
+
+def test_bulletin_beats_the_catalog_rows():
+    """
+    The reason this exists: in production STAT 200 has 217 rows saying 3 against
+    139 saying 4, so even a correct majority vote returns 3. The bulletin says 4.
+    """
+    meta, fake = _meta([[_row(3)] * 9],
+                       code="STAT 200",
+                       bulletin={"STAT 200": {"title": "Elementary Statistics", "credits": 4.0}})
+    assert meta["credits"] == 4
+    assert meta["course_title"] == "Elementary Statistics"
+    assert fake.scan_calls == 0, "the bulletin hit should not touch DynamoDB at all"
+
+
+def test_bulletin_range_gets_a_label():
+    """KINES 1 is published as '1.5-3 Credits/Maximum of 12'."""
+    meta, _ = _meta([[]], code="KINES 1",
+                    bulletin={"KINES 1": {"title": "Introduction to Outdoor Pursuits",
+                                          "credits": 1.5, "credits_max": 3.0}})
+    assert meta["credits"] == 1.5
+    assert meta["credits_label"] == "1.5-3"
+
+
+def test_fixed_credits_label_has_no_range():
+    meta, _ = _meta([[]], code="STAT 200",
+                    bulletin={"STAT 200": {"title": "Elementary Statistics", "credits": 4.0}})
+    assert meta["credits_label"] == "4"
+
+
+def test_course_missing_from_bulletin_falls_back_to_the_vote():
+    """IST 301 was renamed to ETI 301, so the current bulletin doesn't list it."""
+    meta, fake = _meta([[_row(3, title="Information and Organizations", code="IST 301")]],
+                       code="IST 301", bulletin={"STAT 200": {"title": "x", "credits": 4.0}})
+    assert meta["credits"] == 3
+    assert fake.scan_calls == 1
+
+
+def test_bulletin_entry_without_credits_falls_back_to_the_vote():
+    meta, fake = _meta([[_row(4)]], code="MATH 140",
+                       bulletin={"MATH 140": {"title": "Calculus With Analytic Geometry I"}})
+    assert meta["credits"] == 4
+    assert fake.scan_calls == 1
+
+
+def test_unreadable_bulletin_file_does_not_break_lookups():
+    """A missing or corrupt data file must degrade to the vote, not 500."""
+    courses._course_cache.clear()
+    real_tbl, real_bul, real_path = (courses.requirements_table, courses._bulletin,
+                                     courses._BULLETIN_PATH)
+    courses.requirements_table = _FakeTable([[_row(4)]])
+    courses._bulletin = None                       # force a re-read
+    courses._BULLETIN_PATH = pathlib.Path("does-not-exist.json")
+    try:
+        meta = asyncio.run(courses._get_course_meta("MATH 140"))
+        assert meta["credits"] == 4
+    finally:
+        courses.requirements_table, courses._bulletin = real_tbl, real_bul
+        courses._BULLETIN_PATH = real_path
+        courses._course_cache.clear()
+
+
+# ── the catalog-vote fallback ────────────────────────────────────────────────
 
 def test_null_credit_row_first_does_not_win():
     """The original failure: a credits-less row sorted first => '0 credits'."""
@@ -139,9 +211,10 @@ def test_unknown_course_returns_none():
 
 def test_result_is_cached():
     courses._course_cache.clear()
-    real = courses.requirements_table
+    real, real_bul = courses.requirements_table, courses._bulletin
     fake = _FakeTable([[_row(4)]])
     courses.requirements_table = fake
+    courses._bulletin = {}
     try:
         asyncio.run(courses._get_course_meta("MATH 140"))
         calls_after_first = fake.scan_calls
@@ -149,6 +222,7 @@ def test_result_is_cached():
         assert fake.scan_calls == calls_after_first, "second read should hit the cache"
     finally:
         courses.requirements_table = real
+        courses._bulletin = real_bul
         courses._course_cache.clear()
 
 
