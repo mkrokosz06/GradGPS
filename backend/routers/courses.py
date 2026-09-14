@@ -273,35 +273,69 @@ def _normalize_code(code: str) -> str:
     return re.sub(r"[WHN]$", "", code.strip().upper()).strip()
 
 
+# The same course appears once per program that requires it, and those rows do
+# not agree: of MATH 140's 478 rows, 355 say 4 credits, 37 say 3, 14 say 1 and
+# 70 say nothing at all. Taking the first row found is therefore a coin flip —
+# and when it landed on a null-credit row the course screen reported "0 credits"
+# for a 4-credit course (the credits badge then hides itself entirely).
+#
+# So vote across the rows instead. Vote over *all* of them, not a sample: the
+# rows are laid out by program, so an early sample is biased, and some courses
+# are close-run. STAT 200 splits 182 rows saying 4 against 174 saying 3 — the
+# bulletin says 4, and a 25-row sample got it wrong. The result is cached per
+# course, so the full scan is paid once per container, not once per tap.
+
+
+def _mode(values: list) -> object | None:
+    """Most frequent value; ties break toward the larger/longer one."""
+    if not values:
+        return None
+    counts: dict = {}
+    for v in values:
+        counts[v] = counts.get(v, 0) + 1
+    return max(counts.items(), key=lambda kv: (kv[1], kv[0]))[0]
+
+
 async def _get_course_meta(code: str) -> dict | None:
     """Scan requirements table for the course, cache result."""
     norm = _normalize_code(code)
     if norm in _course_cache:
         return _course_cache[norm]
 
-    # Paginated scan — stop at first match to minimise read cost
+    # Full paginated scan — every matching row gets a vote (see above).
     scan_kwargs: dict = {
         "FilterExpression": Attr("course_code").eq(norm),
         "ProjectionExpression": "course_code, course_title, credits",
     }
+    matches: list[dict] = []
     while True:
         resp = requirements_table.scan(**scan_kwargs)
-        items = resp.get("Items", [])
-        if items:
-            item = items[0]
-            meta = {
-                "course_code": item.get("course_code", norm),
-                "course_title": item.get("course_title", ""),
-                "credits": int(item.get("credits", 0) or 0),
-            }
-            _course_cache[norm] = meta
-            return meta
+        matches.extend(resp.get("Items", []))
         last = resp.get("LastEvaluatedKey")
         if not last:
             break
         scan_kwargs["ExclusiveStartKey"] = last
 
-    return None
+    if not matches:
+        return None
+
+    # Vote, ignoring rows that simply don't carry the field.
+    credits = _mode([c for c in (m.get("credits") for m in matches) if c is not None])
+    title   = _mode([t for t in (m.get("course_title") for m in matches) if t])
+
+    # Credits are stored as Decimal; keep 1.5 as 1.5 rather than truncating to 1.
+    if credits is None:
+        credits = 0
+    else:
+        credits = int(credits) if credits == int(credits) else float(credits)
+
+    meta = {
+        "course_code":  matches[0].get("course_code", norm),
+        "course_title": title or "",
+        "credits":      credits,
+    }
+    _course_cache[norm] = meta
+    return meta
 
 
 async def _get_description(code: str) -> str | None:
