@@ -11,6 +11,19 @@ Table written: rmp_professor_courses
   Attributes: name, department, overall_avg_rating, overall_num_ratings
 """
 
+# ============================================================================
+# DORMANT — NOT IMPORTED BY THE RUNNING APP (withdrawn Sept 2026)
+#
+# Nothing in the backend imports this module and nothing schedules it. It is
+# kept in version control only so the work is recoverable if Rate My
+# Professors, LLC ever grants written permission to use their data.
+#
+# Do not wire this back up without that permission. Their Terms of Use
+# prohibit automated access, storing a copy of their index, and commercial
+# use; Apple App Review guideline 5.2.2 requires that authorization be
+# produced on request. See docs/professor-ratings.md.
+# ============================================================================
+
 import asyncio
 import json
 import re

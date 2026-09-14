@@ -2,7 +2,7 @@
 monthly_refresh.py
 ------------------
 Scheduled monthly (EventBridge → ECS Fargate task in prod, or run by hand).
-Refreshes two live data sources that change over time:
+Refreshes the live data sources that change over time:
 
   1. PSU bulletin cross-listings  (scrape_crosslistings.py)
      Writes the scraped pair list to the __CROSSLISTINGS__ item in the
@@ -11,8 +11,8 @@ Refreshes two live data sources that change over time:
      APP_RUNNER_SERVICE_ARN is set, a new App Runner deployment is
      triggered so the running service picks the pairs up immediately.
 
-  2. RateMyProfessors professor index  (build_rmp_index.py)
-     Refreshes professor ratings in the rmp_professor_courses DynamoDB table.
+A RateMyProfessors index refresh ran here until Sept 2026. It was removed with
+the rest of the professor-ratings feature — see docs/professor-ratings.md.
 
 Usage:
     python scripts/monthly_refresh.py
@@ -20,7 +20,6 @@ Usage:
 
 import sys
 import os
-import asyncio
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -130,20 +129,6 @@ def _redeploy_app_runner():
 
 
 # ---------------------------------------------------------------------------
-# 2. RMP index refresh
-# ---------------------------------------------------------------------------
-
-def refresh_rmp():
-    log("=== RateMyProfessors index refresh ===")
-    try:
-        import build_rmp_index
-        asyncio.run(build_rmp_index.main())
-        log("RMP index refresh complete.")
-    except Exception as e:
-        log(f"ERROR during RMP refresh: {e}")
-
-
-# ---------------------------------------------------------------------------
 # Main
 # ---------------------------------------------------------------------------
 
@@ -151,6 +136,5 @@ if __name__ == "__main__":
     log("Monthly refresh starting.")
 
     refresh_cross_listings()
-    refresh_rmp()
 
     log("Monthly refresh complete.")

@@ -115,31 +115,7 @@ except Exception as e:
     print(f"S3 bucket note: {e}")
 
 
-# ── 5. rmp_professor_courses ─────────────────────────────────────────────────
-# PK: course_code  (normalized PSU code, e.g. "MATH 140")
-# SK: professor_id (RMP teacher ID)
-# Attributes: name, department, overall_avg_rating, overall_num_ratings
-# Built by scripts/build_rmp_index.py — do NOT write to this table manually.
-
-try:
-    dynamodb.create_table(
-        TableName="rmp_professor_courses",
-        KeySchema=[
-            {"AttributeName": "course_code",   "KeyType": "HASH"},
-            {"AttributeName": "professor_id",   "KeyType": "RANGE"},
-        ],
-        AttributeDefinitions=[
-            {"AttributeName": "course_code",   "AttributeType": "S"},
-            {"AttributeName": "professor_id",   "AttributeType": "S"},
-        ],
-        BillingMode="PAY_PER_REQUEST",
-    )
-    print("Created table: rmp_professor_courses")
-except dynamodb.exceptions.ResourceInUseException:
-    print("Table already exists: rmp_professor_courses")
-
-
-# ── 6. sessions ──────────────────────────────────────────────────────────────
+# ── 5. sessions ──────────────────────────────────────────────────────────────
 # PK: token_hash (SHA-256 of the opaque session token — raw token never stored)
 # expires_at is a TTL attribute; sessions.py also enforces expiry at read time
 # because TTL deletion can lag.
@@ -171,7 +147,7 @@ except Exception as e:
     print(f"TTL note: {e}")
 
 
-# ── 7. school_requests ───────────────────────────────────────────────────────
+# ── 6. school_requests ───────────────────────────────────────────────────────
 # PK: school_key  (canonical slug from charlie.normalize_school, or "unmatched-*")
 # One row per canonical school. Charlie accumulates votes here (atomic ADD) so
 # every spelling of a school lands on the same row. Stores aliases_seen,
@@ -193,7 +169,7 @@ except dynamodb.exceptions.ResourceInUseException:
     print("Table already exists: school_requests")
 
 
-# ── 8. user_course_choices ───────────────────────────────────────────────────
+# ── 7. user_course_choices ───────────────────────────────────────────────────
 # PK: user_id   SK: slot_key
 # One row per student decision on a suggested course slot. slot_key is a stable
 # requirement identity (e.g. "one:MATH 110|MATH 140", "gened:US", "course:CHEM 110",

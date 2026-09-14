@@ -18,11 +18,7 @@ python scripts/setup_tables.py    # create tables/buckets
 python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
 python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
 python scripts/seed_matthew.py    # seed test user + transcript (also patches ETI catalog)
-python scripts/build_rmp_index.py # rebuild RateMyProfessors course→professor index (~20-40 min)
 ```
-> **RMP index:** `/courses/{code}/professors` reads the `rmp_professor_courses` table. If it's
-> empty (wiped by a Docker restart), the app shows no professors for any course — rebuild with
-> `build_rmp_index.py` above.
 `seed_matthew.py` accepts an optional PDF path: `python scripts/seed_matthew.py path/to/transcript.pdf`
 
 > **Gen ed data:** `rebuild_gen_ed.py` loads the eight knowledge-domain / quantification / cultures
@@ -81,7 +77,7 @@ not `seed_matthew.py`.
 **Monthly refresh cron:** EventBridge Scheduler `gradgps-monthly-refresh` (1st of month, 2 AM ET)
 runs `scripts/monthly_refresh.py` as an ECS Fargate task (cluster `gradgps`, same backend image,
 logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into the
-`__CROSSLISTINGS__` DynamoDB item, rebuilds the RMP index, and bounces App Runner via
+`__CROSSLISTINGS__` DynamoDB item and bounces App Runner via
 `APP_RUNNER_SERVICE_ARN` so the running service reloads the pairs.
 
 ---
@@ -97,7 +93,6 @@ logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into th
 | `official_detector.py` | Scored heuristic that flags official transcripts (see below) |
 | `plan_templates.py` | Loads/validates Suggested Academic Plan (SAP) JSON templates from `sap_templates/` (see below) |
 | `sap_schedule.py` | SAP match stage — `match_template()` decides which template slots the student has already satisfied (pure, DB-free) |
-| `rmp_client.py` | RateMyProfessors lookup client (used by the `/courses` router) |
 | `substitutions.py` | Course-substitution store — per-user course equivalences (`requirement_code -> substitute_course`) |
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
@@ -111,7 +106,7 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 | `timeline.py` | `/timeline` | Academic timeline (past + future semesters) |
 | `transcript.py` | `/transcript` | PDF upload, parse, store + manual class editing (`POST`/`PATCH`/`DELETE /transcript/course`) |
 | `programs.py` | `/programs` | Major search/select |
-| `courses.py` | `/courses` | Course detail + RateMyProfessors lookups (via `rmp_client.py`) |
+| `courses.py` | `/courses` | Course detail + class-selector search (gen-ed domains, pools, business breadth) |
 | `substitutions.py` | `/substitutions` | Course substitutions — "the class I took counts for that requirement" (see below) |
 | `users.py` | `/users` | User profile + `DELETE /users/me` account deletion (PDF, courses, profile, sessions) |
 | `admin.py` | `/admin` | Admin utilities |
@@ -313,6 +308,21 @@ home dashboard, and gen-ed check with no extra wiring.
   badge in the mobile UI) and future-proofs a "reset to uploaded" affordance.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
+
+### Professor ratings — withdrawn (Sept 2026)
+
+The course screen used to show RateMyProfessors ratings. It was removed because RMP's Terms of Use
+prohibit automated access, storing a copy of their index, and commercial use; because the client
+sent a spoofed User-Agent and a hardcoded `Authorization: Basic` header at a **private** GraphQL
+endpoint (which is outside what *hiQ*/*Van Buren* protect — that holding is about **public** pages);
+and because Apple guideline 5.2.2 requires authorization to be produced on request. Hiding it behind
+a flag was considered and rejected — guideline 2.3.1 names "dormant" features specifically, and it
+would not have stopped the monthly crawl anyway.
+
+`backend/rmp_client.py` and `backend/scripts/build_rmp_index.py` remain in the repo, **dormant** —
+imported by nothing, scheduled by nothing, shipped in no binary. Do not wire them back up without
+written permission from Rate My Professors, LLC. Full rationale and the replacement plan
+(PSU public class search + deep link, which needs no one's permission): `docs/professor-ratings.md`.
 
 ### Course substitutions (the advisor workaround)
 Departments routinely accept one course in place of a requirement — Connor took **ESC 120

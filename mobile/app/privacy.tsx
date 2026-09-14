@@ -49,9 +49,8 @@ export default function PrivacyPolicyScreen() {
           GradGPS uses the following external services:{"\n\n"}
           • Sign-In Providers — If you sign in with Google or Apple, they handle authentication and share your name and email address with us. Their own privacy policies apply to your use of those services.{"\n"}
           • Email Delivery — We use Amazon Web Services to send emails such as sign-in verification codes and replies to your support requests.{"\n"}
-          • Professor Ratings — When you tap a course, we retrieve professor ratings using the course code only (no personal data).{"\n"}
           • University Course Bulletins — We fetch public course descriptions using the course code only.{"\n\n"}
-          No personally identifiable information is sent to the professor-ratings or course-bulletin services. As GradGPS expands to support additional schools, new institution-specific integrations may be added. Any such additions will be reflected in an updated Privacy Policy.
+          No personally identifiable information is sent to the course-bulletin service. As GradGPS expands to support additional schools, new institution-specific integrations may be added. Any such additions will be reflected in an updated Privacy Policy.
         </Section>
 
         <Section title="5. Data Storage">

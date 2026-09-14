@@ -1,6 +1,11 @@
 """
-GET /courses/{code}                        — course metadata + PSU bulletin description
-GET /courses/{code}/professor?name=Smith   — RMP ratings for a professor filtered to this course
+GET /courses/{code}            — course metadata + PSU bulletin description
+GET /courses/for-slot          — courses that can fill a class-selector slot
+GET /courses/gen-ed-domains    — the gen-ed domains the student still needs
+GET /courses/breadth-areas     — Business Breadth areas the student can pick from
+
+Professor ratings were served from here until Sept 2026; see
+docs/professor-ratings.md for why they were withdrawn.
 """
 
 import re
@@ -17,7 +22,6 @@ from audit_engine import run_gen_ed_audit
 from sap_schedule import build_gen_ed_satisfied
 from routers.user_choices import get_user_choices
 import business_breadth as bb
-import rmp_client
 
 router = APIRouter()
 
@@ -418,91 +422,3 @@ async def get_course(code: str):
         **meta,
         "description": description,
     }
-
-
-async def _enrich_professor(prof: dict, code: str) -> dict:
-    """Fetch course-specific RMP ratings for one professor result."""
-    try:
-        ratings = await rmp_client.get_course_ratings(prof["id"], code)
-    except Exception:
-        ratings = {
-            "course_avg_rating": None,
-            "course_avg_difficulty": None,
-            "course_would_take_again": None,
-            "course_num_ratings": 0,
-            "overall_avg_rating": prof.get("avgRating"),
-            "overall_avg_difficulty": prof.get("avgDifficulty"),
-            "overall_would_take_again": prof.get("wouldTakeAgainPercent"),
-            "overall_num_ratings": prof.get("numRatings"),
-        }
-    return {
-        "id": prof["id"],
-        "name": f"{prof.get('firstName', '')} {prof.get('lastName', '')}".strip(),
-        "department": prof.get("department"),
-        **ratings,
-    }
-
-
-@router.get("/{code}/professors")
-async def get_professors(code: str):
-    """
-    Return professors who have been rated for this course on RMP,
-    looked up from the pre-built DynamoDB index (rmp_professor_courses table).
-    Each result is enriched with course-specific rating aggregates.
-    """
-    # Step 1: index lookup — who has ratings for this course?
-    index_entries = await rmp_client.get_professors_for_course(code)
-
-    if not index_entries:
-        return {"professors": [], "schedule_found": False}
-
-    # Step 2: enrich each with course-specific rating aggregates
-    async def _enrich_index_entry(entry: dict) -> dict | None:
-        try:
-            ratings = await rmp_client.get_course_ratings(entry["professor_id"], code)
-        except Exception:
-            ratings = {
-                "course_avg_rating": None,
-                "course_avg_difficulty": None,
-                "course_would_take_again": None,
-                "course_num_ratings": 0,
-                "overall_avg_rating": entry.get("overall_avg_rating"),
-                "overall_avg_difficulty": entry.get("overall_avg_difficulty"),
-                "overall_would_take_again": None,
-                "overall_num_ratings": entry.get("overall_num_ratings"),
-            }
-        return {
-            "id": entry["professor_id"],
-            "name": entry.get("name", ""),
-            "department": entry.get("department"),
-            **ratings,
-        }
-
-    enriched = await asyncio.gather(*[_enrich_index_entry(e) for e in index_entries])
-    professors = [p for p in enriched if p is not None]
-
-    return {"professors": professors, "schedule_found": True}
-
-
-@router.get("/{code}/professor")
-async def get_professor_by_name(
-    code: str,
-    name: str = Query(..., min_length=1, description="Professor last name or full name"),
-    school_id: str = Query(None),
-):
-    """
-    Manual fallback: search RMP by professor name and return course-specific ratings.
-    Returns up to 3 best name matches.
-    """
-    sid = school_id or rmp_client.PSU_SCHOOL_ID
-
-    try:
-        professors = await rmp_client.search_professor(name, sid)
-    except httpx.HTTPError:
-        raise HTTPException(status_code=502, detail="RMP search request failed")
-
-    if not professors:
-        return {"professors": []}
-
-    results = await asyncio.gather(*[_enrich_professor(p, code) for p in professors[:3]])
-    return {"professors": list(results)}

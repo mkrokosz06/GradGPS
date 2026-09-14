@@ -71,7 +71,7 @@ function WelcomeState() {
         <Text style={{
           color: "#64748b", fontSize: 15, lineHeight: 23, marginBottom: 28,
         }}>
-          Build your 4-year plan, track your progress, and find the best professors — all in one place.
+          Build your 4-year plan, track your progress, and know exactly what's left — all in one place.
         </Text>
         <TouchableOpacity
           activeOpacity={0.85}
