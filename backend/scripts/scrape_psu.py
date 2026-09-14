@@ -13,8 +13,23 @@ from openpyxl.utils import get_column_letter
 import time
 import re
 import os
+import json
 
 BASE_URL = "https://bulletins.psu.edu"
+
+# Authoritative course titles, so a combo row can be split into its real courses
+# instead of guessing where one title ends and the next begins ("Biology: Basic
+# Concepts and Biodiversity" legitimately contains " and ").
+_BULLETIN_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                              "bulletin_courses.json")
+try:
+    with open(_BULLETIN_PATH, encoding="utf-8") as _f:
+        BULLETIN = json.load(_f)
+except Exception:
+    BULLETIN = {}
+
+# Course code as it appears in a CourseLeaf code cell.
+_CODE_IN_CELL = re.compile(r"\b([A-Z]{2,6})\s{0,2}(\d{3}[A-Z]?)\b")
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; academic-research-bot/1.0)"
 }
@@ -240,7 +255,23 @@ def scrape_program_requirements(program):
                     or re.match(r"^or\s+[A-Z]{2,6}", cell_texts[0].strip())
                 )
 
-                # Must contain a course code somewhere in the row
+                # Must contain a course code somewhere in the row.
+                #
+                # CourseLeaf writes "both of these" as ONE <td class="codecol">
+                # holding several <a> links joined by "&":
+                #     BIOL 114 & BIOL 115 | Biology: ... - Lecture and ... - Lab
+                # Keeping only the first match dropped every later code, so the lab
+                # or second half of a sequence vanished from the program entirely.
+                # Collect them all from the CODE CELL (cell 0 carries the codes in
+                # both of the layouts handled below) and emit one row each, tied
+                # together by a shared pair_branch_id so the audit reads them as ONE
+                # branch rather than as interchangeable alternatives.
+                combo_codes = [m.group(1) + " " + m.group(2) for m in
+                               _CODE_IN_CELL.finditer(cell_texts[0])]
+                # "&" is the AND marker. "or" rows are a different construct and are
+                # already handled by the pair_group_id chain further down.
+                is_combo = len(combo_codes) > 1 and "&" in cell_texts[0]
+                
                 code_match = re.search(r"\b([A-Z]{2,6})\s{0,2}(\d{3}[A-Z]?)\b", full_row)
                 if not code_match:
                     # Check for "select N credits" type rows inside the table
@@ -323,7 +354,7 @@ def scrape_program_requirements(program):
                     current_pair_id = None
                     this_pair_id    = None
 
-                rows.append({
+                base_row = {
                     "program_name":      full_title,
                     "college":           program["college"].replace("-", " ").title(),
                     "degree":            degree,
@@ -337,7 +368,34 @@ def scrape_program_requirements(program):
                     "min_grade":         min_grade,
                     "pair_group_id":     this_pair_id,
                     "url":               program["url"]
-                })
+                }
+
+                if is_combo:
+                    # "BIOL 114 & BIOL 115" is ONE requirement made of two courses,
+                    # not a choice between them. Emit a row per course sharing a
+                    # pair_branch_id; audit_engine._branch_status() then satisfies
+                    # the branch only when every member is complete. Each row takes
+                    # its own authoritative title from the bulletin rather than the
+                    # concatenated blob (splitting that on " and " is unreliable —
+                    # "Biology: Basic Concepts and Biodiversity" contains one).
+                    branch_pid = this_pair_id or _next_pair_id()
+                    branch_id  = "b%d" % branch_pid
+                    for member in combo_codes:
+                        member_row = dict(base_row)
+                        member_row["course_code"]    = member
+                        member_row["group_type"]     = "choose_one"
+                        member_row["pair_group_id"]  = branch_pid
+                        member_row["pair_branch_id"] = branch_id
+                        bulletin_title = (BULLETIN.get(member) or {}).get("title")
+                        if bulletin_title:
+                            member_row["course_title"] = bulletin_title[:120]
+                        rows.append(member_row)
+                    # A combo is never the anchor of a later "or" chain — the chain
+                    # would attach to only its last member.
+                    last_course_idx = None
+                    continue
+
+                rows.append(base_row)
                 last_course_idx = len(rows) - 1
 
     meta = {

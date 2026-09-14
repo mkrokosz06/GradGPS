@@ -339,8 +339,34 @@ counts 6, not 3).
 - `credential_catalog.to_requirement_rows()` passes `pair_branch_id` through — `run_audit()` is shared
   and cannot tell a credential from a major.
 
-Data comes later: a `patch_compound_alternatives()` (pair IDs 900+) in the `patch_known_alternatives()`
-mould, plus a scraper fix. **Nothing in the catalog carries a branch id yet.**
+**Scraper side** — `scrape_psu.py` now reads *every* code in a CourseLeaf code cell instead of the
+first. PSU writes "both of these" as one `<td class="codecol">` holding several `<a>` links joined by
+`&` (`BIOL 114 & BIOL 115`), and keeping only the first match dropped the lab or the second half of a
+sequence from the program entirely. Combo members are emitted as one row each sharing a
+`pair_branch_id`, and each takes its authoritative title from `bulletin_courses.json` rather than the
+concatenated blob (splitting that on `" and "` is unreliable — *"Biology: Basic Concepts and
+Biodiversity"* contains one). A re-scrape recovers **687 rows in 296 branches across 94 programs**,
+including 3- and 4-course chains like `PHYS 211 + 212 + 213 + 214`.
+
+The change is **strictly additive**: running the old and new scrapers over the combo-heavy programs
+side by side loses nothing (0 of 5 programs lost a course) and gains only the recovered members.
+
+> **A re-scrape is safe; a re-*load* is not.** `scrape_psu.py` writes Excel/TXT only and never touches
+> DynamoDB — `load_catalog.py` does. Diffing a fresh scrape against prod shows **656 (program, course)
+> pairs "missing"**, but **629 of them are injected by `patch_known_alternatives(insert_missing=True)`**
+> (CAS 100B/C, DS 200, CHEM 130, STAT 250, ENGL 202C/D, PHYS 250/251 …) rather than scraped. So a load
+> **must** re-run the patch scripts in the same pass or those alternatives vanish. The remaining 27 are
+> pre-existing prod-vs-current-bulletin drift, not a scraper regression — verified by running the old
+> scraper against the same pages and getting byte-identical output (ETI: 66 rows / 53 codes, zero diff).
+
+**Still unfixed in the scraper** (each deserves its own diff): the code regex requires **three digits**
+(`\d{3}`), so `ENGL 15`, `ECON 14`, `SOC 1`, `PSU 6` are invisible to it — that, not a dropped row, is
+why first-year writing never appears in a major's rows (it is carried by `__GEN_ED__` instead);
+`title[:120]` truncates 416 titles mid-word; and "select 3 credits of 400-level courses" is still
+parsed as a course, inventing codes like `PSYCH 400` with the title `"3"`.
+
+**Nothing in the catalog carries a branch id yet** — the engine and the scraper are both in place, but
+no data has been loaded.
 
 ### Course title & credits come from the bulletin, not the catalog
 
