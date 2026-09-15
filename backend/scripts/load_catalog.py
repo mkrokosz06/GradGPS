@@ -101,6 +101,14 @@ with table.batch_writer() as batch:
         if row.get("min_grade", "").strip():
             item["min_grade"] = row["min_grade"].strip()
 
+        # pair_branch_id marks the members of a compound choose-one branch
+        # ("ACCTG 211 or (ACCTG 201 and ACCTG 202)"). It is a STRING, so it can't
+        # ride along in the numeric loop above — and dropping it would silently
+        # flatten the branch back into "any one of these will do".
+        branch = row.get("pair_branch_id", "")
+        if isinstance(branch, str) and branch.strip():
+            item["pair_branch_id"] = branch.strip()
+
         batch.put_item(Item=item)
         loaded += 1
 

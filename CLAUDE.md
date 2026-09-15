@@ -339,6 +339,22 @@ counts 6, not 3).
 - `credential_catalog.to_requirement_rows()` passes `pair_branch_id` through — `run_audit()` is shared
   and cannot tell a credential from a major.
 
+**Where a combo sits decides how it is tied together** — getting this wrong made the first attempt
+*worse* than the bug. Forcing every combo to `choose_one` labelled a lecture+lab as "BIOL 114 **or**
+BIOL 115" and gave each sibling option its own `pair_group_id`, so a student who took BIOL 114+115 was
+then told to take BIOL 116 as well. Both errors over-required. The rule:
+
+| Surrounding group | Emitted as | Enforced by |
+|---|---|---|
+| an `or` chain — "ACCTG 211 or (201 and 202)" | `choose_one` + `pair_group_id` + `pair_branch_id` | branch status — half a branch satisfies nothing |
+| a credit pool — "Select 4-5 credits from…" | pool rows + `pair_branch_id`, **no** pair id | the credit threshold |
+| anything else (lecture + lab) | both individually required | plain requirement |
+
+A combo inside a credit pool needs no branch machinery: `BIOL 114` is 3 credits against a 4-5 credit
+pool, so it cannot satisfy it without the lab. That only holds because combo members now take **real
+credits** from `bulletin_courses.json` — every collapsed row in prod has `credits=None`, and
+`_eval_choose_credits` defaults a missing value to 3.0, which would let a 1-credit lab count as 3.
+
 **Scraper side** — `scrape_psu.py` now reads *every* code in a CourseLeaf code cell instead of the
 first. PSU writes "both of these" as one `<td class="codecol">` holding several `<a>` links joined by
 `&` (`BIOL 114 & BIOL 115`), and keeping only the first match dropped the lab or the second half of a

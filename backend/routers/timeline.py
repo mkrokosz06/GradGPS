@@ -325,8 +325,17 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                              if it.get("pair_group_id") == pid and it["course_code"] != item["course_code"]),
                             None,
                         )
+                        # Two rows of the SAME branch are a combination, not a
+                        # choice — "BIOL 114 and BIOL 115" (lecture + its lab).
+                        # Rendering that as "or" tells the student to take one.
+                        same_branch = (
+                            partner is not None
+                            and item.get("pair_branch_id")
+                            and partner.get("pair_branch_id") == item.get("pair_branch_id")
+                        )
+                        joiner = "and" if same_branch else "or"
                         label = (
-                            f"{item['course_code']} or {partner['course_code']}"
+                            f"{item['course_code']} {joiner} {partner['course_code']}"
                             if partner else item["course_code"]
                         )
                         if label in seen_codes:

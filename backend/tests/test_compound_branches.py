@@ -150,6 +150,65 @@ def test_timeline_schedules_nothing_once_the_branch_is_complete():
     assert _collect_missing(_audit(COMPOUND, ["ACCTG 211"])) == []
 
 
+# ── Where a combo SITS decides how it is tied together ───────────────────────
+#
+# The scraper emits combo members differently depending on their surrounding
+# group, and getting this wrong is what made the first attempt worse than the
+# bug. Forcing every combo to choose_one labelled a lecture+lab as "BIOL 114 or
+# BIOL 115", and gave each sibling option its own pair_group_id so a student who
+# took BIOL 114+115 was then told to take BIOL 116 as well.
+
+_POOL = {"program_name": "Veterinary and Biomedical Sciences, B.S.",
+         "requirement_group": "Select 4-5 credits",
+         "group_type": "choose_credits",
+         "group_threshold": 4}
+
+# "Select 4-5 credits from: (BIOL 114 & BIOL 115) or (BIOL 114 & BIOL 116)"
+POOL_COMBO = [
+    {**_POOL, "course_code": "BIOL 114", "course_title": "Lecture",  "credits": 3, "pair_branch_id": "b1"},
+    {**_POOL, "course_code": "BIOL 115", "course_title": "Lab",      "credits": 1, "pair_branch_id": "b1"},
+    {**_POOL, "course_code": "BIOL 116", "course_title": "FRI Lab",  "credits": 2, "pair_branch_id": "b2"},
+]
+
+
+_POOL_CREDITS = {"BIOL 114": 3.0, "BIOL 115": 1.0, "BIOL 116": 2.0}
+
+
+def _pool_group(codes):
+    tx = [{"course_code": c, "status": "done", "grade": "B",
+           "credits_earned": _POOL_CREDITS[c]} for c in codes]
+    return ae.run_audit(POOL_COMBO, tx)["groups"][0]
+
+
+def test_lecture_alone_does_not_satisfy_a_credit_pool():
+    """BIOL 114 is 3 credits against a 4-credit pool — the lab is still owed."""
+    assert _pool_group(["BIOL 114"])["satisfied"] is False
+
+
+def test_lecture_plus_its_lab_satisfies_the_pool():
+    assert _pool_group(["BIOL 114", "BIOL 115"])["satisfied"] is True
+
+
+def test_a_sibling_option_is_not_additionally_required():
+    """
+    The regression that blocked the first push: after BIOL 114+115 the plan also
+    demanded BIOL 116, which the bulletin offers as an ALTERNATIVE.
+    """
+    tx = [{"course_code": "BIOL 114", "status": "done", "grade": "B", "credits_earned": 3.0},
+          {"course_code": "BIOL 115", "status": "done", "grade": "B", "credits_earned": 1.0}]
+    slots = _collect_missing(ae.run_audit(POOL_COMBO, tx))
+    assert not any(s["course_code"] == "BIOL 116" for s in slots),         "a sibling pool option must not become a requirement"
+
+
+def test_pool_combo_rows_carry_real_credits_not_a_default():
+    """
+    Every collapsed row in prod has credits=None, and the pool evaluator defaults
+    a missing value to 3.0 — which would let a 1-credit lab count as 3 and
+    satisfy the pool on its own. The scraper now takes credits from the bulletin.
+    """
+    assert _pool_group(["BIOL 115"])["satisfied"] is False
+
+
 # ── Backward compatibility — the guarantee ───────────────────────────────────
 
 def _legacy_reference(rows: list[dict], taken: dict) -> dict:

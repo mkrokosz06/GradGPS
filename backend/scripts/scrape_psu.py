@@ -372,23 +372,50 @@ def scrape_program_requirements(program):
 
                 if is_combo:
                     # "BIOL 114 & BIOL 115" is ONE requirement made of two courses,
-                    # not a choice between them. Emit a row per course sharing a
-                    # pair_branch_id; audit_engine._branch_status() then satisfies
-                    # the branch only when every member is complete. Each row takes
-                    # its own authoritative title from the bulletin rather than the
-                    # concatenated blob (splitting that on " and " is unreliable —
-                    # "Biology: Basic Concepts and Biodiversity" contains one).
-                    branch_pid = this_pair_id or _next_pair_id()
-                    branch_id  = "b%d" % branch_pid
+                    # not a choice between them. Emit a row per course, each with
+                    # its own authoritative title and credits from the bulletin —
+                    # the combo cell carries neither (every collapsed row in prod
+                    # has credits=None), and splitting the concatenated title on
+                    # " and " is unreliable because "Biology: Basic Concepts and
+                    # Biodiversity" contains one.
+                    #
+                    # How the members are tied together depends on where the combo
+                    # SITS, which is the part that is easy to get wrong:
+                    #
+                    #   * inside an "or" chain — "ACCTG 211 or (ACCTG 201 and
+                    #     ACCTG 202)" — the combo is one BRANCH of a choice. It
+                    #     needs the pair_group_id + pair_branch_id machinery so
+                    #     half a branch satisfies nothing.
+                    #
+                    #   * anywhere else — nearly always a "Select 4-5 credits from
+                    #     the following" pool — the combo is one OPTION among
+                    #     several. Forcing it to choose_one here was wrong twice
+                    #     over: it labelled a lecture+lab as "BIOL 114 or BIOL 115",
+                    #     and it gave each sibling option its own pair_group_id, so
+                    #     a student who took BIOL 114+115 was then told to take
+                    #     BIOL 116 as well. Leave such rows in their pool and let
+                    #     the credit threshold do the enforcing: BIOL 114 alone is
+                    #     3 credits against a 4-5 credit pool, so it cannot satisfy
+                    #     it without the lab.
+                    in_or_chain = is_or_row and this_pair_id is not None
+                    branch_id   = "b%d" % (this_pair_id if in_or_chain else _next_pair_id())
                     for member in combo_codes:
                         member_row = dict(base_row)
                         member_row["course_code"]    = member
-                        member_row["group_type"]     = "choose_one"
-                        member_row["pair_group_id"]  = branch_pid
                         member_row["pair_branch_id"] = branch_id
-                        bulletin_title = (BULLETIN.get(member) or {}).get("title")
-                        if bulletin_title:
-                            member_row["course_title"] = bulletin_title[:120]
+                        info = BULLETIN.get(member) or {}
+                        if info.get("title"):
+                            member_row["course_title"] = info["title"][:120]
+                        if info.get("credits") is not None:
+                            member_row["credits"] = info["credits"]
+                        if in_or_chain:
+                            member_row["group_type"]    = "choose_one"
+                            member_row["pair_group_id"] = this_pair_id
+                        else:
+                            # Stay in the surrounding group; no pair id, so the
+                            # members are pool options rather than alternatives
+                            # to each other.
+                            member_row["pair_group_id"] = None
                         rows.append(member_row)
                     # A combo is never the anchor of a later "or" chain — the chain
                     # would attach to only its last member.
