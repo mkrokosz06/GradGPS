@@ -463,6 +463,16 @@ def patch_known_alternatives():
                 UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
                 ExpressionAttributeValues={":pid": pair_id, ":gt": "choose_one"},
             )
+            # Write the assignment back onto the cached dict as well. `by_pg` is a
+            # snapshot taken before any of these updates, and the "skip if already
+            # paired" guard below reads it — so without this, a course appearing in
+            # two GROUPS entries gets re-paired by the second one and its first
+            # partner is orphaned in a pair of its own. A lone choose_one row reads
+            # as individually REQUIRED, so the orphan becomes a phantom
+            # requirement: STAT 200 sits in three entries, which stranded STAT 250
+            # in 191 University Park majors (262 singleton pairs in total).
+            row["pair_group_id"] = pair_id
+            row["group_type"]    = "choose_one"
         pair_id += 1
         total_patched += 1
 
@@ -619,6 +629,16 @@ def patch_choose_credits_option_groups():
 
     by_pg: dict = defaultdict(list)
     for r in rows:
+        # Sentinel rows (__GEN_ED__, __CROSSLISTINGS__) are not requirement rows.
+        # __CROSSLISTINGS__ in particular carries `pairs`/`pair_count` and has no
+        # requirement_group at all, so indexing it blindly raises KeyError. This
+        # never fires locally — the dev DB is rebuilt from scratch and the
+        # sentinel is only written by the monthly refresh — but it kills the
+        # script against prod, where the sentinel is preserved across reloads.
+        if str(r.get("program_name", "")).startswith("__"):
+            continue
+        if "requirement_group" not in r:
+            continue
         key = (r["program_name"], r["requirement_group"])
         by_pg[key].append(r)
 

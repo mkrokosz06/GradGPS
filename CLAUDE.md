@@ -309,6 +309,34 @@ home dashboard, and gen-ed check with no extra wiring.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
 
+### Two patch-script bugs that only surface against prod
+
+Both were found by actually loading the catalog into production, and neither could have been caught by
+the local rehearsal — the local DB is rebuilt by **dropping** the `requirements` table, while a prod
+reload **preserves** the sentinel rows and re-patches a catalog whose pair ids differ.
+
+**1. `patch_choose_credits_option_groups` crashed on the `__CROSSLISTINGS__` sentinel.** It scans the
+whole table and did `r["requirement_group"]`; that row carries `pairs`/`pair_count` and no requirement
+fields, so it raised `KeyError`. Sentinels are now skipped. The three other sites that index
+`requirement_group` are safe — they operate on `scan_code(...)`/`course_code`-filtered rows, which a
+sentinel can never reach.
+
+**2. `patch_known_alternatives` orphaned one half of every pair it re-assigned.** `by_pg` is an
+in-memory snapshot taken *before* any writes, and the "skip if already paired" guard reads it. So a
+course appearing in several `GROUPS` entries got re-paired by the later one while its earlier partner
+kept the old id **alone** — and a lone `choose_one` row evaluates as *individually required*, turning
+the orphan into a phantom requirement. STAT 200 sits in three entries:
+
+```
+STAT 200  pair=1987   (re-paired by the DS 200 entry)
+STAT 250  pair=1595   (orphaned, alone -> now "required")
+```
+
+That produced **262 singleton pairs across the 225 UP degree programs** — 191 STAT 250, 56 PHYS 211 —
+each one a course the student was told to take despite already satisfying the alternative. `assign_pair()`
+now writes the assignment back onto the cached dict; the count drops to **1**. Worth remembering as a
+shape: *any* patch script that caches a scan and then mutates rows has this hazard.
+
 ### Compound choose-one branches — "A or B or (C and D)"
 
 PSU writes alternatives whose branches are themselves *pairs* of courses:
