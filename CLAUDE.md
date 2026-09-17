@@ -2,6 +2,12 @@
 
 AI advisor app for Penn State students. FastAPI backend + React Native (Expo) mobile app.
 
+## Answering style
+
+Be brief. Be concise. Avoid being too verbose or giving unnecessary information.
+Lead with the answer, give only the facts that back it, stop. Do the deep
+investigation when it's needed — just report the conclusion, not the walkthrough.
+
 ---
 
 ## Running the project
