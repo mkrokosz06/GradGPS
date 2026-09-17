@@ -24,11 +24,23 @@ logger = logging.getLogger(__name__)
 
 import re as _re
 
-# Matches any " at <Word> Campus" / " at <Word> <Word> Campus" pattern.
+# Matches any " at <Campus list> Campus(es)" pattern.
 # Catches all PSU branch campuses: University Park, Commonwealth, Harrisburg,
 # Brandywine, DuBois, Erie, Fayette, Greater Allegheny, New Kensington,
 # Schuylkill, Scranton, Shenango, York, World Campus, etc.
-_CAMPUS_RE = _re.compile(r" at [\w\s]+ campus", _re.IGNORECASE)
+#
+# The character class must allow a hyphen and a comma, and the noun must allow
+# the plural, or two shapes slip through and a UP student is audited against
+# another campus's plan grid:
+#   * "… at Wilkes-Barre Campus"  — the only hyphenated campus name (66 rows
+#     across Electrical Engineering Technology, Surveying Engineering,
+#     Surveying Engineering Technology, and Administration of Justice B.A./B.S.)
+#   * "… at Altoona, Erie, and Harrisburg Campuses" — the multi-campus lists
+#     Nursing, B.S.N. uses (43 rows).
+# Dropping the UP-inclusive Nursing lists is correct, not a loss: they are
+# semester-grid duplicates of the real "General Nursing Option (66 credits)" /
+# "RN to BSN Option (61 credits)" groups, which this filter keeps.
+_CAMPUS_RE = _re.compile(r" at [\w\s,\-]+ campus(?:es)?\b", _re.IGNORECASE)
 
 # Identifies a named "option" group (e.g. "Forensic Chemistry Option (20 credits)")
 # but not common/all-options groups.
