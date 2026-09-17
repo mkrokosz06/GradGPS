@@ -29,7 +29,34 @@ except Exception:
     BULLETIN = {}
 
 # Course code as it appears in a CourseLeaf code cell.
-_CODE_IN_CELL = re.compile(r"\b([A-Z]{2,6})\s{0,2}(\d{3}[A-Z]?)\b")
+_CODE_IN_CELL_WIDE = re.compile(r"\b([A-Z]{2,6})\s{0,2}(\d{1,3}[A-Z]?)\b")
+
+
+def _code_ok(dept, num):
+    """A 3-digit code is accepted as before.  A 1-2 digit code (ENGL 15, SOC 1,
+    SPAN 3 -- 608 of the bulletin's 9,479 courses) is accepted only if the
+    bulletin actually lists it, so a bare number in prose cannot invent one."""
+    digits = "".join(ch for ch in num if ch.isdigit())
+    if len(digits) >= 3:
+        return True
+    return (dept + " " + num) in BULLETIN
+
+
+class _FilteredCodeRe:
+    """Drop-in for the old _CODE_IN_CELL: same API, bulletin-gated short codes."""
+
+    def finditer(self, text):
+        for m in _CODE_IN_CELL_WIDE.finditer(text):
+            if _code_ok(m.group(1), m.group(2)):
+                yield m
+
+    def search(self, text):
+        for m in self.finditer(text):
+            return m
+        return None
+
+
+_CODE_IN_CELL = _FilteredCodeRe()
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (compatible; academic-research-bot/1.0)"
 }
@@ -272,7 +299,7 @@ def scrape_program_requirements(program):
                 # already handled by the pair_group_id chain further down.
                 is_combo = len(combo_codes) > 1 and "&" in cell_texts[0]
                 
-                code_match = re.search(r"\b([A-Z]{2,6})\s{0,2}(\d{3}[A-Z]?)\b", full_row)
+                code_match = _CODE_IN_CELL.search(full_row)
                 if not code_match:
                     # Check for "select N credits" type rows inside the table
                     pool_match = re.search(
@@ -293,7 +320,7 @@ def scrape_program_requirements(program):
                 # and [code+title combined, credits]; blindly taking cell 1 wrote
                 # the credits cell ("3", "1-0") as the title in the second layout.
                 def _clean_title(text: str) -> str:
-                    t = re.sub(r"\b[A-Z]{2,6}\s{0,2}\d{3}[A-Z]?\b", "", text).strip(" –—/-or")
+                    t = _CODE_IN_CELL_WIDE.sub("", text).strip(" –—/-or")
                     return re.sub(r"\s{2,}", " ", t).strip()
 
                 _credit_cell = re.compile(r"^\d+(?:\.\d+)?(?:\s*[–—-]\s*\d+(?:\.\d+)?)?$")
