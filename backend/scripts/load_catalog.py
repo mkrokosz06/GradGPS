@@ -2,6 +2,18 @@
 Loads PSU_Major_Requirements.xlsx into the DynamoDB requirements table.
 Safe to re-run — uses batch_writer which upserts (overwrites) existing items.
 
+--replace clears the old catalog first, and a re-load into a table that already
+holds one NEEDS it.  The sort key is `group#code#idx` where idx is the row's
+position in the spreadsheet, so a scrape that adds or removes any row shifts
+almost every index after it.  Those shifted keys don't overwrite the old items,
+they sit beside them: without --replace, re-loading a 34k-row file over a 32k-row
+catalog leaves ~66k rows and every program carrying two copies of itself.
+Sentinel rows (program_name starting "__": __GEN_ED__, __CROSSLISTINGS__) are
+never touched — they are written by other scripts and must survive a reload.
+
+A fresh local DB (docker restart → setup_tables) has nothing to clear, which is
+why the flag is opt-in; a production reload is the case that requires it.
+
 Refuses to load a spreadsheet whose junk-title rate exceeds 40% (the
 signature of a broken scrape) unless --force is given; fix_junk_titles.py
 repairs the residual junk after loading either way. The legacy 2025 xlsx
@@ -9,7 +21,7 @@ repairs the residual junk after loading either way. The legacy 2025 xlsx
 by the fixed scraper should be in the single digits.
 
 Usage:
-    python scripts/load_catalog.py [--force]
+    python scripts/load_catalog.py [--force] [--replace]
 """
 
 import sys, os, math
@@ -65,6 +77,45 @@ def clean(val):
         return Decimal(str(val))
     except (ValueError, TypeError):
         return str(val)
+
+# ── Optional: clear the existing catalog first ───────────────────────────────
+def clear_catalog():
+    """Delete every non-sentinel row from the requirements table.
+
+    Scans for keys only (the projection keeps the scan cheap) and deletes in
+    batches.  A row whose program_name starts with "__" is a sentinel written by
+    another script — __GEN_ED__ (rebuild_gen_ed.py) and __CROSSLISTINGS__
+    (monthly_refresh.py) — and is skipped, so a catalog reload never destroys
+    gen-ed requirements or the cross-listing pairs.
+    """
+    print("\n--replace: clearing the existing catalog...")
+    keys, kept = [], 0
+    scan_kw = dict(ProjectionExpression="program_name, group_course")
+    resp = table.scan(**scan_kw)
+    while True:
+        for it in resp.get("Items", []):
+            if str(it.get("program_name", "")).startswith("__"):
+                kept += 1
+                continue
+            keys.append({"program_name": it["program_name"],
+                         "group_course": it["group_course"]})
+        if "LastEvaluatedKey" not in resp:
+            break
+        resp = table.scan(ExclusiveStartKey=resp["LastEvaluatedKey"], **scan_kw)
+
+    print(f"  {len(keys)} catalog rows to delete, {kept} sentinel rows preserved")
+    deleted = 0
+    with table.batch_writer() as batch:
+        for k in keys:
+            batch.delete_item(Key=k)
+            deleted += 1
+            if deleted % 5000 == 0:
+                print(f"  {deleted}/{len(keys)} deleted...")
+    print(f"  Cleared {deleted} rows.\n")
+
+
+if "--replace" in sys.argv:
+    clear_catalog()
 
 loaded = 0
 with table.batch_writer() as batch:
