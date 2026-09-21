@@ -11,8 +11,8 @@ so an email user is distinct from the same person's google:/apple: identity.
 Codes go out via SES using the same verified sender as the support form
 (SUPPORT_FROM_EMAIL). With SUPPORT_FROM_EMAIL unset (local dev), or under
 AUTH_DEV_BYPASS, the code is logged instead of emailed so dev can test without
-SES. NOTE: until SES production access is granted, SES only delivers to
-*verified* recipients — real user inboxes will bounce in the sandbox.
+SES. SES production access is granted on this account, so codes deliver to
+any recipient (verified 2026-09-21).
 """
 
 import os
@@ -43,6 +43,15 @@ _START_PER_IP      = 20     # codes per window per IP
 _RATE_WINDOW       = 3600   # seconds
 _by_email: dict[str, deque] = defaultdict(deque)
 _by_ip:    dict[str, deque] = defaultdict(deque)
+
+# The review demo code is STATIC, so unlike a real one-time code it is never
+# burned after N wrong guesses — without a limit it would be brute-forceable
+# (10^6 space) by anyone who guessed the demo address. These buckets cap guess
+# rate per IP and globally; the global one is the backstop against a botnet.
+_DEMO_VERIFY_PER_IP = 10     # attempts per window per IP
+_DEMO_VERIFY_GLOBAL = 60     # attempts per window across all callers
+_demo_by_ip:  dict[str, deque] = defaultdict(deque)
+_demo_global: dict[str, deque] = defaultdict(deque)
 
 
 class StartBody(BaseModel):
@@ -80,9 +89,28 @@ def _dev_mode() -> bool:
 def _review_account() -> tuple[str, str] | None:
     """App Store review demo account (REVIEW_EMAIL + REVIEW_CODE env vars).
 
-    Apple's reviewer can't read a real inbox, so this one address signs in
-    with a fixed 6-digit code and no email is ever sent. Returns (email, code)
-    when configured, else None (feature fully disabled)."""
+    WHY THIS EXISTS: App Store guideline 2.1 requires that a reviewer be able
+    to fully evaluate the app. GradGPS signs users in with Google/Apple OIDC or
+    an emailed one-time code — the reviewer would land in an empty account with
+    the former and can't read our inbox for the latter. So exactly ONE
+    allowlisted address signs in with a fixed 6-digit code (no email is ever
+    sent for it), landing on a pre-seeded synthetic demo student
+    (scripts/seed_demo_account.py).
+
+    SCOPE — deliberately narrow:
+      * ENV-GATED. Both vars must be set, and REVIEW_CODE must be 6 digits;
+        otherwise this returns None and the demo path does not exist at all
+        (same discipline as CHARLIE_ENABLED). Unset == byte-identical no-op.
+      * ONE address, matched by equality. Not a list, prefix or pattern.
+      * NOT a bypass. It only short-circuits the *code check* for that one
+        address; the session is minted by the normal create_session() path with
+        user_id "email:<that address>", so it cannot authenticate any other id,
+        and get_current_user / x-user-id trust are untouched.
+      * The code is compared with secrets.compare_digest and never logged.
+      * Guess rate is capped in email_verify (see _DEMO_VERIFY_* above) because
+        a static code is never burned the way a real one-time code is.
+
+    Returns (email, code) when configured, else None."""
     email = os.getenv("REVIEW_EMAIL", "").strip().lower()
     code = os.getenv("REVIEW_CODE", "").strip()
     if email and len(code) == 6 and code.isdigit():
@@ -152,7 +180,7 @@ def email_start(body: StartBody, request: Request):
 
 
 @router.post("/email/verify")
-def email_verify(body: VerifyBody):
+def email_verify(body: VerifyBody, request: Request):
     """Verify the code and mint a session (same response shape as
     POST /auth/session)."""
     email = body.email.strip().lower()
@@ -162,6 +190,15 @@ def email_verify(body: VerifyBody):
 
     review = _review_account()
     if review and email == review[0]:
+        # App Review demo account (see _review_account). The code is static, so
+        # it needs its own guess limiter — a real one-time code is burned by
+        # check_code() after MAX_ATTEMPTS, this one never is.
+        if (_rate_limited(_demo_global, "all", _DEMO_VERIFY_GLOBAL)
+                or _rate_limited(_demo_by_ip, _client_ip(request), _DEMO_VERIFY_PER_IP)):
+            raise HTTPException(
+                status_code=429,
+                detail="Too many attempts — please wait a bit before trying again.",
+            )
         ok = secrets.compare_digest(code, review[1])
     else:
         ok = check_code(email, code)

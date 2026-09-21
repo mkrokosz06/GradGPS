@@ -338,7 +338,7 @@ function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: T
             <Text style={{ color: "#b45309", fontSize: 11, fontWeight: "700" }}>Edit ›</Text>
           </TouchableOpacity>
         ) : (
-          <Text style={{ color: "#6b7280", fontSize: 11 }}>Tap for ratings</Text>
+          <Text style={{ color: "#6b7280", fontSize: 11 }}>Tap for course details</Text>
         )}
       </View>
     </TouchableOpacity>

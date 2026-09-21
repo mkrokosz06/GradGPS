@@ -27,6 +27,9 @@ PSU_Major_Requirements.txt
 # Transcripts (student PII)
 *.pdf
 transcripts/
+# ...except the synthetic App Review sample, which is fabricated data and
+# has to ship (regenerate with scripts/make_demo_transcript_pdf.py).
+!backend/scripts/demo_assets/*.pdf
 
 # Node / React Native (for later)
 node_modules/
