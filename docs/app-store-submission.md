@@ -16,7 +16,7 @@ before submitting; do not guess.
 | EAS project ID | `5edc93c4-d727-45f2-ad80-38dee65c0f33` | `mobile/app.json` → `expo.extra.eas.projectId` |
 | Sign in with Apple | enabled | `expo.ios.usesAppleSignIn: true`, plugin `expo-apple-authentication` |
 | Export compliance | already declared exempt | `expo.ios.infoPlist.ITSAppUsesNonExemptEncryption: false` |
-| iPad support | **ON** | `expo.ios.supportsTablet: true` — see §5, this forces iPad screenshots |
+| iPad support | **OFF** | `expo.ios.supportsTablet: false` (set 2026-09-21) — no iPad screenshots required |
 | Production API | `https://kjn2ysmnjr.us-east-1.awsapprunner.com` | `mobile/.env.production` |
 | Support email | `support@gradgps.com` | `mobile/app/privacy.tsx`, `mobile/app/tos.tsx` |
 
@@ -408,13 +408,10 @@ isn't implemented — guideline 2.3.1 is about exactly that.
 
 - [ ] **6.9" iPhone** (iPhone 16 Pro Max / 15 Pro Max class) — **required**. 1320 × 2868 px or
       1290 × 2796 px, portrait. Up to 10; supply at least 3.
-- [ ] **13" iPad** — **required because `ios.supportsTablet` is `true`** in `mobile/app.json`.
-      2064 × 2752 px or 2048 × 2732 px, portrait.
-      **Decision needed:** either capture real iPad screenshots (and verify the layout isn't
-      broken on a tablet — nothing in `mobile/` appears to have been designed or tested for
-      iPad), **or** set `"supportsTablet": false` and rebuild, which removes the iPad
-      requirement entirely. For a first submission by a solo developer, turning it off is the
-      lower-risk choice. `[DECISION: iPad screenshots, or supportsTablet:false + rebuild?]`
+- **13" iPad — NOT required.** `ios.supportsTablet` was set to `false` on 2026-09-21, which
+      removes the iPad screenshot requirement and avoids shipping an untested tablet layout. This
+      is native config, so it takes effect only in a new production build — not over OTA. Reversible:
+      flip it back to `true` and the iPad screenshots become mandatory again.
 - 6.5" iPhone screenshots are no longer separately required; ASC scales the 6.9" set down.
 - Suggested set, matching the description's ordering: Home / registration dashboard → Timeline
   → Course detail → Account with credit progress → Class picker.
@@ -460,46 +457,39 @@ Notes on those commands:
       on the App Runner service. `[VERIFY: REVIEW_EMAIL and REVIEW_CODE are set in production,
       and seed_demo_account.py has been run against production so the account has a major and a
       transcript.]`
-- [ ] Confirm the *ordinary* email sign-in code still arrives for real users. **`backend/routers/
-      email_auth.py` warns that until SES production access is granted, SES delivers only to
-      *verified* recipients — real inboxes bounce in the sandbox.** The reviewer's fixed-code path
-      sidesteps this, so it no longer blocks review, but a sandboxed SES means real users who pick
-      email sign-in cannot get in at all — which a reviewer may well try.
-      `[VERIFY: is the AWS SES account out of the sandbox?]`
+- [ ] Confirm the *ordinary* email sign-in code still arrives for real users. **SES production
+      access is granted** (verified 2026-09-21 via `aws sesv2 get-account`: `ProductionAccessEnabled:
+      true`, 50,000/day, status HEALTHY), so codes deliver to any inbox — the sandbox warning that
+      used to sit in `email_auth.py` was stale and has been corrected. If a user ever reports never
+      receiving a code, check the SES suppression list first (it suppresses on bounce/complaint).
 
 ### Operator placeholders to resolve
 
 | Placeholder | Where |
 |---|---|
 | `[DEMO EMAIL]` (`REVIEW_EMAIL`, default `appreview@gradgps.com`) and `[DEMO SIGN-IN CODE]` (`REVIEW_CODE`, never in the repo) | §1 review notes — set on the production server; account seeded by `backend/scripts/seed_demo_account.py` |
-| `[SAMPLE TRANSCRIPT FILE NAME]` + the PDF itself (none exists in the repo) | §1, ASC attachment |
+| ~~Sample transcript PDF~~ — **done**: `backend/scripts/demo_assets/demo_transcript.pdf` (synthetic, parses 27/27) | §1, ASC attachment |
 | Reviewer contact name / phone / email | ASC App Review Information |
 | Sign-in-SDK third-party-label question | §2.2 |
 | 13+ age-rating question wording in the 2025 questionnaire | §3 |
-| iPad screenshots **or** `supportsTablet: false` | §5 |
-| SES sandbox status | §5 smoke test |
+| ~~iPad screenshots~~ — **done**: `supportsTablet: false` | §5 |
+| ~~SES sandbox status~~ — **done**: production access granted | §5 smoke test |
 | Version number to submit (1.1.0 or bumped) | §5 |
 
 ---
 
 ## 6. Rejection risks found in the repo
 
-### HIGH — the dead "Tap for ratings" label still ships in the app
+### ~~HIGH~~ RESOLVED — the dead "Tap for ratings" label
 
-Not just the website screenshot. The **live app** still tells users to tap a course for ratings:
+The live app told users to tap a course for ratings, a feature withdrawn in September 2026
+(`docs/professor-ratings.md`) — a broken promise under **2.3.1** and **2.1**, and a visible
+reminder in the shipping binary of the exact feature removed for a third-party terms violation.
 
-- `mobile/app/(tabs)/index.tsx:341` — `Tap for ratings`
-- `mobile/app/(tabs)/timeline.tsx:513` — `Tap for ratings ›`
-
-The professor-ratings feature was withdrawn in September 2026 (`docs/professor-ratings.md`), and
-`mobile/app/course/[code].tsx` shows no ratings — so tapping does nothing of the kind. A reviewer
-following that affordance finds a broken promise: **guideline 2.3.1 (accurate metadata)** and
-**2.1 (incomplete functionality)**. It is also a visible reminder, in the shipping binary, of the
-exact feature that was removed for a third-party terms violation — the worst thing to leave in.
-
-**Fix before building.** Replace both strings with something true ("Tap for details ›",
-"Course info ›") or drop the hint entirely. It is a two-line change; there is no reason to submit
-without it.
+Fixed 2026-09-21: both strings now read "Tap for course details". A full grep of `mobile/` found
+no other remnant — no ratings service, type, or endpoint reference survives. The tap handler was
+left alone; the rows still route to `mobile/app/course/[code].tsx`. **Needs a new build to reach
+users.**
 
 ### HIGH — `website/shots/app-timeline.png` shows the withdrawn feature
 
@@ -509,27 +499,26 @@ URL you supply and sees a feature the app doesn't have — that is 2.3.3 (screen
 app in use) and 2.3.1. **Re-capture all three `website/shots/*.png` from the fixed build**, and
 never use website assets as App Store screenshots.
 
-### MEDIUM — `mobile/assets/favicon.png` is still the default Expo chevron
+### ~~MEDIUM~~ RESOLVED — `mobile/assets/favicon.png` was the default Expo chevron
 
-1,129 bytes, untouched since project init, while `mobile/assets/icon.png` is the real 776 KB
-brand icon. It is referenced only by `expo.web.favicon`, so it does **not** ship in the iOS
-binary and will not by itself cause a rejection — but it is the visible favicon of any Expo web
-export and reads as an unfinished app. Replace it with a small PNG derived from `icon.png`.
+1,129 bytes, untouched since project init. Referenced only by `expo.web.favicon`, so it never
+shipped in the iOS binary and could not by itself cause a rejection — but it was the visible
+favicon of any Expo web export. Regenerated 2026-09-21 from `mobile/assets/icon.png`
+(48×48 RGBA, Lanczos).
 
-### MEDIUM — iPad support is on but almost certainly untested
+### ~~MEDIUM~~ RESOLVED — iPad support
 
-`ios.supportsTablet: true` makes iPad a supported device, which means a reviewer may run the app
-on an iPad and 13" screenshots become mandatory. Nothing in `mobile/` suggests tablet layout
-work was done. A broken layout on iPad is a 2.1 / 4.0 rejection. Decide per §5.
+`ios.supportsTablet` was `true`, making iPad a supported device (mandatory 13" screenshots, and a
+reviewer running an untested tablet layout — 2.1 / 4.0). Set to `false` on 2026-09-21. Nothing in
+the repo depended on tablet support. **Native config: needs a new build, not OTA.**
 
-### MEDIUM — ordinary email sign-in may not deliver (SES sandbox)
+### ~~MEDIUM~~ RESOLVED — ordinary email sign-in delivery (SES)
 
-`backend/routers/email_auth.py` documents that SES delivers only to verified recipients until
-production access is granted. The reviewer's demo account uses the fixed-code review path, so
-this no longer blocks the reviewer directly — but if a reviewer tries email sign-in with their
-own address and no code ever arrives, that is a dead sign-up path and **guideline 2.1**, the
-single most common cause of a first-submission rejection. Get SES out of the sandbox, or be
-confident Google/Apple sign-in is what a curious reviewer reaches for.
+`email_auth.py` used to warn that SES delivers only to verified recipients until production access
+is granted, which would have made email sign-in a dead path — **guideline 2.1**, the most common
+first-submission rejection. The warning was stale. Verified 2026-09-21 via `aws sesv2 get-account`:
+`ProductionAccessEnabled: true`, `SendingEnabled: true`, 50,000/day, `EnforcementStatus: HEALTHY`.
+Codes deliver to any inbox. The docstring has been corrected.
 
 ### LOW — dormant RateMyProfessors code is still in the repo
 

@@ -513,6 +513,20 @@ phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap t
   sign-out. A 401 with a token armed auto-clears mobile auth state (`setOnUnauthorized` in
   `services/api.ts`) and routes back to sign-in.
 - **Admin**: `/admin/*` gated by `require_admin` — open under dev bypass, else `ADMIN_USER_IDS` allowlist (comma-separated provider-scoped ids).
+- **App Review demo account**: App Review cannot obtain a PSU transcript, and Google/Apple
+  sign-in would land a reviewer in their own empty account — guideline 2.1 rejects an app the
+  reviewer can't evaluate. `_review_account()` in `routers/email_auth.py` short-circuits the
+  **code check** inside the existing `/auth/email/verify` for one env-configured address:
+  `REVIEW_EMAIL` + `REVIEW_CODE` (exactly 6 digits). Either unset = the path does not exist, so
+  it is a byte-identical no-op — the same gating discipline as `CHARLIE_ENABLED`. It is **not**
+  a bypass: the session is minted by the normal path as `email:<that address>`, no other user id
+  is reachable, and `get_current_user` is untouched. Unlike a real OTP the code is static and
+  never burns, so the demo branch carries its own rate limit (10/hr per IP, 60/hr global).
+  Populate the account with `scripts/seed_demo_account.py` (wholly synthetic — fabricated
+  student, real catalog codes, an SAP-templated major so the timeline shows its richer path);
+  `scripts/make_demo_transcript_pdf.py` regenerates the sample upload PDF in
+  `scripts/demo_assets/`, which needs the `.gitignore` exception to the blanket `*.pdf` PII rule.
+  Submission paperwork: `docs/app-store-submission.md`.
 
 ### App version gate & client version reporting
 The mobile `UpdateGate` (`components/UpdateGate.tsx`) polls `GET /config/app` at launch and
