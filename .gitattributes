@@ -1,0 +1,5 @@
+# Binary assets must never be line-ending converted -- autocrlf is on for this
+# repo and would corrupt a PDF on checkout.
+*.pdf binary
+*.png binary
+*.ico binary
