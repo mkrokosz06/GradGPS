@@ -110,7 +110,7 @@ export function NavHeader({ subtitle }: { subtitle?: string }) {
               {/* Legal footer */}
               <View style={[styles.legalFooter, { paddingBottom: insets.bottom + 20 }]}>
                 <TouchableOpacity onPress={() => navigate("/tos")} activeOpacity={0.6}>
-                  <Text style={styles.legalLink}>Terms of Service</Text>
+                  <Text style={styles.legalLink}>Terms of Use</Text>
                 </TouchableOpacity>
                 <Text style={styles.legalDot}>·</Text>
                 <TouchableOpacity onPress={() => navigate("/privacy")} activeOpacity={0.6}>

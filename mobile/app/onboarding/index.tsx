@@ -2,9 +2,17 @@ import React from "react";
 import { View, Text, TouchableOpacity, Image, StyleSheet } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
+import { isAgeConfirmed } from "../../services/ageAttestation";
 
 export default function WelcomeScreen() {
   const router = useRouter();
+
+  // The age gate is the first onboarding step, but it is asked once per device:
+  // a user who already confirmed goes straight to sign-in.
+  async function handleGetStarted() {
+    const confirmed = await isAgeConfirmed();
+    router.push((confirmed ? "/onboarding/signup" : "/onboarding/age") as any);
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -24,7 +32,7 @@ export default function WelcomeScreen() {
         <TouchableOpacity
           style={styles.primaryBtn}
           activeOpacity={0.85}
-          onPress={() => router.push("/onboarding/signup" as any)}
+          onPress={handleGetStarted}
         >
           <Text style={styles.primaryBtnText}>Get Started</Text>
         </TouchableOpacity>
@@ -33,7 +41,7 @@ export default function WelcomeScreen() {
         </Text>
         <View style={styles.legalLinks}>
           <TouchableOpacity onPress={() => router.push("/tos" as any)}>
-            <Text style={styles.legalLink}>Terms of Service</Text>
+            <Text style={styles.legalLink}>Terms of Use</Text>
           </TouchableOpacity>
           <Text style={styles.legalDot}>·</Text>
           <TouchableOpacity onPress={() => router.push("/privacy" as any)}>

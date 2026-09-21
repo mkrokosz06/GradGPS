@@ -42,7 +42,7 @@ export function TosModal({
             GradGPS is a student-built planning tool and is not official academic advising.
             By continuing, you agree to our{" "}
             <Text style={styles.link} onPress={() => openLegal("/tos")}>
-              Terms of Service
+              Terms of Use
             </Text>{" "}
             and{" "}
             <Text style={styles.link} onPress={() => openLegal("/privacy")}>

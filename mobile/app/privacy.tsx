@@ -16,7 +16,7 @@ export default function PrivacyPolicyScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: August 30, 2026</Text>
+        <Text style={styles.updated}>Last updated: September 21, 2026</Text>
 
         <Section title="1. Who We Are">
           GradGPS is an independent planning tool operated by Matthew Krokosz, an individual developer based in the United States (the "we," "us," or "operator" referred to in this policy). You can reach us at support@gradgps.com or through the Contact Support screen in the app.{"\n\n"}
@@ -26,11 +26,13 @@ export default function PrivacyPolicyScreen() {
         <Section title="2. What We Collect">
           When you use GradGPS, we collect:{"\n\n"}
           • Your name and email address, provided by your sign-in method (Google, Apple, or email verification code), and a user identifier created at sign-up{"\n"}
-          • Your selected major and subplan{"\n"}
-          • Basic account activity information, such as when you signed up and when you last used the app{"\n"}
+          • Your selected major and subplan, and any minors or certificates you declare{"\n"}
+          • Basic account activity information: when you signed up, the date you last used the app, and the app version you are running{"\n"}
           • Academic data parsed from your uploaded transcript: course codes, grades, credits earned, and enrollment terms{"\n"}
-          • A copy of the transcript PDF you upload, and — if you upload an official transcript — the date you acknowledged and consented to using it{"\n\n"}
-          We recommend uploading your unofficial transcript. An official transcript PDF may also carry your name and Penn State student ID number as printed on the document. We only extract and use the academic data listed above. We never ask you for, and never store, your account password, your Social Security Number, or any financial information.
+          • A copy of the transcript PDF you upload, and — if you upload an official transcript — the date you acknowledged and consented to using it{"\n"}
+          • Planning choices you make in the app: the classes you pick for a future slot, and any course substitution you tell us your adviser approved{"\n"}
+          • Anything you write to us in the support form, along with the email address you give there{"\n\n"}
+          We recommend uploading your unofficial transcript. An official transcript PDF may also carry your name and Penn State student ID number as printed on the document. We only extract and use the academic data listed above. We never ask you for, and never store, your account password, your Social Security Number, or any financial information. Your device's IP address is used momentarily to rate-limit sign-in codes and support messages; it is not written to our database and not linked to your account.
         </Section>
 
         <Section title="3. How We Use Your Information">
@@ -40,8 +42,8 @@ export default function PrivacyPolicyScreen() {
           • Recommend future courses based on your remaining requirements{"\n"}
           • Sign you in and keep your account secure{"\n"}
           • Respond when you contact support{"\n"}
-          • Review anonymized, aggregate counts (such as total sign-ups) to improve GradGPS{"\n\n"}
-          We do not sell or rent your personal information, and we do not share it with third parties for advertising or marketing. GradGPS uses no third-party analytics, advertising, or cross-site tracking services.{"\n\n"}
+          • Review anonymized, aggregate counts (such as total sign-ups, or how many people are on each app build) to improve GradGPS{"\n\n"}
+          We do not sell or rent your personal information, and we do not share it with third parties for advertising or marketing. GradGPS uses no third-party analytics, advertising, or cross-site tracking services — there is no analytics SDK of any kind in the app, so there is nothing measuring you in the background.{"\n\n"}
           GradGPS builds your audit and timeline through our own matching against published university requirements. We do not send your personal data to third-party AI services, and we never use your data to train AI models.
         </Section>
 
@@ -58,7 +60,7 @@ export default function PrivacyPolicyScreen() {
         </Section>
 
         <Section title="6. Data Retention">
-          We retain your data while your account is active. If you do not use GradGPS for 24 consecutive months, we may delete your account and its associated data. You can permanently delete your account and all associated data at any time from the Account screen in the app — this removes your transcript file, parsed academic data, profile, and active sessions. You may also request deletion by contacting us.
+          We retain your data while your account is active. If you do not use GradGPS for 24 consecutive months, we may delete your account and its associated data. You can permanently delete your account and all associated data at any time from the Account screen in the app — this removes your stored transcript PDF, your parsed course data, your saved planning choices and course substitutions, your profile record, and your active sessions. You may also request deletion by contacting us.
         </Section>
 
         <Section title="7. Your Rights & Choices">
@@ -70,19 +72,41 @@ export default function PrivacyPolicyScreen() {
           We do not sell your personal information and have not done so. Because GradGPS does not track you across other websites or over time, we do not respond differently to browser "Do Not Track" signals.
         </Section>
 
-        <Section title="8. Security">
+        <Section title="8. State Privacy Rights">
+          Some states — California, Colorado, Connecticut, Virginia, Texas and a growing list of others — give residents specific rights over their personal information. We extend the rights below to everyone who uses GradGPS, wherever you live, because it would be strange to run two different policies.{"\n\n"}
+          What we collect, by category. In the language California uses:{"\n\n"}
+          • Identifiers — your name, email address, and the account identifier created at sign-up. Collected from you and from your sign-in provider (Google or Apple). Kept while your account is active.{"\n"}
+          • Education information — your uploaded transcript PDF and the course codes, grades, credits, and terms parsed from it; your major, subplan, and declared minors or certificates; the planning choices and course substitutions you make in the app. Collected from you. Kept while your account is active.{"\n"}
+          • Internet or device activity — the date you last used the app and the app version you are running. Collected automatically from the app. Kept while your account is active.{"\n"}
+          • Sensitive personal information — if you choose to upload an official transcript, the PDF carries your Penn State student ID number as printed on it. We don't extract or use that number; it simply sits inside the file you uploaded, which you can delete. We recommend the unofficial transcript for exactly this reason. We do not use or disclose sensitive personal information for any purpose other than providing the Service, so there is nothing for you to limit.{"\n\n"}
+          We do not collect biometric information, precise geolocation, commercial or purchase records, or information about your race, religion, health, immigration status, union membership, sexual orientation, or the contents of your private messages.{"\n\n"}
+          We do not sell or share your personal information. We have not sold personal information, and we have not shared it for cross-context behavioral advertising, in the preceding 12 months or ever. We do not do this for anyone, including users under 16. Because there is nothing to opt out of, we do not offer a "Do Not Sell or Share My Personal Information" link — the honest version of that link is this paragraph. We disclose personal information only to the service providers named in Section 4, who process it on our behalf under their own contracts and may not use it for their own purposes.{"\n\n"}
+          Your rights:{"\n\n"}
+          • Know and access — what we collect, why, where it came from, who we disclose it to, and a copy of the specific pieces we hold about you.{"\n"}
+          • Delete — ask us to delete the personal information we hold about you.{"\n"}
+          • Correct — ask us to fix inaccurate personal information.{"\n"}
+          • Portability — get your data in a portable, readily usable format.{"\n"}
+          • Opt out of sale or sharing — not applicable, because we do neither.{"\n"}
+          • Limit the use of sensitive personal information — not applicable, because we only use it to provide the Service.{"\n"}
+          • No retaliation — we will never deny you the Service, charge you a different price, or give you a worse experience for exercising any of these rights.{"\n\n"}
+          How to exercise them. The fastest route is the app itself: the Account screen lets you view your data, correct your major and classes, delete your transcript, and permanently delete your entire account — no request, no waiting. Otherwise, email support@gradgps.com or use the Contact Support screen and say what you want. To protect your account we will ask you to make the request from the email address associated with it, or to confirm details only the account holder would know; we'll use what you send us only to handle the request. We aim to respond within 45 days and will tell you if we need the extension the law allows. If we have to decline, we'll explain why. You may use an authorized agent, who must provide written permission from you and verify their own identity.{"\n\n"}
+          If you are in a state whose law gives you a right to appeal a decision we make about your request, email us with "Privacy Appeal" in the subject line and a person — not an automated process — will review it and write back with the outcome and the reasons.
+        </Section>
+
+        <Section title="9. Security">
           We take reasonable measures to protect your data, including encrypted storage and access controls. However, no system is completely secure. Please keep the sign-in method associated with your account (your Google, Apple, or email account) secure and do not share it with others.
         </Section>
 
-        <Section title="9. Children's Privacy">
-          GradGPS is intended for current and prospective college students and is not directed at children. We do not knowingly collect data from anyone under 13 years of age. If you believe a child under 13 has provided us data, contact us and we will delete it.
+        <Section title="10. Age Requirement & Children's Privacy">
+          GradGPS is intended for current and prospective college students. You must be at least 13 years old to create an account or use the Service, and if you are under 18 you may use it only with the consent of a parent or guardian. The Service is not directed at children.{"\n\n"}
+          We do not knowingly collect personal information from anyone under 13. If we learn that we have, we delete the account and its data. If you are a parent or guardian and believe a child under 13 has given us data, contact us at support@gradgps.com and we will delete it.
         </Section>
 
-        <Section title="10. Changes to This Policy">
+        <Section title="11. Changes to This Policy">
           We may update this Privacy Policy from time to time. We will notify you of material changes through the app. Continued use after changes are posted means you accept the updated policy.
         </Section>
 
-        <Section title="11. Contact Us">
+        <Section title="12. Contact Us">
           If you have questions or want to request data deletion, contact us at support@gradgps.com or through the Contact Support screen in the app.
         </Section>
       </ScrollView>
