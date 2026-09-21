@@ -398,7 +398,7 @@ async def _get_description(code: str) -> str | None:
         async with httpx.AsyncClient(timeout=8, follow_redirects=True) as client:
             resp = await client.get(
                 url,
-                headers={"User-Agent": "Mozilla/5.0 (compatible; GradGPS/1.0)"},
+                headers={"User-Agent": "GradGPS/1.0 (course lookup; mkrokosz06@gmail.com)"},
             )
         html = resp.text
         # PSU bulletin wraps descriptions in <p class="courseblockdesc">

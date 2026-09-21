@@ -58,7 +58,7 @@ class _FilteredCodeRe:
 
 _CODE_IN_CELL = _FilteredCodeRe()
 HEADERS = {
-    "User-Agent": "Mozilla/5.0 (compatible; academic-research-bot/1.0)"
+    "User-Agent": "GradGPS-CatalogScraper/1.0 (educational use; mkrokosz06@gmail.com)"
 }
 
 # Global counter for unique pair group IDs across all programs

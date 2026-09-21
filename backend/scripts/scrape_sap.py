@@ -97,7 +97,7 @@ def fetch(url: str) -> str:
     path = os.path.join(_CACHE_DIR, key)
     if os.path.exists(path):
         return open(path, encoding="utf-8").read()
-    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0 (GradGPS SAP scraper)"})
+    req = urllib.request.Request(url, headers={"User-Agent": "GradGPS-SAPScraper/1.0 (educational use; mkrokosz06@gmail.com)"})
     with urllib.request.urlopen(req, timeout=30) as resp:
         html = resp.read().decode("utf-8", "replace")
     with open(path, "w", encoding="utf-8") as f:

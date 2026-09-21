@@ -37,7 +37,7 @@ CACHE_DIR  = HERE / ".cache"
 OUT_PATH   = HERE.parent / "backend" / "credential_data" / "credential_requirements.json"
 XLSX_PATH  = HERE.parent / "PSU_Major_Requirements.xlsx"
 
-USER_AGENT = "Mozilla/5.0 (GradGPS credential catalog builder)"
+USER_AGENT = "GradGPS-CredentialScraper/1.0 (educational use; mkrokosz06@gmail.com)"
 
 # University Park resident-instruction colleges, from routers/programs.py.
 # Credential names rarely carry a campus parenthetical — "Business, Minor" has none but

@@ -122,7 +122,7 @@ _CATALOG_SIGNATURES: list[tuple[str, list[str]]] = [
     ("Ellucian/Banner", ["bwckctlg", "bwckschd", "ellucian"]),
 ]
 
-_UA = "Mozilla/5.0 (compatible; GradGPS-Charlie/1.0; +https://gradgps.com)"
+_UA = "GradGPS-Charlie/1.0 (educational use; mkrokosz06@gmail.com; +https://gradgps.com)"
 
 
 def detect_catalog_platform(html: str) -> str | None:
