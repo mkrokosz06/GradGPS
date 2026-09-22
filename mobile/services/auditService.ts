@@ -32,6 +32,14 @@ export function getCachedAudit(userId: string): AuditSummary | null {
   return auditCache.get(userId) ?? null;
 }
 
+/** Drop the cached audit so no screen renders a requirement state we already
+ *  know is out of date. Called by every transcript mutation — the audit is
+ *  computed from the transcript, so an edit invalidates it by definition. */
+export function invalidateAudit(userId?: string): void {
+  if (userId) auditCache.delete(userId);
+  else auditCache.clear();
+}
+
 export async function getAudit(userId: string): Promise<AuditSummary> {
   const res = await api.get<AuditSummary>("/audit", { headers: { "x-user-id": userId } });
   auditCache.set(userId, res.data);

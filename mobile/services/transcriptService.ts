@@ -1,4 +1,18 @@
 import api from "./api";
+import { invalidateAudit } from "./auditService";
+import { invalidateTimeline } from "./timelineService";
+
+/** Every mutation below changes the transcript, and the audit, the timeline and
+ *  the Entrance to Major gate are all computed FROM the transcript — so their
+ *  caches are stale the instant one of these returns. Dropping them here rather
+ *  than at each call site means no screen can render a requirement state we
+ *  already know is wrong: the Account checklist was showing a gate course as
+ *  still taken after the student swapped it away, because it rendered the
+ *  cached timeline on focus before the refetch landed. */
+function invalidateDerived(userId: string): void {
+  invalidateAudit(userId);
+  invalidateTimeline(userId);
+}
 
 export type UploadResult = {
   status:          string;
@@ -51,6 +65,7 @@ export async function uploadTranscript(
   const res = await api.post<UploadResult>("/transcript/upload", form, {
     headers: { "x-user-id": userId, "Content-Type": "multipart/form-data" },
   });
+  invalidateDerived(userId);
   return res.data;
 }
 
@@ -74,6 +89,7 @@ export async function deleteTranscript(userId: string): Promise<void> {
   await api.delete("/transcript", {
     headers: { "x-user-id": userId },
   });
+  invalidateDerived(userId);
 }
 
 /** Add a class the student registered for (stored as an in-progress course). */
@@ -88,6 +104,7 @@ export async function addCourse(
     { course_code: courseCode, term, credits_earned: credits },
     { headers: { "x-user-id": userId } },
   );
+  invalidateDerived(userId);
   return res.data.course;
 }
 
@@ -103,6 +120,7 @@ export async function swapCourse(
     { original_code: originalCode, course_code: newCode, credits_earned: credits },
     { headers: { "x-user-id": userId } },
   );
+  invalidateDerived(userId);
   return res.data.course;
 }
 
@@ -112,4 +130,5 @@ export async function dropCourse(userId: string, courseCode: string): Promise<vo
     params: { course_code: courseCode },
     headers: { "x-user-id": userId },
   });
+  invalidateDerived(userId);
 }

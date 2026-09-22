@@ -1,4 +1,6 @@
 import api from "./api";
+import { invalidateAudit } from "./auditService";
+import { invalidateTimeline } from "./timelineService";
 
 /**
  * Minors & certificates — coursework a student declares *in addition* to their
@@ -69,6 +71,10 @@ export async function setCredentials(
     { programs },
     { headers: { "x-user-id": userId } },
   );
+  // Declaring a minor changes both the audit and the plan, so neither cache can
+  // be trusted afterwards.
+  invalidateAudit(userId);
+  invalidateTimeline(userId);
   return res.data.credentials ?? [];
 }
 

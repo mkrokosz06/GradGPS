@@ -111,6 +111,14 @@ export function getCachedTimeline(userId: string): TimelineData | null {
   return timelineCache.get(userId) ?? null;
 }
 
+/** Drop the cached timeline. See invalidateAudit — same reasoning, and the
+ *  Entrance to Major checklist reads its gate from here, so a stale entry shows
+ *  a course as still taken after the student has swapped it away. */
+export function invalidateTimeline(userId?: string): void {
+  if (userId) timelineCache.delete(userId);
+  else timelineCache.clear();
+}
+
 export async function getTimeline(userId: string): Promise<TimelineData> {
   const res = await api.get<TimelineData>("/timeline", { headers: { "x-user-id": userId } });
   timelineCache.set(userId, res.data);

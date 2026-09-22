@@ -1,5 +1,5 @@
 import api from "./api";
-import { SlotKind } from "./timelineService";
+import { SlotKind, invalidateTimeline } from "./timelineService";
 
 export type ChoicePayload = {
   slot_key:       string;
@@ -12,6 +12,10 @@ export type ChoicePayload = {
  *  it's pinned to). The timeline reads these on its next fetch. */
 export async function putChoice(userId: string, payload: ChoicePayload): Promise<void> {
   await api.put("/user-choices", payload, { headers: { "x-user-id": userId } });
+  // The plan is rebuilt from these decisions, so the cached timeline is stale
+  // the moment one is saved — including the Entrance to Major gate that reads
+  // the student's pick back out of it.
+  invalidateTimeline(userId);
 }
 
 /** Clear a decision — "let GradGPS choose" again. */
@@ -20,4 +24,5 @@ export async function deleteChoice(userId: string, slotKey: string): Promise<voi
     params: { slot_key: slotKey },
     headers: { "x-user-id": userId },
   });
+  invalidateTimeline(userId);
 }
