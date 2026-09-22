@@ -143,7 +143,11 @@ with table.batch_writer() as batch:
         }
 
         # Numeric fields — only include if present
-        for num_col in ["group_threshold", "credits", "pair_group_id"]:
+        # pool_seq distinguishes the several independent pools a single
+        # requirement section can hold ("Select 3 credits from..." three times
+        # over). Dropping it re-merges them into one, which is the bug this
+        # column exists to fix.
+        for num_col in ["group_threshold", "credits", "pair_group_id", "pool_seq"]:
             val = clean(row.get(num_col, ""))
             if val is not None:
                 item[num_col] = val

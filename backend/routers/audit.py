@@ -12,6 +12,7 @@ from db import requirements_table, users_table, transcript_table
 from audit_engine import run_audit, run_gen_ed_audit
 import credential_choices
 from credentials_audit import audit_declared_credentials
+import entrance_to_major
 from deps import get_user_id
 from client_meta import touch_client_meta
 from substitutions import get_substitutions
@@ -236,5 +237,17 @@ def get_audit(
     result["credentials"] = audit_declared_credentials(
         user, transcript_courses, declared_subs,
         credential_choices.get_credential_choices(user_id))
+
+    # ── 8. Entrance to Major ──────────────────────────────────────────────────
+    # A GATE, not extra requirements. Every course PSU names here is already a
+    # requirement of this major, so nothing is added to the degree — this only
+    # reports which of those courses the gate needs first, at what grade, and
+    # behind what GPA. `None` for a program with no published gate, which keeps
+    # it a byte-identical no-op for every client that ignores the key.
+    # Status only. The interactive checklist needs the slot each group maps to,
+    # and slots are the timeline's to know — see GET /timeline, which returns
+    # the same object with `slot_key` attached.
+    result["entrance_to_major"] = entrance_to_major.evaluate(
+        major, transcript_courses, declared_subs)
 
     return result

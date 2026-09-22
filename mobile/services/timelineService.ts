@@ -53,14 +53,66 @@ export type Semester = {
   courses: TimelineCourse[];
 };
 
+/** One requirement of the Entrance to Major gate: take any ONE branch in full.
+ *  A branch is normally a single course, but PSU writes compound ones
+ *  ("ACCTG 211 or (ACCTG 201 and ACCTG 202)") where every code is required. */
+export type EntranceBranch = {
+  codes:  string[];
+  status: "done" | "in_progress" | "below_grade" | "partial" | "missing";
+};
+
+export type EntranceGroup = {
+  branches: EntranceBranch[];
+  status:   EntranceBranch["status"];
+  /** Every code the gate lists for this group. */
+  options:  string[];
+  /** The timeline slot this group maps to. Absent once the group is satisfied —
+   *  there is nothing left to schedule, so nothing to write against. */
+  slot_key?:  string;
+  slot_kind?: SlotKind;
+  /** The subset of `options` this slot actually offers. Empty for a named
+   *  single-course slot, which is still pinnable to a semester. */
+  choosable?: string[];
+};
+
+export type EntranceToMajor = {
+  /** `courses_met` means the COURSES are done — never that the student is in.
+   *  `needs_confirmation` means PSU states something GradGPS cannot check. */
+  status:             "courses_met" | "in_progress" | "not_started"
+                      | "needs_confirmation" | "no_course_requirements";
+  groups:             EntranceGroup[];
+  groups_done:        number;
+  groups_total:       number;
+  remaining_courses:  string[];
+  gpa_min:            number | null;
+  gpa_candidates:     number[];
+  min_grade:          string | null;
+  semester_standing:  number | null;
+  needs_confirmation: boolean;
+  /** PSU's own wording for anything we could not check. Render verbatim. */
+  notes:              string[];
+  source_url:         string | null;
+};
+
 export type TimelineData = {
   major:              string;
   subplan:            string | null;
   transcript_credits: number;
   semesters:          Semester[];
+  /** `null` for the majors that publish no gate, and absent on older backends. */
+  entrance_to_major?: EntranceToMajor | null;
 };
+
+// Last successful timeline per user, so the Account checklist can render from
+// cache on focus instead of blocking on a fetch it shares with Home/Timeline.
+const timelineCache = new Map<string, TimelineData>();
+
+export function getCachedTimeline(userId: string): TimelineData | null {
+  return timelineCache.get(userId) ?? null;
+}
 
 export async function getTimeline(userId: string): Promise<TimelineData> {
   const res = await api.get<TimelineData>("/timeline", { headers: { "x-user-id": userId } });
+  timelineCache.set(userId, res.data);
   return res.data;
 }

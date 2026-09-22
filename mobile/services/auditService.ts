@@ -1,5 +1,10 @@
 import api from "./api";
 import type { CredentialAudit } from "./credentialService";
+import type { EntranceToMajor } from "./timelineService";
+
+export type {
+  EntranceToMajor, EntranceGroup, EntranceBranch,
+} from "./timelineService";
 
 export type AuditSummary = {
   major:              string;
@@ -12,6 +17,11 @@ export type AuditSummary = {
   /** Declared minors / certificates, each with its own audit. Absent on older
    *  backends, so every consumer must tolerate undefined. */
   credentials?:       CredentialAudit[];
+  /** Entrance-to-Major gate — status only. The interactive checklist needs each
+   *  group's timeline slot, which only GET /timeline knows, so the type lives
+   *  in timelineService and is re-exported here rather than declared twice.
+   *  `null` for the majors that publish no gate; absent on older backends. */
+  entrance_to_major?: EntranceToMajor | null;
 };
 
 // Last successful audit per user, so screens can render instantly on focus

@@ -103,14 +103,33 @@ def seed_courses(courses):
 
 def patch_eti_catalog():
     """
-    Fix two classes of catalog defects for the ETI program:
+    Fix the ETI program's junk rows — the scraper captured credit counts ("3",
+    "4") as course_title for some rows, creating duplicate entries that inflate
+    the missing count.
 
-    1. Junk rows — the scraper captured credit counts ("3", "4") as course_title
-       for some rows, creating duplicate entries that inflate the missing count.
+    This used to also pair BA 243/BLAW 243, BA 301/FIN 301, BA 303/MKTG 301 and
+    BA 304/MGMT 301 as choose_one (ids 580-583). That was wrong, and removing it
+    is the point of this note.
 
-    2. Missing pairs — BA-prefixed Smeal courses and their dept-prefix equivalents
-       (MKTG 301, MGMT 301, FIN 301, BLAW 243) are choose-one alternatives but
-       the scraper didn't capture their pair_group_id relationship.
+    Those four either/or pairs are the **Business Competency application focus**
+    ("Select 12 credits from: (BA 301 or FIN 100 or FIN 301), (BA 303 or MKTG
+    221W or MKTG 301), (BA 304 or MGMT 100 or MGMT 301), BLAW 243, IB 303") —
+    one of several optional focuses a student may choose, alongside Cybersecurity
+    and HCDD. They are NOT the major requirement. The major requirement is a
+    single pool, "Select 3-4 credits from the following:" over those same nine
+    courses, and the bulletin footnote is explicit:
+
+        Note 3: One of these courses is required to be taken to satisfy major
+        requirements. The student needs to take the remaining courses on this
+        list to complete the application focus. The student may not double-count
+        these credits as both a requirement of the major and to meet the
+        requirements of the application focus.
+
+    So the patch took an optional focus and made it mandatory, telling every ETI
+    student they owed four business courses instead of one — regardless of which
+    focus they actually picked. Re-typing the rows to choose_one also destroyed
+    the pool, which is how the requirement is genuinely modelled now that the
+    scraper splits pools correctly (see `pool_seq` in scrape_psu.py).
     """
     print("\nPatching ETI catalog...")
     resp = requirements_table.query(
@@ -134,40 +153,6 @@ def patch_eti_catalog():
             deleted += 1
     print(f"  Removed {deleted} junk rows (credit-count titles).")
 
-    # Reload after deletions
-    resp = requirements_table.query(
-        KeyConditionExpression=Key("program_name").eq(MAJOR)
-    )
-    rows = resp.get("Items", [])
-
-    # 2. Pair BA-prefix courses with their dept-prefix equivalents
-    PAIRS = [
-        ("BA 243",  "BLAW 243", Decimal("580")),  # Legal Environment
-        ("BA 301",  "FIN 301",  Decimal("581")),  # Finance
-        ("BA 303",  "MKTG 301", Decimal("582")),  # Marketing
-        ("BA 304",  "MGMT 301", Decimal("583")),  # Management
-    ]
-
-    def unpaired_row(code):
-        return next(
-            (r for r in rows if r["course_code"] == code and not r.get("pair_group_id")),
-            None,
-        )
-
-    paired = 0
-    for code_a, code_b, pid in PAIRS:
-        row_a, row_b = unpaired_row(code_a), unpaired_row(code_b)
-        if not row_a or not row_b:
-            continue
-        for row in (row_a, row_b):
-            requirements_table.update_item(
-                Key={"program_name": row["program_name"], "group_course": row["group_course"]},
-                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
-                ExpressionAttributeValues={":pid": pid, ":gt": "choose_one"},
-            )
-        paired += 1
-    print(f"  Fixed {paired} missing course pairs (BA<->dept-prefix equivalents).")
-
 
 def patch_phys_alternatives():
     """
@@ -176,7 +161,7 @@ def patch_phys_alternatives():
     In reality, programs offer these as alternatives (students on the MATH 22 track take
     PHYS 250; others take PHYS 211). This patches them to 'choose_one' pairs.
 
-    Pair IDs start at 600 (ETI patches use 580-583).
+    Pair IDs start at 600 (580-583 are retired — see patch_eti_catalog).
     """
     import re
     from boto3.dynamodb.conditions import Attr
@@ -266,7 +251,7 @@ def patch_known_alternatives():
     One full table scan is performed upfront; all filtering happens in Python.
 
     Pair IDs:
-      ETI pairs:        580-583
+      ETI pairs:        580-583  (retired, see patch_eti_catalog)
       PHYS 211/250:     600+
       MATH 250/251:     700+   (already applied, will be skipped as already-paired)
       This function:    800+
@@ -549,57 +534,17 @@ def patch_known_alternatives():
         print(f"  Skipped {skipped_excluded} excluded (both-required) combos.")
 
 
-def patch_eti_select_groups():
-    """
-    Fix catalog defect: the ETI bulletin has THREE separate "Select 3 credits"
-    groups under Requirements for the Major —
-
-      1. intro course        (CMPSC 121/131, IST 140, CYBER 100/100S, IST 110, HCDD 113/113S, ...)
-      2. second programming  (CMPSC 122, CMPSC 132, IST 242)
-      3. 400-level application (ETI 400, ETI 423, ETI 435, ETI 463, IST 440W)
-
-    — but the scraper flattened all their courses into ONE choose_credits pool
-    with threshold 3, so taking any single intro course (e.g. CMPSC 131) marks
-    the whole thing satisfied and the audit under-requires the degree by 6 cr.
-
-    Fix: convert groups 2 and 3 into choose_one alternatives (shared
-    pair_group_id, the same mechanism as the other pair patches), leaving the
-    remaining pool rows as the intro select-3 group.  Idempotent — converted
-    rows are no longer choose_credits, so a re-run is a no-op.
-    """
-    print("\nPatching ETI select groups (bulletin has 3 pools, scraper made 1)...")
-    resp = requirements_table.query(
-        KeyConditionExpression=Key("program_name").eq(MAJOR)
-    )
-    rows = resp.get("Items", [])
-    while "LastEvaluatedKey" in resp:
-        resp = requirements_table.query(
-            KeyConditionExpression=Key("program_name").eq(MAJOR),
-            ExclusiveStartKey=resp["LastEvaluatedKey"]
-        )
-        rows.extend(resp.get("Items", []))
-
-    GROUPS = [
-        ({"CMPSC 122", "CMPSC 132", "IST 242"},            Decimal("590")),  # 2nd programming
-        ({"ETI 435", "ETI 463", "IST 440W"},               Decimal("591")),  # 400-level application
-    ]
-
-    for codes, pid in GROUPS:
-        targets = [
-            r for r in rows
-            if r["course_code"] in codes
-            and r.get("group_type") == "choose_credits"
-            and not r.get("pair_group_id")
-        ]
-        if len(targets) < 2:   # already patched, or catalog changed shape
-            continue
-        for r in targets:
-            requirements_table.update_item(
-                Key={"program_name": r["program_name"], "group_course": r["group_course"]},
-                UpdateExpression="SET pair_group_id = :pid, group_type = :gt",
-                ExpressionAttributeValues={":pid": pid, ":gt": "choose_one"},
-            )
-        print(f"  Split out choose-one group {int(pid)}: {', '.join(sorted(codes))} ({len(targets)} rows)")
+# `patch_eti_select_groups()` lived here. It diagnosed this exact bug in ETI —
+# "bulletin has 3 pools, scraper made 1" — and worked around it by re-typing two
+# of the merged pools into choose_one pairs (ids 590, 591).
+#
+# The scraper now splits pools properly (`pool_seq`), so ETI's six pools arrive
+# as six pools and the workaround is not only redundant but harmful: its guard
+# fires on any `choose_credits` row without a pair id, so it would re-type the
+# now-correct CMPSC 122 / CMPSC 132 / IST 242 pool back into a pair and undo the
+# fix on every seed. Its third group (ETI 435 / ETI 463 / IST 440W) was wrong on
+# its own terms too — the bulletin pairs ETI 400/423 and ETI 435/463 as ordinary
+# "or" rows, which the scraper captures, and never lists IST 440W here at all.
 
 
 def patch_choose_credits_option_groups():
@@ -707,7 +652,6 @@ if __name__ == "__main__":
     seed_courses(courses)
 
     patch_eti_catalog()
-    patch_eti_select_groups()
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()

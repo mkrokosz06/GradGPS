@@ -24,6 +24,7 @@ from routers.user_choices import get_user_choices
 from substitutions import get_substitutions
 import credential_choices
 from credentials_audit import audit_declared_credentials
+import entrance_to_major
 
 router = APIRouter()
 
@@ -225,7 +226,7 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                                 for it in pool_items
                                 if it.get("status") == "missing"
                             ]
-                            _make_pool_selectable(entry)
+                            _make_pool_selectable(entry, src.get("pool_seq"))
                         missing.append(entry)
             elif gtype == "choose_courses":
                 # Satisfied choose_courses pools are skipped entirely (like choose_credits).
@@ -251,7 +252,7 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                                 for it in pool_items
                                 if it.get("status") == "missing"
                             ]
-                            _make_pool_selectable(entry)
+                            _make_pool_selectable(entry, src.get("pool_seq"))
                         missing.append(entry)
             elif gtype in ("dept_credits", "unstructured_credits"):
                 # Credential pools (minors/certificates). Both are rules rather than
@@ -383,9 +384,14 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
     return missing
 
 
-def _sort_named(courses: list[dict]) -> list[dict]:
+def _sort_named(courses: list[dict], priority: set[str] | None = None) -> list[dict]:
     """
     Order named (non-pool) missing courses so that:
+      0. Entrance-to-Major courses come first. PSU expects the gate cleared by
+         the end of the fourth semester, and a student who leaves one of these
+         to senior year has not just taken a course late — they have missed the
+         deadline to be admitted to the major at all. Within the gate the normal
+         ordering still applies.
       1. Lower course numbers come before higher ones
          (100-level before 200 before 300 before 400) — a rough prerequisite proxy.
       2. Within each level tier, courses are round-robined by subject prefix
@@ -402,6 +408,16 @@ def _sort_named(courses: list[dict]) -> list[dict]:
         """Return the subject prefix: 'CHEM 202' → 'CHEM'."""
         m = re.match(r"^([A-Z]+)", (code or "").strip())
         return m.group(1) if m else ""
+
+    def _base_code(code: str) -> str:
+        return re.sub(r"[WHNMXY]$", "", (code or "").strip().upper()).strip()
+
+    priority = priority or set()
+    if priority:
+        gate = [c for c in courses if _base_code(c.get("course_code", "")) in priority]
+        rest = [c for c in courses if _base_code(c.get("course_code", "")) not in priority]
+        if gate:
+            return _sort_named(gate) + _sort_named(rest)
 
     # Group by level tier
     tier_map: dict[int, list] = defaultdict(list)
@@ -516,25 +532,49 @@ def _fill_future_titles(semesters: list[dict]) -> None:
                 c["course_title"] = t
 
 
-def _make_pool_selectable(entry: dict) -> None:
+def _make_pool_selectable(entry: dict, pool_seq: int | None = None) -> None:
     """Give a bounded pool (a dropdown of >1 concrete course) a class-selector
     identity, so the student can say which of the listed courses they'll take
     rather than only reading the list."""
     opts = entry.get("pool_courses") or []
     if len(opts) < 2:
         return
-    entry["slot_key"]  = _pool_slot_key(entry.get("course_code", ""))
+    entry["slot_key"]  = _pool_slot_key(entry.get("course_code", ""), pool_seq)
     entry["slot_kind"] = "pool"
     entry["options"]   = opts
 
 
-def _pool_slot_key(name: str) -> str:
+def _pool_slot_key(name: str, pool_seq: int | None = None) -> str:
     """Stable class-selector identity for a bounded requirement pool, derived from
     the requirement group's own name ('Supporting Courses' -> 'pool:SUPPORTING_COURSES').
     The name is what the catalog keys the group on, so it survives a reflow the way
-    a course code does."""
+    a course code does.
+
+    One section can hold several pools, though (ETI's "Additional Courses" has
+    four), and they would all collide on the section name — the student's pick
+    for the speech pool would overwrite their pick for the programming pool in
+    `user_course_choices`. `pool_seq` disambiguates them.
+
+    The FIRST pool in a section deliberately keeps the bare, historic key: rows
+    predating the column have no pool_seq, and pool #1 is the pool that key
+    already referred to, so no stored choice is orphaned by this change."""
     tok = re.sub(r"[^A-Z0-9]+", "_", (name or "").strip().upper()).strip("_")
-    return f"pool:{tok or 'POOL'}"
+    base = f"pool:{tok or 'POOL'}"
+    return base if not pool_seq or int(pool_seq) <= 1 else f"{base}@{int(pool_seq)}"
+
+
+def _choice_for(mapping: dict[str, str] | None, slot_key: str | None) -> str | None:
+    """A stored decision for this slot, tolerating the per-slice suffix.
+
+    `_expand_pool` gives each slice of a split pool its own key ("pool:X#0",
+    "pool:X#1") so a course picked for one slice doesn't appear on all of them.
+    But a decision made somewhere that only knows the pool — the Entrance to
+    Major checklist writes against the un-split key `_collect_missing` reports —
+    would then match no slice at all and silently do nothing. Fall back to the
+    base key so such a pick lands on the first slice."""
+    if not mapping or not slot_key:
+        return None
+    return mapping.get(slot_key) or mapping.get(slot_key.split("#")[0])
 
 
 def _apply_pool_choice(slot: dict, course_choices: dict[str, str] | None) -> None:
@@ -543,7 +583,7 @@ def _apply_pool_choice(slot: dict, course_choices: dict[str, str] | None) -> Non
     whether the pool is actually satisfied — so this mirrors the gen-ed pick:
     the placeholder becomes a real course card (title backfilled by
     `_fill_future_titles`) that keeps its `options` so the pick can be changed."""
-    chosen = (course_choices or {}).get(slot.get("slot_key") or "")
+    chosen = _choice_for(course_choices, slot.get("slot_key"))
     if not chosen:
         return
     opts = slot.get("options") or []
@@ -867,12 +907,14 @@ def _build_layer1_future(
     transfer_courses: list[dict],
     base_term: str,
     course_choices: dict[str, str] | None = None,
+    gate_codes: set[str] | None = None,
 ) -> list[dict]:
     """Layer 1 fallback: build future semesters from the audit alone (no SAP
     template) with the credit-band packer.  Used for every major that doesn't
     have a plan template."""
     collected     = _collect_missing(audit_result, course_choices)
-    named_courses = _sort_named([c for c in collected if not c.get("is_pool")])
+    named_courses = _sort_named([c for c in collected if not c.get("is_pool")],
+                                priority=gate_codes)
     raw_pools     = [c for c in collected if c.get("is_pool")]
 
     # Gen ed → one slot per still-incomplete category.
@@ -1114,8 +1156,8 @@ def _apply_pins(future: list[dict], pins: dict[str, str]) -> list[dict]:
         keep = []
         for c in sem["courses"]:
             sk = c.get("slot_key")
-            if sk and sk in pins:
-                target = pins[sk]
+            target = _choice_for(pins, sk)
+            if sk and target:
                 if _term_key(target) < _term_key(earliest):
                     target = earliest
                     c["pin_moved"] = True
@@ -1313,6 +1355,11 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     course_choices = {k: v["chosen_course"] for k, v in choices.items() if v.get("chosen_course")}
     pins           = {k: v["pinned_term"]   for k, v in choices.items() if v.get("pinned_term")}
 
+    # Entrance-to-Major courses are scheduled first on the Layer 1 path and
+    # badged on both. The SAP path needs no reordering — PSU's own plan already
+    # puts the gate in the first two years, which is the whole point of it.
+    gate_codes = entrance_to_major.priority_codes(major)
+
     if template:
         # The major audit is the source of truth for course equivalences/pairs
         # (MATH 110/140, STAT 200/SCM 200): fold its satisfied requirement codes
@@ -1335,6 +1382,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             audit_result, gen_ed_result, requirement_rows,
             transcript_courses, transfer_courses, base_term,
             course_choices=course_choices,
+            gate_codes=gate_codes,
         )
 
     # Declared minors / certificates schedule after the major's plan is built, so the
@@ -1347,6 +1395,43 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # Declaring a credential can genuinely push graduation out. Report it so the client
     # can say so, rather than letting an extra term appear in the plan unexplained.
     credential_added_terms = max(0, len(future) - terms_before)
+
+    # Badge gate courses wherever they landed, on both paths, so the client can
+    # say WHY a course matters rather than just when to take it.
+    if gate_codes:
+        def _slot_hits_gate(slot: dict) -> bool:
+            # A choose-one slot carries its alternatives in one label
+            # ("IST 110 or CYBER 100"), and a pool slot lists them in `options`.
+            # Any alternative that clears the gate makes the slot a gate slot.
+            raw = (slot.get("course_code") or "")
+            candidates = [c for c in re.split(r"\s+or\s+", raw, flags=re.I) if c]
+            candidates += [o.get("course_code", "") for o in (slot.get("options") or [])]
+            for cand in candidates:
+                code = re.sub(r"[WHNMXY]$", "", cand.strip().upper()).strip()
+                if code in gate_codes:
+                    return True
+                # The catalog and the gate can spell the same course
+                # differently — Materials Science lists MATH 141G where its gate
+                # says MATH 141, Vet/Biomed lists BIOL 114 where its gate says
+                # BIOL 114H. Tolerate one trailing letter either way, the same
+                # section-letter allowance sap_schedule._codes_match makes.
+                if any(g == code[:-1] or code == g[:-1] for g in gate_codes
+                       if g and code):
+                    return True
+            return False
+
+        for term in future:
+            for slot in term.get("courses", []):
+                if _slot_hits_gate(slot):
+                    slot["entrance_to_major"] = True
+
+    # The gate, with each unmet group pointing at the slot that can satisfy it.
+    # Built from `future` because these are the slots the student actually sees;
+    # a key from anywhere else would be written and never read.
+    gate = entrance_to_major.attach_slots(
+        entrance_to_major.evaluate(major, transcript_courses, declared_subs),
+        [c for term in future for c in term.get("courses", [])],
+    )
 
     semesters.extend(_apply_pins(future, pins))
 
@@ -1378,4 +1463,8 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             }
             for c in credential_audits
         ],
+        # Entrance to Major, each unmet group carrying the slot_key the checklist
+        # writes a course pick / optional semester against. `None` for the 18
+        # majors that publish no gate; an older build ignores the key.
+        "entrance_to_major":   gate,
     }

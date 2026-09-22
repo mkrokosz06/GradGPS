@@ -29,7 +29,15 @@ except Exception:
     BULLETIN = {}
 
 # Course code as it appears in a CourseLeaf code cell.
-_CODE_IN_CELL_WIDE = re.compile(r"\b([A-Z]{2,6})\s{0,2}(\d{1,3}[A-Z]?)\b")
+#
+# A few PSU subject prefixes contain a hyphen — "A-I" (Artificial Intelligence)
+# is the one that bites, because A-I 100 is one of the seven ways to satisfy
+# ETI's intro requirement and a plain [A-Z]{2,6} cannot see it, so the pool
+# silently offered six options instead of seven. Hyphenated prefixes are allowed
+# as long as the whole prefix is still at least two letters.
+_CODE_IN_CELL_WIDE = re.compile(
+    r"\b([A-Z]{2,6}(?:-[A-Z]{1,6})?|[A-Z](?:-[A-Z]){1,3})\s{0,2}(\d{1,3}[A-Z]?)\b"
+)
 
 
 def _code_ok(dept, num):
@@ -186,6 +194,38 @@ def scrape_program_requirements(program):
     current_group_type = "required"
     current_threshold  = None   # N for choose_credits or choose_courses
 
+    # ── Pool identity ────────────────────────────────────────────────────────
+    # A CourseLeaf section routinely holds SEVERAL independent pools, each
+    # introduced by its own "Select N credits from the following:" comment row
+    # and each listing its members in a <div class="blockindent">.  ETI's
+    # "Additional Courses" has six.  Tracking only (group, type, threshold) —
+    # which is all the audit engine had — merged every same-threshold pool in a
+    # section into one, so a single ENGL 15 satisfied four separate 3-credit
+    # requirements and CYBER 100 / IST 140 / the speech pool vanished from the
+    # plan entirely.  `pool_seq` numbers the pools within a section so the audit
+    # can tell them apart; rows without one bucket as None, i.e. exactly the
+    # previous behaviour.
+    current_pool_seq   = 0       # 0 = not in a pool
+    pool_open          = False
+    pool_indent_scoped = False   # members marked by <div class="blockindent">?
+    pool_pending       = False   # opened by a comment row, no indented member yet
+    heading_group_type = "required"
+    heading_threshold  = None
+
+    def close_pool():
+        """Leave the current pool and fall back to the SECTION's own type.
+
+        Without this a pool near the top of a table leaked its type and
+        threshold onto every prescribed course that followed it, quietly
+        turning required courses into pool options."""
+        nonlocal current_group_type, current_threshold, pool_open
+        nonlocal pool_indent_scoped, pool_pending
+        pool_open          = False
+        pool_indent_scoped = False
+        pool_pending       = False
+        current_group_type = heading_group_type
+        current_threshold  = heading_threshold
+
     def detect_group_type(text):
         """
         Classify a requirement group header into one of four types:
@@ -199,8 +239,14 @@ def scrape_program_requirements(program):
         threshold = None
 
         # ── choose_credits: "choose N credits", "minimum N credits", "N credit hours" ──
+        # "Select 3-4 credits from the following" is common — the range exists
+        # because the listed courses differ in size. Take the LOW end: any one
+        # of the listed courses is an acceptable answer, so the smallest of them
+        # must be enough to satisfy the pool. Requiring the high end would tell
+        # a student their 3-credit choice had not finished a 3-4 credit pool.
         m = re.search(
-            r"(?:choose|select|complete|minimum|at least)\s+(\d+)\s*(?:or more\s*)?credits?",
+            r"(?:choose|select|complete|minimum|at least)\s+(\d+)(?:\s*[-–—]\s*\d+)?"
+            r"(?:\s+(?:additional|more|or\s+more|elective|electives|total|further|upper-division))*\s*credits?",
             tl
         )
         if m:
@@ -248,12 +294,39 @@ def scrape_program_requirements(program):
                 continue
             current_group      = text
             current_group_type, current_threshold = detect_group_type(text)
+            # A new section ends any open pool and becomes the fallback the
+            # pool's members revert to once the pool closes.
+            heading_group_type = current_group_type
+            heading_threshold  = current_threshold
+            current_pool_seq   = 0
+            pool_open          = False
+            pool_indent_scoped = False
+            pool_pending       = False
 
         # ── Also check paragraph/span text immediately before tables for pool instructions ──
         # e.g. "Select 3-4 credits from the following:"
         elif tag == "table":
-            # Check preceding sibling text for "choose N credits" language
+            # A new table is a new context. Pools were only ever closed by an
+            # <h2>-<h5>, but CourseLeaf splits a section across several tables
+            # (one per option) with no heading between them, so a pool opened in
+            # one table stayed open into the next and swallowed its prescribed
+            # courses: World Languages Education had WLED 300 — a Prescribed
+            # Course — reported as a pool option.
+            #
+            # current_pool_seq deliberately keeps counting. Restarting it per
+            # table would give two pools in the same section the same number,
+            # which is exactly the collision this field exists to prevent.
+            close_pool()
+
+            # Check preceding sibling text for "choose N credits" language.
+            # Only a prose sibling counts. When two courselist tables are
+            # adjacent the previous sibling IS the first table, and its own
+            # "Select 3 credits from the following:" row then re-opened a pool
+            # over the second table's prescribed courses — undoing the reset
+            # immediately above.
             prev = el.find_previous_sibling()
+            if prev is not None and getattr(prev, "name", None) == "table":
+                prev = None
             if prev:
                 prev_text = prev.get_text(" ", strip=True).lower()
                 pg_type, pg_threshold = detect_group_type(prev_text)
@@ -261,6 +334,15 @@ def scrape_program_requirements(program):
                     current_group_type = pg_type
                     if pg_threshold:
                         current_threshold = pg_threshold
+                    # The instruction sits OUTSIDE the table, so this pool's
+                    # members are the table's ordinary rows and carry no
+                    # blockindent. Open it, but don't let an unindented row
+                    # close it — only the next heading or in-table pool row can.
+                    if pg_type in ("choose_credits", "choose_courses"):
+                        current_pool_seq  += 1
+                        pool_open          = True
+                        pool_indent_scoped = False
+                        pool_pending       = False
 
             # Track the last non-"or" row so we can group "or" alternatives with it
             last_course_idx = None   # index of last appended row
@@ -271,9 +353,24 @@ def scrape_program_requirements(program):
                 if not tds:
                     continue
 
+                # An areaheader row ("Prescribed Courses", "Additional Courses",
+                # "Requirements for the Option") starts a new sub-section inside
+                # the table. It is a <tr>, not a heading tag, so it never reset
+                # anything and a pool ran straight through it.
+                if any("areaheader" in c for c in (tr.get("class") or [])):
+                    close_pool()
+                    continue
+
                 cell_texts = [td.get_text(" ", strip=True) for td in tds]
                 full_row   = " | ".join(cell_texts)
                 first_cell = cell_texts[0].strip().lower()
+
+                # CourseLeaf wraps a pool OPTION's code in <div class="blockindent">
+                # and leaves prescribed courses unwrapped. That is the only
+                # reliable "is this row part of the pool above it?" signal on the
+                # page — the text alone cannot tell "Select 3 credits: CMPSC 121,
+                # CMPSC 131, IST 140" apart from the required course that follows.
+                is_indented = any(td.find("div", class_="blockindent") for td in tds)
 
                 # ── Detect "or" rows: first cell is literally "or" or starts with "or " ──
                 is_or_row = (
@@ -302,18 +399,101 @@ def scrape_program_requirements(program):
                 code_match = _CODE_IN_CELL.search(full_row)
                 if not code_match:
                     # Check for "select N credits" type rows inside the table
+                    # Range thresholds ("Select 3-4 credits from the following:")
+                    # were not matched at all, so the row did not register as a
+                    # pool header — the courses under it silently joined the
+                    # PREVIOUS pool. See detect_group_type for why the low end.
+                    # Filler words sit between the number and "credits" more
+                    # often than you would guess. Spanish B.A. heads two of its
+                    # pools "Select 9 ADDITIONAL credits from the following",
+                    # which matched nothing — so those 34 courses fell through to
+                    # the section default and every one of them was stored as
+                    # individually REQUIRED.
                     pool_match = re.search(
-                        r"(?:select|choose|minimum)\s+(\d+)\s*(?:or more\s*)?credits?",
+                        r"(?:select|choose|minimum)\s+(\d+)(?:\s*[-–—]\s*\d+)?"
+                        r"(?:\s+(?:additional|more|or\s+more|elective|electives|total|further|upper-division))*\s*credits?",
                         full_row, re.I
                     )
+                    # Not every pool header says "credits". Aerospace Engineering
+                    # writes "Select one of the following sequences:" with the
+                    # credit count in the hours column, and Anthropology writes
+                    # "Select 2 of the following". Neither matched, so the courses
+                    # under them joined the PREVIOUS pool — the same merge, by a
+                    # different route.
+                    #
+                    # Where such a row carries a credit figure, prefer it and model
+                    # the pool by credits: a "sequence" option is usually an "&"
+                    # combo (AERSP 401A & AERSP 401B), and only a credit threshold
+                    # stops half a sequence from satisfying the whole thing. Fall
+                    # back to counting courses when the row has no credits.
+                    if not pool_match:
+                        word_match = re.search(
+                            r"(?:select|choose|complete|take)\s+"
+                            r"(one|two|three|four|five|six|\d+)\s+of\s+the\s+following",
+                            full_row, re.I
+                        )
+                        if word_match:
+                            words = {"one": 1, "two": 2, "three": 3,
+                                     "four": 4, "five": 5, "six": 6}
+                            token = word_match.group(1).lower()
+                            count = words.get(token) or int(token)
+                            hours = next(
+                                (float(m.group(1)) for ct in reversed(cell_texts)
+                                 for m in [re.match(r"^\s*(\d+(?:\.\d+)?)", ct.strip())]
+                                 if m and ct.strip() and re.match(r"^[\d.\s–—-]+$", ct.strip())),
+                                None,
+                            )
+                            if hours:
+                                current_group_type = "choose_credits"
+                                current_threshold  = int(hours)
+                            else:
+                                current_group_type = "choose_courses"
+                                current_threshold  = count
+                            current_pool_seq  += 1
+                            pool_open          = True
+                            pool_indent_scoped = True
+                            pool_pending       = True
                     if pool_match:
+                        # Each such row starts a NEW pool — this is the line the
+                        # old code missed, which is why consecutive pools merged.
                         current_group_type = "choose_credits"
                         current_threshold  = int(pool_match.group(1))
+                        current_pool_seq  += 1
+                        pool_open          = True
+                        pool_indent_scoped = True
+                        pool_pending       = True
                     if not is_or_row:
                         current_pair_id = None   # break any open pair chain
                     continue
 
                 course_code = f"{code_match.group(1)} {code_match.group(2)}"
+
+                # Indentation is the page's own answer to "is this row part of
+                # the list above it?", and it settles two different questions.
+                #
+                # 1. Does that "Select N credits" row introduce a list at all?
+                #    Plenty of them do not. Aerospace Engineering's "Additional
+                #    Courses" opens with "Select 1 credit of First-Year Seminar",
+                #    a standalone instruction with no courses under it, and is
+                #    followed by the ordinary requirement "AERSP 413 or AERSP
+                #    450". Treating the comment as a pool header swallowed both
+                #    into a 1-credit First-Year Seminar pool. So a comment row
+                #    only opens a PENDING pool; the pool is real only once an
+                #    indented row actually arrives. An unindented first row
+                #    discards it, and the row is handled as it would have been
+                #    with no comment there at all.
+                #
+                # 2. Where does a confirmed pool end? At the first unindented
+                #    course row. "or" rows continue whatever they follow, so they
+                #    never end one.
+                if pool_open and pool_indent_scoped:
+                    if is_indented:
+                        pool_pending = False
+                    elif pool_pending:
+                        current_pool_seq -= 1     # keep seqs contiguous
+                        close_pool()
+                    elif not is_or_row:
+                        close_pool()
 
                 # Course title: first cell after the code cell that is not a
                 # credits value. Rows come in two layouts — [code, title, credits]
@@ -366,7 +546,24 @@ def scrape_program_requirements(program):
                 row_group_type = current_group_type
                 this_pair_id   = None
 
-                if is_or_row:
+                if is_or_row and pool_open and current_group_type in (
+                        "choose_credits", "choose_courses"):
+                    # An "or" chain INSIDE a credit pool is a set of options, not
+                    # a standalone choice. Lifting it out to choose_one told the
+                    # student they MUST take one of them: Administration of
+                    # Justice's "Select 3-4 credits" list of ten became BA 243
+                    # required outright (a lone choose_one row evaluates as
+                    # individually required), plus one of PHIL 106 / PHIL-STS 107,
+                    # plus one of STS 101 / STS-PHIL 107 — three mandatory courses
+                    # where the bulletin asks for one.
+                    #
+                    # Same reasoning as an "&" combo inside a pool: leave the rows
+                    # in the pool and let the credit threshold do the enforcing.
+                    # The "or" relationship carries no extra meaning here — these
+                    # are usually cross-listings ("PHIL/STS 107") that the
+                    # equivalence machinery already reconciles.
+                    current_pair_id = None
+                elif is_or_row:
                     row_group_type = "choose_one"
                     if last_course_idx is not None:
                         rows[last_course_idx]["group_type"] = "choose_one"
@@ -394,6 +591,10 @@ def scrape_program_requirements(program):
                     "credits":           credits,
                     "min_grade":         min_grade,
                     "pair_group_id":     this_pair_id,
+                    "pool_seq":          (current_pool_seq
+                                          if pool_open and row_group_type in
+                                             ("choose_credits", "choose_courses")
+                                          else None),
                     "url":               program["url"]
                 }
 

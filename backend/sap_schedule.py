@@ -127,6 +127,32 @@ def build_gen_ed_satisfied(gen_ed_result: dict) -> dict[str, bool]:
     return out
 
 
+def _pool_effectively_met(gtype: str, src: dict) -> bool:
+    """Whether a credit/course pool is covered once in-progress work is counted.
+
+    `satisfied` on the audit result is completed-only by design — it is what a
+    finished-credits total should mean. For scheduling, a course the student is
+    enrolled in right now is already spoken for, so it must retire the pool's
+    other options.
+    """
+    if gtype not in ("choose_credits", "choose_courses"):
+        return False
+    if src.get("satisfied"):
+        return True
+    threshold = src.get("threshold")
+    if not threshold:
+        return False
+    items = src.get("items", [])
+    if gtype == "choose_courses":
+        have = sum(1 for it in items if it.get("status") in ("done", "in_progress"))
+        return have >= threshold
+    # A pool item carries no credits when the catalog row had none; the audit
+    # engine defaults such a course to 3 credits, so match that here.
+    ip = sum(float(it.get("credits") or 3)
+             for it in items if it.get("status") == "in_progress")
+    return (src.get("credits_earned") or 0) + ip >= threshold
+
+
 def build_satisfied_req_codes(*audit_results: dict) -> set[str]:
     """Base codes of every requirement an audit reports SATISFIED — completed,
     in-progress, or covered by a done/in-progress pair alternative.
@@ -142,14 +168,22 @@ def build_satisfied_req_codes(*audit_results: dict) -> set[str]:
     included: the catalog may model options as one pool (IST 140 / IST 110 /
     CYBER 100 / CMPSC 121-132 in a "choose N credits" group) that the template
     lists as individual slots — once the pool is met (e.g. via CMPSC 131), the
-    template must not re-schedule its other options."""
+    template must not re-schedule its other options.
+
+    "Met" has to include work IN PROGRESS. A pool's `satisfied` flag counts only
+    completed credits, so a student sitting in CMPSC 131 this semester did not
+    retire the pool by that measure, and the template went on scheduling IST 140
+    for next fall — a course they will not need. `_collect_missing()` in the
+    timeline has always folded in-progress credits in before deciding what to
+    schedule; this is the same arithmetic, so the SAP path and the Layer 1 packer
+    agree. (This stayed hidden while consecutive pools were merged: the merged
+    pool was already satisfied by some completed course elsewhere in it.)"""
     out: set[str] = set()
     for res in audit_results:
         for g in (res or {}).get("groups", []):
             for src in (g.get("sub_groups") or [g]):
                 gtype = src.get("sub_type") or src.get("group_type", "")
-                pool_met = (gtype in ("choose_credits", "choose_courses")
-                            and src.get("satisfied"))
+                pool_met = _pool_effectively_met(gtype, src)
                 for it in src.get("items", []):
                     if (pool_met
                             or it.get("status") in ("done", "in_progress")

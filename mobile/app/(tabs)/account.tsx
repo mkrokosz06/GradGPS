@@ -9,6 +9,10 @@ import { deleteAccount } from "../../services/userService";
 import { setCredentials, credentialErrorMessage } from "../../services/credentialService";
 import { CredentialPickerModal } from "../../components/CredentialPickerModal";
 import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
+import { EntranceToMajorCard } from "../../components/EntranceToMajorCard";
+import {
+  getTimeline, getCachedTimeline, type TimelineData,
+} from "../../services/timelineService";
 
 function classYear(credits: number): string {
   if (credits < 30)  return "Freshman";
@@ -112,14 +116,25 @@ export default function AccountScreen() {
     }
   }
 
-  useFocusEffect(
-    useCallback(() => {
-      if (!userId) { setAudit(null); return; }
-      // Show the last known audit immediately, then refresh in the background.
-      setAudit(getCachedAudit(userId));
-      getAudit(userId).then(setAudit).catch(() => {});
-    }, [userId]),
+  // The Entrance to Major checklist needs the timeline, not the audit: the slot
+  // a gate group maps to is the timeline's to know, and it differs by path (a
+  // templated major's plan emits `one:CYBER 100|IST 110` where the Layer 1
+  // packer would say `course:ETI 100`). Writing against the wrong one would
+  // store a choice the plan never reads.
+  const [timeline, setTimeline] = useState<TimelineData | null>(
+    () => (userId ? getCachedTimeline(userId) : null),
   );
+
+  const refresh = useCallback(() => {
+    if (!userId) { setAudit(null); setTimeline(null); return; }
+    // Show the last known data immediately, then refresh in the background.
+    setAudit(getCachedAudit(userId));
+    setTimeline(getCachedTimeline(userId));
+    getAudit(userId).then(setAudit).catch(() => {});
+    getTimeline(userId).then(setTimeline).catch(() => {});
+  }, [userId]);
+
+  useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
   const creditPct = audit ? Math.min(100, Math.round((audit.transcript_credits / 120) * 100)) : 0;
   const year      = audit ? classYear(audit.transcript_credits) : null;
@@ -184,6 +199,21 @@ export default function AccountScreen() {
             ) : null}
           </View>
         )}
+
+        {/* Entrance to Major — a gate over courses the major already requires, so
+            it adds nothing to the plan. Hidden for the majors that publish no
+            gate, and for a student who has cleared it with nothing left to
+            confirm: a permanently green card stops being read. */}
+        {timeline?.entrance_to_major &&
+          !(timeline.entrance_to_major.status === "courses_met" &&
+            !timeline.entrance_to_major.needs_confirmation) && (
+            <EntranceToMajorCard
+              gate={timeline.entrance_to_major}
+              timeline={timeline}
+              userId={userId!}
+              onChanged={refresh}
+            />
+          )}
 
         {/* Minors & certificates — declared here, never during onboarding */}
         {audit && (

@@ -1119,20 +1119,34 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
         # A group may contain rows with different group_types (e.g. ETI Requirements
         # has both choose_one and choose_credits rows). Split and evaluate each
         # sub-type separately, then merge into one group result.
-        # Key: (group_type, threshold) so that choose_credits/choose_courses rows
-        # with different thresholds become separate pools (e.g. Finance has an
-        # ENGL pool at 3cr and a FIN electives pool at 9cr in the same group).
+        # Key: (group_type, threshold, pool_seq) so that choose_credits /
+        # choose_courses rows become separate pools whenever they ARE separate
+        # pools on the bulletin page.
+        #
+        # Threshold alone was not enough. A section routinely holds several
+        # pools with the SAME threshold — ETI's "Additional Courses" has four
+        # at 3 credits (speech, writing, intro programming, intro IST) — and
+        # keying on (type, threshold) merged all four into one 3-credit pool
+        # that a single ENGL 15 satisfied, hiding CYBER 100, IST 140 and the
+        # speech requirement from the audit and the timeline. `pool_seq` is
+        # stamped by the scraper, one number per pool per section.
+        #
+        # Rows loaded before that column existed have no pool_seq, so they key
+        # on None and bucket exactly as they did before — the engine is a
+        # no-op until the catalog is reloaded.
         type_buckets: dict[tuple, list[dict]] = defaultdict(list)
         for row in rows:
             gtype = row.get("group_type", "required")
-            thr_key = int(row["group_threshold"]) if gtype in (
-            "choose_credits", "choose_courses", "dept_credits", "unstructured_credits"
-        ) and row.get("group_threshold") else None
-            type_buckets[(gtype, thr_key)].append(row)
+            is_pool = gtype in (
+                "choose_credits", "choose_courses", "dept_credits", "unstructured_credits"
+            )
+            thr_key = int(row["group_threshold"]) if is_pool and row.get("group_threshold") else None
+            seq_key = int(row["pool_seq"]) if is_pool and row.get("pool_seq") else None
+            type_buckets[(gtype, thr_key, seq_key)].append(row)
 
         if len(type_buckets) == 1:
             # Homogeneous — simple path
-            (gtype, _) = next(iter(type_buckets))
+            (gtype, _, _) = next(iter(type_buckets))
             threshold  = group_meta[group_name]["group_threshold"]
             result     = _eval_type(gtype, rows, taken, threshold,
                                     (attested_by_group or {}).get(group_name))
@@ -1170,9 +1184,10 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             agg_done = agg_ip = agg_missing = 0
             agg_credits = 0.0
 
-            for (gtype, thr), bucket_rows in type_buckets.items():
+            for (gtype, thr, seq), bucket_rows in type_buckets.items():
                 # thr is the pool threshold for choose_credits/choose_courses,
-                # or None for required/choose_one rows.
+                # or None for required/choose_one rows. seq distinguishes two
+                # pools that share a threshold within the same section.
                 res = _eval_type(gtype, bucket_rows, taken, thr)
                 d, ip, m = _pool_counts(gtype, res)
                 agg_done    += d
@@ -1182,6 +1197,10 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
                 sr = {
                     "sub_type":       gtype,
                     "threshold":      thr,
+                    # Carried so the timeline can give each pool its own
+                    # class-selector slot_key instead of colliding on the
+                    # section name (see routers/timeline._pool_slot_key).
+                    "pool_seq":       seq,
                     "satisfied":      res["satisfied"],
                     "done":           res["done"],
                     "in_progress":    res["in_progress"],
