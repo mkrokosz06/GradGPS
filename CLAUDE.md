@@ -100,6 +100,8 @@ logs in `/ecs/gradgps-monthly-refresh`). It rescrapes PSU cross-listings into th
 | `plan_templates.py` | Loads/validates Suggested Academic Plan (SAP) JSON templates from `sap_templates/` (see below) |
 | `sap_schedule.py` | SAP match stage — `match_template()` decides which template slots the student has already satisfied (pure, DB-free) |
 | `substitutions.py` | Course-substitution store — per-user course equivalences (`requirement_code -> substitute_course`) |
+| `entrance_parse.py` | Parses a bulletin "how to get in" tab into an Entrance to Major spec (see below) |
+| `entrance_to_major.py` | Entrance to Major at runtime — gate progress, timeline slot attachment |
 | `deps.py` | Shared FastAPI dependency — `get_user_id` extracts `x-user-id` header |
 | `db.py` | DynamoDB + S3 clients (local in dev, real AWS in prod) |
 
@@ -167,7 +169,22 @@ Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 ### Catalog patches (applied by `seed_matthew.py`)
 **ETI fixes:**
 1. **Junk rows** — credit counts ("3", "4") imported as `course_title` for 14 courses. Deleted on seed.
-2. **Missing pairs** — BA 243/BLAW 243, BA 301/FIN 301, BA 303/MKTG 301, BA 304/MGMT 301 are choose-one alternatives not captured by the scraper. Pair IDs 580–583 are assigned on seed.
+
+> **Two ETI patches were removed (Sept 2026) — do not re-add them.**
+>
+> **Pairs 580–583** (BA 243/BLAW 243, BA 301/FIN 301, BA 303/MKTG 301, BA 304/MGMT 301) took the
+> **optional Business Competency application focus** and applied it as a mandatory major requirement,
+> so every ETI student was told they owed four business courses. The bulletin's own footnote says
+> otherwise: *"Note 3: One of these courses is required to be taken to satisfy major requirements.
+> The student needs to take the remaining courses on this list to complete the application focus."*
+> The major requirement is a single `Select 3-4 credits` pool over those nine courses — **one course**.
+>
+> **`patch_eti_select_groups()`** was a per-program workaround for the pool-merge bug (below); its
+> docstring even said *"bulletin has 3 pools, scraper made 1"*. `pool_seq` fixes that properly, and
+> the patch's guard fired on any unpaired `choose_credits` row, so keeping it would have re-merged
+> the corrected pools on every seed. `scripts/apply_catalog_patches.py` (the **prod** entry point)
+> imported it — check that file whenever a patch function is deleted, or the next prod catalog run
+> dies on an `ImportError` before applying anything.
 
 **PHYS 211 / PHYS 250 physics sequence alternatives (32 programs):**
 The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
@@ -412,11 +429,163 @@ side by side loses nothing (0 of 5 programs lost a course) and gains only the re
 **Still unfixed in the scraper** (each deserves its own diff): the code regex requires **three digits**
 (`\d{3}`), so `ENGL 15`, `ECON 14`, `SOC 1`, `PSU 6` are invisible to it — that, not a dropped row, is
 why first-year writing never appears in a major's rows (it is carried by `__GEN_ED__` instead);
-`title[:120]` truncates 416 titles mid-word; and "select 3 credits of 400-level courses" is still
-parsed as a course, inventing codes like `PSYCH 400` with the title `"3"`.
+`title[:120]` truncates 416 titles mid-word; "select 3 credits of 400-level courses" is still
+parsed as a course, inventing codes like `PSYCH 400` with the title `"3"`; and a **plan-grid row
+captures only one course code**, because that path does a single `search()` over the whole `<tr>`.
+The grid holds two terms side by side (`A-I 100 | 3 | ENGL 15 | 3`), so the second is dropped — and
+which one survives can change under you: `ENGL 15` disappeared from the AI major the moment the
+hyphen fix below made `A-I 100` matchable.
 
 **Nothing in the catalog carries a branch id yet** — the engine and the scraper are both in place, but
 no data has been loaded.
+
+### Requirement pools — one section holds SEVERAL of them
+
+A CourseLeaf section routinely holds several independent pools, each introduced by its own
+`Select N credits from the following:` comment row and each listing its members in a
+`<div class="blockindent">`. ETI's "Additional Courses" has **six**. The scraper noticed the first
+and the audit engine bucketed rows by `(group_type, threshold)`, so every same-threshold pool in a
+section **merged into one**: ETI's four 3-credit pools (speech, writing, intro programming, intro
+IST) became a single 3-credit pool that a lone `ENGL 15` satisfied, and `CYBER 100`, `IST 140` and
+the speech requirement vanished from the audit and the plan. **The app told students they owed less
+than they did.** 116 of the 225 UP degree programs had more than one pool in a section.
+
+**`pool_seq`** numbers the pools within a section. The scraper stamps it, `load_catalog.py` carries
+it, and `run_audit()` keys on `(group_type, threshold, pool_seq)`. Rows loaded before the column
+existed have no `pool_seq`, bucket as `None`, and behave exactly as before — **the engine is a no-op
+until the catalog is reloaded**, the same discipline as `pair_branch_id`.
+
+**Seven distinct bugs, all in pool boundaries.** They are listed because each is a different way the
+same mechanism failed, and a re-scrape can reintroduce any of them:
+
+| | Bug | Direction |
+|---|---|---|
+| 1 | consecutive pools merged | **under**-requires |
+| 2 | `or` chain inside a pool lifted out to `choose_one` | **over**-requires |
+| 3 | pool header without the word "credits" not detected | merges pools |
+| 4 | a comment row with no list treated as a pool header | swallows real requirements |
+| 5 | a pool leaking across tables and `areaheader` rows | prescribed courses become optional |
+| 6 | an adjacent table read as its own instruction text | re-opens the leak |
+| 7 | a filler word between the number and "credits" | **over**-requires |
+
+Detail on the ones that are easy to reintroduce:
+
+- **(2)** An `or` chain inside a credit pool is a set of *options*, not a standalone choice.
+  Administration of Justice's `Select 3-4 credits` list of ten became `BA 243` required outright (a
+  lone `choose_one` row evaluates as individually required), **plus** one of PHIL 106 / PHIL-STS 107,
+  **plus** one of STS 101 / STS-PHIL 107 — three mandatory courses where the bulletin asks for one.
+  Same rule as an `&` combo in a pool: leave the rows in the pool, let the threshold enforce it.
+- **(4)** Not every `Select N` row introduces a list. Aerospace's "Additional Courses" opens with
+  *"Select 1 credit of First-Year Seminar"* — a standalone instruction — followed by the ordinary
+  requirement `AERSP 413 or AERSP 450`, and treating the comment as a header swallowed both.
+  **Indentation decides**: a comment row opens a *pending* pool, and it is only real once an
+  indented row actually arrives. An unindented first row discards it.
+- **(5)/(6)** Pools were only ever closed by an `<h2>`–`<h5>`, but CourseLeaf also starts sections
+  with `<tr class="areaheader">` rows and with whole new tables. Fixing that exposed a second problem
+  underneath: the "instruction before the table" heuristic calls `find_previous_sibling()`, and when
+  two courselist tables are adjacent **the previous sibling is the first table**, whose own
+  `Select 3 credits` row re-opened a pool over the next table's prescribed courses. Only a *prose*
+  sibling counts now.
+- **(7)** Spanish B.A. heads two pools *"Select 9 **additional** credits from the following"*. The
+  filler word broke the match, and the areaheader fix in (5) removed the accidental type-leak those
+  rows had been riding on — so 34 SPAN courses came out **individually required**. A regression
+  introduced by the fix and caught by the verifier; filler words (`additional`, `more`, `elective`,
+  `total`…) are now allowed between the count and "credits".
+
+Also fixed: **hyphenated subject prefixes**. `A-I 100` was invisible to `[A-Z]{2,6}`, so ETI's intro
+pool offered six options instead of seven.
+
+**`build_satisfied_req_codes()` now counts in-progress work** when deciding a pool is covered. Its
+docstring already named the case (*"once the pool is met, e.g. via CMPSC 131"*) but `satisfied` on a
+`choose_credits` pool is **completed credits only**, so a student sitting in CMPSC 131 was still
+scheduled `IST 140` for the following fall. This stayed hidden while pools were merged, because a
+merged pool was always already satisfied by something finished elsewhere in it.
+
+> **The scraper is not allowed to be its own witness.** `scripts/verify_pool_split.py` re-fetches
+> every changed program and re-derives its pools with a **second, independently written parser**,
+> then compares. Final run: **136 of 225 programs changed, 0 disagreements**. Bugs 2–7 were all found
+> this way, and so was the Spanish regression. Two caveats learned the hard way — a slash cell
+> (`EE 471/AERSP 490/NUCE 490`) is **one** course cross-listed three ways, not three requirements;
+> and a non-pool comment row does **not** end a list (pages use them as sub-headings), while an
+> `areaheader` does. Getting either wrong swings the disagreement count by 20+, all of it noise.
+
+**Pool slot keys.** One section can hold several pools, and they would all collide on the section
+name, so `_pool_slot_key()` appends `@<seq>`. The **first** pool keeps the bare historic key, so no
+stored `user_course_choices` row is orphaned by the change. `_apply_pool_choice()` and `_apply_pins()`
+fall back to the base key when `_expand_pool()` has split a pool into `#0`/`#1` slices, so a choice
+made against the whole pool still lands.
+
+> **The catalog data is gitignored.** `PSU_Major_Requirements.xlsx` is not in the repo, so this ships
+> as code only — every environment needs its own `scrape_psu.py` → `load_catalog.py --replace`, and
+> that reload **must re-run the patch scripts in the same pass** or the ~629 injected alternatives
+> vanish. **As of the Sept 2026 push, prod has NOT been reloaded**: the engine is live and inert
+> there, and CYBER 100 still does not appear for a real ETI student until it is.
+
+Tests: `backend/tests/test_pool_split.py` (37, pytest or plain `python`); the fixture
+`tests/fixtures/eti_courselist.html` is the real ETI courselist table.
+
+### Entrance to Major
+
+**A gate, not extra credits.** Of the 88 programs with a course gate and catalog rows, **87** have
+every gate group satisfiable from requirements the major already lists (the exception is Music
+Education's `ENGL 15`, which lives in `__GEN_ED__`). So it is modelled as its own bundled spec, never
+as requirement rows — those would double-count the credits and schedule the same course twice. What
+the gate adds is a **deadline** (PSU expects it by the end of the fourth semester), a **minimum
+grade**, and a **GPA floor**. Not one row in the 35k-row catalog carried any of this before: it lives
+in prose in a tab, and `scrape_psu.py` only reads tables.
+
+| File | Purpose |
+|---|---|
+| `entrance_parse.py` | Bulletin parser — sections, groups, branches, GPA, and what we refuse to model |
+| `entrance_to_major.py` | Runtime: `evaluate()`, `attach_slots()`, `priority_codes()` |
+| `entrance_data/entrance_requirements.json` | Bundled spec, 322 programs (same pattern as `credential_requirements.json` — no new table, no prod IAM grant) |
+| `scripts/scrape_entrance_to_major.py` | Re-scrape; `--report` reprints the health stats |
+
+**Anchor on the tab container, never the heading.** PSU writes `Entrance to Major` (ETI, Astronomy),
+`Direct Admission to the Major` (Nursing, Law and Society) and `Entrance Procedures` (Architecture)
+for the same thing. Matching the heading covered **186 of 225** selectable majors and silently
+reported "no section" for the other 39 — every Nursing and Architecture program among them. Every
+page wraps it in `<div id="howtogetintextcontainer">`. Now **207 of 225**; the other 18 publish no
+gate at all (16 associate degrees plus two bachelor's verified by hand).
+
+**A gate is never reported cleared when we cannot check it.** 81 of the 207 carry something
+unverifiable — portfolios, enrollment controls, application deadlines, World Languages' 80 documented
+volunteer hours. Those return `needs_confirmation` with PSU's exact wording, the same discipline as
+`unstructured_credits` on credentials. Two traps worth keeping:
+
+- **Contradictory GPA figures.** Accounting names **3.10** for entrance and **2.60–3.09** for "space
+  availability". Whichever matched first became the answer, so the student was told the bar was 2.60.
+  Multiple distinct figures now assert *none* of them and say so.
+- **Over-eager flagging.** A bare `"application"` substring flagged the *Artificial Intelligence
+  Methods and **Applications*** major off its own name, so phrases are word-bounded and specific. But
+  under-flagging is worse: Architecture's gate is a portfolio plus an external application, and
+  reading "no courses, no GPA" as "no gate" would tell that student there is nothing to clear.
+
+**Compound branches are AND, not OR.** `ACCTG 211 or ACCTG 211H or (ACCTG 201 and ACCTG 202)` — a
+group is a list of *branches*, each a list of codes that must **all** be taken. Reading the inner
+pair as alternatives clears the gate for a student holding only ACCTG 201. Inline annotations are
+stripped first: `HCDD 113S (FYS) or CYBER 100S (FYS)` split ETI's single 7-way alternative into three
+groups, a gate three times harder than the real one.
+
+**Wiring.** `GET /audit` returns the gate as **status only**. `GET /timeline` returns it with each
+unmet group's `slot_key` attached, because slots are the timeline's to know and **the two vocabularies
+disagree**: a templated major emits `one:CYBER 100|IST 110` where the Layer 1 packer would say
+`course:ETI 100`. Attaching the wrong one stores a choice against a slot the student's plan never
+renders — it saves successfully and does nothing. `attach_slots()` scores candidate slots by how many
+of the group's options they offer, so a 7-option group doesn't bind to a bare named slot with nothing
+to choose from.
+
+Gate courses also sort first on the Layer 1 path (`_sort_named(priority=…)`) and carry an
+`entrance_to_major` flag on both paths.
+
+**Mobile**: `components/EntranceToMajorCard.tsx`, a checklist on the Account page only — no
+onboarding step, no blocking. Choosing a course writes an ordinary `user_course_choices` row against
+the slot the timeline **already** emits for that requirement, which is what lets the pick flow into
+the plan without scheduling a second copy. The semester is optional; the default is "GradGPS
+decides". The card hides entirely once the gate is cleared with nothing left to confirm.
+
+Tests: `backend/tests/test_entrance_to_major.py` (30); the `tests/fixtures/etm_*.html` fixtures are
+real bulletin sections covering each shape.
 
 ### Course title & credits come from the bulletin, not the catalog
 
@@ -573,7 +742,19 @@ wmic process where "name like '%python%'" get ProcessId,Name
 | subplan | none |
 | transcript | Real PSU unofficial transcript, 26 courses, FA 2026 in progress |
 
+Useful as a fixture because he exercises both new mechanisms: his ETI plan has **six** requirement
+pools (the merge bug's original report was that `CYBER 100` never appeared), and he has cleared only
+**1 of 6** Entrance to Major groups, so the gate checklist renders with real content.
+
 ---
 
 ## Adding a new requirement pair to the catalog
-If two courses should be choose-one alternatives but aren't paired in the catalog, add them to the `PAIRS` list in `seed_matthew.py`'s `patch_eti_catalog()` with a new pair ID (currently up to 583).
+If two courses should be choose-one alternatives but aren't paired in the catalog, add them to the
+`GROUPS` table in `seed_matthew.py`'s `patch_known_alternatives()` (pair IDs 800+), which is the
+generic catalog-wide pass. ETI's old hand-written `PAIRS` list is gone — see the warning above.
+
+**First check whether the bulletin actually says "or".** Two courses listed inside one
+`Select N credits` pool are *not* alternatives that need pairing: the credit threshold already does
+the enforcing, and re-typing them to `choose_one` makes each one individually required. That is how
+the removed ETI patch turned a pick-one pool into four mandatory courses. `patch_known_alternatives()`
+skips `choose_credits` pools for exactly this reason.
