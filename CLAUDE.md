@@ -8,6 +8,12 @@ Be brief. Be concise. Avoid being too verbose or giving unnecessary information.
 Lead with the answer, give only the facts that back it, stop. Do the deep
 investigation when it's needed — just report the conclusion, not the walkthrough.
 
+## Keeping docs current
+
+When a task is **finished** — a feature shipped, a bug fixed, a decision made — update the docs it
+touches (this file, `mobile/CLAUDE.md`, the relevant `docs/*.md`) as part of finishing it. Once per
+completed task, not after every message or intermediate step.
+
 ---
 
 ## Running the project
@@ -696,6 +702,10 @@ phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap t
   `scripts/make_demo_transcript_pdf.py` regenerates the sample upload PDF in
   `scripts/demo_assets/`, which needs the `.gitignore` exception to the blanket `*.pdf` PII rule.
   Submission paperwork: `docs/app-store-submission.md`.
+  **Live in prod since 2026-09-22** (`REVIEW_EMAIL=appreview@gradgps.com`, account seeded) and
+  **in App Review as of 2026-09-23** (1.1.0 build 10): while review is pending, don't touch this
+  path, unset either var, or re-seed the account. **Rotate `REVIEW_CODE` after approval** — the
+  current value has been in App Store Connect.
 
 ### App version gate & client version reporting
 The mobile `UpdateGate` (`components/UpdateGate.tsx`) polls `GET /config/app` at launch and

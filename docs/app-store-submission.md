@@ -1,8 +1,25 @@
 # App Store Connect submission — GradGPS
 
-Working document for the operator (Matthew Krokosz, solo developer). Everything below is
-grounded in the repo as of 2026-09-21. Placeholders are marked `[LIKE THIS]` — fill them in
-before submitting; do not guess.
+Working document for the operator (Matthew Krokosz, solo developer). Written 2026-09-21,
+updated 2026-09-23 to record what was actually submitted.
+
+## Status — submitted for review (2026-09-23)
+
+| | |
+|---|---|
+| Version / build | **1.1.0 (build 10)** — EAS build `441b46de-050c-45b5-a931-3c84e6b23101`. Build 9 is identical except for the app icon (see §6). |
+| Demo account in prod | `REVIEW_EMAIL=appreview@gradgps.com` and `REVIEW_CODE` set on App Runner 2026-09-22 (value **not** in the repo). Seeded with `seed_demo_account.py`: 27 courses, 6 terms, 67.5 credits, Computer Engineering B.S. Verified against prod: right code → session, wrong code → 401, the code against any other address → 401. |
+| Screenshots | 6.5" slot, 1242 × 2688, flattened to RGB (ASC rejects PNGs with an alpha channel). |
+| Release | Manual release after approval. |
+
+**While review is pending:** pushes to `main` deploy straight to the backend the reviewer is
+using. Do not touch `_review_account()` in `routers/email_auth.py`, do not unset either env var,
+and do not re-seed or delete the demo account.
+
+**After approval:** rotate `REVIEW_CODE` (`aws apprunner update-service`, fresh six digits) —
+the current value has been in App Store Connect and in local submission files.
+
+A rejection arrives as a Resolution Center message; fix and resubmit, nothing is lost.
 
 ## 0. Facts pulled from the repo
 
@@ -29,116 +46,95 @@ the hamburger menu footer (`mobile/components/NavHeader.tsx`) and from onboardin
 
 ## 1. App Review notes (free-text "Notes" field)
 
-Paste this into **App Review Information → Notes**. Fill the placeholders first.
+**ASC caps this field at 4,000 characters.** The first draft was 5,871 and would not paste; the
+version below is what was submitted (3,594). It keeps every guideline
+argument — 2.1 (why a demo account exists), 5.2.2 (rights to catalog data), 4.8 (Sign in with
+Apple), 5.1.1(v) (deletion) — and drops the longer factual-vs-creative elaboration and the
+RateMyProfessors removal note. `<REVIEW_CODE>` stands in for the real code, which is deliberately
+not in the repo.
 
 ```
 WHAT GRADGPS IS
 
-GradGPS turns a college student's academic transcript into a degree audit and a
-semester-by-semester plan to graduation. The student uploads their unofficial
-transcript PDF, picks their major, and the app shows what requirements are done,
-what is in progress, and which classes are left to take and when.
+GradGPS turns a college student's transcript into a degree audit and a
+semester-by-semester plan to graduation.
 
-IMPORTANT: THE APP NEEDS A TRANSCRIPT TO SHOW ANYTHING
+THE APP NEEDS A TRANSCRIPT TO SHOW ANYTHING
 
-Every meaningful screen (timeline, audit, registration dashboard) is generated from
-an uploaded transcript plus a selected major. A brand-new account with no transcript
-shows an empty state. So that you do not need a Penn State student login, we have
-seeded a demo account that already has a major and a full transcript loaded.
+Every meaningful screen is generated from an uploaded transcript plus a selected
+major; a brand-new account shows an empty state. So you do not need a university
+login, we seeded a demo account that already has a major and a full transcript.
 
 DEMO ACCOUNT (no university login required)
 
-  Sign-in method: "Continue with Email" on the sign-in screen
-  Email:  [DEMO EMAIL — default is appreview@gradgps.com; confirm the value of
-           REVIEW_EMAIL on the production server]
-  Code:   [DEMO SIGN-IN CODE — the REVIEW_CODE env var on the production
-           server; it is deliberately not stored in the repo]
+  On the sign-in screen choose "Continue with Email"
+  Email: appreview@gradgps.com
+  Code:  <REVIEW_CODE>
 
-  (This account uses the app's passwordless email sign-in with a fixed code, so
-  no email has to be delivered and no Google or Apple account is required. Enter
-  the email, tap continue, then type the code above.)
+This is passwordless email sign-in with a fixed code for this one account, so no
+email has to be delivered and no Google or Apple account is needed.
 
-STEP BY STEP — WHAT TO TAP
+WHAT TO TAP
 
-  1. Launch the app. Tap "Get Started".
-  2. Age gate: tap the confirm button ("I'm 13 or older"). The app requires users to
-     be at least 13; this matches our Terms and Privacy Policy.
-  3. On the sign-in screen choose "Continue with Email", enter the demo email above,
-     then enter the code. You land on the Home screen.
-  4. HOME: the greeting names the student's major, and below it is the
-     current/next-semester registration dashboard — the classes to register for,
-     each tagged (Required / Gen Ed / Elective). This is the app's main screen.
-  5. TIMELINE: tap the hamburger menu (top left) -> "Timeline". This is the full
-     academic plan: past semesters from the transcript, then every remaining
-     semester through graduation, credit-balanced and in prerequisite order.
-  6. COURSE DETAIL: on the Home or Timeline screen, tap any course card. A detail
-     screen opens with the course title, credit value, and the official course
-     description.
-  7. CLASS PICKER: on a Timeline card marked "Gen Ed" or showing an "N options"
-     button, tap it — a picker opens listing the real courses that satisfy that
-     slot. Picking one updates the plan.
-  8. DEGREE AUDIT / ACCOUNT: hamburger menu -> "Account". Shows credits Done /
-     In Progress / Remaining, the declared major, and the "Minors & Certificates"
-     card (tap it to declare one and watch the Timeline absorb the extra courses).
-  9. UPLOAD FLOW: hamburger menu -> "Upload Transcript" to see the upload screen and
-     the parsed transcript, grouped by semester.
+1. Launch, tap "Get Started".
+2. Age gate: tap "I Confirm". The app requires users to be 13+, matching our
+   Terms and Privacy Policy.
+3. "Continue with Email", enter the email above, then the code. You land on Home.
+4. HOME: the greeting names the major; below it is the current/next-semester
+   registration dashboard, each class tagged Required / Gen Ed / Elective.
+5. TIMELINE: hamburger menu (top left) -> "Timeline". Past semesters from the
+   transcript, then every remaining semester through graduation, credit-balanced
+   and in prerequisite order.
+6. COURSE DETAIL: tap any course card for title, credits and description.
+7. CLASS PICKER: on a Timeline card marked "Gen Ed" or showing "N options", tap
+   it to see the real courses that satisfy that slot. Picking one updates the plan.
+8. ACCOUNT: hamburger menu -> "Account". Credits Done / In Progress / Remaining,
+   the declared major, and "Minors & Certificates" (declare one and the Timeline
+   absorbs the extra courses).
+9. UPLOAD: hamburger menu -> "Upload Transcript".
 
-TESTING THE UPLOAD FLOW YOURSELF
+TESTING UPLOAD YOURSELF
 
-A sample Penn State unofficial transcript PDF is attached to this submission as a
-review attachment: [SAMPLE TRANSCRIPT FILE NAME — attach the PDF in App Review
-Information -> Attachment]. Tap "Upload Transcript", choose to select a PDF, and pick
-that file from the Files app. Note: re-uploading replaces the demo account's existing
-transcript; we can restore the demo data by re-running our seed script, so please use
-a second throwaway account if you want the demo data left intact.
+A sample unofficial transcript PDF is attached to this submission
+(demo_transcript.pdf). Tap "Upload Transcript" and pick it from the Files app.
+Note that re-uploading replaces the demo account's transcript; please use a
+throwaway account if you want the demo data left intact.
 
-INDEPENDENCE FROM PENN STATE / RIGHTS TO THE DATA (guideline 5.2.2)
+RIGHTS TO THE DATA (5.2.2)
 
-GradGPS is an independent project built by one student developer. It is NOT
-affiliated with, endorsed by, sponsored by, or approved by The Pennsylvania State
-University, and the app says so in three places: the Terms of Use (Section 2, "Not
-affiliated with Penn State"), the Privacy Policy (Section 1), and the App Store
-description.
+GradGPS is an independent project by one student developer. It is NOT affiliated
+with, endorsed by or sponsored by The Pennsylvania State University, and says so
+in the Terms of Use, the Privacy Policy and the App Store description.
 
-The course and program information in the app is factual academic catalog data —
-course codes, course titles, credit values, and degree requirement lists — published
-publicly by the university on its own public bulletin website (bulletins.psu.edu),
-which requires no login and is intended for public consultation by prospective and
-current students. Factual catalog listings of this kind are not creative expression.
-We do not reproduce the university's logos, seal, brand assets, or copyrighted
-marketing text, we do not use any university trademark in the app name, icon, or
-subtitle, and we make no claim of affiliation. The app does not access any Penn State
-account, portal, or private system: the student supplies their own transcript file
-from their own records.
+The course and program information is factual academic catalog data - course
+codes, titles, credit values and requirement lists - published publicly on the
+university's own bulletin site (bulletins.psu.edu), which needs no login and
+exists for public consultation. We reproduce no logos, seal, brand assets or
+marketing text, use no university trademark in the app name, icon or subtitle,
+and claim no affiliation. The app accesses no university account, portal or
+private system: the student supplies their own transcript file. The app is not
+built on any third party's private or licensed API.
 
-The app is not built on any third party's private or licensed API. (A professor
-ratings feature that called a third-party endpoint was removed from the app in
-September 2026 and is not present in this build.)
+SIGN IN WITH APPLE (4.8)
 
-ACCOUNT CREATION AND SIGN IN WITH APPLE (guideline 4.8)
+Implemented and offered alongside Google and email sign-in. The native Apple
+button shows on device (TestFlight / App Store builds). Apple ID tokens are
+verified server-side against Apple's JWKS. No password is ever collected.
 
-Sign in with Apple is implemented and offered on the sign-in screen alongside
-Google Sign-In and passwordless email sign-in. On device (TestFlight / App Store
-builds) the native Apple button is shown. Apple ID tokens are verified server-side
-against Apple's JWKS. No password is ever collected or stored.
+ACCOUNT DELETION (5.1.1(v))
 
-ACCOUNT DELETION (guideline 5.1.1(v))
-
-In-app account deletion: hamburger menu -> "Account" -> scroll to the bottom ->
-"Delete Account" -> confirm in the alert. It is a single confirmation, with no email
-or support ticket required.
-
-It permanently deletes: the stored transcript PDF in object storage; every parsed
-transcript course row; every saved planning choice, pinned class, and adviser
-course-substitution; the user profile record (name, email, major, subplan, declared
-minors/certificates); and every active session token, which signs the user out
-everywhere. See backend/routers/users.py, DELETE /users/me.
+Hamburger menu -> "Account" -> "Delete Account" -> confirm. One confirmation, no
+email or support ticket. It permanently deletes the stored transcript PDF, every
+parsed course row, every saved planning choice, pinned class and adviser
+substitution, the user profile, and every session token.
 
 SUPPORT
 
-support@gradgps.com, or the in-app Contact Support screen (hamburger menu ->
-"Contact Support").
+In-app Contact Support (hamburger menu), or https://gradgps.com/support
 ```
+
+ASC labels the sign-in fields "Username" / "Password"; the code goes in "Password". The app has
+no passwords — the Notes explain that, which is why the step list stays near the top.
 
 > **Accuracy check on the deletion paragraph.** `DELETE /users/me` in
 > `backend/routers/users.py` deletes, in order: (1) the S3 object
@@ -150,9 +146,9 @@ support@gradgps.com, or the in-app Contact Support screen (hamburger menu ->
 > deletes nothing else, so a "deleted" response always means the PDF is gone. Do **not** claim
 > deletion is instant across backups — the wording above only claims what the code does.
 
-> **One thing the notes do not claim:** there is **no transcript PDF checked into this
-> repository**. The sample must be exported from LionPATH (or redacted from a real one) by the
-> operator and attached in ASC. Do not point the reviewer at a file that does not exist.
+> **The review attachment** is `backend/scripts/demo_assets/demo_transcript.pdf` — wholly
+> synthetic, parses 27/27 with no Unknown terms, and scores −5 on the official detector so it
+> cannot trip the 409 consent dialog mid-review.
 
 ---
 
@@ -333,40 +329,34 @@ already in the app name and subtitle are indexed automatically, so they are not 
 
 ### Description — limit 4000
 
-**2,088 characters.**
+**1,757 characters.** The first draft (all-caps section headers, a bolded feature list)
+read as machine-written and was replaced. What was entered in ASC:
 
 ```
-GradGPS turns your college transcript into a clear plan for graduating.
+GradGPS turns a college transcript into a plan for graduating.
 
-Upload your unofficial transcript, pick your major, and GradGPS builds a degree audit and a semester-by-semester timeline: what you have finished, what you are taking now, and exactly what is left. No spreadsheets, no guessing which requirement a class actually filled.
+Upload your unofficial transcript and choose your major. GradGPS reads what you've already taken, checks it against every requirement in your program, and shows what's done, what's in progress, and what's left. Then it lays the remaining classes out semester by semester - in prerequisite order, with a realistic credit load each term, and following your program's published suggested plan where one exists.
 
-WHAT YOU GET
+The home screen shows the classes to register for next, so you know what to sign up for without opening the full plan.
 
-- Degree audit. Every major requirement and General Education category, checked against the classes on your transcript.
-- Semester timeline. Your remaining requirements laid out term by term, credit-balanced and in prerequisite order, following your program's published suggested plan where one exists.
-- Registration view. Next semester's classes on the home screen, so you know what to sign up for.
-- Minors and certificates. Declare up to three and see the extra coursework folded into your plan.
-- Class picker. For a General Education slot or an elective, browse the courses that actually count and pin the one you want.
-- Course detail. Title, credits, and the official course description.
-- Adviser substitutions. If your department approved a swap, tell GradGPS and the plan updates.
-- Manual edits. Added or dropped a class for the term you are registered in? Change it without re-uploading anything.
+You can declare up to three minors or certificates and see the extra coursework folded into the same timeline. For a general education slot or an elective, a picker lists the courses that actually count so you can choose one instead of leaving a placeholder. If your department approved a course substitution, you can record it and the plan updates. And if you add or drop a class for the term you're registered in, you can change it without re-uploading your transcript.
 
-WHO IT COVERS
+Tap any course to see its title, credit value, and official description.
 
-GradGPS currently supports University Park degree programs, minors, and certificates at Penn State. More schools are on the way.
+GradGPS currently supports degree programs, minors, and certificates at Penn State's University Park campus. More schools are being added.
 
-HONEST ABOUT WHAT IT IS
+GradGPS is an independent project and is not affiliated with, endorsed by, or sponsored by any university. Requirement data comes from publicly published course bulletins. It's a planning tool, not academic advising - confirm with your adviser before you register.
 
-GradGPS is an independent project built by a student developer. It is not affiliated with, endorsed by, or sponsored by The Pennsylvania State University. Requirement data comes from the university's publicly published bulletin. GradGPS is a planning aid, not academic advising: always confirm with your adviser before you register.
+There are no ads and no analytics. You can delete your transcript, or your entire account, from the Account screen at any time.
 
-YOUR DATA
-
-Your transcript is yours. No ads, no analytics SDKs, nothing sold or shared. Delete your transcript, or your entire account and everything in it, from the Account screen at any time.
-
-Terms of Use: https://gradgps.com/terms
-Privacy Policy: https://gradgps.com/privacy
-Support: https://gradgps.com/support
+Terms: gradgps.com/terms
+Privacy: gradgps.com/privacy
+Support: gradgps.com/support
 ```
+
+The body is deliberately school-neutral ("your program", "any university"), but the coverage line
+naming University Park **stays** — the app only has that catalog, and implying broader support is
+a 2.3.1 problem. It is the one line to edit as schools are added.
 
 Every feature claim above is implemented: degree audit (`backend/audit_engine.py`), timeline
 (`backend/routers/timeline.py` + `backend/sap_templates/`), registration dashboard
@@ -383,9 +373,11 @@ isn't implemented — guideline 2.3.1 is about exactly that.
 ### In App Store Connect — app information
 
 - [ ] **Category:** Primary `Education`. Secondary `Productivity` (optional).
-- [ ] **Content rights:** answer "Does your app contain, show, or access third-party content?"
-      → **Yes**, described as *publicly published university course catalog information; no
-      licence required.* (Consistent with the Review Notes in §1.)
+- [x] **Content rights:** "Does your app contain, show, or access third-party content?"
+      → **Yes**, with the rights attestation. It has to be Yes: the course screen shows PSU's
+      course descriptions verbatim, which is prose, not bare fact. There is no free-text box;
+      the justification lives in the Review Notes. If 5.2.2 is ever pushed on, the description
+      text is the weak point and a short factual summary would be the fix.
 - [ ] **Copyright field:** `2026 Matthew Krokosz` (year + name only — no "©", ASC adds it).
 - [ ] **Support URL:** `https://gradgps.com/support` — **required**. Confirm the page loads and
       its contact form actually posts to production before submitting.
@@ -406,13 +398,15 @@ isn't implemented — guideline 2.3.1 is about exactly that.
 
 ### Screenshots — the item most likely to block you
 
-- [ ] **6.9" iPhone** (iPhone 16 Pro Max / 15 Pro Max class) — **required**. 1320 × 2868 px or
-      1290 × 2796 px, portrait. Up to 10; supply at least 3.
+- [x] **iPhone screenshots.** ASC offered the **6.5"** slot and accepted 1242 × 2688 (the size an
+      XS Max / 11 Pro Max produces). 6.9" would be 1320 × 2868 or 1290 × 2796.
+- **ASC rejects any PNG with an alpha channel**, even a fully opaque one. Raw device screenshots
+      are RGB; alpha usually arrives via a design tool or a device-frame template. Flatten onto
+      white before upload (PIL: paste onto an `RGB` canvas using the alpha as the mask).
 - **13" iPad — NOT required.** `ios.supportsTablet` was set to `false` on 2026-09-21, which
       removes the iPad screenshot requirement and avoids shipping an untested tablet layout. This
       is native config, so it takes effect only in a new production build — not over OTA. Reversible:
       flip it back to `true` and the iPad screenshots become mandatory again.
-- 6.5" iPhone screenshots are no longer separately required; ASC scales the 6.9" set down.
 - Suggested set, matching the description's ordering: Home / registration dashboard → Timeline
   → Course detail → Account with credit progress → Class picker.
 - [ ] **Do not reuse `website/shots/*.png`** as App Store screenshots — see §6.
@@ -435,7 +429,7 @@ Notes on those commands:
 - `eas.json` sets `cli.appVersionSource: "remote"` and `build.production.autoIncrement: true`,
   so the **build number** increments on EAS automatically. The **marketing version** (`1.1.0`)
   comes from `mobile/app.json` and must be bumped by hand if this submission should be a new
-  version. `[DECIDE: submit as 1.1.0, or bump the version first?]`
+  version. Submitted as **1.1.0**; only the build number moved (9, then 10).
 - The production build reads `mobile/.env.production`, pointing the app at the live App Runner
   backend. Verify `EXPO_PUBLIC_API_BASE` is present before building — without it the app falls
   back to a LAN address and the reviewer sees nothing but network errors.
@@ -454,9 +448,8 @@ Notes on those commands:
 - [ ] **Sign in as the reviewer will**, with `REVIEW_EMAIL` + `REVIEW_CODE`, against the live
       production backend — not a local one. The review sign-in path in
       `backend/routers/email_auth.py` is env-gated, so it only works once both variables are set
-      on the App Runner service. `[VERIFY: REVIEW_EMAIL and REVIEW_CODE are set in production,
-      and seed_demo_account.py has been run against production so the account has a major and a
-      transcript.]`
+      on the App Runner service. Done 2026-09-22: both set, account seeded, and the path
+      checked against prod (see Status).
 - [ ] Confirm the *ordinary* email sign-in code still arrives for real users. **SES production
       access is granted** (verified 2026-09-21 via `aws sesv2 get-account`: `ProductionAccessEnabled:
       true`, 50,000/day, status HEALTHY), so codes deliver to any inbox — the sandbox warning that
@@ -467,14 +460,14 @@ Notes on those commands:
 
 | Placeholder | Where |
 |---|---|
-| `[DEMO EMAIL]` (`REVIEW_EMAIL`, default `appreview@gradgps.com`) and `[DEMO SIGN-IN CODE]` (`REVIEW_CODE`, never in the repo) | §1 review notes — set on the production server; account seeded by `backend/scripts/seed_demo_account.py` |
+| ~~Demo email / sign-in code~~ — **done**: set on App Runner 2026-09-22, account seeded | §1 review notes |
 | ~~Sample transcript PDF~~ — **done**: `backend/scripts/demo_assets/demo_transcript.pdf` (synthetic, parses 27/27) | §1, ASC attachment |
-| Reviewer contact name / phone / email | ASC App Review Information |
+| ~~Reviewer contact~~ — **done**, entered in ASC | ASC App Review Information |
 | Sign-in-SDK third-party-label question | §2.2 |
 | 13+ age-rating question wording in the 2025 questionnaire | §3 |
 | ~~iPad screenshots~~ — **done**: `supportsTablet: false` | §5 |
 | ~~SES sandbox status~~ — **done**: production access granted | §5 smoke test |
-| Version number to submit (1.1.0 or bumped) | §5 |
+| ~~Version number~~ — **done**: 1.1.0 (build 10) | §5 |
 
 ---
 
@@ -505,6 +498,20 @@ never use website assets as App Store screenshots.
 shipped in the iOS binary and could not by itself cause a rejection — but it was the visible
 favicon of any Expo web export. Regenerated 2026-09-21 from `mobile/assets/icon.png`
 (48×48 RGBA, Lanczos).
+
+### RESOLVED — app icon had transparent corners
+
+`mobile/assets/icon.png` was a pre-rounded RGBA image: fully transparent corners, 4.6% of pixels
+non-opaque. Apple requires the 1024 marketing icon to have no alpha. Flattened 2026-09-22
+(`9fb43ae`) by extending the icon's own navy gradient into the corners — compositing onto white
+would leave visible wedges. The Android adaptive-icon layers keep their alpha; they need it.
+
+**It was not the cause of the blank icon in App Store Connect**, which is what prompted it. Build
+10's icon showed next to the build while the large app-level icon stayed blank: that one fills
+from a build *attached to a version*, and on a never-approved app it can stay generic until first
+approval. Inspecting a built IPA does not answer the alpha question either — Xcode rewrites icons
+into Apple's CgBI PNG variant, whose header reports `RGBA` regardless and which PIL cannot decode.
+Check the source file instead.
 
 ### ~~MEDIUM~~ RESOLVED — iPad support
 
