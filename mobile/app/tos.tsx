@@ -83,9 +83,9 @@ export default function TermsOfUseScreen() {
         </Section>
 
         <Section title="12. Copyright complaints">
-          We respect copyright. If you believe something on the Service infringes a copyright you own or represent, email mkrokosz06@gmail.com and tell us what the work is, what you believe is infringing it, where to find that on the Service, and how to reach you. Please confirm that you own the copyright or are authorized to act for the owner.{"\n\n"}
+          We respect copyright. If you believe something on the Service infringes a copyright you own or represent, email support@gradgps.com and tell us what the work is, what you believe is infringing it, where to find that on the Service, and how to reach you. Please confirm that you own the copyright or are authorized to act for the owner.{"\n\n"}
           We'll review the notice and remove or disable anything that shouldn't be there. If your material was removed and you think that was a mistake, email the same address and we'll take another look. We close the accounts of people who repeatedly infringe others' copyrights.{"\n\n"}
-          This address is for copyright complaints only. For anything else, use support@gradgps.com or the Contact Support screen in the app.
+          Please use the subject line "Copyright" so the notice is routed correctly. For anything else, use the same address or the Contact Support screen in the app.
         </Section>
 
         <Section title="13. Termination">
