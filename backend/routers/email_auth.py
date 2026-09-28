@@ -99,8 +99,8 @@ def _review_account() -> tuple[str, str] | None:
 
     SCOPE — deliberately narrow:
       * ENV-GATED. Both vars must be set, and REVIEW_CODE must be 6 digits;
-        otherwise this returns None and the demo path does not exist at all
-        (same discipline as CHARLIE_ENABLED). Unset == byte-identical no-op.
+        otherwise this returns None and the demo path does not exist at all.
+        Unset == byte-identical no-op.
       * ONE address, matched by equality. Not a list, prefix or pattern.
       * NOT a bypass. It only short-circuits the *code check* for that one
         address; the session is minted by the normal create_session() path with

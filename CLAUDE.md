@@ -125,7 +125,6 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 | `users.py` | `/users` | User profile + `DELETE /users/me` account deletion (PDF, courses, profile, sessions) |
 | `admin.py` | `/admin` | Admin utilities |
 | `support.py` | `/support` | Support/contact form (mobile app + gradgps.com). Emails `SUPPORT_EMAIL` via SES with the sender as Reply-To; unset `SUPPORT_EMAIL` (local dev) = log only. No auth required (website form is anonymous); in-memory rate limit + honeypot field. SES setup: identity `mkrokosz06@gmail.com` verified, `ses:SendEmail` on the App Runner role (`GradGPSSupportSES` inline policy). |
-| `charlie.py` | `/charlie` | **Charlie** — the "add my school" agent (multi-school demand funnel + onboarding scout). Public `POST /charlie/request` captures + normalizes a school name (aliases → one canonical row, votes accumulate); admin endpoints rank demand and run **feasibility triage** (`run_triage` → readiness report). Core logic in `backend/charlie.py` (+ `charlie_schools.json` seed roster); founder dashboard at `/charlie/dashboard` (`static/charlie.html`). **Not autonomous** — never adds a school without a human. **Gated OFF by default** — the router only mounts when `CHARLIE_ENABLED=1` (set in `backend/.env` for local dev); prod never sets it, so `/charlie/*` doesn't exist there. Enabling it in prod would first need the `school_requests` table created + an IAM grant for it on `GradGPSAppRunnerInstance`. Design: `docs/charlie.md`. |
 
 #### DynamoDB tables
 | Table | PK | SK | Contents |
@@ -133,7 +132,6 @@ SAP templates live as JSON under `backend/sap_templates/` (~180 University Park 
 | `requirements` | `program_name` | `group_course` | All PSU major + gen ed requirements |
 | `users` | `user_id` | — | User profile (major, subplan, timestamps) |
 | `transcript_courses` | `user_id` | `course_code` | Parsed transcript courses |
-| `school_requests` | `school_key` | — | Charlie's per-canonical-school demand rows (votes, aliases_seen, notify_emails, last readiness report) |
 
 #### Gen ed
 Gen ed requirements are stored under `program_name = "__GEN_ED__"` in the requirements table. `run_gen_ed_audit()` enforces cross-group exclusivity (a course can only satisfy one gen ed category) with an exception for interdomain/multi-category courses (`multi_category=True`).
@@ -693,7 +691,7 @@ phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap t
   reviewer can't evaluate. `_review_account()` in `routers/email_auth.py` short-circuits the
   **code check** inside the existing `/auth/email/verify` for one env-configured address:
   `REVIEW_EMAIL` + `REVIEW_CODE` (exactly 6 digits). Either unset = the path does not exist, so
-  it is a byte-identical no-op — the same gating discipline as `CHARLIE_ENABLED`. It is **not**
+  it is a byte-identical no-op. It is **not**
   a bypass: the session is minted by the normal path as `email:<that address>`, no other user id
   is reachable, and `get_current_user` is untouched. Unlike a real OTP the code is static and
   never burns, so the demo branch carries its own rate limit (10/hr per IP, 60/hr global).
@@ -757,6 +755,9 @@ pools (the merge bug's original report was that `CYBER 100` never appeared), and
 **1 of 6** Entrance to Major groups, so the gate checklist renders with real content.
 
 ---
+
+## Adding a new school
+Not started. Step-by-step plan: `docs/new-school-playbook.md` (replaced the removed "Charlie" agent).
 
 ## Adding a new requirement pair to the catalog
 If two courses should be choose-one alternatives but aren't paired in the catalog, add them to the

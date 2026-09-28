@@ -538,6 +538,7 @@ but do not wire them back up. `docs/professor-ratings.md` has the full rationale
 
 `backend/charlie.py` mounts only when `CHARLIE_ENABLED=1`, which production never sets, so
 `/charlie/*` does not exist in prod and the mobile app does not call it. Nothing to disclose.
+*(Removed from the repo entirely on 2026-09-28.)*
 
 ### LOW — legacy dev-bypass endpoints
 
