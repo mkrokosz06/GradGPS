@@ -8,4 +8,12 @@
   <url><loc>https://gradgps.com/support</loc><lastmod>2026-09-01</lastmod></url>
   <url><loc>https://gradgps.com/privacy</loc><lastmod>2026-08-30</lastmod></url>
   <url><loc>https://gradgps.com/terms</loc><lastmod>2026-09-01</lastmod></url>
+  <!-- majors -->
+  <url><loc>https://gradgps.com/majors/</loc><lastmod>2026-09-28</lastmod></url>
+  <url><loc>https://gradgps.com/majors/accounting</loc><lastmod>2026-09-28</lastmod></url>
+  <url><loc>https://gradgps.com/majors/computer-science</loc><lastmod>2026-09-28</lastmod></url>
+  <url><loc>https://gradgps.com/majors/enterprise-technology-integration</loc><lastmod>2026-09-28</lastmod></url>
+  <url><loc>https://gradgps.com/majors/finance</loc><lastmod>2026-09-28</lastmod></url>
+  <url><loc>https://gradgps.com/majors/mechanical-engineering</loc><lastmod>2026-09-28</lastmod></url>
+  <!-- /majors -->
 </urlset>

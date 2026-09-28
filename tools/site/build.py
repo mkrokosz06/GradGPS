@@ -74,7 +74,7 @@ def main() -> int:
     stale: list[str] = []
     touched = 0
 
-    for page in sorted(SITE.glob("*.html")):
+    for page in sorted(SITE.rglob("*.html")):
         built = render(page)
         if built == page.read_text(encoding="utf-8"):
             continue
@@ -82,7 +82,7 @@ def main() -> int:
             stale.append(page.name)
         else:
             page.write_text(built, encoding="utf-8")
-            print(f"updated {page.relative_to(ROOT)}")
+            print(f"updated {page.relative_to(ROOT).as_posix()}")
             touched += 1
 
     if check and stale:

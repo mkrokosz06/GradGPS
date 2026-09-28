@@ -756,6 +756,14 @@ pools (the merge bug's original report was that `CYBER 100` never appeared), and
 
 ---
 
+## Website SEO — per-major pages
+gradgps.com is static (`website/`, GitHub Pages via `deploy-website.yml`). `python tools/site/majors.py`
+generates `website/majors/<slug>.html` + `/majors/` index + the `<!-- majors -->` block of `sitemap.xml`
+from the SAP template, the Entrance to Major spec and `bulletin_courses.json` titles, flagging gate
+courses inside the plan. Pilot is 5 majors (`MAJORS` list); widen once Search Console shows them indexed.
+A GPA floor is published only when the bulletin names exactly one figure (`gpa_candidates` is unreliable
+otherwise). `build.py` now walks subdirectories. Search Console is verified (Domain property via GoDaddy).
+
 ## Adding a new school
 Not started. Step-by-step plan: `docs/new-school-playbook.md` (replaced the removed "Charlie" agent).
 
