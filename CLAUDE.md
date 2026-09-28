@@ -312,13 +312,13 @@ Tests: `backend/tests/test_credentials.py` (18, pytest or plain `python`) plus 3
 `credentials/tests/`.
 
 **Degree-program scoping.** `is_degree_program()` in `routers/programs.py` keeps minors/certificates
-out of the **major** list (`/programs/all`, `/programs/search`: 487 → 225 programs) and `POST
+out of the **major** list (`/programs/all`, `/programs/search`: 487 → 225 programs, then 184 after UP scoping below) and `POST
 /programs/select` refuses one with a 400, because the major is the single program the whole plan is
 built from. They are now offered separately via `GET /programs/credentials` (above). It keys off the
 row's `degree` attribute with the `", Minor"` / `", Certificate"` name suffix as a fallback, keeping
 anything unlabelled — dropping only what is positively identified as non-degree.
 
-**University Park scoping.** `is_up_program()` in `routers/programs.py` is the single authoritative definition of "a UP program" — a **denylist** of non-UP campus keywords (fail-safe: a re-scrape can't silently leak a campus we forgot to allowlist). SAP templates are UP-only.
+**University Park scoping.** `is_up_program()` in `routers/programs.py` is the single authoritative definition of "a UP program" — a **denylist** (fail-safe: an unknown name is kept) with two parts: non-UP campus keywords in the name, plus `program_data/non_up_programs.json`, every degree program the bulletin's index lists *without* University Park. The name test alone leaked **41** branch-campus majors with no campus parenthetical (`Law and Society, B.A.`, `Engineering, B.S.`, `Social Work, B.S.W.` …) into the picker; with the file it shows **184**, exactly the bulletin's UP degree list minus ROTC ×3 and the B.Phil. Refresh with `python scripts/scrape_program_campuses.py`. It only scopes the *picker* — `/programs/select` and the audit don't consult it, so an existing user on one of those 41 keeps working. SAP templates are UP-only.
 
 ### Manual class editing (transcript course CRUD)
 Students who registered classes in summer sometimes swap one before the term starts — not worth

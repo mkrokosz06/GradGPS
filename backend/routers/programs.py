@@ -4,6 +4,8 @@ GET  /programs/search?q=forensic — filter cached list, case-insensitive substr
 POST /programs/select            — save a user's major selection
 """
 
+import json
+import os
 import re
 
 from fastapi import APIRouter, Query, HTTPException, Depends
@@ -52,15 +54,40 @@ _UP_COLLEGE_QUALIFIERS = {
 }
 
 
+# The name test alone isn't enough: most branch-campus programs carry no campus
+# parenthetical ("Law and Society, B.A." is Abington-only, "Engineering, B.S." is
+# Behrend), and 41 of them leaked into the major picker.  The bulletin's program
+# index tags each entry with its campuses, so `scripts/scrape_program_campuses.py`
+# records every degree program it lists WITHOUT University Park.  Still a
+# denylist — a name the file doesn't mention is kept — and a missing/unreadable
+# file degrades to the name test rather than failing startup.
+_NON_UP_PROGRAMS_PATH = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "program_data", "non_up_programs.json",
+)
+
+
+def _load_non_up_programs() -> frozenset[str]:
+    try:
+        with open(_NON_UP_PROGRAMS_PATH, encoding="utf-8") as f:
+            return frozenset(json.load(f)["non_up_programs"])
+    except (OSError, ValueError, KeyError):
+        return frozenset()
+
+
+_NON_UP_PROGRAMS = _load_non_up_programs()
+
+
 def is_up_program(name: str) -> bool:
     """Whether a program is offered at University Park (this app's only scope).
 
-    Keeps every program EXCEPT those whose name carries a non-UP campus
-    parenthetical.  Unqualified names (the majority) and UP-college
-    parentheticals are kept; branch/Commonwealth/World Campus offerings are
-    dropped.  This is the shared UP-scope definition used by both the program
-    list and the SAP template pipeline.
+    Drops a program the bulletin lists only at other campuses, or whose name
+    carries a non-UP campus parenthetical.  Everything else is kept, so an
+    unknown name fails open.  This is the shared UP-scope definition used by
+    the program list and the SAP / entrance-to-major scrapers.
     """
+    if name in _NON_UP_PROGRAMS:
+        return False
     nl = name.lower()
     return not any(
         f"({kw})" in nl or f"({kw} " in nl for kw in _NON_UP_CAMPUS_KEYWORDS

@@ -48,6 +48,20 @@ def test_up_college_qualifiers_are_never_treated_as_campuses():
         assert is_up_program(f"Some Program, B.S. ({title})"), college
 
 
+def test_unqualified_branch_campus_programs_are_dropped():
+    # No campus parenthetical, but the bulletin lists them only at other campuses.
+    for name in ("Law and Society, B.A.", "Engineering, B.S.",
+                 "Social Work, B.S.W.", "Administration of Justice, B.A."):
+        assert not is_up_program(name), name
+
+
+def test_bulletin_up_programs_survive_the_denylist():
+    # Same-named UP offerings must not be caught by the bulletin denylist.
+    for name in ("Accounting, B.S. (Business)", "Economics, B.S.",
+                 "Enterprise Technology Integration, B.S. (Information Sciences and Technology)"):
+        assert is_up_program(name), name
+
+
 if __name__ == "__main__":
     tests = [v for k, v in sorted(globals().items())
              if k.startswith("test_") and callable(v)]
