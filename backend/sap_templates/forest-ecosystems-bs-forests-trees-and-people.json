@@ -198,7 +198,12 @@
           "type": "pool",
           "ref": "supporting",
           "label": "ERM 448 , FOR 439 , or FOR 475 (or Supporting Course)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "ERM 448",
+            "FOR 439",
+            "FOR 475"
+          ]
         },
         {
           "type": "choose_one",
@@ -237,7 +242,11 @@
           "type": "pool",
           "ref": "supporting",
           "label": "FOR 409 & SOILS 102 (or Supporting Course)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "FOR 409",
+            "SOILS 102"
+          ]
         },
         {
           "type": "choose_one",

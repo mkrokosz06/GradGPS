@@ -168,8 +168,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Diversity and Development",
           "credits": 3.0
         },
         {
@@ -208,9 +209,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HDFS Course in Advanced Development",
+          "credits": 3.0,
+          "dept": "HDFS"
         },
         {
           "type": "gen_ed",
@@ -235,14 +238,18 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HDFS Capstone",
+          "credits": 3.0,
+          "dept": "HDFS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HDFS Course in Advanced Development",
+          "credits": 3.0,
+          "dept": "HDFS"
         },
         {
           "type": "gen_ed",
@@ -267,9 +274,11 @@
       "credits": 12.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 12.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HDFS Capstone",
+          "credits": 12.0,
+          "dept": "HDFS"
         }
       ]
     }

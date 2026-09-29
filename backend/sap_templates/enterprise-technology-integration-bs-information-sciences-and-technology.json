@@ -3,7 +3,7 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 124.0,
+  "total_credits": 120.0,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/information-sciences-technology/enterprise-technology-integration-bs/",
   "scraped": true,
   "semesters": [
@@ -18,11 +18,8 @@
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "IST 110",
-            "CYBER 100"
-          ],
+          "type": "course",
+          "code": "ETI 100",
           "credits": 3.0
         },
         {
@@ -57,7 +54,7 @@
         },
         {
           "type": "course",
-          "code": "IST 220",
+          "code": "ETI 200",
           "credits": 3.0
         },
         {
@@ -69,8 +66,8 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "CAS 100",
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
@@ -96,13 +93,14 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "course",
+          "code": "IST 256",
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Elective",
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pick from Smeal College Business Fundamentals Certificate List",
           "credits": 3.0
         },
         {
@@ -115,11 +113,11 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.0,
+      "credits": 14.0,
       "slots": [
         {
           "type": "course",
-          "code": "IST 256",
+          "code": "IST 220",
           "credits": 3.0
         },
         {
@@ -128,13 +126,12 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
           "credits": 3.0
         },
         {
@@ -155,11 +152,8 @@
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "ETI 301",
-            "IST 301"
-          ],
+          "type": "course",
+          "code": "ETI 301",
           "credits": 3.0
         },
         {
@@ -176,8 +170,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
           "credits": 3.0
         }
       ]
@@ -188,11 +183,8 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "ETI 302",
-            "IST 302"
-          ],
+          "type": "course",
+          "code": "ETI 302",
           "credits": 3.0
         },
         {
@@ -203,15 +195,15 @@
         {
           "type": "choose_one",
           "codes": [
-            "HCDD 331",
-            "HCDD 264",
-            "IST 331"
+            "ETI 400",
+            "ETI 423"
           ],
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
           "credits": 3.0
         },
         {
@@ -236,37 +228,25 @@
     {
       "year": 4,
       "term_season": "FA",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "ETI 420",
-            "IST 420"
-          ],
-          "credits": 3.0
-        },
-        {
-          "type": "choose_one",
-          "codes": [
-            "ETI 423",
-            "IST 402",
-            "IST 423"
-          ],
+          "type": "course",
+          "code": "ETI 420",
           "credits": 3.0
         },
         {
           "type": "choose_one",
           "codes": [
             "ETI 435",
-            "ETI 463",
-            "IST 440W"
+            "ETI 463"
           ],
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
           "credits": 3.0
         },
         {
@@ -277,42 +257,40 @@
         {
           "type": "gen_ed",
           "category": null,
-          "credits": 1.5
+          "credits": 3.0
         }
       ]
     },
     {
       "year": 4,
       "term_season": "SP",
-      "credits": 13.5,
+      "credits": 14.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "ETI 421",
-            "IST 421"
-          ],
+          "type": "course",
+          "code": "ETI 421",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
           "type": "elective",
           "label": "Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 1.5
+          "credits": 2.0
         }
       ]
     }

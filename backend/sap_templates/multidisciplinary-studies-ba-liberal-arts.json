@@ -29,8 +29,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Foreign Language (Level 1)",
           "credits": 4.0
         },
         {
@@ -70,8 +71,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Foreign Language (Level 2)",
           "credits": 4.0
         },
         {
@@ -92,18 +94,21 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Core course for major",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures Course",
           "credits": 3.0
         },
         {
@@ -122,11 +127,18 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Core Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
@@ -140,13 +152,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "BA Knowldege Domains Course",
           "credits": 3.0
         }
       ]
@@ -157,8 +165,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Core Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
@@ -167,18 +182,14 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domains Course",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective course",
           "credits": 3.0
         }
       ]
@@ -189,13 +200,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Core Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
@@ -226,18 +239,21 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {
@@ -258,13 +274,15 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Capstone Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Major Option Course",
           "credits": 3.0
         },
         {

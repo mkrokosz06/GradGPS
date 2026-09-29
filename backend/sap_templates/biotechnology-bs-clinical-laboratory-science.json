@@ -251,8 +251,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C (Consult with an academic adviser for options)",
           "credits": 2.0
         }
       ]

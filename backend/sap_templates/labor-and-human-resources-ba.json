@@ -3,14 +3,14 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.A.",
-  "total_credits": 124.5,
+  "total_credits": 121.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/labor-human-resources-ba/",
   "scraped": true,
   "semesters": [
     {
       "year": 1,
       "term_season": "FA",
-      "credits": 17.5,
+      "credits": 14.5,
       "slots": [
         {
           "type": "choose_one",
@@ -20,16 +20,6 @@
             "ENGL 137H"
           ],
           "credits": 3.0
-        },
-        {
-          "type": "choose_one",
-          "codes": [
-            "ECON 14",
-            "ECON 102",
-            "ECON 104"
-          ],
-          "credits": 3.0,
-          "gen_ed": "GS"
         },
         {
           "type": "course",
@@ -62,9 +52,11 @@
         {
           "type": "choose_one",
           "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
             "CAS 138T",
-            "ENGL 138T",
-            "CAS 100"
+            "ENGL 138T"
           ],
           "credits": 3.0
         },
@@ -130,7 +122,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "gen_ed",
@@ -153,8 +145,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         }
       ]
@@ -165,8 +158,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
@@ -202,13 +196,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
@@ -283,8 +279,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         },
         {

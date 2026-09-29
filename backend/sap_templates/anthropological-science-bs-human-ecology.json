@@ -100,9 +100,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH Survey Course (200-Level and Below)",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "ANTH"
         },
         {
           "type": "pool",
@@ -129,9 +132,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH Survey Course (200-Level and Below)",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "ANTH"
         },
         {
           "type": "pool",
@@ -176,9 +182,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Human Ecology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
           "type": "gen_ed",
@@ -198,19 +207,27 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH Methods Course",
+          "credits": 3.0,
+          "dept": "ANTH"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Human Ecology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Archaeological Science or Biological Anthropology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
           "type": "gen_ed",
@@ -230,14 +247,19 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH Methods Course",
+          "credits": 3.0,
+          "dept": "ANTH"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Human Ecology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
           "type": "pool",
@@ -268,14 +290,20 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Human Ecology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANTH (400-Level Archaeological Science or Biological Anthropology Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANTH"
         },
         {
           "type": "pool",

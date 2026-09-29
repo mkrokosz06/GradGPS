@@ -180,8 +180,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (consult with an academic adviser for options)",
           "credits": 3.0
         }
       ]
@@ -205,13 +206,15 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced Elective (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {
@@ -243,13 +246,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced Elective",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Genearl Education Course",
           "credits": 3.0
         },
         {
@@ -275,13 +280,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced Elective (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {

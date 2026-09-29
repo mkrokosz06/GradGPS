@@ -69,9 +69,13 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "ACCTG 211",
-          "credits": 4.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (ACCTG 211 is recommended)",
+          "credits": 4.0,
+          "codes": [
+            "ACCTG 211"
+          ]
         }
       ]
     },
@@ -137,14 +141,22 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "FIN 301",
-          "credits": 3.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (FIN 301 is recommended)",
+          "credits": 3.0,
+          "codes": [
+            "FIN 301"
+          ]
         },
         {
-          "type": "course",
-          "code": "RM 214",
-          "credits": 1.5
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (RM 214 is recommended)",
+          "credits": 1.5,
+          "codes": [
+            "RM 214"
+          ]
         }
       ]
     },
@@ -224,8 +236,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
           "credits": 3.0
         },
         {
@@ -246,13 +259,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {
@@ -281,8 +296,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {
@@ -296,8 +312,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
           "credits": 3.0
         }
       ]

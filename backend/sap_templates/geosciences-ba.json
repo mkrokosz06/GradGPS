@@ -210,18 +210,21 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Course",
           "credits": 3.0
         },
         {
@@ -237,9 +240,24 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced 300/400 level GEOSC course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "GEOSC"
         },
         {
           "type": "gen_ed",
@@ -247,18 +265,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Course",
           "credits": 3.0
         },
         {
@@ -274,28 +283,35 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced 300/400 level GEOSC course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "GEOSC"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Field/lab experience",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Writing intensive course from within Earth and Mineral Sciences",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "World Cultures course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         }
       ]

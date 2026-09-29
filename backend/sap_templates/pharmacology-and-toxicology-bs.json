@@ -296,8 +296,9 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Elective",
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Elective or Supporting Coursess",
           "credits": 3.0
         },
         {
@@ -331,8 +332,9 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Elective",
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Elective or Supporting Course",
           "credits": 3.0
         },
         {

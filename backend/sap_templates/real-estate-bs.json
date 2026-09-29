@@ -297,7 +297,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective Course",
           "credits": 3.0
         }
       ]

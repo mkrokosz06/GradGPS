@@ -238,8 +238,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Electve (see notes)",
           "credits": 3.0
         },
         {

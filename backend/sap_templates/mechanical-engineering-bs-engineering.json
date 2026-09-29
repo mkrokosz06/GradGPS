@@ -149,8 +149,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Science Elective",
           "credits": 3.0
         },
         {
@@ -240,8 +241,9 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Technical Elective (ETE)",
           "credits": 3.0
         },
         {
@@ -250,8 +252,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Mechanical Engineering Technical Elective (METE)",
           "credits": 3.0
         },
         {
@@ -292,13 +295,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "General Technical Elective (GTE)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Technical Elective (ETE)",
           "credits": 3.0
         }
       ]

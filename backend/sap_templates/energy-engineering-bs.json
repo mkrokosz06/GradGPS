@@ -198,8 +198,9 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Material Science Elective from Approved Department List",
           "credits": 3.0
         }
       ]
@@ -233,8 +234,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Fuel Science Elective from Approved Department List",
           "credits": 3.0
         },
         {
@@ -250,13 +252,15 @@
       "credits": 18.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Professional Elective from Approved Department List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Fuel Science Elective from Approved Department List",
           "credits": 3.0
         },
         {
@@ -278,8 +282,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective from Approved Department List",
           "credits": 3.0
         }
       ]
@@ -295,28 +300,33 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Energy Systems Elective from Approved Department List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective from Approved Department List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective from Approved Department List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Professional Elective from Approved Department List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Energy Systems Elective from Approved Department List",
           "credits": 3.0
         }
       ]

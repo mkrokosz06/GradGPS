@@ -123,8 +123,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C",
           "credits": 3.0
         },
         {
@@ -233,9 +234,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MICRB Elective (List B)",
+          "credits": 3.0,
+          "dept": "MICRB"
         },
         {
           "type": "gen_ed",
@@ -268,13 +271,16 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MICRB Elective (List B)",
+          "credits": 3.0,
+          "dept": "MICRB"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C",
           "credits": 3.0
         },
         {
@@ -290,14 +296,18 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MICRB Elective (List A)",
+          "credits": 3.0,
+          "dept": "MICRB"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MICRB Elective (List B)",
+          "credits": 3.0,
+          "dept": "MICRB"
         },
         {
           "type": "choose_one",
@@ -310,8 +320,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C",
           "credits": 3.0
         },
         {

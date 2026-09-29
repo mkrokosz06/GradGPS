@@ -60,9 +60,11 @@
           "gen_ed": "GQ"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC Lower-Level Course",
+          "credits": 3.0,
+          "dept": "SOC"
         },
         {
           "type": "gen_ed",
@@ -101,13 +103,16 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC Lower-Level Course",
+          "credits": 3.0,
+          "dept": "SOC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pathway Course",
           "credits": 3.0
         },
         {
@@ -120,7 +125,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.5,
+      "credits": 16.0,
       "slots": [
         {
           "type": "course",
@@ -128,9 +133,11 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC Lower-Level Course",
+          "credits": 3.0,
+          "dept": "SOC"
         },
         {
           "type": "gen_ed",
@@ -168,8 +175,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pathway Course",
           "credits": 3.0
         },
         {
@@ -200,8 +208,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pathway Course",
           "credits": 3.0
         },
         {
@@ -240,8 +249,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pathway Course",
           "credits": 3.0
         },
         {
@@ -270,8 +280,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Pathway Course",
           "credits": 3.0
         },
         {

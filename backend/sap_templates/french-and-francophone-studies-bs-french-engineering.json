@@ -102,8 +102,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
@@ -139,13 +140,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
@@ -181,8 +184,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
@@ -252,8 +256,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
@@ -280,13 +285,15 @@
           "gen_ed": "IL"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Engineering Course",
           "credits": 3.0
         },
         {

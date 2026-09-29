@@ -205,7 +205,13 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
     if "world language" in low:
         return {"type": "pool", "ref": "world_language", "label": text, "credits": credits}
     if "business breadth" in low:
-        return {"type": "pool", "ref": "business_breadth", "label": "Business Breadth Course", "credits": credits}
+        slot = {"type": "pool", "ref": "business_breadth", "label": "Business Breadth Course", "credits": credits}
+        if codes:
+            # "BA 411 or a Business Breadth course" (Smeal): BA 411 fills it too.
+            # Hand-restored in 6f6fea7 after this branch flattened it; now scraped.
+            slot.update(label="BA 411 or a Business Breadth course" if codes == ["BA 411"] else text,
+                        codes=codes)
+        return slot
     # A department level-selection placeholder — "EDTHP 400 Level Selection",
     # "PLSC 400-Level" — means pick ANY course in that department at that level.
     # Without this branch the code regex reduces it to a literal course ("PLSC
@@ -229,12 +235,28 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
     # SUBPLAN_PROGRAMS `supporting` spec stamps the concrete codes on afterward
     # (see _apply_supporting).
     if "supporting course" in low or (low.startswith("supporting") and not codes):
-        return {"type": "pool", "ref": "supporting", "label": text, "credits": credits}
+        slot = {"type": "pool", "ref": "supporting", "label": text, "credits": credits}
+        if codes:
+            # "PHYS 213 (or Supporting Course)", "Supporting Course (ACCTG 211 is
+            # recommended)": the named course anchors the pool — offered by the
+            # picker, and satisfies the slot if taken — without being required.
+            slot["codes"] = codes
+        return slot
     # A free-elective cell: bare "Elective"/"Electives", or any "… Elective …"
     # phrasing with no codes ("General Elective Course"). Without the broad
     # no-codes match these fall through to the default gen_ed return and get
     # soaked up by spare gen-ed courses instead of a real elective.
     if "elective" in low and not codes:
+        # Only an unqualified elective is FREE — satisfied by any spare credits.
+        # "Chemical Engineering Elective", "CMPEN Elective", "Technical Elective"
+        # draw on a department list; typed free, a student's unrelated surplus
+        # credits "completed" their technical electives.
+        core = re.sub(r"\([^)]*\)|\bcourses?\b|\(s\)", " ", low)
+        core = re.sub(r"[^a-z/ ]", " ", core).split()
+        qualifiers = [w for w in core if w not in {"elective", "electives", "general", "free",
+                                                   "or", "and", "a", "an", "see", "notes", "note"}]
+        if qualifiers and not re.search(r"general education|gen ed|world cultures|minor|/", low):
+            return _classify_placeholder(text, gened, credits, major=True)
         return {"type": "elective", "label": text or "Elective", "credits": credits}
     if "general education" in low or (gened and not codes):
         return {"type": "gen_ed", "category": gened, "credits": credits}
@@ -251,8 +273,76 @@ def _classify(text: str, codes: list[str], credits: float) -> dict:
         if gened:
             slot["gen_ed"] = gened
         return slot
-    # No codes, no recognized keyword → treat as a generic gen-ed/elective slot.
-    return {"type": "gen_ed", "category": gened, "credits": credits}
+    return _classify_placeholder(text, gened, credits)
+
+
+# A codeless grid cell that IS general education: a domain, the first-year
+# seminar, cultures, health and wellness, integrative studies.
+_GENED_LABEL = re.compile(
+    r"general\s+ed|gen\s*ed\b|\b(?:GA|GH|GN|GS|GQ|GHW|GWS|US|IL)\b|first[\s-]*year|\bFYS\b"
+    r"|health and (?:physical|wellness)|wellness|\bcultures?\b|knowledge domain|inter-?domain"
+    r"|integrative|exploration|quantification|foundation", re.I)
+# A Bachelor of Arts degree requirement (BA Fields, BA World Cultures, a foreign
+# language) — neither general education nor the major.
+_BA_LABEL = re.compile(
+    r"\bB\.?\s?A\.?\s+(?:fields?|world|other|knowledge|requirement|course)|bachelor of arts"
+    r"|world cultures|other cultures|foreign language|language level", re.I)
+_LEVEL_LABEL = re.compile(r"\b(\d)(?:00|xx|XX)[\s-]*(?:or\s+\d00[\s-]*)?level\b|\blevel\s+(\d)00\b", re.I)
+
+
+def _classify_placeholder(text: str, gened: str | None, credits: float,
+                          major: bool = False) -> dict:
+    """A cell with no course code and no keyword the branches above know.
+
+    This used to fall through to a category-less gen-ed slot. But most such cells
+    are MAJOR requirements — "400-Level HIST Course", "Option Course", "MATSE
+    Specialization Course", "Application Focus Selection" (1,137 slots in 187
+    templates) — and a category-less gen-ed slot is retired once the student's
+    gen-eds are done, so real major coursework silently left the plan of every
+    student far enough along. Only genuine gen-ed labels stay gen-ed."""
+    label = re.sub(r"\s+", " ", re.sub(r"[\*#†‡§¶]+", "", text)).strip() or "Major Course"
+    # A zero-credit cell is an instruction ("Enter the major before the end of
+    # this semester…"), not coursework — keep the old, inert handling.
+    if major:                                 # a qualified elective: always the major's
+        return _scope({"type": "pool", "ref": "major_selection", "label": label,
+                       "credits": credits}, text)
+    if not credits:
+        return {"type": "gen_ed", "category": gened, "credits": credits}
+    # B.A. before gen-ed: "BA World Cultures" would otherwise read as gen-ed cultures.
+    if _BA_LABEL.search(text):
+        return {"type": "pool", "ref": "ba_requirement", "label": label, "credits": credits}
+    if _GENED_LABEL.search(text):
+        return {"type": "gen_ed", "category": gened, "credits": credits}
+    slot = {"type": "pool",
+            "ref": "application_focus" if "application focus" in text.lower() else "major_selection",
+            "label": label, "credits": credits}
+    return _scope(slot, text)
+
+
+def _scope(slot: dict, text: str) -> dict:
+    """Add the dept / level a placeholder's label names ("400-Level HIST Course")."""
+    m = _LEVEL_LABEL.search(text)
+    if m:
+        slot["level"] = int(m.group(1) or m.group(2)) * 100
+    depts = [w for w in re.findall(r"\b[A-Z]{2,5}\b", text) if w in _subjects()]
+    if len(depts) == 1:                      # "400-Level HIST Course"; "HIST/GEOG" is ambiguous
+        slot["dept"] = depts[0]
+    return slot
+
+
+_SUBJECTS: set[str] | None = None
+
+
+def _subjects() -> set[str]:
+    """Every PSU subject prefix (HIST, SOC, MATSE…), from the bulletin course list."""
+    global _SUBJECTS
+    if _SUBJECTS is None:
+        path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bulletin_courses.json")
+        try:
+            _SUBJECTS = {k.split()[0] for k in json.load(open(path, encoding="utf-8"))} - {"BA"}
+        except Exception:
+            _SUBJECTS = set()
+    return _SUBJECTS
 
 
 def parse_plangrid(html: str) -> list[dict]:
@@ -334,10 +424,29 @@ def parse_plangrid(html: str) -> list[dict]:
         out = [_emit(year, term, sems[(year, term)]) for (year, term) in sorted(sems)]
 
     _narrow_family_slots(out)
+    _normalize_breadth(out)
     return out
 
 
-_SITEMAP = "https://bulletins.psu.edu/sitemap.xml"
+def _normalize_breadth(semesters: list[dict]) -> None:
+    """Smeal's Business Breadth is ONE two-piece sequence — two plain breadth
+    slots — beside a "BA 411 or a Business Breadth course" slot. Grids print the
+    trio inconsistently (Finance: two "BA 411 (or Business Breadth Course)" cells
+    and one plain), so make the first ones plain until there are two
+    (docs/business-breadth.md; hand-applied in 6f6fea7, now part of the scrape)."""
+    slots = [s for sem in semesters for s in sem["slots"]
+             if s.get("type") == "pool" and s.get("ref") == "business_breadth"]
+    plain = sum(1 for s in slots if not s.get("codes"))
+    for s in slots:
+        if plain >= 2 or len(slots) < 3:
+            break
+        if s.get("codes"):
+            s.pop("codes")
+            s["label"] = "Business Breadth Course"
+            plain += 1
+
+
+_SITEMAP ="https://bulletins.psu.edu/sitemap.xml"
 
 # UP resident-instruction college path segments (branch campuses excluded — this
 # app is University Park only; see routers.programs.is_up_program).

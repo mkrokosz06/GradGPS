@@ -150,7 +150,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (TURF 100 Turfgrass Mgmt. Recommended)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "TURF 100"
+          ]
         }
       ]
     },
@@ -192,7 +195,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (ACCTG 211 Recommended)",
-          "credits": 4.0
+          "credits": 4.0,
+          "codes": [
+            "ACCTG 211"
+          ]
         }
       ]
     },

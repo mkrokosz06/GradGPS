@@ -195,9 +195,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Electral Engineering 300 or 400 level selection (consult with an academic adviser for options)",
+          "credits": 3.0,
+          "level": 300
         },
         {
           "type": "gen_ed",
@@ -227,9 +229,11 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Electral Engineering 300 or 400 level selection (consult with an academic adviser for options)",
+          "credits": 3.0,
+          "level": 300
         },
         {
           "type": "course",
@@ -281,7 +285,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "GHA Elective",
           "credits": 1.5
         }

@@ -50,9 +50,11 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course at Any Level in JST or Related Area",
+          "credits": 3.0,
+          "dept": "JST"
         },
         {
           "type": "gen_ed",
@@ -87,9 +89,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course at Any Level in JST or Related Area",
+          "credits": 3.0,
+          "dept": "JST"
         },
         {
           "type": "gen_ed",
@@ -111,12 +115,22 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Course in HEBR",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "HEBR"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course at Any Level in JST or Related Area",
+          "credits": 3.0,
+          "dept": "JST"
         },
         {
           "type": "gen_ed",
@@ -129,13 +143,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "B.A. Knowledge Domains",
           "credits": 3.0
         }
       ]
@@ -146,9 +156,18 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course at Any Level in JST or Related Area",
+          "credits": 3.0,
+          "dept": "JST"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Course in JST, HEBR, or Related Area",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",
@@ -156,13 +175,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "B.A. Knowledge Domains",
           "credits": 3.0
         },
         {
@@ -183,9 +198,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Course in JST, HEBR, or Related Area",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",
@@ -210,18 +227,22 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Course in JST, HEBR, or Related Area",
+          "credits": 3.0,
+          "level": 400
+        },
+        {
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "World Cultures",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "B.A. Knowledge Domains",
           "credits": 3.0
         },
         {
@@ -242,9 +263,11 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Course in JST, HEBR, or Related Area",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",

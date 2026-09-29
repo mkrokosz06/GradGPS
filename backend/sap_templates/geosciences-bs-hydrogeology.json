@@ -154,7 +154,8 @@
           "credits": 1.5
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "HYDRO Option Elective",
           "credits": 3.0
         }
@@ -204,7 +205,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "HYDRO Option elective",
           "credits": 3.0
         },
@@ -258,7 +260,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "HYDRO Option elective",
           "credits": 3.0
         },

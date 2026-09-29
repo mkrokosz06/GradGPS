@@ -13,13 +13,15 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - Primary Instrument",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -56,13 +58,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - Primary Instrument",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -103,13 +107,15 @@
       "credits": 17.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - Primary Instrument",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -151,13 +157,15 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - Primary Instrument",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -207,13 +215,16 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Music Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -234,14 +245,18 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Music Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Music Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "choose_one",
@@ -271,18 +286,22 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Music Course",
+          "credits": 3.0,
+          "level": 400
+        },
+        {
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures",
           "credits": 3.0
         },
         {
@@ -313,8 +332,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {

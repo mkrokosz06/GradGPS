@@ -38,19 +38,25 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
-          "type": "course",
-          "code": "MUSIC 116",
-          "credits": 1.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major or MUSIC 116 (see note)",
+          "credits": 1.0,
+          "codes": [
+            "MUSIC 116"
+          ]
         }
       ]
     },
@@ -100,18 +106,21 @@
           "gen_ed": "IL"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 1.0
         }
       ]
@@ -160,18 +169,21 @@
           "gen_ed": "GS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 1.0
         },
         {
@@ -215,24 +227,34 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
-          "type": "course",
-          "code": "MUSIC 152",
-          "credits": 1.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major or MUSIC 152 (see note)",
+          "credits": 1.0,
+          "codes": [
+            "MUSIC 152"
+          ]
         },
         {
-          "type": "course",
-          "code": "MUSIC 270",
-          "credits": 1.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major or MUSIC 270 (see note)",
+          "credits": 1.0,
+          "codes": [
+            "MUSIC 270"
+          ]
         },
         {
           "type": "gen_ed",
@@ -291,13 +313,15 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
@@ -343,13 +367,15 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {
@@ -390,13 +416,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Applied Music (see note)",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major, Ensemble (see note)",
           "credits": 1.0
         },
         {

@@ -149,7 +149,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "US or IL or Elective",
           "credits": 3.0
         },

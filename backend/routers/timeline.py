@@ -18,7 +18,7 @@ from routers.audit import _filter_rows
 from deps import get_user_id
 from plan_templates import load_template
 from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
-                          build_used_codes, build_satisfied_req_codes,
+                          build_used_codes, build_satisfied_req_codes, build_major_pool_codes,
                           build_gen_ed_courses, build_gen_ed_open, match_template)
 from routers.user_choices import get_user_choices
 from routers.courses import _bulletin_courses
@@ -1587,8 +1587,31 @@ def _is_placeholder(c: dict) -> bool:
     return bool(c.get("is_pool") or c.get("gen_ed_categories"))
 
 
+def _eligible_in(c: dict, idx: int, future: list[dict], done: set[str],
+                 tsem: dict[str, int] | None) -> bool:
+    """Could course slot `c` sit in future[idx]? Its prerequisites must be done or
+    planned in an EARLIER term, its corequisites no later than that term. A slot
+    offering alternatives qualifies if any one of them does."""
+    earlier = set(done)
+    for s in future[:idx]:
+        for x in s["courses"]:
+            earlier |= _slot_codes(x)
+    same = set().union(*(_slot_codes(x) for x in future[idx]["courses"])) if future[idx]["courses"] else set()
+    codes = _slot_codes(c)
+    if not codes:
+        return True
+    for code in codes:
+        strict = [a for a, st in _needs(code, earlier, tsem) if st]
+        co = [a for a, st in _needs(code, earlier | same, tsem) if not st]
+        if not strict and not co:
+            return True
+    return False
+
+
 def _hold_for_entrance(future: list[dict], gate: dict | None, depts: set[str],
-                       past_semesters: int, open_codes: set[str] | None = None) -> list[dict]:
+                       past_semesters: int, open_codes: set[str] | None = None,
+                       done: set[str] | None = None,
+                       tsem: dict[str, int] | None = None) -> list[dict]:
     """Keep major-only courses out of semesters before the student is in the major.
 
     PSU's flow: the semester a student finishes their last Entrance to Major
@@ -1673,6 +1696,21 @@ def _hold_for_entrance(future: list[dict], gate: dict | None, depts: set[str],
                 origin["courses"].append(filler)
             elif load + cr > _MAX_CREDITS:
                 continue
+            else:
+                # No placeholder to trade back: pull forward a course the student
+                # CAN take in the vacated term — not major-locked, not pinned, its
+                # prerequisites met by then. Without this an ETI student whose ETI
+                # 301/302 waited for entrance was left a 9-credit spring while BA 302
+                # and ENGL 202C, open to them now, sat a semester later.
+                oi = future.index(origin)
+                pull = next(((ls, f) for ls in late if not ls["term"].startswith("SU")
+                             for f in ls["courses"]
+                             if not f.get("pinned") and not _locked(f) and not _is_placeholder(f)
+                             and f is not c and _eligible_in(f, oi, future, done or set(), tsem)),
+                            None)
+                if pull:
+                    pull[0]["courses"].remove(pull[1])
+                    origin["courses"].append(pull[1])
             sem["courses"].append(c)
             placed = True
             break
@@ -1865,6 +1903,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             build_gen_ed_satisfied(gen_ed_result),
             transcript_courses=transcript_courses,
             used_codes=build_used_codes(audit_result, gen_ed_result),
+            major_pool_codes=build_major_pool_codes(audit_result, template),
             gen_ed_courses=build_gen_ed_courses(gen_ed_result),
             course_choices=course_choices,
             gen_ed_open=build_gen_ed_open(gen_ed_result),
@@ -1933,6 +1972,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         entrance_to_major.major_depts(_plan_codes(requirement_rows, template)),
         sum(1 for t in sorted_terms if t.split()[0] in ("FA", "SP")),
         _template_open_codes(template, gate_codes),
+        done_codes, tsem,
     )
 
     # Last word on order: nothing before a prerequisite or apart from a corequisite

@@ -65,14 +65,19 @@
           "gen_ed": "GN"
         },
         {
-          "type": "course",
-          "code": "BIOL 110",
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 114",
+            "BIOL 115"
+          ],
           "credits": 4.0,
           "gen_ed": "GN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Selection in Consultation with Adviser",
           "credits": 3.0
         },
         {
@@ -113,8 +118,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Selection in Consultation With Adviser",
           "credits": 3.0
         },
         {
@@ -190,14 +196,18 @@
           "gen_ed": "GN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "300-Level Production",
+          "credits": 3.0,
+          "level": 300
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         }
       ]
     },
@@ -228,9 +238,11 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
           "type": "gen_ed",
@@ -245,28 +257,38 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC Selection at 400-Level",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Other Selection",
           "credits": 3.0
         }
       ]
@@ -277,28 +299,37 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ANSC/Other Selection",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Other Selection",
           "credits": 3.0
         }
       ]

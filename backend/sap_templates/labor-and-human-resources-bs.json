@@ -3,7 +3,7 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 124.5,
+  "total_credits": 121.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/labor-human-resources-bs/",
   "scraped": true,
   "semesters": [
@@ -51,14 +51,16 @@
     {
       "year": 1,
       "term_season": "SP",
-      "credits": 15.0,
+      "credits": 13.5,
       "slots": [
         {
           "type": "choose_one",
           "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
             "CAS 138T",
-            "ENGL 138T",
-            "CAS 100"
+            "ENGL 138T"
           ],
           "credits": 3.0
         },
@@ -76,19 +78,14 @@
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "ECON 14",
-            "ECON 102",
-            "ECON 104"
-          ],
-          "credits": 3.0,
-          "gen_ed": "GS"
-        },
-        {
           "type": "gen_ed",
           "category": "GQ",
           "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
         }
       ]
     },
@@ -108,8 +105,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         },
         {
@@ -127,7 +125,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "gen_ed",
@@ -150,8 +148,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         }
       ]
@@ -212,8 +211,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         },
         {
@@ -231,7 +231,7 @@
     {
       "year": 4,
       "term_season": "FA",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -259,11 +259,6 @@
           "type": "elective",
           "label": "Elective",
           "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": "GHW",
-          "credits": 1.5
         }
       ]
     },

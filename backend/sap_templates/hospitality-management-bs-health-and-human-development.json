@@ -102,9 +102,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         },
         {
           "type": "course",
@@ -139,14 +141,18 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         }
       ]
     },
@@ -176,9 +182,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         }
       ]
     },
@@ -203,9 +211,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         },
         {
           "type": "gen_ed",
@@ -230,9 +240,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         },
         {
           "type": "course",
@@ -240,9 +252,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         }
       ]
     },
@@ -262,14 +276,18 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 3.0,
+          "dept": "HM"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 4.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HM Elective",
+          "credits": 4.0,
+          "dept": "HM"
         },
         {
           "type": "gen_ed",

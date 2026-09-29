@@ -58,9 +58,11 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "CAS Additional course (work with adviser)",
+          "credits": 3.0,
+          "dept": "CAS"
         },
         {
           "type": "gen_ed",
@@ -86,9 +88,11 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "CAS Additional course (work with adviser)",
+          "credits": 3.0,
+          "dept": "CAS"
         },
         {
           "type": "gen_ed",
@@ -101,8 +105,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -116,12 +121,14 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "CAS Additional course (work with adviser)",
+          "credits": 3.0,
+          "dept": "CAS"
         },
         {
           "type": "gen_ed",
@@ -139,8 +146,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         }
       ]
@@ -194,8 +202,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -232,13 +241,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting CAS course (work with adviser)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "World Cultures",
           "credits": 3.0
         },
         {

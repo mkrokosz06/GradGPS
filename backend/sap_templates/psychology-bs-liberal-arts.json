@@ -39,8 +39,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Option Course",
           "credits": 3.0
         },
         {
@@ -117,8 +118,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Option Supporting Course",
           "credits": 3.0
         }
       ]
@@ -126,7 +128,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 18.0,
+      "credits": 16.5,
       "slots": [
         {
           "type": "course",
@@ -134,8 +136,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Option Course",
           "credits": 3.0
         },
         {
@@ -189,8 +192,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Option Course",
           "credits": 3.0
         }
       ]
@@ -215,13 +219,15 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Option Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Option Supporting Course",
           "credits": 3.0
         },
         {
@@ -281,13 +287,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Option Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Option Supporting Course",
           "credits": 3.0
         },
         {

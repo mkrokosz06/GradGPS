@@ -69,8 +69,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Literature Selection",
           "credits": 3.0
         }
       ]
@@ -133,13 +134,16 @@
           "credits": 5.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related 200 Level Selection",
+          "credits": 3.0,
+          "level": 200
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Art Selection",
           "credits": 3.0
         }
       ]
@@ -163,14 +167,18 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related 200-level Selection",
+          "credits": 3.0,
+          "level": 200
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related 200-level Selection",
+          "credits": 3.0,
+          "level": 200
         },
         {
           "type": "course",

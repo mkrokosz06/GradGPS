@@ -102,8 +102,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "World Cultures",
           "credits": 3.0
         },
         {
@@ -125,8 +126,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -140,8 +142,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain",
           "credits": 3.0
         }
       ]
@@ -165,8 +168,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -175,8 +179,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain (IL Cultures)",
           "credits": 3.0
         }
       ]
@@ -203,8 +208,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -222,8 +228,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain",
           "credits": 3.0
         }
       ]
@@ -256,8 +263,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -302,13 +310,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {

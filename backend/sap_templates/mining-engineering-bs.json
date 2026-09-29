@@ -306,9 +306,11 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MNG Technical Elective from Approved Department List",
+          "credits": 3.0,
+          "dept": "MNG"
         },
         {
           "type": "gen_ed",
@@ -338,9 +340,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MNG Technical Elective from Approved Department List",
+          "credits": 3.0,
+          "dept": "MNG"
         },
         {
           "type": "gen_ed",

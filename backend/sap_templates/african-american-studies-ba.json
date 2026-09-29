@@ -135,7 +135,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -158,8 +158,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         }
       ]
@@ -170,8 +171,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "AFAM any or AFAM elective",
           "credits": 3.0
         },
         {
@@ -181,8 +183,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures",
           "credits": 3.0
         },
         {
@@ -203,8 +206,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {
@@ -241,8 +245,9 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {
@@ -275,8 +280,9 @@
       "credits": 15.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "AFAM any or AFAM elective",
           "credits": 3.0
         },
         {

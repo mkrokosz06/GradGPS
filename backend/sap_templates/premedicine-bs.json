@@ -172,8 +172,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Healthcare Internship",
           "credits": 1.0
         }
       ]
@@ -202,14 +203,22 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "PHYS 213",
-          "credits": 2.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "PHYS 213 (or Supporting Course)",
+          "credits": 2.0,
+          "codes": [
+            "PHYS 213"
+          ]
         },
         {
-          "type": "course",
-          "code": "PHYS 214",
-          "credits": 2.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "PHYS 214 (or Supporting Course)",
+          "credits": 2.0,
+          "codes": [
+            "PHYS 214"
+          ]
         },
         {
           "type": "gen_ed",
@@ -273,18 +282,21 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-Level Supporting Course (Area of Concentration)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Area of Concentration)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Consult with adviser for options)",
           "credits": 3.0
         },
         {
@@ -300,23 +312,27 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-Level Supporting Course (Area of Concentration)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Area of Concentration)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Consult with adviser for options)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Consult with adviser for options)",
           "credits": 2.0
         },
         {

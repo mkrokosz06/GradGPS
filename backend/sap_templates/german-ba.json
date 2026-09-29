@@ -99,8 +99,18 @@
           "credits": 4.0
         },
         {
-          "type": "course",
-          "code": "GER 200",
+          "type": "choose_one",
+          "codes": [
+            "GER 100",
+            "GER 115N",
+            "GER 128N",
+            "GER 131",
+            "GER 143",
+            "GER 166",
+            "GER 175",
+            "GER 189N",
+            "GER 200N"
+          ],
           "credits": 3.0
         },
         {
@@ -123,14 +133,11 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.5,
+      "credits": 16.0,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "GER 201",
-            "GER 208Y"
-          ],
+          "type": "course",
+          "code": "GER 201",
           "credits": 4.0,
           "gen_ed": "IL"
         },
@@ -145,8 +152,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures Course",
           "credits": 3.0
         },
         {
@@ -173,8 +181,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirements",
           "credits": 3.0
         },
         {
@@ -201,19 +210,19 @@
           "gen_ed": "IL"
         },
         {
+          "type": "course",
+          "code": "GER 402",
+          "credits": 3.0
+        },
+        {
           "type": "gen_ed",
           "category": null,
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "GER 344",
-          "credits": 3.0,
-          "gen_ed": "IL"
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirements",
           "credits": 3.0
         },
         {
@@ -233,18 +242,14 @@
           "codes": [
             "GER 411",
             "GER 412",
-            "GER 430"
+            "GER 430",
+            "GER 435"
           ],
           "credits": 3.0
         },
         {
           "type": "gen_ed",
           "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "course",
-          "code": "GER 310",
           "credits": 3.0
         },
         {
@@ -256,6 +261,11 @@
           "type": "gen_ed",
           "category": "GHW",
           "credits": 1.5
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
         }
       ]
     },
@@ -270,9 +280,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Select 3 credits of 300- or 400-level courses in GER, in consultation with major adviser",
+          "credits": 3.0,
+          "level": 300,
+          "dept": "GER"
         },
         {
           "type": "gen_ed",

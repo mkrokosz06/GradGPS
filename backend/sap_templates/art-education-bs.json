@@ -101,13 +101,15 @@
           "gen_ed": "GS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see list)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Literature Selection",
           "credits": 3.0
         },
         {
@@ -138,8 +140,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see list)",
           "credits": 3.0
         },
         {
@@ -148,8 +151,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course, 300/400-level Art History",
           "credits": 3.0
         }
       ]
@@ -176,8 +180,9 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see list)",
           "credits": 3.0
         },
         {
@@ -186,8 +191,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course, 300/400-level Art History",
           "credits": 3.0
         }
       ]
@@ -218,13 +224,15 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see list)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course, 300/400-level studio",
           "credits": 4.0
         }
       ]
@@ -245,8 +253,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course, 300/400-level studio",
           "credits": 4.0
         },
         {

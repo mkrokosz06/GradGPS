@@ -283,14 +283,18 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "EMET Technical Elective",
+          "credits": 3.0,
+          "dept": "EMET"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "EMET Technical Elective",
+          "credits": 3.0,
+          "dept": "EMET"
         },
         {
           "type": "gen_ed",

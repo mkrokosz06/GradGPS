@@ -45,8 +45,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 1",
           "credits": 4.0
         },
         {
@@ -92,8 +93,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 2",
           "credits": 4.0
         },
         {
@@ -114,13 +116,15 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Major Course from Supporting Courses and Related Areas List",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 3",
           "credits": 4.0
         },
         {
@@ -134,8 +138,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         }
       ]
@@ -143,11 +148,12 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.5,
+      "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 110",
           "credits": 4.0
         },
         {
@@ -166,8 +172,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         }
       ]
@@ -193,13 +200,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domains Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 401",
           "credits": 4.0
         }
       ]
@@ -210,8 +219,9 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 402",
           "credits": 4.0
         },
         {
@@ -249,8 +259,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 403",
           "credits": 4.0
         },
         {
@@ -276,8 +287,9 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Asian Language Level 404",
           "credits": 4.0
         },
         {

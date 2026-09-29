@@ -119,23 +119,26 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Business & Management",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Analysis & Technology",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Energy & Science",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         },
         {
@@ -186,18 +189,21 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Business & Management",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Analysis & Technology",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Energy & Science",
           "credits": 3.0
         },
         {
@@ -207,7 +213,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         }
       ]
@@ -245,21 +251,23 @@
       "credits": 13.0,
       "slots": [
         {
-          "type": "choose_one",
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course - Ethics, Leadership, & Communications - recommend SUST 200 or PHIL 133N",
+          "credits": 3.0,
           "codes": [
             "SUST 200",
             "PHIL 133N"
-          ],
+          ]
+        },
+        {
+          "type": "elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         },
         {

@@ -184,7 +184,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (CMPSC 221 is recommended)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "CMPSC 221"
+          ]
         },
         {
           "type": "gen_ed",
@@ -207,13 +210,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Computational Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Computational Course",
           "credits": 3.0
         },
         {
@@ -252,8 +257,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Computational Course",
           "credits": 3.0
         },
         {

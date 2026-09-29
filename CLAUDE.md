@@ -308,6 +308,29 @@ the base (no-option) plan when the base is still an untouched first-grid scrape 
 Mathematics' base was hand-edited and left alone). Rejected on purpose: RN to BSN (a 90-credit
 completion degree). Tests: `tests/test_sap_options.py` (13).
 
+**Placeholder slots + template refresh (Sept 2026).** A codeless grid cell the classifier didn't know
+("400-Level HIST Course", "Option Course", "Application Focus Selection", "Chemical Engineering
+Elective") fell through to a category-less gen-ed slot — and those are retired once a student's gen-eds
+are done, so **1,137 major slots in 187 templates** (+133 B.A.-requirement slots) silently left the plans
+of students far enough along. `scrape_sap._classify_placeholder` now types them:
+- `major_selection` / `application_focus` pools (with `dept`/`level` when the label names them) —
+  satisfied by `sap_schedule._assign_major_selections` from courses the **major audit** credited to a
+  pool the template does **not** itemize (`build_major_pool_codes(audit, template)`; ETI's CMPSC 131 is
+  the IST 140 slot's, not a focus course). **Never** from leftover electives. Unsatisfied → scheduled.
+- `ba_requirement` pools ("BA Fields", "World Cultures") — satisfied from leftovers before free electives.
+- Only an **unqualified** elective ("Elective", "General Elective") is free; "Technical/Engineering/
+  CMPEN Elective" is `major_selection` (typed free, a ChemE student's unrelated surplus "completed" them).
+- Supporting / breadth cells keep their named course as an anchor ("PHYS 213 (or Supporting Course)");
+  `_normalize_breadth` keeps Smeal's two plain sequence slots (the 6f6fea7 hand edit, now scraped).
+Slot keys carry dept/level (`pool:MAJOR_SELECTION:HIST:400#s12`) so `/courses` search scopes itself —
+the placeholders are searchable in the existing app build.
+
+`scripts/refresh_sap_templates.py --cache DIR [--write]` regenerates every template from today's
+bulletin (27 were stale — ETI lacked ETI 100/200 entirely). Every earlier template edit is reproducible
+by the scraper (git history is scraper output + LA 83/283 + 6f6fea7 + Forensic Chemistry, re-applied via
+`SUBPLAN_PROGRAMS`). Verified: 300 of 307 fresh-student plans identical in length/credits (the 7 are the
+majors PSU changed); every real-user plan change was traced. Tests: `tests/test_plan_placeholders.py`.
+
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`, `--options`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
 ### Minors & certificates (credentials)
@@ -691,6 +714,10 @@ nothing. The response's gate carries `major_courses_from`; moved slots carry `he
   bulletin has prerequisites only; public LionPATH's `robots.txt` is `Disallow: /`). A course is locked
   if it is 300/400-level (incl. `FIN 4XX` placeholders) in the major's dominant upper-level prefix
   (`major_depts()`) and is **not** a gate course (Smeal's gate includes FIN 301).
+- **The gap is filled, not left empty**: with no pool/gen-ed placeholder to trade back, the hold pulls
+  forward a later course that isn't locked or pinned and whose prerequisites are met by then
+  (`_eligible_in`, via `course_prereqs`). Without it an ETI student whose ETI 301/302 waited got a
+  9-credit spring while BA 302 and ENGL 202C — open to them — sat a term later.
 - **PSU's plan overrides the heuristic**: anything a SAP template schedules in or before its own entrance
   semester is open (`_template_open_codes()` — SCM 301 sits beside FIN 301 in Supply Chain's plan). With
   that, a fresh student in all 157 gated templated majors sees **zero** moves; it only bites for students

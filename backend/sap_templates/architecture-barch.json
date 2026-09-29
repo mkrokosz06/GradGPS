@@ -258,8 +258,9 @@
       "credits": 18.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Semester Abroad",
           "credits": 3.0
         },
         {
@@ -278,8 +279,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 3.0
         }
       ]
@@ -300,13 +302,15 @@
           "credits": 6.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 3.0
         }
       ]
@@ -322,13 +326,15 @@
           "credits": 6.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course for Major (see note)",
           "credits": 3.0
         }
       ]

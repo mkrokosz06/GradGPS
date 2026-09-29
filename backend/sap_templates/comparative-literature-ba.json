@@ -30,9 +30,11 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "00 or 100 Level Course in Comparative Literature",
+          "credits": 3.0,
+          "level": 100
         },
         {
           "type": "gen_ed",
@@ -103,8 +105,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Any Level Course in Comparative Literature",
           "credits": 3.0
         },
         {
@@ -128,7 +131,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -143,8 +146,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirements",
           "credits": 3.0
         },
         {
@@ -182,8 +186,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirements",
           "credits": 3.0
         },
         {
@@ -199,13 +204,16 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in CMLIT",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "CMLIT"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "BA World Cultures Course/Elective",
           "credits": 3.0
         },
         {
@@ -220,8 +228,9 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirements",
           "credits": 3.0
         },
         {
@@ -275,14 +284,18 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in Comparative Literature, English Literature, or Foreign Literature",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in Comparative Literature, English Literature, or Foreign Literature",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",

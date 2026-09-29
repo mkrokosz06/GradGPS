@@ -420,6 +420,28 @@ def test_no_room_adds_a_semester():
     assert _where(out)["FIN 408"] == "FA 2027"
 
 
+def test_no_placeholder_pulls_an_eligible_course_into_the_gap():
+    # ETI-shaped: FIN 408 must wait, and the next term holds only named courses.
+    # Without a gen-ed/elective to trade back, an open course (GEOG 30, no
+    # prerequisites) moves up rather than leaving the early term short.
+    from routers.timeline import _hold_for_entrance
+    fut = [_sem("FA 2026", "FIN 301", "FIN 408", "HIST 20"),
+           _sem("SP 2027", "GEOG 30", "FIN 406")]
+    out = _where(_hold_for_entrance(fut, _gate(), {"FIN"}, 0, None, set(), None))
+    assert out["FIN 408"] == "SP 2027"
+    assert out["GEOG 30"] == "FA 2026"
+    assert out["FIN 406"] == "SP 2027"          # locked itself: never pulled forward
+
+
+def test_a_course_is_not_pulled_ahead_of_its_prerequisite():
+    from routers.timeline import _hold_for_entrance
+    # BA 302 needs ACCTG 211 (and ECON / STAT) — none done, so it may not move up.
+    fut = [_sem("FA 2026", "FIN 301", "FIN 408"),
+           _sem("SP 2027", "BA 302")]
+    out = _where(_hold_for_entrance(fut, _gate(), {"FIN"}, 0, None, set(), None))
+    assert out["BA 302"] == "SP 2027"
+
+
 def test_major_depts_takes_dominant_upper_level_prefix():
     codes = ["FIN 301", "FIN 406", "FIN 408", "FIN 4XX", "BA 411", "MATH 110"]
     assert etm.major_depts(codes) == {"FIN"}

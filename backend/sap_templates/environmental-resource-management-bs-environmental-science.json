@@ -80,8 +80,12 @@
           "credits": 2.0
         },
         {
-          "type": "course",
-          "code": "BIOL 110",
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 114",
+            "BIOL 115"
+          ],
           "credits": 4.0
         },
         {
@@ -97,8 +101,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "BIOL 220W",
+          "type": "choose_one",
+          "codes": [
+            "BIOL 220W",
+            "BIOL 224",
+            "BIOL 225W"
+          ],
           "credits": 4.0
         },
         {
@@ -189,7 +197,7 @@
         },
         {
           "type": "course",
-          "code": "ASM 327",
+          "code": "ABSM 327",
           "credits": 3.0
         },
         {
@@ -201,8 +209,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Ecology Selection",
           "credits": 3.0
         },
         {
@@ -233,13 +242,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
@@ -265,18 +276,23 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level ERM Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ERM"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         }
       ]
@@ -292,23 +308,29 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level ERM Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "ERM"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Communications/Sustainability/Leadership Selection",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         }
       ]

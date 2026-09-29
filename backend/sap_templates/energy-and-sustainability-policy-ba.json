@@ -139,8 +139,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields course",
           "credits": 3.0
         },
         {
@@ -150,7 +151,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         }
       ]
@@ -204,8 +205,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields course",
           "credits": 3.0
         },
         {
@@ -215,7 +217,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         }
       ]
@@ -264,12 +266,13 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields course",
           "credits": 3.0
         },
         {
@@ -279,7 +282,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (consider fulfilling with EBF or GEOG minor courses or EARTH certificate courses)",
           "credits": 3.0
         }
       ]

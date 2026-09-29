@@ -3,23 +3,23 @@
   "subplan": null,
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 125.0,
+  "total_credits": 129.0,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/veterinary-biomedical-sciences-bs/",
   "scraped": true,
   "semesters": [
     {
       "year": 1,
       "term_season": "FA",
-      "credits": 15.0,
+      "credits": 17.0,
       "slots": [
         {
           "type": "course",
           "code": "VBSC 50",
-          "credits": 1.0
+          "credits": 3.0
         },
         {
           "type": "gen_ed",
-          "category": "GS",
+          "category": null,
           "credits": 3.0
         },
         {
@@ -35,11 +35,8 @@
           "gen_ed": "GN"
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "MATH 140",
-            "MATH 140B"
-          ],
+          "type": "course",
+          "code": "MATH 140",
           "credits": 4.0,
           "gen_ed": "GQ"
         },
@@ -53,7 +50,7 @@
     {
       "year": 1,
       "term_season": "SP",
-      "credits": 17.0,
+      "credits": 16.0,
       "slots": [
         {
           "type": "choose_one",
@@ -84,10 +81,10 @@
         {
           "type": "choose_one",
           "codes": [
-            "MATH 141",
-            "MATH 141B"
+            "STAT 200",
+            "STAT 250"
           ],
-          "credits": 4.0,
+          "credits": 3.0,
           "gen_ed": "GQ"
         },
         {
@@ -104,8 +101,17 @@
       "slots": [
         {
           "type": "course",
-          "code": "BIOL 110",
-          "credits": 4.0,
+          "code": "BIOL 114",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 115",
+            "BIOL 116"
+          ],
+          "credits": 1.0,
           "gen_ed": "GN"
         },
         {
@@ -142,18 +148,22 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 14.0,
+      "credits": 17.0,
       "slots": [
         {
           "type": "choose_one",
           "codes": [
-            "BIOL 220W",
-            "BIOL 230W",
-            "BIOL 240W",
+            "BIOL 224",
+            "BIOL 225W",
+            "BIOL 226W",
+            "BIOL 234",
+            "BIOL 235W",
+            "BIOL 236W",
+            "BIOL 244",
+            "BIOL 245W",
             "BMB 251"
           ],
-          "credits": 3.0,
-          "gen_ed": "GN"
+          "credits": 3.0
         },
         {
           "type": "course",
@@ -174,6 +184,11 @@
           "type": "course",
           "code": "ANSC 201",
           "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
         }
       ]
     },
@@ -199,23 +214,20 @@
         {
           "type": "choose_one",
           "codes": [
-            "STAT 250",
-            "STAT 200"
-          ],
-          "credits": 3.0,
-          "gen_ed": "GQ"
-        },
-        {
-          "type": "choose_one",
-          "codes": [
             "BIOL 222",
-            "BIOL 322"
+            "BIOL 322",
+            "ANSC 322"
           ],
           "credits": 3.0
         },
         {
           "type": "gen_ed",
           "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Electives",
           "credits": 3.0
         }
       ]
@@ -228,8 +240,8 @@
         {
           "type": "choose_one",
           "codes": [
-            "BMB 402",
-            "BMB 221"
+            "BMB 221",
+            "BMB 402"
           ],
           "credits": 2.0
         },
@@ -250,8 +262,8 @@
           "credits": 2.0
         },
         {
-          "type": "elective",
-          "label": "Elective",
+          "type": "course",
+          "code": "VBSC 300",
           "credits": 3.0
         },
         {
@@ -272,8 +284,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Courses (see department list)",
           "credits": 6.0
         },
         {
@@ -302,19 +315,20 @@
         {
           "type": "choose_one",
           "codes": [
-            "BIOL 472",
-            "ANSC 423"
+            "ANSC 423",
+            "BIOL 472"
           ],
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Electives",
           "credits": 6.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Courses (see department list)",
           "credits": 3.0
         }
       ]

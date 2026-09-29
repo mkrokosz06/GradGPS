@@ -83,8 +83,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]
@@ -115,8 +116,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]
@@ -147,8 +149,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]

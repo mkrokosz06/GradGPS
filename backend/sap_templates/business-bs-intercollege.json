@@ -244,9 +244,13 @@
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "ACCTG 426",
-          "credits": 3.0
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Business Supporting Course (ACCTG 426 is recommended)",
+          "credits": 3.0,
+          "codes": [
+            "ACCTG 426"
+          ]
         }
       ]
     },
@@ -266,8 +270,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Business Supporting Course",
           "credits": 3.0
         },
         {

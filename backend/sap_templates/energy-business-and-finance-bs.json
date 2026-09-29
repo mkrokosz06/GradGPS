@@ -39,8 +39,9 @@
           "gen_ed": "GQ"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Introductory Level Elective",
           "credits": 3.0
         },
         {
@@ -80,8 +81,9 @@
           "gen_ed": "GQ"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Introductory Level Elective",
           "credits": 3.0
         }
       ]
@@ -227,8 +229,9 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced Level Elective",
           "credits": 3.0
         },
         {

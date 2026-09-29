@@ -185,8 +185,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {
@@ -207,13 +208,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {
@@ -242,13 +245,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {
@@ -277,8 +282,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Support Course Selection (Technical or Application)",
           "credits": 3.0
         },
         {

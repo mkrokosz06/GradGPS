@@ -269,6 +269,24 @@ def _resolve_slot_universe(slot_key: str, category: str | None = None,
         return _load_lang()
     if slot_key.upper().startswith("POOL:BUSINESS_BREADTH"):
         return _breadth_courses(program_name, category)
+    m = re.match(r"pool:(MAJOR_SELECTION|APPLICATION_FOCUS|BA_REQUIREMENT):([A-Z-]*):(\d*)#",
+                 slot_key, re.I)
+    if m:
+        # A plan-grid placeholder ("400-Level HIST Course", "Option Course"): the
+        # bulletin's courses, scoped to the dept / level the key carries. An
+        # unscoped one is the whole bulletin, which the caller asks to be searched.
+        dept, level = m.group(2).upper(), int(m.group(3) or 0)
+        out = []
+        for code, info in _bulletin_courses().items():
+            subj, _, num = code.partition(" ")
+            digits = re.match(r"\d+", num)
+            if dept and subj != dept:
+                continue
+            if level and not (digits and level <= int(digits.group()) < level + 100):
+                continue
+            out.append({"course_code": code, "course_title": info.get("title", ""),
+                        "credits": info.get("credits") or 3})
+        return out
     return []
 
 

@@ -36,8 +36,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {
@@ -58,9 +59,12 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "1-100 level PHIL Course",
+          "credits": 3.0,
+          "level": 100,
+          "dept": "PHIL"
         },
         {
           "type": "gen_ed",
@@ -100,8 +104,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {
@@ -133,8 +138,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {
@@ -148,8 +154,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         }
       ]
@@ -160,8 +167,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {
@@ -170,8 +178,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {
@@ -235,23 +244,28 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "4xx level in Mathematics and Science",
+          "credits": 3.0,
+          "level": 400
+        },
+        {
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {
@@ -267,8 +281,9 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Concentration Course",
           "credits": 3.0
         },
         {

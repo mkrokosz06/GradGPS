@@ -109,18 +109,19 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (World Cultures)",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (WAC)",
           "credits": 3.0
         }
       ]
@@ -128,7 +129,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "pool",
@@ -148,8 +149,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -170,14 +172,18 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "IT Additional Courses from List",
+          "credits": 3.0,
+          "dept": "IT"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "IT Additional Courses from List",
+          "credits": 3.0,
+          "dept": "IT"
         },
         {
           "type": "gen_ed",
@@ -202,9 +208,19 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "IT Additional Courses from List",
+          "credits": 3.0,
+          "dept": "IT"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level IT Course from List",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "IT"
         },
         {
           "type": "gen_ed",
@@ -212,13 +228,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         }
       ]
@@ -237,9 +249,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level IT Course from List",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "IT"
         },
         {
           "type": "course",
@@ -254,7 +269,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (US)",
           "credits": 3.0
         }
       ]
@@ -265,9 +280,12 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level IT Course from List",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "IT"
         },
         {
           "type": "gen_ed",
@@ -276,7 +294,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (IL)",
           "credits": 3.0
         },
         {

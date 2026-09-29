@@ -239,6 +239,46 @@ def build_used_codes(*audit_results: dict) -> set[str]:
     return used
 
 
+# Plan-grid placeholders for major / B.A. requirements (scrape_sap._classify_placeholder).
+_PLACEHOLDER_REFS = ("major_selection", "application_focus", "ba_requirement")
+
+_POOL_KINDS = ("choose_credits", "choose_courses", "dept_credits", "unstructured_credits")
+
+
+def build_major_pool_codes(audit_result: dict, template: dict | None = None) -> set[str]:
+    """Base codes the MAJOR audit credited to one of its pools — "Select 6
+    credits of 400-level HIST", "Select 12 credits from an Application Focus".
+    These are what a plan-grid placeholder such as "400-Level HIST Course" or
+    "Application Focus Selection" stands for (see _assign_major_selections).
+    Gen-ed courses are deliberately not included: a GH course must never fill an
+    "Option Course" slot.
+
+    With `template`, a pool the template already itemizes — any of its options is
+    a named slot, as ETI's intro-programming pool is the IST 140 slot — is left
+    out: its course belongs to that slot, and a CMPSC 131 taken for it must not
+    also "complete" an Application Focus Selection."""
+    named: set[str] = set()
+    for sem in (template or {}).get("semesters", []):
+        for slot in sem.get("slots", []):
+            if slot.get("type") == "course":
+                named.add(_base(slot.get("code", "")))
+            elif slot.get("type") in ("choose_one", "pool"):
+                named |= {_base(c) for c in slot.get("codes", [])}
+    out: set[str] = set()
+    for g in (audit_result or {}).get("groups", []):
+        subs = g.get("sub_groups") or []
+        pools = [sg for sg in subs if sg.get("sub_type") in _POOL_KINDS]
+        if not subs and g.get("group_type") in _POOL_KINDS:
+            pools = [g]
+        for pool in pools:
+            if {_base(i.get("course_code", "")) for i in pool.get("items", [])} & named:
+                continue
+            for item in pool.get("items", []):
+                if item.get("status") in ("done", "in_progress"):
+                    out.add(_base(item.get("course_code", "")))
+    return out
+
+
 # ── Slot → schedulable timeline item ─────────────────────────────────────────
 
 def _dedupe_crosslisted(codes: list[str]) -> list[str]:
@@ -466,6 +506,46 @@ def _assign_generic_gen_ed(records: list[dict], gen_ed_courses: list[str],
             rec["satisfied"], rec["item"] = True, None
 
 
+def _assign_major_selections(records: list[dict], pool_courses: list[dict]) -> None:
+    """Satisfy major placeholders ("400-Level HIST Course", "Option Course",
+    "Application Focus Selection") from courses the major audit credited to its
+    pools and no named template slot claimed — one course per slot, in plan
+    order, most specific slots first (a dept and level must both match).
+
+    Never from leftover electives: counting a stray course as an "Option Course"
+    would tell a student they finished coursework they have not. A slot nothing
+    satisfies stays in the plan."""
+    def fits(slot, c):
+        if slot.get("dept") and _dept(c) != slot["dept"]:
+            return False
+        lvl = slot.get("level")
+        return not lvl or lvl <= _course_number(c) < lvl + 100
+    targets = [r for r in records
+               if not r["satisfied"] and r["slot"].get("type") == "pool"
+               and r["slot"].get("ref") in ("major_selection", "application_focus")
+               and not r["slot"].get("codes")]
+    targets.sort(key=lambda r: -(bool(r["slot"].get("dept")) + bool(r["slot"].get("level"))))
+    for rec in targets:
+        hit = next((c for c in pool_courses if fits(rec["slot"], c)), None)
+        if hit:
+            rec["satisfied"], rec["item"] = True, None
+            rec["matched_code"] = _norm(hit.get("course_code", ""))
+            pool_courses.remove(hit)
+
+
+def _assign_ba_requirements(records: list[dict], leftovers: list[dict]) -> None:
+    """Satisfy B.A. degree-requirement placeholders ("BA Fields", "BA World
+    Cultures") from leftover courses, one per slot — before free electives soak
+    up the remainder."""
+    for rec in records:
+        if (rec["satisfied"] or rec["slot"].get("type") != "pool"
+                or rec["slot"].get("ref") != "ba_requirement" or not leftovers):
+            continue
+        hit = leftovers.pop(0)
+        rec["satisfied"], rec["item"] = True, None
+        rec["matched_code"] = _norm(hit.get("course_code", ""))
+
+
 def _assign_electives(records: list[dict], leftovers: list[dict]) -> None:
     """Satisfy free-elective slots from the surplus-credit pool, in plan order.
     Purely credit-count based: any unclaimed course is by definition a free
@@ -561,6 +641,10 @@ def slot_identity(slot: dict, ordinal: int) -> tuple[str, str]:
         if codes:
             return "pool", "pool:" + "|".join(codes)
         ref = _norm(str(slot.get("ref") or slot.get("label") or "pool"))
+        if slot.get("ref") in _PLACEHOLDER_REFS:
+            # Carry the dept / level so the picker's search can scope itself from
+            # the key alone: "pool:MAJOR_SELECTION:HIST:400#s12".
+            return "pool", f"pool:{ref}:{slot.get('dept') or ''}:{slot.get('level') or ''}#s{ordinal}"
         return "pool", f"pool:{ref}#s{ordinal}"
     return "elective", f"elective:s{ordinal}"
 
@@ -587,6 +671,7 @@ def match_template(
     gen_ed_courses: list[str] | None = None,
     course_choices: dict[str, str] | None = None,
     gen_ed_open: bool = True,
+    major_pool_codes: set[str] | None = None,
 ) -> list[dict]:
     """Walk the template in order and produce one record per slot:
 
@@ -640,7 +725,7 @@ def match_template(
             kind, skey = slot_identity(slot, ordinal)
             item["slot_key"] = skey
             item["slot_kind"] = kind
-            if kind == "gen_ed" or (kind == "pool" and slot.get("ref") in ("world_language", "business_breadth") and not slot.get("codes")):
+            if kind == "gen_ed" or (kind == "pool" and slot.get("ref") in ("world_language", "business_breadth", *_PLACEHOLDER_REFS) and not slot.get("codes")):
                 # No bounded option list — the picker offers a course search instead
                 # (gen-ed: pick a domain + course; world language: pick a language
                 # course; business breadth: pick an area + its two-piece sequence).
@@ -690,11 +775,20 @@ def match_template(
         pool = [c for c in (gen_ed_courses or []) if _base(c) not in named_codes]
         _assign_generic_gen_ed(records, pool, gen_ed_open)
 
+    if transcript_courses and major_pool_codes:
+        pool_courses = [c for c in transcript_courses
+                        if c.get("status") in ("done", "in_progress", "transfer")
+                        and _base(c.get("course_code", "")) in major_pool_codes
+                        and not any(_codes_match(t, u) for t in _equivalents(c.get("course_code", ""))
+                                    for u in consumed)]
+        _assign_major_selections(records, pool_courses)
+
     if transcript_courses:
         leftovers = _leftover_courses(transcript_courses, consumed, used_codes or set())
         _assign_world_language(records, leftovers)
         _assign_dept_level(records, leftovers)
         _assign_business_breadth(records, leftovers, template.get("program_name"))
+        _assign_ba_requirements(records, leftovers)
         _assign_electives(records, leftovers)   # electives LAST — soaks up remainder
 
     return records

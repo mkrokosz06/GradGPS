@@ -3,7 +3,7 @@
   "subplan": "Labor and Employment Relations",
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 127.5,
+  "total_credits": 121.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/labor-human-resources-bs/",
   "source_plan": "Labor and Employment Relations Option: Labor and Human Resources, B.S. at University Park Campus and World Campus",
   "scraped": true,
@@ -52,14 +52,16 @@
     {
       "year": 1,
       "term_season": "SP",
-      "credits": 15.0,
+      "credits": 13.5,
       "slots": [
         {
           "type": "choose_one",
           "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C",
             "CAS 138T",
-            "ENGL 138T",
-            "CAS 100"
+            "ENGL 138T"
           ],
           "credits": 3.0
         },
@@ -77,19 +79,14 @@
           "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "ECON 14",
-            "ECON 102",
-            "ECON 104"
-          ],
-          "credits": 3.0,
-          "gen_ed": "GS"
-        },
-        {
           "type": "gen_ed",
           "category": "GQ",
           "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
         }
       ]
     },
@@ -200,7 +197,7 @@
     {
       "year": 3,
       "term_season": "SP",
-      "credits": 18.0,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -228,18 +225,13 @@
           "type": "elective",
           "label": "Elective",
           "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective",
-          "credits": 3.0
         }
       ]
     },
     {
       "year": 4,
       "term_season": "FA",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -267,11 +259,6 @@
           "type": "elective",
           "label": "Elective",
           "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": "GHW",
-          "credits": 1.5
         }
       ]
     },

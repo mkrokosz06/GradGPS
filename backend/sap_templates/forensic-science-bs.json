@@ -270,8 +270,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective Course",
           "credits": 3.0
         }
       ]
@@ -297,8 +297,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (consult your adviser)",
           "credits": 3.0
         },
         {
@@ -307,8 +308,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective Course",
           "credits": 3.0
         }
       ]

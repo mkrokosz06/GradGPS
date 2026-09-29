@@ -106,6 +106,8 @@
           "type": "choose_one",
           "codes": [
             "BIOL 110",
+            "BIOL 114",
+            "BIOL 115",
             "BIOL 127"
           ],
           "credits": 3.0
@@ -195,7 +197,7 @@
         },
         {
           "type": "course",
-          "code": "ASM 327",
+          "code": "ABSM 327",
           "credits": 3.0
         },
         {
@@ -204,8 +206,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
@@ -249,8 +252,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         }
       ]
@@ -271,18 +275,21 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         }
       ]
@@ -301,8 +308,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Specialization/Minor Course",
           "credits": 3.0
         },
         {

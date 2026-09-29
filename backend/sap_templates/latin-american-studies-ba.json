@@ -18,9 +18,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course in LATAM Related Topic",
+          "credits": 3.0,
+          "dept": "LATAM"
         },
         {
           "type": "course",
@@ -51,9 +53,11 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course in LATAM Related Topic",
+          "credits": 3.0,
+          "dept": "LATAM"
         },
         {
           "type": "course",
@@ -89,9 +93,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Course in LATAM Related Topic",
+          "credits": 3.0,
+          "dept": "LATAM"
         },
         {
           "type": "course",
@@ -114,7 +120,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.5,
+      "credits": 16.0,
       "slots": [
         {
           "type": "course",
@@ -149,9 +155,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in LATAM Related Topic",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "LATAM"
         },
         {
           "type": "course",
@@ -164,8 +173,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         },
         {
@@ -181,9 +191,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in LATAM Related Topic",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "LATAM"
         },
         {
           "type": "gen_ed",
@@ -213,9 +226,12 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400 Level Course in LATAM Related Topic",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "LATAM"
         },
         {
           "type": "course",
@@ -223,13 +239,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         },
         {

@@ -13,13 +13,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -65,13 +67,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -116,13 +120,15 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -163,13 +169,15 @@
       "credits": 17.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
           "credits": 1.0
         },
         {
@@ -215,13 +223,15 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course",
           "credits": 1.0
         },
         {
@@ -261,13 +271,15 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course",
           "credits": 3.0
         },
         {
@@ -303,8 +315,9 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {
@@ -345,8 +358,9 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Applied Music - primary instrument (Additional Courses for Option)",
           "credits": 1.0
         },
         {

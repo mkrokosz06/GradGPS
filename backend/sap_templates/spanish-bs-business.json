@@ -215,14 +215,20 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "200- or 300-Level Course in SPAN",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "SPAN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "200- or 300-Level Course in SPAN",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "SPAN"
         },
         {
           "type": "gen_ed",
@@ -258,14 +264,20 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "200- or 300-Level Course in SPAN",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "SPAN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level SPAN Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SPAN"
         }
       ]
     },
@@ -275,19 +287,28 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level SPAN Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SPAN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level SPAN Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SPAN"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level SPAN Course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SPAN"
         },
         {
           "type": "choose_one",

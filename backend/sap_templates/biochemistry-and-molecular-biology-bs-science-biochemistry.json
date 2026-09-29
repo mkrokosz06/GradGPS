@@ -120,8 +120,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {
@@ -199,8 +200,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C (consult with an academic adviser for options)",
           "credits": 1.0
         }
       ]
@@ -271,8 +273,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C Selection (consult with an academic adviser for options)",
           "credits": 3.0
         },
         {
@@ -321,8 +324,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Department List C (consult with an academic adviser for options)",
           "credits": 1.0
         },
         {

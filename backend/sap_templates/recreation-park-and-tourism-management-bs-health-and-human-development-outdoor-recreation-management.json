@@ -207,31 +207,46 @@
           "type": "pool",
           "ref": "supporting",
           "label": "RPTM 230 (or Supporting Course in Consultation with Academic Adviser)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "RPTM 230"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "RPTM 326 (or Supporting Course in Consultation with Academic Adviser)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "RPTM 326"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "RPTM 327 (or Supporting Course in Consultation with Academic Adviser)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "RPTM 327"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "RPTM 425 (or Supporting Course in Consultation with Academic Adviser)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "RPTM 425"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "RPTM 430 (or Supporting Course in Consultation with Academic Adviser)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "RPTM 430"
+          ]
         }
       ]
     },

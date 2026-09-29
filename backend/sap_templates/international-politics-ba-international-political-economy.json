@@ -120,8 +120,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "HIST/GEOG Option",
           "credits": 3.0
         },
         {
@@ -168,8 +169,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         }
       ]
@@ -188,9 +190,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ECON advanced-level option",
+          "credits": 3.0,
+          "dept": "ECON"
         },
         {
           "type": "gen_ed",
@@ -209,8 +213,9 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         }
       ]
@@ -229,9 +234,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ECON advanced-level option",
+          "credits": 3.0,
+          "dept": "ECON"
         },
         {
           "type": "gen_ed",
@@ -239,8 +246,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {

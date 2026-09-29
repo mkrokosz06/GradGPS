@@ -180,8 +180,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
           "credits": 3.0
         }
       ]
@@ -207,8 +208,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection",
           "credits": 3.0
         },
         {
@@ -260,9 +262,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection (300- or 400-level)",
+          "credits": 3.0,
+          "level": 300
         },
         {
           "type": "gen_ed",
@@ -299,9 +303,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection (300- or 400-level)",
+          "credits": 3.0,
+          "level": 300
         },
         {
           "type": "gen_ed",

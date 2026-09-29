@@ -139,8 +139,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": "GN",
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Natural Science (GN) Elective",
           "credits": 2.0
         },
         {
@@ -250,8 +251,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective (Department List)",
           "credits": 3.0
         },
         {
@@ -291,8 +292,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "General Elective (Department List)",
           "credits": 3.0
         },
         {

@@ -180,8 +180,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Natural Resource Policy, Planning, Law, Administration (PPLA) and Human Dimensions (HD) Course",
           "credits": 3.0
         },
         {
@@ -231,8 +232,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Natural Resource Policy, Planning, Law, Administration (PPLA) and Human Dimensions (HD) Course",
           "credits": 3.0
         },
         {
@@ -267,13 +269,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Fisheries Selection",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Botany Selection",
           "credits": 3.0
         }
       ]

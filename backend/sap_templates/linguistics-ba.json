@@ -76,8 +76,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Linguistics Social Science Requirement",
           "credits": 3.0
         },
         {
@@ -129,7 +130,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 17.5,
+      "credits": 16.0,
       "slots": [
         {
           "type": "course",
@@ -143,13 +144,15 @@
           "gen_ed": "GQ"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Field Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Field Course",
           "credits": 3.0
         },
         {
@@ -197,8 +200,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Non-English Linguistics Course",
           "credits": 3.0
         },
         {
@@ -207,13 +211,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Field Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures Course",
           "credits": 3.0
         },
         {
@@ -235,8 +241,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Area Course",
           "credits": 3.0
         },
         {
@@ -268,8 +275,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Area Course",
           "credits": 3.0
         },
         {

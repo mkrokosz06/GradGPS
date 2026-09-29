@@ -132,8 +132,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see note 1)",
           "credits": 3.0
         }
       ]
@@ -170,8 +171,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major (see note 1)",
           "credits": 3.0
         },
         {
@@ -236,8 +238,9 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Semester Abroad",
           "credits": 3.0
         },
         {
@@ -320,8 +323,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Add Additional Course for Major (see note 1)",
           "credits": 3.0
         },
         {

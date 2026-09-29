@@ -247,7 +247,8 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Biomechanics Elective",
           "credits": 3.0
         }
@@ -283,7 +284,8 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Biomechanics Elective",
           "credits": 3.0
         },
@@ -310,17 +312,20 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Biomechanics Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Related Technical Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Science or Engineering Elective",
           "credits": 3.0
         },

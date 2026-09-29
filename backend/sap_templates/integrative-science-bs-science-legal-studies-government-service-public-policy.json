@@ -82,8 +82,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Global, Social, and Personal Awareness Course (from Department List)",
           "credits": 3.0
         },
         {
@@ -111,18 +112,21 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Life, Mathematical, or Physical Science Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Teamwork and Interpersonal Communication Course (from Department List)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Legal Studies, Government Service, Public Policy Course (from Department List)",
           "credits": 3.0
         },
         {
@@ -157,13 +161,15 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Life, Mathematical, or Physical Science Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Legal Studies, Government Service, Public Policy Course (from Department List)",
           "credits": 3.0
         },
         {
@@ -197,13 +203,15 @@
           "gen_ed": "GQ"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Life, Mathematical, or Physical Science Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Legal Studies, Government Service, Public Policy Course (from Department List)",
           "credits": 3.0
         },
         {
@@ -238,13 +246,16 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Life, Mathematical, or Physical Science Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Legal Studies, Government Service, Public Policy Course (from Department List)",
           "credits": 3.0
         },
         {
@@ -263,23 +274,33 @@
           "type": "pool",
           "ref": "supporting",
           "label": "PHYS 213 (or Supporting Course)",
-          "credits": 2.0
+          "credits": 2.0,
+          "codes": [
+            "PHYS 213"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "PHYS 214 (or Supporting Course)",
-          "credits": 2.0
+          "credits": 2.0,
+          "codes": [
+            "PHYS 214"
+          ]
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Life, Mathematical, or Physical Science Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Legal Studies, Government Service, Public Policy Course (from Department List)",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",
@@ -294,14 +315,18 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Life, Mathematical, or Physical Science Course",
+          "credits": 3.0,
+          "level": 400
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "400-Level Legal Studies, Government Service, Public Policy Course (from Department List)",
+          "credits": 3.0,
+          "level": 400
         },
         {
           "type": "gen_ed",

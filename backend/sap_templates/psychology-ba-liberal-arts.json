@@ -66,9 +66,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "PSYCH 2xx Level (Group A, B, C or Additional)",
+          "credits": 3.0,
+          "level": 200,
+          "dept": "PSYCH"
         },
         {
           "type": "pool",
@@ -128,7 +131,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -164,8 +167,9 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domains Course",
           "credits": 3.0
         },
         {
@@ -217,13 +221,15 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domains Course",
           "credits": 3.0
         },
         {
@@ -288,8 +294,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Knowledge Domain Course",
           "credits": 3.0
         },
         {

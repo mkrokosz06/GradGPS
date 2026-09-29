@@ -226,13 +226,15 @@
           "gen_ed": "GA"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major - Advanced Dance (see list)",
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major - Chorale Ensemble (see list)",
           "credits": 2.0
         },
         {
@@ -283,8 +285,9 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Course for Major - Advanced Dance (see list)",
           "credits": 1.5
         },
         {

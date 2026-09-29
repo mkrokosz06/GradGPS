@@ -154,7 +154,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -170,8 +170,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Course In Consultation with Adviser",
           "credits": 3.0
         },
         {
@@ -208,8 +209,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Course in Consultation with Adviser",
           "credits": 3.0
         },
         {
@@ -244,13 +246,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Methodology Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Course in Consultation with Adviser",
           "credits": 3.0
         },
         {
@@ -279,18 +283,20 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Methodology Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Related Course in Consultation with Adviser",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (WAC)",
           "credits": 3.0
         },
         {
@@ -306,9 +312,11 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "PLSC Capstone",
+          "credits": 3.0,
+          "dept": "PLSC"
         },
         {
           "type": "pool",
@@ -319,8 +327,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Methodology Course",
           "credits": 3.0
         },
         {

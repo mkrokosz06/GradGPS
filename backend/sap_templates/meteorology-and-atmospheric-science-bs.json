@@ -202,7 +202,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         }
@@ -224,17 +225,20 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         }
@@ -246,17 +250,20 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         },
         {
-          "type": "elective",
+          "type": "pool",
+          "ref": "major_selection",
           "label": "Professional Elective",
           "credits": 3.0
         },

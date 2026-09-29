@@ -73,7 +73,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (ACCTG 211 is recommended)",
-          "credits": 4.0
+          "credits": 4.0,
+          "codes": [
+            "ACCTG 211"
+          ]
         }
       ]
     },
@@ -142,13 +145,19 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (FIN 301 is recommended)",
-          "credits": 3.0
+          "credits": 3.0,
+          "codes": [
+            "FIN 301"
+          ]
         },
         {
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (RM 214 is recommended)",
-          "credits": 1.5
+          "credits": 1.5,
+          "codes": [
+            "RM 214"
+          ]
         }
       ]
     },
@@ -251,13 +260,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {
@@ -286,8 +297,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "STAT, RM, or IE",
           "credits": 3.0
         },
         {

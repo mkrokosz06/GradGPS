@@ -204,8 +204,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SET Elective",
           "credits": 3.0
         }
       ]
@@ -296,14 +297,17 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "System Elective",
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATH Requirement",
+          "credits": 3.0,
+          "dept": "MATH"
         },
         {
           "type": "gen_ed",

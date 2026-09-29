@@ -100,8 +100,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Knowledge Domain",
           "credits": 3.0
         },
         {
@@ -146,8 +147,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Knowledge Domain",
           "credits": 3.0
         },
         {
@@ -190,8 +192,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts Knowledge Domain",
           "credits": 3.0
         },
         {
@@ -212,18 +215,21 @@
       "credits": 21.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "(Optional Semester in London)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "If at University Park campus:",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Literature & Theory",
           "credits": 3.0
         },
         {
@@ -277,8 +283,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "Bachelor of Arts World Cultures",
           "credits": 3.0
         },
         {

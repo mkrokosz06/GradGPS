@@ -42,8 +42,9 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Agriculture Course (any College of Agricultural Sciences course)",
           "credits": 3.0
         },
         {
@@ -87,8 +88,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Agriculture Course (any College of Agricultural Sciences course)",
           "credits": 3.0
         }
       ]
@@ -110,9 +112,11 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Animal Science Course (any ANSC course)",
+          "credits": 3.0,
+          "dept": "ANSC"
         },
         {
           "type": "gen_ed",
@@ -177,8 +181,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         },
         {
@@ -233,8 +238,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         }
       ]
@@ -263,9 +269,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Horticulture Course (any HORT course)",
+          "credits": 3.0,
+          "dept": "HORT"
         },
         {
           "type": "gen_ed",
@@ -290,18 +298,21 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Ag Economics & Rural Sociology Course (any AGBM, CED, or RSOC course)",
           "credits": 3.0
         },
         {
@@ -322,23 +333,27 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Crop Managment Course (any AGECO, AGRO, or ENT course)",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "College of Agricultural Sciences Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Agriculture Course (any College of Agricultural Sciences course)",
           "credits": 3.0
         },
         {

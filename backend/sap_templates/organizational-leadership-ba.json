@@ -132,7 +132,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "choose_one",
@@ -145,8 +145,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
@@ -161,7 +162,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (US)",
           "credits": 3.0
         }
       ]
@@ -177,8 +178,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
@@ -188,7 +190,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (IL)",
           "credits": 3.0
         },
         {
@@ -209,8 +211,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields Course",
           "credits": 3.0
         },
         {
@@ -220,7 +223,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective/World Cultures Course",
           "credits": 3.0
         },
         {

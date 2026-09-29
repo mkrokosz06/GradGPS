@@ -147,7 +147,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "AGECO 154 (or Supporting Course)",
-          "credits": 2.0
+          "credits": 2.0,
+          "codes": [
+            "AGECO 154"
+          ]
         }
       ]
     },
@@ -306,7 +309,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "SOILS 403 (or Supporting Course)",
-          "credits": 2.0
+          "credits": 2.0,
+          "codes": [
+            "SOILS 403"
+          ]
         },
         {
           "type": "pool",

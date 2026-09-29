@@ -39,8 +39,8 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "Intro GEOSC/EARTH elective",
           "credits": 3.0
         }
       ]
@@ -79,8 +79,8 @@
           "gen_ed": "GWS"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "Intro GEOSC/EARTH elective",
           "credits": 3.0
         }
       ]
@@ -119,8 +119,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         }
       ]
@@ -136,8 +137,8 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "Intro GEOSC/EARTH elective",
           "credits": 3.0
         },
         {
@@ -146,14 +147,17 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced EARTH elective",
+          "credits": 3.0,
+          "dept": "EARTH"
         }
       ]
     },
@@ -163,23 +167,27 @@
       "credits": 14.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced EARTH elective",
+          "credits": 3.0,
+          "dept": "EARTH"
+        },
+        {
+          "type": "elective",
+          "label": "Intro GEOSC/EARTH elective",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor course",
           "credits": 3.0
         },
         {
@@ -195,8 +203,19 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "elective",
+          "label": "Advanced GEOSC/EARTH elective",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Intro GEOSC/EARTH elective",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -205,18 +224,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
           "credits": 3.0
         },
         {
@@ -232,9 +242,11 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced EARTH elective",
+          "credits": 3.0,
+          "dept": "EARTH"
         },
         {
           "type": "gen_ed",
@@ -242,8 +254,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
@@ -269,28 +282,35 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Advanced EARTH elective",
+          "credits": 3.0,
+          "dept": "EARTH"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "EARTH Field/lab experience",
+          "credits": 3.0,
+          "dept": "EARTH"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Writing across the curriculum course in EMS",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Minor Course",
           "credits": 3.0
         }
       ]

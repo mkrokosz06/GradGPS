@@ -116,8 +116,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "GTE - General Tech Elective",
           "credits": 3.0
         }
       ]
@@ -180,8 +181,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "GTE - General Tech Elective",
           "credits": 1.0
         },
         {

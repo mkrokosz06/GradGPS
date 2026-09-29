@@ -102,8 +102,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Courses and Related Areas",
           "credits": 3.0
         },
         {
@@ -129,8 +130,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Courses and Related Areas",
           "credits": 3.0
         },
         {
@@ -166,8 +168,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Suppoting Courses and Related Areas",
           "credits": 3.0
         },
         {
@@ -212,8 +215,9 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Courses are Related Areas",
           "credits": 3.0
         }
       ]

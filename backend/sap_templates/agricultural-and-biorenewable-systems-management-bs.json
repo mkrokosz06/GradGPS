@@ -158,13 +158,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         }
       ]
@@ -220,18 +222,23 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ABSM Selection",
+          "credits": 3.0,
+          "dept": "ABSM"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ABSM Selection",
+          "credits": 3.0,
+          "dept": "ABSM"
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         },
         {
@@ -267,14 +274,17 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ABSM Selection",
+          "credits": 3.0,
+          "dept": "ABSM"
         }
       ]
     },
@@ -294,18 +304,22 @@
           "credits": 2.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "ABSM Selection",
+          "credits": 3.0,
+          "dept": "ABSM"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Additional Specialization",
           "credits": 3.0
         }
       ]

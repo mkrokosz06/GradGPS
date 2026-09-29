@@ -185,7 +185,7 @@
         },
         {
           "type": "elective",
-          "label": "General Elective",
+          "label": "General Elective Course",
           "credits": 3.0
         }
       ]
@@ -224,6 +224,7 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Approved Supporting Course",
+          "credits": 3.0,
           "codes": [
             "BMB 428",
             "CHEM 410",
@@ -233,8 +234,7 @@
             "CHEM 431W",
             "CHEM 450",
             "CHEM 452"
-          ],
-          "credits": 3.0
+          ]
         },
         {
           "type": "gen_ed",
@@ -267,6 +267,7 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Approved Supporting Course",
+          "credits": 3.0,
           "codes": [
             "BMB 428",
             "CHEM 410",
@@ -276,8 +277,7 @@
             "CHEM 431W",
             "CHEM 450",
             "CHEM 452"
-          ],
-          "credits": 3.0
+          ]
         },
         {
           "type": "gen_ed",
@@ -286,7 +286,7 @@
         },
         {
           "type": "elective",
-          "label": "General Elective",
+          "label": "General Elective Course",
           "credits": 3.0
         }
       ]
@@ -310,6 +310,7 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Approved Supporting Course",
+          "credits": 3.0,
           "codes": [
             "BMB 428",
             "CHEM 410",
@@ -319,8 +320,7 @@
             "CHEM 431W",
             "CHEM 450",
             "CHEM 452"
-          ],
-          "credits": 3.0
+          ]
         },
         {
           "type": "gen_ed",
@@ -329,7 +329,7 @@
         },
         {
           "type": "elective",
-          "label": "General Elective",
+          "label": "General Elective Course",
           "credits": 3.0
         }
       ]

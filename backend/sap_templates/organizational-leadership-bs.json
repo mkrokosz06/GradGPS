@@ -128,7 +128,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "gen_ed",
@@ -150,12 +150,12 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (US)",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (Inter-Domain)",
           "credits": 3.0
         }
       ]
@@ -185,12 +185,12 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (Inter-Domain)",
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (IL)",
           "credits": 3.0
         }
       ]
@@ -228,8 +228,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Supporting Course",
           "credits": 3.0
         },
         {
@@ -255,13 +256,15 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Supporting Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Supporting Course",
           "credits": 3.0
         },
         {
@@ -287,13 +290,15 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Supporting Course",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "supporting",
+          "label": "400-level Supporting Course",
           "credits": 3.0
         },
         {
@@ -303,7 +308,7 @@
         },
         {
           "type": "elective",
-          "label": "Elective",
+          "label": "Elective (Writing Across the Curriculum)",
           "credits": 3.0
         },
         {

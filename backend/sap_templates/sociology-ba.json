@@ -56,9 +56,11 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC (Lower Level Course)",
+          "credits": 3.0,
+          "dept": "SOC"
         },
         {
           "type": "pool",
@@ -84,9 +86,11 @@
       "credits": 17.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC (Lower Level Course)",
+          "credits": 3.0,
+          "dept": "SOC"
         },
         {
           "type": "course",
@@ -115,7 +119,7 @@
     {
       "year": 2,
       "term_season": "SP",
-      "credits": 16.5,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
@@ -123,8 +127,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -150,9 +155,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC (400-Level Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SOC"
         },
         {
           "type": "gen_ed",
@@ -165,8 +173,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -197,8 +206,9 @@
           "credits": 4.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Fields",
           "credits": 3.0
         },
         {
@@ -219,9 +229,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC (400-Level Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SOC"
         },
         {
           "type": "gen_ed",
@@ -229,8 +242,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA World Cultures Course",
           "credits": 3.0
         },
         {
@@ -246,9 +260,12 @@
       "credits": 14.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "SOC (400-Level Course)",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "SOC"
         },
         {
           "type": "gen_ed",

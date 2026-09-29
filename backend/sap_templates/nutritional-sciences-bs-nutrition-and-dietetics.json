@@ -69,7 +69,10 @@
           "type": "pool",
           "ref": "supporting",
           "label": "Supporting Course (CHEM 111 recommended)",
-          "credits": 1.0
+          "credits": 1.0,
+          "codes": [
+            "CHEM 111"
+          ]
         },
         {
           "type": "gen_ed",
@@ -209,8 +212,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "University Wide Offering with consultation with adviser",
           "credits": 3.0
         }
       ]
@@ -292,8 +296,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "University Wide Offering in consultation with adviser",
           "credits": 2.0
         }
       ]

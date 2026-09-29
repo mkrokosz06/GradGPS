@@ -245,9 +245,11 @@
           "credits": 1.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Specialization Course 1 from Department List",
+          "credits": 3.0,
+          "dept": "MATSE"
         },
         {
           "type": "gen_ed",
@@ -278,24 +280,30 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Specialization Course 2 from Department List",
+          "credits": 3.0,
+          "dept": "MATSE"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective 1",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective 2",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Senior Processing Laboratory (can be taken fall or spring)",
+          "credits": 3.0,
+          "dept": "MATSE"
         },
         {
           "type": "gen_ed",
@@ -318,29 +326,37 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Specialization Course 3 from Department List",
+          "credits": 3.0,
+          "dept": "MATSE"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Specialization Course 4 from Department List",
+          "credits": 3.0,
+          "dept": "MATSE"
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective 3",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Technical Elective 4",
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 1.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "MATSE Senior Processing Laboratory (can be taken fall or spring)",
+          "credits": 1.0,
+          "dept": "MATSE"
         },
         {
           "type": "gen_ed",

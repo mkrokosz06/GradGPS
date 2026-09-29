@@ -83,8 +83,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]
@@ -115,8 +116,9 @@
           "credits": 1.5
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]
@@ -147,8 +149,9 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "pool",
+          "ref": "ba_requirement",
+          "label": "BA Requirement",
           "credits": 3.0
         }
       ]
@@ -238,14 +241,20 @@
       "credits": 13.5,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "4xx level FR course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "FR"
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "4xx level FR course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "FR"
         },
         {
           "type": "course",
@@ -276,9 +285,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "4xx level FR course",
+          "credits": 3.0,
+          "level": 400,
+          "dept": "FR"
         },
         {
           "type": "elective",
