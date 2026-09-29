@@ -567,6 +567,36 @@ Detail on the ones that are easy to reintroduce:
 Also fixed: **hyphenated subject prefixes**. `A-I 100` was invisible to `[A-Z]{2,6}`, so ETI's intro
 pool offered six options instead of seven.
 
+**Over-requiring shapes (Sept 2026).** A second family of bugs stored elective lists as individually
+*required* courses — Biology 272-495 credits for a 50-55 credit option, Psychology's Business Option 183
+for 24, Data Sciences (IST) 620, HCDD 386. Fixed in `scrape_psu.py` (tests: `test_scraper_shapes.py`,
+real-page fixtures `tests/fixtures/req_*.html`):
+- **Qualifier before the number** — "Select *a minimum of* 12 credits", "Select *at least* 6" (`_POOL_HEADER`).
+  A cap ("A maximum of 3 credits may be chosen from") is deliberately *not* a header.
+- **A header whose prose names a course** — "…can be replaced by LA 495", "not to include PSYCH 294",
+  "except MATH 401". The code made the row read as a course: the pool never opened, and an *excluded*
+  course became required. A `courselistcomment` row that reads as a pool header is a header.
+- **Pick one block** (`_PICK_BLOCK`) — "Select one concentration", "Select an emphasis", "Select one
+  sequence of the following", "Select course set A or B", "…with selected emphasis area". Modelled like the
+  existing sequence pools: one credit pool, low end of the stated hours, over every block's courses
+  (which block isn't enforced). Indented "Select N" rows inside an open block don't open new pools.
+  World Languages' emphases sit in separate `<h6>` tables after "Select an emphasis"; they continue that
+  pool — but only a block-wording header may be continued (a plain "Select one of the following: 3" inside
+  the French emphasis once filed German–Spanish under a 3-credit pool, the *under*-requiring direction).
+- **Application Focus lists** live in the Suggested Academic Plan tab; each area became its own required
+  group. Now the plan tab contributes only its semester grids, and "Select 12 credits from the Application
+  Focus lists" becomes one 12-credit pool over all areas' courses (can't enforce "your chosen area").
+- **Options without "Option"** — Data Sciences' "Applied Data Sciences (DATSC_BS…): 47 credits" under
+  "Requirements for the Option" gets " Option" inserted, so the audit narrows to one; the subplan name the
+  student sees is unchanged. `alternative_inserts.json` keys were renamed to match.
+
+Verified with `verify_pool_split.py`, updated *independently* (codes from cell text vs the scraper's own
+rules): disagreements 20 → 9, none new (the 9 are prose-invented codes, below). 0 of 171 size-stated
+option groups now exceed their size (was 10). Every course the new scrape drops (28) was checked: all were
+codes invented from prose. **Loaded with `scripts/reload_programs.py`** — re-scrapes and replaces only
+named programs (41), offsets pair/branch ids above the table max, backs up, runs the patch pipeline in the
+same pass, `--restore` undoes. Rehearsed locally: nothing outside the 41 changes, restore is exact.
+
 **`build_satisfied_req_codes()` now counts in-progress work** when deciding a pool is covered. Its
 docstring already named the case (*"once the pool is met, e.g. via CMPSC 131"*) but `satisfied` on a
 `choose_credits` pool is **completed credits only**, so a student sitting in CMPSC 131 was still

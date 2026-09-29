@@ -65,6 +65,32 @@ class _FilteredCodeRe:
 
 
 _CODE_IN_CELL = _FilteredCodeRe()
+
+# A pool header inside a courselist: "Select 3-4 credits from the following",
+# "Select 9 additional credits", "Select a minimum of 12 credits", "Select at
+# least 6 credits". The range takes its LOW end (any one listed course must be
+# enough). A cap — "A maximum of 3 credits may be chosen from" — is NOT a header:
+# it limits part of the pool it sits in, and must not open a new one.
+_POOL_HEADER = re.compile(
+    r"(?:select|choose|minimum)\s+"
+    r"(?:(?:a\s+)?minimum\s+of\s+|at\s+least\s+|a\s+total\s+of\s+)?"
+    r"(\d+)(?:\s*[-–—]\s*\d+)?"
+    r"(?:\s+(?:additional|more|or\s+more|elective|electives|total|further|upper-division))*\s*credits?",
+    re.I,
+)
+
+# A "pick one block" instruction worded without "of the following": "Select one
+# sequence of the following", "Select one concentration", "Select an emphasis",
+# "...with selected emphasis area". Group 1 is the count word ("one"/"an").
+_PICK_BLOCK = re.compile(
+    r"(?:(?:select|choose|complete|take)\s+(one|an?)\s+(?:approved\s+)?"
+    r"(?:sequence|concentration|emphasis|emphasis\s+area|track)s?\b(?!\s+of\s+\d)"
+    r"|with\s+(?:a\s+)?(selected)\s+emphasis\s+area"
+    # Physics' options: "Select course set A or B:" over a Set A and a Set B.
+    r"|select\s+(?:course\s+)?set\s+[A-Z]\s+or\s+[A-Z]\b)",
+    re.I,
+)
+
 HEADERS = {
     "User-Agent": "GradGPS-CatalogScraper/1.0 (educational use; mkrokosz06@gmail.com)"
 }
@@ -279,9 +305,64 @@ def scrape_program_requirements(program):
         # ── Default: all required ──
         return "required", None
 
+    # ── Application Focus lists ──────────────────────────────────────────────
+    # Data Sciences (IST) and HCDD require "Select 12 credits from the lists of
+    # Application Focus courses", and publish the lists themselves in the
+    # SUGGESTED ACADEMIC PLAN tab, one <h4> + courselist per area. Walking that
+    # tab like the requirements tab turned every area into its own group of
+    # REQUIRED courses — 620 credits for Data Sciences, 386 for HCDD. The areas
+    # are the members of that one 12-credit requirement instead.
+    #
+    # The bulletin's rule is "12 credits from your CHOSEN area" (or a custom
+    # four-course focus an adviser approves). A pool over every area's courses
+    # can't enforce the single-area part, and a custom focus won't count toward
+    # it; both are closer to the truth than 500 phantom required credits.
+    plan_tab = soup.find(id="suggestedacademicplantextcontainer")
+    focus_codes: list[str] = []
+    if plan_tab is not None:
+        for h in plan_tab.find_all("h4"):
+            if "custom" in h.get_text(" ", strip=True).lower():
+                continue
+            if not any("application focus" in p.get_text(" ", strip=True).lower()
+                       for p in h.find_all_previous("p", limit=12)):
+                continue
+            table = h.find_next("table")
+            if table is None or "sc_courselist" not in (table.get("class") or []):
+                continue
+            # Codes from the cell TEXT, like every other row here: a course PSU
+            # has renamed or retired (IST 311, FDSC 206) still appears in the
+            # list but has no working link.
+            for td in table.select("td.codecol"):
+                for m in _CODE_IN_CELL.finditer(td.get_text(" ", strip=True)):
+                    code = f"{m.group(1)} {m.group(2)}"
+                    if code not in focus_codes:
+                        focus_codes.append(code)
+
+    in_option_section = False
+    # "Select an emphasis" closes its own table; the emphases follow as separate
+    # tables, each under an <h6> ("French Emphasis"). Remember the block pool so
+    # those tables join it rather than each becoming required courses.
+    last_block = None            # (pool_seq, group_type, threshold) or None
+    # Only a "Select an emphasis"-style block continues into the <h6> tables
+    # after it. A plain "Select one of the following" row INSIDE an emphasis
+    # must never become the block the later emphases join: World Languages'
+    # French emphasis has one ("...: 3"), and German through Spanish were
+    # filed under that 3-credit pool instead of the 33-credit emphasis.
+    emphasis_block = None
+
+    def in_plan_tab(el) -> bool:
+        return plan_tab is not None and plan_tab in el.parents
+
     # Walk through elements in order
     for el in req_content.find_all(["h2", "h3", "h4", "h5", "table"], recursive=True):
         tag = el.name
+
+        # The plan tab contributes its semester grids (the campus-plan groups
+        # the audit filters out) and nothing else: its <h4>/<h5> headings and
+        # plain courselists are the focus-area menus handled above.
+        if in_plan_tab(el) and (tag in ("h4", "h5") or
+                                (tag == "table" and "sc_plangrid" not in (el.get("class") or []))):
+            continue
 
         # ── Section headers ──
         if tag in ["h2", "h3", "h4", "h5"]:
@@ -292,8 +373,21 @@ def scrape_program_requirements(program):
                           "academic advising", "contact", "overview", "about", "career"]
             if any(s in text.lower() for s in skip_words):
                 continue
+            # An option is found by the word "Option" in its group name (the
+            # audit narrows to one option by it, and /audit/subplans derives the
+            # student's choices from it). Data Sciences heads its three options
+            # "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits" under a
+            # "Requirements for the Option" section, so a student with no option
+            # picked was audited against all three at once. Name them as options;
+            # the subplan the student sees ("Applied Data Sciences") is unchanged.
+            if tag in ("h2", "h3", "h4"):
+                in_option_section = text.lower().startswith("requirements for the option")
+            elif in_option_section and "option" not in text.lower():
+                text = re.sub(r"^([^(:]+?)(\s*[(:])", r"\1 Option\2", text, count=1)
             current_group      = text
             current_group_type, current_threshold = detect_group_type(text)
+            last_block         = None
+            emphasis_block     = None
             # A new section ends any open pool and becomes the fallback the
             # pool's members revert to once the pool closes.
             heading_group_type = current_group_type
@@ -317,6 +411,18 @@ def scrape_program_requirements(program):
             # table would give two pools in the same section the same number,
             # which is exactly the collision this field exists to prevent.
             close_pool()
+
+            # An emphasis table under an <h6>, right after a "Select an emphasis"
+            # block pool: every course in it is a member of that pool, whatever
+            # sub-structure the emphasis has of its own.
+            # The nearest heading or table BEFORE this one, in page order: the
+            # French emphasis table is not a direct sibling of its <h6>.
+            prev_heading = el.find_previous(["h2", "h3", "h4", "h5", "h6", "table"])
+            block_table = (emphasis_block is not None and prev_heading is not None
+                           and prev_heading.name == "h6")
+            if block_table:
+                current_group_type, current_threshold = emphasis_block[1], emphasis_block[2]
+                pool_open, pool_indent_scoped, pool_pending = True, False, False
 
             # Check preceding sibling text for "choose N credits" language.
             # Only a prose sibling counts. When two courselist tables are
@@ -358,7 +464,8 @@ def scrape_program_requirements(program):
                 # the table. It is a <tr>, not a heading tag, so it never reset
                 # anything and a pool ran straight through it.
                 if any("areaheader" in c for c in (tr.get("class") or [])):
-                    close_pool()
+                    if not block_table:
+                        close_pool()
                     continue
 
                 cell_texts = [td.get_text(" ", strip=True) for td in tds]
@@ -397,6 +504,28 @@ def scrape_program_requirements(program):
                 is_combo = len(combo_codes) > 1 and "&" in cell_texts[0]
                 
                 code_match = _CODE_IN_CELL.search(full_row)
+                # An instruction row is marked <span class="courselistcomment">
+                # and never carries a code-cell link. Its prose can still NAME a
+                # course — Psychology's Business Option heads its pool "Select 15
+                # credits from at least three different groups ... (3 credits in
+                # any category can be replaced by LA 495 ...)" — and that mention
+                # made the header read as a course row: LA 495 became required,
+                # the pool never opened, and all 60 courses listed under it were
+                # stored as required for a 24-credit option. A comment row that
+                # reads as a pool header is a pool header.
+                is_comment = tr.find("span", class_="courselistcomment") is not None
+                if code_match and is_comment and _POOL_HEADER.search(full_row):
+                    code_match = None
+                if not code_match and block_table:
+                    continue            # an emphasis's own sub-headings and pools
+                # Inside an open "Select one concentration" pool, an INDENTED
+                # "Select 3 credits from the following" belongs to one of the
+                # blocks, not to the section. Opening a pool for each made every
+                # concentration's sub-pools separate requirements (Social Studies
+                # Teaching: all seven concentrations required).
+                if (not code_match and is_indented and pool_open and last_block is not None
+                        and last_block[0] == current_pool_seq):
+                    continue
                 if not code_match:
                     # Check for "select N credits" type rows inside the table
                     # Range thresholds ("Select 3-4 credits from the following:")
@@ -409,11 +538,14 @@ def scrape_program_requirements(program):
                     # which matched nothing — so those 34 courses fell through to
                     # the section default and every one of them was stored as
                     # individually REQUIRED.
-                    pool_match = re.search(
-                        r"(?:select|choose|minimum)\s+(\d+)(?:\s*[-–—]\s*\d+)?"
-                        r"(?:\s+(?:additional|more|or\s+more|elective|electives|total|further|upper-division))*\s*credits?",
-                        full_row, re.I
-                    )
+                    # A qualifier can also come BEFORE the number: Biology heads
+                    # every option's elective list "Select a minimum of 12
+                    # credits of 400-level biology courses", Environmental
+                    # Engineering "Select at least 6 credits of ENVE Technical
+                    # Electives". Neither matched, so ~80 Biology electives per
+                    # option were stored as individually required (272-495
+                    # credits for a 50-55 credit option). See _POOL_HEADER.
+                    pool_match = _POOL_HEADER.search(full_row)
                     # Not every pool header says "credits". Aerospace Engineering
                     # writes "Select one of the following sequences:" with the
                     # credit count in the hours column, and Anthropology writes
@@ -432,11 +564,23 @@ def scrape_program_requirements(program):
                             r"(one|two|three|four|five|six|\d+)\s+of\s+the\s+following",
                             full_row, re.I
                         )
+                        # "Pick one block" in other words: History's "Select one
+                        # sequence of the following", Secondary Education's
+                        # "Select one concentration", World Languages' "Select an
+                        # emphasis", Kinesiology's "Take the following required
+                        # courses with selected emphasis area". Unmatched, every
+                        # block's courses were stored as required. Modelled like a
+                        # sequence pool above: credits of ONE block, drawn from
+                        # the blocks' courses (which block isn't enforced).
+                        picked_block = False
+                        if not word_match:
+                            word_match = _PICK_BLOCK.search(full_row)
+                            picked_block = word_match is not None
                         if word_match:
                             words = {"one": 1, "two": 2, "three": 3,
                                      "four": 4, "five": 5, "six": 6}
-                            token = word_match.group(1).lower()
-                            count = words.get(token) or int(token)
+                            token = (word_match.group(1) or "one").lower()
+                            count = words.get(token) or (1 if token in ("a", "an") else int(token))
                             hours = next(
                                 (float(m.group(1)) for ct in reversed(cell_texts)
                                  for m in [re.match(r"^\s*(\d+(?:\.\d+)?)", ct.strip())]
@@ -453,6 +597,33 @@ def scrape_program_requirements(program):
                             pool_open          = True
                             pool_indent_scoped = True
                             pool_pending       = True
+                            last_block = (current_pool_seq, current_group_type, current_threshold)
+                            if picked_block:
+                                emphasis_block = last_block
+                    if pool_match and focus_codes and "application focus" in full_row.lower():
+                        # "Select 12 credits from the lists of Application Focus
+                        # courses": the pool's members live in the plan tab.
+                        current_pool_seq += 1
+                        for code in focus_codes:
+                            info = BULLETIN.get(code) or {}
+                            rows.append({
+                                "program_name":      full_title,
+                                "college":           program["college"].replace("-", " ").title(),
+                                "degree":            degree,
+                                "campus":            campus,
+                                "requirement_group": current_group,
+                                "group_type":        "choose_credits",
+                                "group_threshold":   int(pool_match.group(1)),
+                                "course_code":       code,
+                                "course_title":      (info.get("title") or "")[:120],
+                                "credits":           info.get("credits") if info.get("credits") is not None else "",
+                                "min_grade":         "",
+                                "pair_group_id":     None,
+                                "pool_seq":          current_pool_seq,
+                                "url":               program["url"],
+                            })
+                        close_pool()
+                        pool_match = None
                     if pool_match:
                         # Each such row starts a NEW pool — this is the line the
                         # old code missed, which is why consecutive pools merged.

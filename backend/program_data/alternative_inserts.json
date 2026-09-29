@@ -2156,9 +2156,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Engineering)",
-   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "group": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits",
    "inserted": "STAT 200",
-   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "group_course": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
    "pair_group_id": 1589,
    "partners": [
     "DS 200"
@@ -2202,9 +2202,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Engineering)",
-   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "group": "Computational Data Sciences Option (DTSCE_BS): 47 credits",
    "inserted": "MATH 311W",
-   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "group_course": "Computational Data Sciences Option (DTSCE_BS): 47 credits#MATH 311W",
    "pair_group_id": 2528,
    "partners": [
     "CMPSC 360"
@@ -2225,9 +2225,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Information Sciences and Technology)",
-   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "group": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits",
    "inserted": "STAT 200",
-   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "group_course": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
    "pair_group_id": 1591,
    "partners": [
     "DS 200"
@@ -2317,9 +2317,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Information Sciences and Technology)",
-   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "group": "Computational Data Sciences Option (DTSCE_BS): 47 credits",
    "inserted": "MATH 311W",
-   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "group_course": "Computational Data Sciences Option (DTSCE_BS): 47 credits#MATH 311W",
    "pair_group_id": 2529,
    "partners": [
     "CMPSC 360"
@@ -2455,9 +2455,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Science)",
-   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "group": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits",
    "inserted": "STAT 200",
-   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "group_course": "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
    "pair_group_id": 1592,
    "partners": [
     "DS 200"
@@ -2501,9 +2501,9 @@
   },
   {
    "program": "Data Sciences, B.S. (Science)",
-   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "group": "Computational Data Sciences Option (DTSCE_BS): 47 credits",
    "inserted": "MATH 311W",
-   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "group_course": "Computational Data Sciences Option (DTSCE_BS): 47 credits#MATH 311W",
    "pair_group_id": 2530,
    "partners": [
     "CMPSC 360"

@@ -44,11 +44,24 @@ HEADERS = {
 
 POOL_TYPES = ("choose_credits", "choose_courses")
 
-# "Select 3 credits", "Select 3-4 credits", "Choose 6 or more credits"
+# "Select 3 credits", "Select 3-4 credits", "Choose 6 or more credits", and a
+# qualifier before the number: "Select a minimum of 12 credits", "Select at
+# least 6 credits". Phrased here independently of scrape_psu._POOL_HEADER: the
+# number may be preceded by up to four words, none of them a cap ("maximum",
+# "up to") — a cap limits part of a pool rather than opening one.
 _POOL_RE = re.compile(
-    r"(?:select|choose|minimum)\s+(\d+)(?:\s*[-–—]\s*\d+)?"
-    r"(?:\s+(?:additional|more|or\s+more|elective|electives|total|further|"
-    r"upper-division))*\s*credits?",
+    r"\b(?:select|choose|minimum)\b(?:\s+(?!maximum\b|up\b)[a-z]+){0,4}?\s+(\d+)"
+    r"(?:\s*[-–—]\s*\d+)?(?:\s+[a-z-]+){0,2}?\s+credits?\b",
+    re.I,
+)
+# "Pick one block" worded without "of the following": "Select one
+# concentration", "Select an emphasis", "Select one sequence of the following",
+# "...with selected emphasis area". Written separately from scrape_psu._PICK_BLOCK.
+_BLOCK_RE = re.compile(
+    r"\b(?:select|choose|take|complete)\s+(?:one|an?)\s+(?:approved\s+)?"
+    r"(?:sequence|concentration|emphasis(?:\s+area)?|track|pathway)s?\b(?!\s+of\s+\d)"
+    r"|\bwith\s+(?:a\s+)?selected\s+emphasis\s+area\b"
+    r"|\b(?:select|choose)\s+(?:course\s+)?set\s+[a-z]\s+or\s+[a-z]\b",
     re.I,
 )
 _POOL_COUNT_RE = re.compile(
@@ -86,12 +99,44 @@ def _code_ok(dept: str, num: str) -> bool:
 # code cell is wrapped in <div class="blockindent"> belong to it; the first
 # unindented course row closes it.
 
+def _focus_codes(soup) -> list[frozenset]:
+    """Every course in the plan tab's plain courselists — the Application Focus
+    menus (Data Sciences, HCDD) — read from cell text. The scraper reads the same
+    lists from their links; the two must agree."""
+    tab = soup.find(id="suggestedacademicplantextcontainer")
+    if tab is None:
+        return []
+    out = []
+    for table in tab.find_all("table", class_="sc_courselist"):
+        for tr in table.find_all("tr"):
+            tds = tr.find_all(["td", "th"])
+            if not tds or tr.find("span", class_="courselistcomment") is not None:
+                continue
+            for part in tds[0].get_text(" ", strip=True).split("&"):
+                codes = frozenset(f"{m.group(1)} {m.group(2)}" for m in _CODE_RE.finditer(part)
+                                  if _code_ok(m.group(1), m.group(2)))
+                if codes and codes not in out:
+                    out.append(codes)
+    return out
+
+
 def pools_from_page(html: str) -> list[dict]:
     soup = BeautifulSoup(html, "html.parser")
     root = soup.find("div", {"id": re.compile(r"requirementstab", re.I)}) or soup
     pools: list[dict] = []
+    focus = _focus_codes(soup)
+    block = None                # the open "pick one block" pool, if any
+    emph = None                 # ...only if it was an "emphasis/concentration" block
     for table in root.find_all("table", class_=re.compile(r"sc_courselist")):
         current = None          # a new table is a new context
+        # An emphasis table under an <h6> continues the block pool opened by
+        # "Select an emphasis" in the table before it; every course is a member.
+        prev = table.find_previous(["h2", "h3", "h4", "h5", "h6", "table"])
+        continuing = emph is not None and prev is not None and prev.name == "h6"
+        if continuing:
+            current = emph
+        else:
+            block = emph = None
         for tr in table.find_all("tr"):
             tds = tr.find_all(["td", "th"])
             if not tds:
@@ -99,7 +144,9 @@ def pools_from_page(html: str) -> list[dict]:
             # "Prescribed Courses" / "Supporting Courses and Related Areas" start
             # a new sub-section and end whatever list came before.
             if any("areaheader" in c for c in (tr.get("class") or [])):
-                current = None
+                if not continuing:
+                    current = None
+                    block = emph = None
                 continue
             text = " ".join(td.get_text(" ", strip=True) for td in tds)
             # A code cell holds one requirement, but it can spell it several ways:
@@ -116,16 +163,38 @@ def pools_from_page(html: str) -> list[dict]:
                 for part in cell.split("&")
             ]
             codes = [c for c in codes if c]
+            # An instruction row (<span class="courselistcomment">) is never a
+            # course, even when its prose names one: Psychology heads a pool
+            # "Select 15 credits ... can be replaced by LA 495".
+            if tr.find("span", class_="courselistcomment") is not None:
+                codes = []
             indented = any(td.find("div", class_="blockindent") for td in tds)
 
+            if continuing:
+                if codes:
+                    current["codes"].extend(codes)
+                continue
+
             if not codes:
+                # Inside a pick-one block, an indented header ("Select 12 credits
+                # from the following:" under "2. Geographic Information
+                # Systems") belongs to one block and opens nothing new.
+                if block is not None and current is block and indented:
+                    continue
                 # A pool header either states credits ("Select 3-4 credits from
                 # the following:") or counts options ("Select one of the
                 # following sequences:"). Both open a list.
                 m = _POOL_RE.search(text) or _POOL_COUNT_RE.search(text)
-                if m:
+                if m and focus and "application focus" in text.lower():
+                    # The pool's members are the plan tab's focus menus.
+                    pools.append({"codes": list(focus), "confirmed": True})
+                    current = None
+                    continue
+                if m or _BLOCK_RE.search(text):
                     current = {"codes": []}
                     pools.append(current)
+                    block = current if (_POOL_COUNT_RE.search(text) or _BLOCK_RE.search(text)) else None
+                    emph = current if _BLOCK_RE.search(text) else None
                 # A comment row that is not a pool header does NOT end the list.
                 # Pages use them as sub-headings inside a long option list
                 # ("European Art:"), and closing on them split pools the page
