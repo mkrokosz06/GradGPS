@@ -233,6 +233,132 @@ def patch_phys_alternatives():
         print(f"  Skipped {skipped_already} pairs (already patched).")
 
 
+# ── Define all known alternative groups ───────────────────────────────────
+#
+# Each entry:
+#   codes         - list of course codes that are interchangeable (2 or 3)
+#   insert_missing - if True, insert an absent alternative when only 1 is present —
+#                    but ONLY where program_data/alternative_inserts.json verified
+#                    that program's bulletin offers it (see _verified_inserts()).
+#                    Unverified, this added CHEM 130 to Chemical Engineering and
+#                    MATH 110 to Physics: 280 alternatives no bulletin offered.
+#   exclude        - fn(program_name, group_name) -> bool; True = skip this combo
+#
+# "MIXED" pairs (both sometimes required) use insert_missing=False and an
+# exclude function to protect programs where both courses are genuinely needed.
+
+KNOWN_ALTERNATIVE_GROUPS = [
+    # ── English / Writing ───────────────────────────────────────────────
+    dict(codes=["ENGL 202C", "ENGL 202D"],
+         insert_missing=True, exclude=None),
+
+    # ── Speech (3-way: A, B, C are all sections of the same course) ─────
+    dict(codes=["CAS 100A", "CAS 100B", "CAS 100C"],
+         insert_missing=True, exclude=None),
+
+    # ── Statistics ──────────────────────────────────────────────────────
+    dict(codes=["STAT 200", "STAT 250"],
+         insert_missing=True, exclude=None),
+    dict(codes=["SCM 200",  "STAT 200"],
+         insert_missing=False, exclude=None),
+    dict(codes=["DS 200",   "STAT 200"],
+         insert_missing=True, exclude=None),
+
+    # ── Chemistry ───────────────────────────────────────────────────────
+    dict(codes=["CHEM 110", "CHEM 130"],
+         insert_missing=True, exclude=None),
+    dict(codes=["CHEM 101", "CHEM 130"],
+         insert_missing=True, exclude=None),
+    # Organic chem: MIXED — genuinely both required in Chemistry Teaching,
+    # Clinical Lab Science, and Data Sciences Nutrition tracks
+    dict(codes=["CHEM 202", "CHEM 210"],
+         insert_missing=False,
+         exclude=lambda p, g: (
+             "Chemistry Teaching" in g or
+             "Clinical Laboratory Science" in g or
+             ("Data Sciences" in p and "Nutrition" in g)
+         )),
+
+    # ── Mathematics ─────────────────────────────────────────────────────
+    dict(codes=["MATH 110", "MATH 140"],
+         insert_missing=True, exclude=None),
+    dict(codes=["MATH 250", "MATH 251"],
+         insert_missing=True, exclude=None),
+    # MATH 230/231 MIXED: most engineering programs require both as a sequence;
+    # only minors and EET treat them as alternatives
+    dict(codes=["MATH 230", "MATH 231"],
+         insert_missing=False,
+         exclude=lambda p, g: "Meteorology" in p and "Common Requirements" in g),
+
+    # ── Accounting ──────────────────────────────────────────────────────
+    dict(codes=["ACCTG 201", "ACCTG 211"],
+         insert_missing=True, exclude=None),
+
+    # ── Computer Science ─────────────────────────────────────────────────
+    dict(codes=["CMPSC 121", "CMPSC 131"],
+         insert_missing=True, exclude=None),
+    dict(codes=["CMPSC 122", "CMPSC 132"],
+         insert_missing=True, exclude=None),
+    dict(codes=["CMPSC 200", "CMPSC 201"],
+         insert_missing=True, exclude=None),
+    dict(codes=["CMPSC 360", "MATH 311W"],
+         insert_missing=True, exclude=None),
+
+    # ── Business ────────────────────────────────────────────────────────
+    dict(codes=["MIS 204",   "MIS 250"],
+         insert_missing=True, exclude=None),
+    dict(codes=["BA 243",    "BLAW 243"],
+         insert_missing=False, exclude=None),
+    dict(codes=["AGBM 101",  "ECON 102"],
+         insert_missing=False, exclude=None),
+    # ECON MIXED: both required in Business Common Req, Management Common Req,
+    # Risk Management, Stats Actuarial, Criminology, lang+Business options,
+    # and Data Sciences Economics/Business Fundamentals groups
+    dict(codes=["ECON 102", "ECON 104"],
+         insert_missing=False,
+         exclude=lambda p, g: (
+             ("Business, B.S." in p and "Common Requirements" in g) or
+             ("Management, B.S." in p and "Common Requirements" in g) or
+             "Risk Management" in p or
+             ("Statistics, B.S." in p and "Actuarial" in g) or
+             "Criminology" in p or
+             (any(lang in p for lang in ["French", "German", "Spanish"]) and "Business" in g) or
+             ("Data Sciences" in p and any(x in g for x in ["Economics", "Business Fundamentals"]))
+         )),
+
+    # ── Physics ─────────────────────────────────────────────────────────
+    dict(codes=["PHYS 211", "PHYS 250"],
+         insert_missing=True, exclude=None),
+    dict(codes=["PHYS 212", "PHYS 251"],
+         insert_missing=True, exclude=None),
+    dict(codes=["PHYS 150", "PHYS 250"],
+         insert_missing=True, exclude=None),
+
+    # ── Biology ─────────────────────────────────────────────────────────
+    dict(codes=["BIOL 222", "BIOL 322"],
+         insert_missing=True, exclude=None),
+
+    # ── Human Development / Psychology ───────────────────────────────────
+    dict(codes=["HDFS 229", "PSYCH 100"],
+         insert_missing=False, exclude=None),
+]
+
+
+def _verified_inserts() -> dict:
+    """(program, group, code) -> verdict entry for every alternative the bulletin
+    was checked for (scripts/verify_alternative_inserts.py). Only `keep` and
+    `branch` entries may be inserted; anything absent from the file is not."""
+    import json
+    path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                        "program_data", "alternative_inserts.json")
+    try:
+        entries = json.load(open(path, encoding="utf-8"))["entries"]
+    except FileNotFoundError:
+        return {}
+    return {(e["program"], e["group"], e["inserted"]): e for e in entries
+            if e["verdict"] in ("keep", "branch")}
+
+
 def patch_known_alternatives():
     """
     Fix choose-one alternative pairing defects across the entire catalog.
@@ -243,7 +369,10 @@ def patch_known_alternatives():
 
     Strategy per (program, group):
       - 2+ courses present + unpaired -> assign shared pair_group_id, set to choose_one
-      - 1 course present + insert_missing=True -> insert absent alternatives, then pair
+      - 1 course present + insert_missing=True -> insert an absent alternative, then
+        pair — only where program_data/alternative_inserts.json verified the bulletin
+        offers it; a `branch` verdict inserts the whole compound branch
+        ("ACCTG 211 or (ACCTG 201 and ACCTG 202)") under one pair_branch_id
       - choose_credits pools -> skip (pairing doesn't apply to credit pools)
       - excluded combos -> skip (courses are genuinely both required there)
       - already paired -> skip (idempotent)
@@ -260,111 +389,7 @@ def patch_known_alternatives():
 
     print("\nPatching known course alternatives across all programs...")
 
-    # ── Define all known alternative groups ───────────────────────────────────
-    #
-    # Each entry:
-    #   codes         - list of course codes that are interchangeable (2 or 3)
-    #   insert_missing - if True, insert absent alternatives when only 1 is present
-    #   exclude        - fn(program_name, group_name) -> bool; True = skip this combo
-    #
-    # "MIXED" pairs (both sometimes required) use insert_missing=False and an
-    # exclude function to protect programs where both courses are genuinely needed.
-
-    GROUPS = [
-        # ── English / Writing ───────────────────────────────────────────────
-        dict(codes=["ENGL 202C", "ENGL 202D"],
-             insert_missing=True, exclude=None),
-
-        # ── Speech (3-way: A, B, C are all sections of the same course) ─────
-        dict(codes=["CAS 100A", "CAS 100B", "CAS 100C"],
-             insert_missing=True, exclude=None),
-
-        # ── Statistics ──────────────────────────────────────────────────────
-        dict(codes=["STAT 200", "STAT 250"],
-             insert_missing=True, exclude=None),
-        dict(codes=["SCM 200",  "STAT 200"],
-             insert_missing=False, exclude=None),
-        dict(codes=["DS 200",   "STAT 200"],
-             insert_missing=True, exclude=None),
-
-        # ── Chemistry ───────────────────────────────────────────────────────
-        dict(codes=["CHEM 110", "CHEM 130"],
-             insert_missing=True, exclude=None),
-        dict(codes=["CHEM 101", "CHEM 130"],
-             insert_missing=True, exclude=None),
-        # Organic chem: MIXED — genuinely both required in Chemistry Teaching,
-        # Clinical Lab Science, and Data Sciences Nutrition tracks
-        dict(codes=["CHEM 202", "CHEM 210"],
-             insert_missing=False,
-             exclude=lambda p, g: (
-                 "Chemistry Teaching" in g or
-                 "Clinical Laboratory Science" in g or
-                 ("Data Sciences" in p and "Nutrition" in g)
-             )),
-
-        # ── Mathematics ─────────────────────────────────────────────────────
-        dict(codes=["MATH 110", "MATH 140"],
-             insert_missing=True, exclude=None),
-        dict(codes=["MATH 250", "MATH 251"],
-             insert_missing=True, exclude=None),
-        # MATH 230/231 MIXED: most engineering programs require both as a sequence;
-        # only minors and EET treat them as alternatives
-        dict(codes=["MATH 230", "MATH 231"],
-             insert_missing=False,
-             exclude=lambda p, g: "Meteorology" in p and "Common Requirements" in g),
-
-        # ── Accounting ──────────────────────────────────────────────────────
-        dict(codes=["ACCTG 201", "ACCTG 211"],
-             insert_missing=True, exclude=None),
-
-        # ── Computer Science ─────────────────────────────────────────────────
-        dict(codes=["CMPSC 121", "CMPSC 131"],
-             insert_missing=True, exclude=None),
-        dict(codes=["CMPSC 122", "CMPSC 132"],
-             insert_missing=True, exclude=None),
-        dict(codes=["CMPSC 200", "CMPSC 201"],
-             insert_missing=True, exclude=None),
-        dict(codes=["CMPSC 360", "MATH 311W"],
-             insert_missing=True, exclude=None),
-
-        # ── Business ────────────────────────────────────────────────────────
-        dict(codes=["MIS 204",   "MIS 250"],
-             insert_missing=True, exclude=None),
-        dict(codes=["BA 243",    "BLAW 243"],
-             insert_missing=False, exclude=None),
-        dict(codes=["AGBM 101",  "ECON 102"],
-             insert_missing=False, exclude=None),
-        # ECON MIXED: both required in Business Common Req, Management Common Req,
-        # Risk Management, Stats Actuarial, Criminology, lang+Business options,
-        # and Data Sciences Economics/Business Fundamentals groups
-        dict(codes=["ECON 102", "ECON 104"],
-             insert_missing=False,
-             exclude=lambda p, g: (
-                 ("Business, B.S." in p and "Common Requirements" in g) or
-                 ("Management, B.S." in p and "Common Requirements" in g) or
-                 "Risk Management" in p or
-                 ("Statistics, B.S." in p and "Actuarial" in g) or
-                 "Criminology" in p or
-                 (any(lang in p for lang in ["French", "German", "Spanish"]) and "Business" in g) or
-                 ("Data Sciences" in p and any(x in g for x in ["Economics", "Business Fundamentals"]))
-             )),
-
-        # ── Physics ─────────────────────────────────────────────────────────
-        dict(codes=["PHYS 211", "PHYS 250"],
-             insert_missing=True, exclude=None),
-        dict(codes=["PHYS 212", "PHYS 251"],
-             insert_missing=True, exclude=None),
-        dict(codes=["PHYS 150", "PHYS 250"],
-             insert_missing=True, exclude=None),
-
-        # ── Biology ─────────────────────────────────────────────────────────
-        dict(codes=["BIOL 222", "BIOL 322"],
-             insert_missing=True, exclude=None),
-
-        # ── Human Development / Psychology ───────────────────────────────────
-        dict(codes=["HDFS 229", "PSYCH 100"],
-             insert_missing=False, exclude=None),
-    ]
+    GROUPS = KNOWN_ALTERNATIVE_GROUPS
 
     # ── One full table scan, filter in Python ────────────────────────────────
     all_relevant_codes = set()
@@ -461,16 +486,27 @@ def patch_known_alternatives():
         pair_id += 1
         total_patched += 1
 
-    def insert_course(template_row, code):
-        if code not in course_info or course_info[code][0] is None:
+    verified = _verified_inserts()
+    bulletin = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                           "bulletin_courses.json"), encoding="utf-8"))
+    skipped_unverified = 0
+
+    def insert_course(template_row, code, branch_id=None):
+        if code in course_info and course_info[code][0] is not None:
+            title, credits = course_info[code]
+        elif code in bulletin:               # a branch mate outside GROUPS (ACCTG 202)
+            title, credits = bulletin[code]["title"], Decimal(str(bulletin[code]["credits"]))
+        else:
             return None
-        title, credits = course_info[code]
         item = {k: v for k, v in template_row.items()}
         item["course_code"]  = code
         item["course_title"] = title
         item["credits"]      = credits
         item["group_course"] = f"{template_row['requirement_group']}#{code}"
         item.pop("pair_group_id", None)
+        item.pop("pair_branch_id", None)
+        if branch_id:
+            item["pair_branch_id"] = branch_id
         requirements_table.put_item(Item=item)
         return item
 
@@ -514,9 +550,18 @@ def patch_known_alternatives():
                 template = list(present.values())[0]
                 new_rows = [template]
                 for mc in [c for c in codes if c not in present]:
-                    nr = insert_course(template, mc)
-                    if nr:
-                        new_rows.append(nr)
+                    entry = verified.get((prog, group, mc))
+                    if entry is None:
+                        skipped_unverified += 1      # the bulletin never offers it here
+                        continue
+                    # "ACCTG 211 or (ACCTG 201 and ACCTG 202)": ACCTG 201 alone is
+                    # half a course, so the whole branch goes in under one branch id.
+                    members = entry["branch"] or [mc]
+                    branch_id = f"alt-{pair_id}" if entry["branch"] else None
+                    for code in members:
+                        nr = insert_course(template, code, branch_id)
+                        if nr:
+                            new_rows.append(nr)
                 if len(new_rows) >= 2:
                     assign_pair(new_rows)
                     grp_patched += 1
@@ -532,6 +577,8 @@ def patch_known_alternatives():
         print(f"  Skipped {skipped_pool} choose_credits pools.")
     if skipped_excluded:
         print(f"  Skipped {skipped_excluded} excluded (both-required) combos.")
+    if skipped_unverified:
+        print(f"  Skipped {skipped_unverified} alternatives the bulletin does not offer.")
 
 
 # `patch_eti_select_groups()` lived here. It diagnosed this exact bug in ETI —

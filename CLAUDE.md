@@ -194,7 +194,26 @@ Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
 
 **Known course alternatives across the catalog (`patch_known_alternatives()`):**
-A single generic pass in `seed_matthew.py` (pair IDs 800+) fixes choose-one pairing defects for a table of known interchangeable course groups — MATH 250/251 (diff eq), MATH 110/140, the CAS 100 sections, STAT/SCM/DS options, chemistry, CMPSC, and business alternatives among them. Per `(program, group)` it pairs 2+ unpaired courses into a shared `pair_group_id`, optionally inserts an absent alternative (`insert_missing`), skips `choose_credits` pools and `exclude`d combos (where both courses are genuinely required), and skips already-paired rows (idempotent).
+A single generic pass in `seed_matthew.py` (pair IDs 800+) fixes choose-one pairing defects for a table of known interchangeable course groups (`KNOWN_ALTERNATIVE_GROUPS`) — MATH 250/251 (diff eq), MATH 110/140, the CAS 100 sections, STAT/SCM/DS options, chemistry, CMPSC, and business alternatives among them. Per `(program, group)` it pairs 2+ unpaired courses into a shared `pair_group_id`, skips `choose_credits` pools and `exclude`d combos (where both courses are genuinely required), and skips already-paired rows (idempotent).
+
+> **Inserting an absent alternative is gated on the bulletin (Sept 2026).** `insert_missing` used to add
+> "the other course" wherever one half of a pair appeared, and **280 of the 317** alternatives it added
+> to UP majors appear nowhere on that major's bulletin page — CHEM 130 in every engineering major,
+> MATH 110 in Physics, PHYS 250 in the calculus-based majors, ACCTG 201 *alone* for ACCTG 211 — so the
+> audit told students they were done when they weren't. (MATH 110/140 *is* a real choice in many
+> majors, but there the bulletin lists both and the scraper pairs them without any insert.)
+> `scripts/verify_alternative_inserts.py` now checks every insert against independent sources — the
+> live page's requirements / plan / entrance tabs, the raw HTML's course links (a second witness sharing
+> no parsing), the bundled SAP templates and ETM spec, and the rest of the scrape — and writes
+> `program_data/alternative_inserts.json`. The patch inserts **only** `keep` / `branch` verdicts;
+> a `branch` ("ACCTG 211 or (ACCTG 201 and ACCTG 202)", Smeal ×8) goes in as a compound branch.
+> A drop needs every source silent **and** the page to name the partner course (proof it was read).
+> `scripts/remove_unverified_alternatives.py` removes the drops from a loaded catalog: dry run by
+> default, re-validates each row live, backs up before-images to `backend/backups/`, `--restore` undoes.
+> Inserted rows are recognisable by key: scraped rows are `group#code#<seq>`, inserts `group#code`.
+> A partner is restored to plain `required` — **not** from the xlsx, whose pair ids are numbered per
+> scrape run and collide with the loaded catalog's (restoring from it merged CED's STAT 200 into a
+> CAS 100 pair). Tests: `tests/test_alternative_inserts.py` (23).
 
 ### Timeline semester projection
 
@@ -804,9 +823,10 @@ in `audit_engine.py`, `routers/courses.py` and `routers/timeline.py` if those ch
 then, PSU values stay hardcoded on `main`.
 
 ## Adding a new requirement pair to the catalog
-If two courses should be choose-one alternatives but aren't paired in the catalog, add them to the
-`GROUPS` table in `seed_matthew.py`'s `patch_known_alternatives()` (pair IDs 800+), which is the
-generic catalog-wide pass. ETI's old hand-written `PAIRS` list is gone — see the warning above.
+If two courses should be choose-one alternatives but aren't paired in the catalog, add them to
+`KNOWN_ALTERNATIVE_GROUPS` in `seed_matthew.py` (pair IDs 800+), which is the generic catalog-wide
+pass. Pairing courses that are both present needs nothing else; an **inserted** alternative also
+needs a verdict — re-run `scripts/verify_alternative_inserts.py` (needs the local catalog + xlsx). ETI's old hand-written `PAIRS` list is gone — see the warning above.
 
 **First check whether the bulletin actually says "or".** Two courses listed inside one
 `Select N credits` pool are *not* alternatives that need pairing: the credit threshold already does

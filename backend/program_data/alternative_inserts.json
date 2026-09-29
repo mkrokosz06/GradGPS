@@ -1,0 +1,7325 @@
+{
+ "about": "Verdicts on course alternatives inserted by patch_known_alternatives(); built by scripts/verify_alternative_inserts.py. patch_known_alternatives() inserts ONLY entries marked keep/branch; remove_unverified_alternatives.py deletes the drops from a loaded catalog.",
+ "counts": {
+  "branch": 8,
+  "drop": 280,
+  "keep": 29
+ },
+ "entries": [
+  {
+   "program": "Accounting, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2305,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Accounting, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 801,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Accounting, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2561,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Actuarial Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2310,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Actuarial Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 804,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Actuarial Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1870,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Actuarial Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2564,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Advertising/Public Relations, B.A.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1283,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Aerospace Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1597,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Aerospace Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 806,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Aerospace Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1872,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Aerospace Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2699,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Aerospace Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2869,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "African and African American Studies, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1285,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agribusiness Management, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2311,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agribusiness Management, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 811,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agricultural and Biorenewable Systems Management, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2312,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agricultural and Biorenewable Systems Management, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1600,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agricultural and Extension Education, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 813,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Agricultural and Extension Education, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1289,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Anthropological Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1295,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Anthropology, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1302,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Architectural Engineering, B.A.E.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1608,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Architectural Engineering, B.A.E.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 814,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Architectural Engineering, B.A.E.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1879,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Architectural Engineering, B.A.E.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2702,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Architectural Engineering, B.A.E.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2870,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 824,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1889,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 311W",
+   "group_course": "Requirements for the Major#MATH 311W",
+   "pair_group_id": 2517,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2703,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2876,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Methods and Applications, B.S. (Information Sciences and Technology)",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 121",
+   "group_course": "Requirements for the Major#CMPSC 121",
+   "pair_group_id": 2450,
+   "partners": [
+    "CMPSC 131"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Methods and Applications, B.S. (Information Sciences and Technology)",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 122",
+   "group_course": "Requirements for the Major#CMPSC 122",
+   "pair_group_id": 2488,
+   "partners": [
+    "CMPSC 132"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Artificial Intelligence Methods and Applications, B.S. (Information Sciences and Technology)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1893,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1617,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 827,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1894,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 250",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 250",
+   "pair_group_id": 2234,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2704,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2877,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Astronomy and Astrophysics, B.S.",
+   "group": "Computer Science Option (33 credits)",
+   "inserted": "CMPSC 132",
+   "group_course": "Computer Science Option (33 credits)#CMPSC 132",
+   "pair_group_id": 2489,
+   "partners": [
+    "CMPSC 122"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biochemistry and Molecular Biology, B.S. (Science)",
+   "group": "Biochemistry Option (40 credits)",
+   "inserted": "PHYS 250",
+   "group_course": "Biochemistry Option (40 credits)#PHYS 250",
+   "pair_group_id": 2708,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biochemistry and Molecular Biology, B.S. (Science)",
+   "group": "Biochemistry Option (40 credits)",
+   "inserted": "PHYS 251",
+   "group_course": "Biochemistry Option (40 credits)#PHYS 251",
+   "pair_group_id": 2880,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biochemistry and Molecular Biology, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "BIOL 222",
+   "group_course": "Common Requirements for the Major (All Options)#BIOL 222",
+   "pair_group_id": 3012,
+   "partners": [
+    "BIOL 322"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biochemistry and Molecular Biology, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1623,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biochemistry and Molecular Biology, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1900,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biological Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1629,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biological Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1905,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biological Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2713,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biological Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2888,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biology, B.S. (Science)",
+   "group": "Genetics and Developmental Biology Option (50-55 credits)",
+   "inserted": "BIOL 222",
+   "group_course": "Genetics and Developmental Biology Option (50-55 credits)#BIOL 222",
+   "pair_group_id": 3019,
+   "partners": [
+    "BIOL 322"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1652,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CMPSC 201",
+   "group_course": "Common Requirements for the Major (All Options)#CMPSC 201",
+   "pair_group_id": 2502,
+   "partners": [
+    "CMPSC 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 847,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1915,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2731,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biomedical Engineering, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2899,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biotechnology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1657,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biotechnology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1920,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biotechnology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 211",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 211",
+   "pair_group_id": 2734,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Biotechnology, B.S.",
+   "group": "General Biotechnology Option (48-50 credits)",
+   "inserted": "STAT 200",
+   "group_course": "General Biotechnology Option (48-50 credits)#STAT 200",
+   "pair_group_id": 1321,
+   "partners": [
+    "STAT 250"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Business Analytics and Information Systems, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 858,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Business Analytics and Information Systems, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2581,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1661,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 870,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1926,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2243,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2737,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemical Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2903,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemistry, B.S. (Science)",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1666,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemistry, B.S. (Science)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1932,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemistry, B.S. (Science)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2738,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Chemistry, B.S. (Science)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2909,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Civil Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1672,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Civil Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 875,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Civil Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1937,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Civil Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2740,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Civil Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2914,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Community, Environment, and Development, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1339,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1674,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 311W",
+   "group_course": "Requirements for the Major#MATH 311W",
+   "pair_group_id": 2521,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2742,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2915,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Science, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 877,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Science, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 311W",
+   "group_course": "Requirements for the Major#MATH 311W",
+   "pair_group_id": 2525,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Science, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2745,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Computer Science, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2920,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Corporate Innovation and Entrepreneurship, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2381,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Corporate Innovation and Entrepreneurship, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 881,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Corporate Innovation and Entrepreneurship, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2599,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Criminology, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1366,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Criminology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1369,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Engineering)",
+   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "inserted": "STAT 200",
+   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "pair_group_id": 1589,
+   "partners": [
+    "DS 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1957,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Engineering)",
+   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "inserted": "MATH 311W",
+   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "pair_group_id": 2528,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "inserted": "STAT 200",
+   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "pair_group_id": 1591,
+   "partners": [
+    "DS 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Business Fundamentals",
+   "inserted": "ACCTG 201",
+   "group_course": "Business Fundamentals#ACCTG 201",
+   "pair_group_id": 2384,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Business Fundamentals",
+   "inserted": "STAT 250",
+   "group_course": "Business Fundamentals#STAT 250",
+   "pair_group_id": 1371,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1960,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "inserted": "MATH 311W",
+   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "pair_group_id": 2529,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Economics",
+   "inserted": "STAT 250",
+   "group_course": "Economics#STAT 250",
+   "pair_group_id": 1372,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Food Science",
+   "inserted": "CHEM 130",
+   "group_course": "Food Science#CHEM 130",
+   "pair_group_id": 1675,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Information and Cybersecurity Sciences",
+   "inserted": "STAT 250",
+   "group_course": "Information and Cybersecurity Sciences#STAT 250",
+   "pair_group_id": 1374,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Nutrition",
+   "inserted": "CHEM 130",
+   "group_course": "Nutrition#CHEM 130",
+   "pair_group_id": 1676,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Information Sciences and Technology)",
+   "group": "Psychology",
+   "inserted": "STAT 250",
+   "group_course": "Psychology#STAT 250",
+   "pair_group_id": 1375,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Science)",
+   "group": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits",
+   "inserted": "STAT 200",
+   "group_course": "Applied Data Sciences (DATSC_BS, DTSAB_BS): 47 credits#STAT 200",
+   "pair_group_id": 1592,
+   "partners": [
+    "DS 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 1961,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Data Sciences, B.S. (Science)",
+   "group": "Computational Data Sciences (DTSCE_BS): 47 credits",
+   "inserted": "MATH 311W",
+   "group_course": "Computational Data Sciences (DTSCE_BS): 47 credits#MATH 311W",
+   "pair_group_id": 2530,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Earth Science and Policy, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1679,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Earth Science and Policy, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1377,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Electrical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1695,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Electrical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 892,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Electrical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1978,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Electrical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2762,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Electrical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2925,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Business and Finance, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2385,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Business and Finance, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1986,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1699,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 896,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1989,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2261,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2763,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Energy Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2929,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1701,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 902,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 1991,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2263,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2765,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Engineering Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2931,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Enterprise Technology Integration, B.S. (Information Sciences and Technology)",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2388,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1708,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 905,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2000,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2769,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Resource Management, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1710,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Resource Management, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 906,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Systems Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1718,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Systems Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 907,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Systems Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2269,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Systems Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2771,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Environmental Systems Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2938,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Finance, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 909,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Finance, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2603,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Food Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1721,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Food Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2773,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Food Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 200",
+   "group_course": "Requirements for the Major#STAT 200",
+   "pair_group_id": 1391,
+   "partners": [
+    "STAT 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forensic Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1722,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forensic Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2011,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forensic Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 200",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 200",
+   "pair_group_id": 1392,
+   "partners": [
+    "STAT 250"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forest Ecosystems, B.S.",
+   "group": "Watershed Ecohydrology Option (64 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Watershed Ecohydrology Option (64 credits)#CHEM 130",
+   "pair_group_id": 1728,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forest Ecosystems, B.S.",
+   "group": "Watershed Ecohydrology Option (64 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Watershed Ecohydrology Option (64 credits)#MATH 110",
+   "pair_group_id": 2018,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Forest Ecosystems, B.S.",
+   "group": "Watershed Ecohydrology Option (64 credits)",
+   "inserted": "PHYS 250",
+   "group_course": "Watershed Ecohydrology Option (64 credits)#PHYS 250",
+   "pair_group_id": 2782,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "French and Francophone Studies, B.S.",
+   "group": "French-Business Option (44 credits)",
+   "inserted": "ACCTG 201",
+   "group_course": "French-Business Option (44 credits)#ACCTG 201",
+   "pair_group_id": 2393,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "French and Francophone Studies, B.S.",
+   "group": "French-Business Option (44 credits)",
+   "inserted": "ENGL 202C",
+   "group_course": "French-Business Option (44 credits)#ENGL 202C",
+   "pair_group_id": 913,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geobiology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1732,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geobiology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2022,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geobiology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2785,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geography, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1409,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geosciences, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1735,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geosciences, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2028,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Geosciences, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2786,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "German, B.S.",
+   "group": "German Business Option (44 credits)",
+   "inserted": "ACCTG 201",
+   "group_course": "German Business Option (44 credits)#ACCTG 201",
+   "pair_group_id": 2394,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "German, B.S.",
+   "group": "German Business Option (44 credits)",
+   "inserted": "ENGL 202C",
+   "group_course": "German Business Option (44 credits)#ENGL 202C",
+   "pair_group_id": 914,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Health Policy and Administration, B.S. (Health and Human Development)",
+   "group": "Suggested Academic Plan",
+   "inserted": "STAT 250",
+   "group_course": "Suggested Academic Plan#STAT 250",
+   "pair_group_id": 1413,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Human-Centered Design and Development, B.S. (Information Sciences and Technology)",
+   "group": "Data Sciences",
+   "inserted": "STAT 200",
+   "group_course": "Data Sciences#STAT 200",
+   "pair_group_id": 1595,
+   "partners": [
+    "DS 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Human-Centered Design and Development, B.S. (Information Sciences and Technology)",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1422,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Immunology and Infectious Disease, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1743,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Immunology and Infectious Disease, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2039,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Immunology and Infectious Disease, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2793,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Immunology and Infectious Disease, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 212",
+   "group_course": "Requirements for the Major#PHYS 212",
+   "pair_group_id": 2939,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1744,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 920,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2040,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 251",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 251",
+   "pair_group_id": 2270,
+   "partners": [
+    "MATH 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2794,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Industrial Engineering, B.S. (Engineering)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2940,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1753,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2072,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "SECONDARY EDUCATION OPTION (94 credits)",
+   "inserted": "ENGL 202D",
+   "group_course": "SECONDARY EDUCATION OPTION (94 credits)#ENGL 202D",
+   "pair_group_id": 934,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "SECONDARY EDUCATION OPTION (94 credits)",
+   "inserted": "PHYS 211",
+   "group_course": "SECONDARY EDUCATION OPTION (94 credits)#PHYS 211",
+   "pair_group_id": 2808,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "SECONDARY EDUCATION OPTION (94 credits)",
+   "inserted": "PHYS 212",
+   "group_course": "SECONDARY EDUCATION OPTION (94 credits)#PHYS 212",
+   "pair_group_id": 2944,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Integrative Science, B.S. (Science)",
+   "group": "SECONDARY EDUCATION OPTION (94 credits)",
+   "inserted": "STAT 250",
+   "group_course": "SECONDARY EDUCATION OPTION (94 credits)#STAT 250",
+   "pair_group_id": 1472,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Kinesiology, B.S. (Health and Human Development)",
+   "group": "Movement Science Option (40-42 credits)",
+   "inserted": "PHYS 211",
+   "group_course": "Movement Science Option (40-42 credits)#PHYS 211",
+   "pair_group_id": 2815,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Landscape Contracting, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ACCTG 201",
+   "group_course": "Common Requirements for the Major (All Options)#ACCTG 201",
+   "pair_group_id": 2408,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Landscape Contracting, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202C",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202C",
+   "pair_group_id": 940,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Linguistics, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1485,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Management, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2412,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Management, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 942,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Management, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2614,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Marketing, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2417,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Marketing, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 946,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Marketing, B.S. (Business)",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2617,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1767,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 201",
+   "group_course": "Requirements for the Major#CMPSC 201",
+   "pair_group_id": 2508,
+   "partners": [
+    "CMPSC 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 947,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2271,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2818,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Materials Science and Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2951,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 360",
+   "group_course": "Requirements for the Major#CMPSC 360",
+   "pair_group_id": 2539,
+   "partners": [
+    "MATH 311W"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2095,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1487,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CMPSC 360",
+   "group_course": "Common Requirements for the Major (All Options)#CMPSC 360",
+   "pair_group_id": 2543,
+   "partners": [
+    "MATH 311W"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2100,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mathematics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1494,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1775,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 965,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2117,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2287,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2820,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mechanical Engineering, B.S. (Engineering)",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2957,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Meteorology and Atmospheric Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1782,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Meteorology and Atmospheric Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2122,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Meteorology and Atmospheric Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 250",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 250",
+   "pair_group_id": 2289,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Meteorology and Atmospheric Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2821,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Meteorology and Atmospheric Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2962,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Microbiology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1792,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Microbiology, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2131,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Middle Level Education, B.S.",
+   "group": "Mathematics 4-8 Option (31 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Mathematics 4-8 Option (31 credits)#MATH 110",
+   "pair_group_id": 2138,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mining Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1801,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mining Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2141,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mining Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 251",
+   "group_course": "Requirements for the Major#MATH 251",
+   "pair_group_id": 2293,
+   "partners": [
+    "MATH 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mining Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2828,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Mining Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2978,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Neurobiology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2830,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Neurobiology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 212",
+   "group_course": "Requirements for the Major#PHYS 212",
+   "pair_group_id": 2979,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1804,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 974,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2143,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 250",
+   "group_course": "Requirements for the Major#MATH 250",
+   "pair_group_id": 2295,
+   "partners": [
+    "MATH 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2831,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Nuclear Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2981,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Organizational Leadership, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1512,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Petroleum and Natural Gas Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1811,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Petroleum and Natural Gas Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 978,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Petroleum and Natural Gas Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2148,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Petroleum and Natural Gas Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2832,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Petroleum and Natural Gas Engineering, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2984,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Pharmacology and Toxicology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1814,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Pharmacology and Toxicology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2151,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Pharmacology and Toxicology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2835,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Pharmacology and Toxicology, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 212",
+   "group_course": "Requirements for the Major#PHYS 212",
+   "pair_group_id": 2985,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Physics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1815,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Physics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 979,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Physics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2152,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Physics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 250",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 250",
+   "pair_group_id": 2836,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Physics, B.S. (Science)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 251",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 251",
+   "pair_group_id": 2986,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Planetary Science and Astronomy, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1822,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Planetary Science and Astronomy, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202D",
+   "group_course": "Requirements for the Major#ENGL 202D",
+   "pair_group_id": 987,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Planetary Science and Astronomy, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2161,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Planetary Science and Astronomy, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1514,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Plant Sciences, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1824,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Plant Sciences, B.S.",
+   "group": "Plant Genetics and Biotechnology Option (51-57 credits)",
+   "inserted": "PHYS 211",
+   "group_course": "Plant Genetics and Biotechnology Option (51-57 credits)#PHYS 211",
+   "pair_group_id": 2845,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Plant Sciences, B.S.",
+   "group": "Plant Science Option (44-50 credits)",
+   "inserted": "PHYS 211",
+   "group_course": "Plant Science Option (44-50 credits)#PHYS 211",
+   "pair_group_id": 2848,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedical-Medical, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1830,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedical-Medical, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2164,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedical-Medical, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 250",
+   "group_course": "Requirements for the Major#PHYS 250",
+   "pair_group_id": 2852,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedical-Medical, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 251",
+   "group_course": "Requirements for the Major#PHYS 251",
+   "pair_group_id": 2988,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedicine, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1834,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Premedicine, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2165,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Psychology, B.S. (Liberal Arts)",
+   "group": "Business Option (24 credits)",
+   "inserted": "ACCTG 201",
+   "group_course": "Business Option (24 credits)#ACCTG 201",
+   "pair_group_id": 2432,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Real Estate, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2434,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Real Estate, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 1001,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Real Estate, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2630,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Risk Management, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ACCTG 201",
+   "group_course": "Common Requirements for the Major (All Options)#ACCTG 201",
+   "pair_group_id": 2435,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Risk Management, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202C",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202C",
+   "pair_group_id": 1008,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Risk Management, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MIS 204",
+   "group_course": "Common Requirements for the Major (All Options)#MIS 204",
+   "pair_group_id": 2631,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Science, B.S./Business Administration, M.B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2438,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Science, B.S./Business Administration, M.B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1835,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Science, B.S./Business Administration, M.B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2182,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Biological Science Teaching Option (63-67 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Biological Science Teaching Option (63-67 credits)#CHEM 130",
+   "pair_group_id": 1837,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Biological Science Teaching Option (63-67 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Biological Science Teaching Option (63-67 credits)#MATH 110",
+   "pair_group_id": 2184,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Chemistry Teaching Option (55-61 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Chemistry Teaching Option (55-61 credits)#CHEM 130",
+   "pair_group_id": 1838,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Chemistry Teaching Option (55-61 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Chemistry Teaching Option (55-61 credits)#MATH 110",
+   "pair_group_id": 2186,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Chemistry Teaching Option (55-61 credits)",
+   "inserted": "PHYS 250",
+   "group_course": "Chemistry Teaching Option (55-61 credits)#PHYS 250",
+   "pair_group_id": 2857,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Chemistry Teaching Option (55-61 credits)",
+   "inserted": "PHYS 251",
+   "group_course": "Chemistry Teaching Option (55-61 credits)#PHYS 251",
+   "pair_group_id": 2993,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Earth and Space Science Teaching Option (60-64 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Earth and Space Science Teaching Option (60-64 credits)#CHEM 130",
+   "pair_group_id": 1840,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Earth and Space Science Teaching Option (60-64 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Earth and Space Science Teaching Option (60-64 credits)#MATH 110",
+   "pair_group_id": 2188,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Environmental Education Teaching Option (52-56 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Environmental Education Teaching Option (52-56 credits)#CHEM 130",
+   "pair_group_id": 1864,
+   "partners": [
+    "CHEM 101"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Environmental Education Teaching Option (52-56 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Environmental Education Teaching Option (52-56 credits)#MATH 110",
+   "pair_group_id": 2190,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "General Science Teaching Option (38-39 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "General Science Teaching Option (38-39 credits)#CHEM 130",
+   "pair_group_id": 1842,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "General Science Teaching Option (38-39 credits)",
+   "inserted": "MATH 110",
+   "group_course": "General Science Teaching Option (38-39 credits)#MATH 110",
+   "pair_group_id": 2191,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Mathematics Teaching Option (54-56 credits)",
+   "inserted": "CMPSC 360",
+   "group_course": "Mathematics Teaching Option (54-56 credits)#CMPSC 360",
+   "pair_group_id": 2553,
+   "partners": [
+    "MATH 311W"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Mathematics Teaching Option (54-56 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Mathematics Teaching Option (54-56 credits)#MATH 110",
+   "pair_group_id": 2192,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Physics Teaching Option (55-63 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Physics Teaching Option (55-63 credits)#CHEM 130",
+   "pair_group_id": 1843,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Physics Teaching Option (55-63 credits)",
+   "inserted": "MATH 110",
+   "group_course": "Physics Teaching Option (55-63 credits)#MATH 110",
+   "pair_group_id": 2194,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Physics Teaching Option (55-63 credits)",
+   "inserted": "PHYS 250",
+   "group_course": "Physics Teaching Option (55-63 credits)#PHYS 250",
+   "pair_group_id": 2859,
+   "partners": [
+    "PHYS 211"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Secondary Education, B.S. (Education)",
+   "group": "Physics Teaching Option (55-63 credits)",
+   "inserted": "PHYS 251",
+   "group_course": "Physics Teaching Option (55-63 credits)#PHYS 251",
+   "pair_group_id": 2995,
+   "partners": [
+    "PHYS 212"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": true,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Security and Risk Analysis, B.S. (Information Sciences and Technology)",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1556,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Social Data Analytics, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 121",
+   "group_course": "Requirements for the Major#CMPSC 121",
+   "pair_group_id": 2478,
+   "partners": [
+    "CMPSC 131"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Social Data Analytics, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CMPSC 122",
+   "group_course": "Requirements for the Major#CMPSC 122",
+   "pair_group_id": 2497,
+   "partners": [
+    "CMPSC 132"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Social Data Analytics, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 110",
+   "group_course": "Requirements for the Major#MATH 110",
+   "pair_group_id": 2196,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Social Data Analytics, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MATH 311W",
+   "group_course": "Requirements for the Major#MATH 311W",
+   "pair_group_id": 2555,
+   "partners": [
+    "CMPSC 360"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Sociology, B.A.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1561,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Sociology, B.S. (Liberal Arts)",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1564,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Spanish, B.S.",
+   "group": "Business Option (50 credits)",
+   "inserted": "ACCTG 201",
+   "group_course": "Business Option (50 credits)#ACCTG 201",
+   "pair_group_id": 2439,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Spanish, B.S.",
+   "group": "Business Option (50 credits)",
+   "inserted": "ENGL 202C",
+   "group_course": "Business Option (50 credits)#ENGL 202C",
+   "pair_group_id": 1011,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Actuarial Statistics Option (47 credits)",
+   "inserted": "ACCTG 201",
+   "group_course": "Actuarial Statistics Option (47 credits)#ACCTG 201",
+   "pair_group_id": 2442,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Biostatistics Option (47-50 credits)",
+   "inserted": "CHEM 130",
+   "group_course": "Biostatistics Option (47-50 credits)#CHEM 130",
+   "pair_group_id": 1844,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "MATH 110",
+   "group_course": "Common Requirements for the Major (All Options)#MATH 110",
+   "pair_group_id": 2207,
+   "partners": [
+    "MATH 140"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "STAT 250",
+   "group_course": "Common Requirements for the Major (All Options)#STAT 250",
+   "pair_group_id": 1574,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Statistics and Computing Option (41 credits)",
+   "inserted": "CMPSC 121",
+   "group_course": "Statistics and Computing Option (41 credits)#CMPSC 121",
+   "pair_group_id": 2485,
+   "partners": [
+    "CMPSC 131"
+   ],
+   "verdict": "keep",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": true,
+    "bulletin_plan": true,
+    "bulletin_entrance": false,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": true
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Statistics, B.S.",
+   "group": "Statistics and Computing Option (41 credits)",
+   "inserted": "CMPSC 122",
+   "group_course": "Statistics and Computing Option (41 credits)#CMPSC 122",
+   "pair_group_id": 2498,
+   "partners": [
+    "CMPSC 132"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Supply Chain and Information Systems, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ACCTG 201",
+   "group_course": "Requirements for the Major#ACCTG 201",
+   "pair_group_id": 2444,
+   "partners": [
+    "ACCTG 211"
+   ],
+   "verdict": "branch",
+   "branch": [
+    "ACCTG 201",
+    "ACCTG 202"
+   ],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": true,
+    "bulletin_entrance": true,
+    "bulletin_page": true,
+    "bulletin_links": true,
+    "sap_template": false,
+    "entrance_spec": true,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Supply Chain and Information Systems, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "ENGL 202C",
+   "group_course": "Requirements for the Major#ENGL 202C",
+   "pair_group_id": 1022,
+   "partners": [
+    "ENGL 202D"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Supply Chain and Information Systems, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "MIS 204",
+   "group_course": "Requirements for the Major#MIS 204",
+   "pair_group_id": 2634,
+   "partners": [
+    "MIS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Systems Neuroscience, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1847,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Systems Neuroscience, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2862,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Systems Neuroscience, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 212",
+   "group_course": "Requirements for the Major#PHYS 212",
+   "pair_group_id": 2998,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Systems Neuroscience, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1580,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Turfgrass Science, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "STAT 250",
+   "group_course": "Requirements for the Major#STAT 250",
+   "pair_group_id": 1583,
+   "partners": [
+    "STAT 200"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Veterinary and Biomedical Sciences, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "CHEM 130",
+   "group_course": "Requirements for the Major#CHEM 130",
+   "pair_group_id": 1853,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Veterinary and Biomedical Sciences, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 211",
+   "group_course": "Requirements for the Major#PHYS 211",
+   "pair_group_id": 2865,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Veterinary and Biomedical Sciences, B.S.",
+   "group": "Requirements for the Major",
+   "inserted": "PHYS 212",
+   "group_course": "Requirements for the Major#PHYS 212",
+   "pair_group_id": 3001,
+   "partners": [
+    "PHYS 251"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Wildlife and Fisheries Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "CHEM 130",
+   "group_course": "Common Requirements for the Major (All Options)#CHEM 130",
+   "pair_group_id": 1856,
+   "partners": [
+    "CHEM 110"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Wildlife and Fisheries Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "ENGL 202D",
+   "group_course": "Common Requirements for the Major (All Options)#ENGL 202D",
+   "pair_group_id": 1028,
+   "partners": [
+    "ENGL 202C"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  },
+  {
+   "program": "Wildlife and Fisheries Science, B.S.",
+   "group": "Common Requirements for the Major (All Options)",
+   "inserted": "PHYS 211",
+   "group_course": "Common Requirements for the Major (All Options)#PHYS 211",
+   "pair_group_id": 2868,
+   "partners": [
+    "PHYS 250"
+   ],
+   "verdict": "drop",
+   "branch": [],
+   "evidence": {
+    "bulletin_requirements": false,
+    "bulletin_plan": false,
+    "bulletin_entrance": false,
+    "bulletin_page": false,
+    "bulletin_links": false,
+    "sap_template": false,
+    "entrance_spec": false,
+    "scraped_elsewhere": false
+   },
+   "page_names_partner": true
+  }
+ ]
+}
