@@ -1,10 +1,11 @@
 {
   "program_name": "Biology, B.S. (Science)",
-  "subplan": null,
+  "subplan": "Genetics and Developmental Biology",
   "catalog_year": "2024",
   "degree": "B.S.",
   "total_credits": 124.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biology-bs/",
+  "source_plan": "Genetics and Development Option: Biology, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
@@ -189,9 +190,16 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
+          "type": "choose_one",
+          "codes": [
+            "BIOL 430",
+            "BMB 430"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 401",
           "credits": 3.0
         },
         {
@@ -208,11 +216,6 @@
           "type": "elective",
           "label": "Elective (see notes)",
           "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective (see notes)",
-          "credits": 3.0
         }
       ]
     },
@@ -222,9 +225,13 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
+          "type": "course",
+          "code": "BIOL 322",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 402",
           "credits": 3.0
         },
         {
@@ -235,11 +242,6 @@
         {
           "type": "gen_ed",
           "category": "GHW",
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
           "credits": 3.0
         },
         {
@@ -322,6 +324,5 @@
         }
       ]
     }
-  ],
-  "source_plan": "General Biology Option: Biology, B.S. at University Park Campus"
+  ]
 }

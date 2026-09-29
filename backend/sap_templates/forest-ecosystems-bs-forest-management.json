@@ -1,0 +1,322 @@
+{
+  "program_name": "Forest Ecosystems, B.S.",
+  "subplan": "Forest Management",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/forest-ecosystems-bs/",
+  "source_plan": "Forest Management Option: Forest Ecosystems, B.S. at University Park Campus and Commonwealth Campuses",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 22",
+            "MATH 33",
+            "MATH 34",
+            "AGBM 106",
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 127"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 240",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FOR 200",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 203",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 255",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FOR 204",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 266",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PPEM 318",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "ENT 313",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FOR 308",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 440",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "FOR 401 (or Supporting Course)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FOR 320",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 350",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WFS 209N",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 450W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 455",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ERM 448",
+            "FOR 439",
+            "FOR 475"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 421",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FOR 430",
+            "WFS 430"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course",
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "FOR 409 & SOILS 102 (or Supporting Course)",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 466W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 410",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 470",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FOR 480",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

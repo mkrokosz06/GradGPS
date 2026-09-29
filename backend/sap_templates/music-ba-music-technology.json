@@ -1,0 +1,399 @@
+{
+  "program_name": "Music, B.A.",
+  "subplan": "Music Technology",
+  "catalog_year": "2024",
+  "degree": "B.A.",
+  "total_credits": 133.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/music-ba/",
+  "source_plan": "Music Technology Option: Music, B.A. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 40",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 121",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 127",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 131",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "INART 50",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "INART 258A",
+          "credits": 3.0,
+          "gen_ed": "GA"
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 122",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 132",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 162",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 221",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 262",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 38",
+          "credits": 3.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "pool",
+          "ref": "world_language",
+          "label": "World Language",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 222",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 261",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 270",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 332",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 41",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "course",
+          "code": "MATSE 81",
+          "credits": 3.0,
+          "gen_ed": "GN"
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 437",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 453",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "THEA 484",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 15A",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GS",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 451",
+            "MUSIC 452"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 458",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 476W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MUSIC 101",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 177",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 451",
+            "MUSIC 452"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,305 @@
+{
+  "program_name": "Biotechnology, B.S.",
+  "subplan": "Clinical Laboratory Science",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 119.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biotechnology-bs/",
+  "source_plan": "Clinical Laboratory Science Option: Biotechnology, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MICRB 202",
+            "MICRB 203"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 250",
+            "MATH 141",
+            "MATH 141B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 251",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 202",
+            "CHEM 210"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 250",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 252",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 211",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 203",
+            "CHEM 212",
+            "CHEM 213"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 212",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 222",
+            "MICRB 410"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 421W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 221",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 322",
+            "MICRB 410"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 412",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 422",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 405A",
+          "credits": 8.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 405B",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 405C",
+          "credits": 6.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 405D",
+          "credits": 5.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 405E",
+          "credits": 7.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 405F",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

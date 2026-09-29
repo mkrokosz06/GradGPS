@@ -1,0 +1,379 @@
+{
+  "program_name": "Music, B.M.",
+  "subplan": "Keyboard Instruments",
+  "catalog_year": "2024",
+  "degree": "B.M.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/music-bm/",
+  "source_plan": "Keyboard Instruments Option: Music, B.M. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 130",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 40",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 121",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 131",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 180",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 15A",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 122",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 132",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 162",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 230",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 221",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 231",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 262",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 280",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 222",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 261",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 270",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 332",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 330",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 181",
+            "MUSIC 182",
+            "MUSIC 267",
+            "MUSIC 420",
+            "MUSIC 422",
+            "MUSIC 423",
+            "MUSIC 431",
+            "MUSIC 433",
+            "MUSIC 438"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 266",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 481",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 380",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "elective",
+          "label": "Electives",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "ENGL 202A (Music Electives)",
+          "credits": 3.0,
+          "codes": [
+            "ENGL 202A"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 430",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 419",
+            "MUSIC 424"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 461W",
+            "MUSIC 462W",
+            "MUSIC 463W",
+            "MUSIC 464W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "KEYBD 480",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Ensemble (Supporting Course)",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MUSIC 101",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MUSIC 422",
+            "MUSIC 431",
+            "MUSIC 433",
+            "MUSIC 461W",
+            "MUSIC 462W",
+            "MUSIC 463W",
+            "MUSIC 472"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

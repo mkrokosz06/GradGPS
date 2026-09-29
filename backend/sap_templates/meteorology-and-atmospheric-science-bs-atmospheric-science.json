@@ -1,10 +1,11 @@
 {
   "program_name": "Meteorology and Atmospheric Science, B.S.",
-  "subplan": null,
+  "subplan": "Atmospheric Science",
   "catalog_year": "2024",
   "degree": "B.S.",
   "total_credits": 121.0,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/meteorology-atmospheric-science-bs/",
+  "source_plan": "Atmospheric Sciences Option: Meteorology and Atmospheric Science, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
@@ -214,8 +215,17 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "course",
+          "code": "METEO 422",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "METEO 436",
+            "METEO 437",
+            "METEO 454"
+          ],
           "credits": 3.0
         },
         {
@@ -224,13 +234,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Professional Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
@@ -272,6 +277,5 @@
         }
       ]
     }
-  ],
-  "source_plan": "General Option: Meteorology and Atmospheric Science, B.S. at University Park Campus"
+  ]
 }

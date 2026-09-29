@@ -1,0 +1,277 @@
+{
+  "program_name": "Secondary Education, B.S. (Education)",
+  "subplan": "Physics Teaching",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 119.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/secondary-education-bs/",
+  "source_plan": "Physics Teaching Option: Secondary Education, B.S. at University Park Campus and Commonwealth Campuses",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 211",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PSYCH 100",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 212",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 110",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 213",
+            "PHYS 214"
+          ],
+          "credits": 2.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 13.5,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        },
+        {
+          "type": "course",
+          "code": "CI 295",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 250",
+            "MATH 251"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 237",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 230",
+            "MATH 231"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 400",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "HDFS 239",
+            "PSYCH 412"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SCIED 411W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 403B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 419",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 12.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SCIED 412",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 495C",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 402",
+            "PHYS 458",
+            "PHYS 457"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495E",
+          "credits": 15.0
+        }
+      ]
+    }
+  ]
+}

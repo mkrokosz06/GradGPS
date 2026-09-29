@@ -257,7 +257,26 @@ actionable; the timeline's dropdown rows and the home screen's pool row open the
 
 **Template schema & authoring.** Slot types: `course`, `choose_one`, `gen_ed`, `pool`, `elective` (`VALID_SLOT_TYPES` in `plan_templates.py`). `validate_template()` does structural + **grand-total** credit checks only — per-semester `credits` are advisory because PSU bulletin SAPs are frequently internally inconsistent per-semester but correct at the 120-credit total.
 
-**Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
+**Per-option plans (Sept 2026).** A major with options publishes one grid *per option*, but only the
+first was scraped and `load_template()` fell back to it for every option — a Social Studies teaching
+student got the Biology Teaching plan (278 wrong-option course slots across 134 major/option pairs;
+20 after). `scrape_sap.py --options` writes one subplan template per University Park option grid
+(**126**, across 46 majors), named with the catalog's option name — the value `/audit/subplans` offers and
+the profile stores. PSU words the two differently ("Biology Teaching" / "Biological Science Teaching",
+"Math" / "Mathematics 4-8"), so `match_option()` matches on word containment and refuses ties. A
+**reworded** match must also not be contradicted by the plan's courses: two witnesses vote — the page's
+own option sections (`page_option_codes()`) and the catalog's option groups — counting only courses
+unique to one option *and* to this plan (every Biology plan takes CHEM 202/203, so they prove nothing).
+Grids must *start* at University Park (a "Starting at Berks … Ending at University Park" 2+2 plan is
+not the UP plan). `collapse_renamed_duplicates()` folds LA 83/LA 283-style double listings at scrape
+time. **`load_template()`** now returns `None` (→ Layer 1 audit-driven planner) for an option with no
+grid of its own when the program has option templates, instead of another option's plan; a program
+without option templates keeps the shared-plan fallback. A "General …" grid no one can select becomes
+the base (no-option) plan when the base is still an untouched first-grid scrape (Biology, Meteorology;
+Mathematics' base was hand-edited and left alone). Rejected on purpose: RN to BSN (a 90-credit
+completion degree). Tests: `tests/test_sap_options.py` (13).
+
+**Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`, `--options`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
 ### Minors & certificates (credentials)
 

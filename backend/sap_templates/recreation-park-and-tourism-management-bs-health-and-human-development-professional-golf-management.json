@@ -1,0 +1,402 @@
+{
+  "program_name": "Recreation, Park, and Tourism Management, B.S. (Health and Human Development)",
+  "subplan": "Professional Golf Management",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 147.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/health-human-development/recreation-park-tourism-management-bs/",
+  "source_plan": "Professional Golf Management Option: Recreation, Park, and Tourism Management, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSU 14",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 120",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 100S",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100A (Counts for elective credits)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100A"
+          ]
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ECON 102",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 220",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100B (Counts for elective credits)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100B"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SU",
+      "credits": 3.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RPTM 295A",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BA 304",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 277",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 250",
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100A (Counts for elective credits)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100A"
+          ]
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 100"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (TURF 100 Turfgrass Mgmt. Recommended)",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 19.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100B (Counts for elective credits)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100B"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "RPTM 236",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 360",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (ACCTG 211 Recommended)",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SU",
+      "credits": 3.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RPTM 395B",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 20.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BA 303",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 410",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 456",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100A (Counts for elective credit)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100A"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "RPTM 254",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 336",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BLAW 243",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 20.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100B (Counts for elective credit)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100B"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "RPTM 390",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "RPTM 350",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Elective (BA 302 Recommended for students seeking Smeal Business Certificate)",
+          "credits": 3.0,
+          "codes": [
+            "BA 302"
+          ]
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SU",
+      "credits": 3.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RPTM 495B",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 3.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RPTM 495C",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 21.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202D",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "RPTM 415",
+            "HM 466"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "RPTM 100B (Counts for elective credit)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 100B"
+          ]
+        },
+        {
+          "type": "course",
+          "code": "RPTM 433W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Elective (BA 301 recommended for students seeking Smeal Business Certificate)",
+          "credits": 3.0,
+          "codes": [
+            "BA 301"
+          ]
+        },
+        {
+          "type": "pool",
+          "ref": "major_elective",
+          "label": "Elective (RPTM 354 recommended)",
+          "credits": 3.0,
+          "codes": [
+            "RPTM 354"
+          ]
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SU",
+      "credits": 2.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "RPTM 495D",
+          "credits": 2.0
+        }
+      ]
+    }
+  ]
+}

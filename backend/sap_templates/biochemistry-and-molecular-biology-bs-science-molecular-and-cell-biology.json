@@ -1,0 +1,318 @@
+{
+  "program_name": "Biochemistry and Molecular Biology, B.S. (Science)",
+  "subplan": "Molecular and Cell Biology",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 125.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biochemistry-molecular-biology-bs/",
+  "source_plan": "Molecular and Cell Biology Option: Biochemistry and Molecular Biology, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 140",
+            "MATH 140B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ESL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MICRB 201",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MICRB 202",
+            "MICRB 203"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 113",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 141",
+            "MATH 141B"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 251",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 210",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 250",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 252",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 212",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 213",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "PHYS 251",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 322",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 400",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 442",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 410",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 460",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BMB 443W",
+            "BMB 445W"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 6.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "BMB 428",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 430",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MICRB",
+          "level": 400,
+          "label": "MICRB 400-Level Course",
+          "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "BMB 448",
+            "BMB 445W",
+            "BMB 443W"
+          ],
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MICRB",
+          "level": 400,
+          "label": "MICRB 400-Level Course",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 7.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

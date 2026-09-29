@@ -1,10 +1,11 @@
 {
   "program_name": "Biology, B.S. (Science)",
-  "subplan": null,
+  "subplan": "Vertebrate Physiology",
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 124.5,
+  "total_credits": 125.0,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biology-bs/",
+  "source_plan": "Vertebrate Physiology Option: Biology, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
@@ -81,17 +82,17 @@
           "credits": 1.0
         },
         {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
           "type": "choose_one",
           "codes": [
             "STAT 250",
             "STAT 200",
             "STAT 240"
           ],
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
           "credits": 3.0
         }
       ]
@@ -196,17 +197,17 @@
         },
         {
           "type": "course",
+          "code": "BMB 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
           "code": "PHYS 250",
           "credits": 4.0
         },
         {
           "type": "gen_ed",
           "category": "GS",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective (see notes)",
           "credits": 3.0
         },
         {
@@ -221,6 +222,11 @@
       "term_season": "SP",
       "credits": 16.0,
       "slots": [
+        {
+          "type": "course",
+          "code": "BIOL 402W",
+          "credits": 3.0
+        },
         {
           "type": "pool",
           "ref": "major_elective",
@@ -238,11 +244,6 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
           "type": "elective",
           "label": "Elective (see notes)",
           "credits": 3.0
@@ -255,9 +256,8 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
+          "type": "course",
+          "code": "BIOL 472",
           "credits": 3.0
         },
         {
@@ -291,13 +291,12 @@
     {
       "year": 4,
       "term_season": "SP",
-      "credits": 15.0,
+      "credits": 15.5,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
-          "credits": 3.0
+          "type": "course",
+          "code": "BIOL 473",
+          "credits": 2.0
         },
         {
           "type": "pool",
@@ -319,9 +318,13 @@
           "type": "elective",
           "label": "Elective (see notes)",
           "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective (see notes)",
+          "credits": 1.5
         }
       ]
     }
-  ],
-  "source_plan": "General Biology Option: Biology, B.S. at University Park Campus"
+  ]
 }

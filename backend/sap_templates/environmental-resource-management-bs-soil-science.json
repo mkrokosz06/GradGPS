@@ -1,0 +1,326 @@
+{
+  "program_name": "Environmental Resource Management, B.S.",
+  "subplan": "Soil Science",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 118.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/agricultural-sciences/environmental-resource-management-bs/",
+  "source_plan": "Soil Science Option: Environmental Resource Management, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 110",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGBM 101",
+            "ECON 102"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "ERM 151",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CHEM 112",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "CAS 137H",
+            "ENGL 137H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 101",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 102",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 138T",
+            "ENGL 138T"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "BIOL 110",
+            "BIOL 127"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CHEM 111",
+          "credits": 1.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 202",
+            "CHEM 210"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "AGRO 28",
+            "HORT 101",
+            "TURF 235",
+            "BIOL 220W",
+            "FOR 203"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "PHYS 211",
+            "PHYS 250"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOSC 20",
+            "GEOSC 1"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 200",
+            "STAT 240",
+            "STAT 250"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SOILS 412W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ERM 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ASM 327",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 403",
+          "credits": 2.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "ENGL 202C",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "SOILS 402",
+            "SOILS 420",
+            "ERM 440"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "SOILS 401",
+            "SOILS 405",
+            "GEOSC 452"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "ERM 300",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SOILS 416",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "SOILS 450",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "SOILS 404",
+            "FOR 475"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Electives",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    }
+  ]
+}

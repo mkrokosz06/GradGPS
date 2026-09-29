@@ -37,9 +37,15 @@ def _all_templates() -> list[dict]:
 def load_template(program_name: str, subplan: str | None = None) -> dict | None:
     """Return the SAP template for a program (+ optional subplan), or None.
 
-    Matches on `program_name`; prefers an exact `subplan` match but falls back to
-    the subplan-less template for the program so a student who hasn't picked an
-    option still gets the base plan.
+    Matches on `program_name`; prefers an exact `subplan` match. A student who
+    hasn't picked an option gets the subplan-less base plan.
+
+    A student who HAS picked an option with no plan of its own gets None — the
+    audit-driven Layer 1 planner — whenever the program publishes per-option
+    plans. The base plan of such a program is one particular option's grid, so
+    falling back to it scheduled a Social Studies teaching student the Biology
+    Teaching plan. A program without option templates keeps the old fallback:
+    its single grid is shared by every option.
     """
     candidates = [t for t in _all_templates() if t.get("program_name") == program_name]
     if not candidates:
@@ -48,6 +54,8 @@ def load_template(program_name: str, subplan: str | None = None) -> dict | None:
         exact = [t for t in candidates if t.get("subplan") == subplan]
         if exact:
             return exact[0]
+        if any(t.get("subplan") for t in candidates):
+            return None
     base = [t for t in candidates if not t.get("subplan")]
     return (base or candidates)[0]
 

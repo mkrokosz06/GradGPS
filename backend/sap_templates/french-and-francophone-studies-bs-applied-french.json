@@ -1,107 +1,49 @@
 {
-  "program_name": "Meteorology and Atmospheric Science, B.S.",
-  "subplan": null,
+  "program_name": "French and Francophone Studies, B.S.",
+  "subplan": "Applied French",
   "catalog_year": "2024",
   "degree": "B.S.",
-  "total_credits": 121.0,
-  "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/meteorology-atmospheric-science-bs/",
+  "total_credits": 121.5,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/french-francophone-studies-bs/",
+  "source_plan": "Applied French Option: French and Francophone Studies, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
       "year": 1,
       "term_season": "FA",
-      "credits": 16.0,
+      "credits": 17.5,
       "slots": [
         {
-          "type": "choose_one",
-          "codes": [
-            "MATH 140",
-            "MATH 140G"
-          ],
-          "credits": 4.0,
-          "gen_ed": "GQ"
-        },
-        {
           "type": "course",
-          "code": "CHEM 110",
-          "credits": 3.0,
-          "gen_ed": "GN"
-        },
-        {
-          "type": "course",
-          "code": "EMSC 100S",
-          "credits": 3.0,
-          "gen_ed": "GWS"
-        },
-        {
-          "type": "course",
-          "code": "METEO 201",
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        }
-      ]
-    },
-    {
-      "year": 1,
-      "term_season": "SP",
-      "credits": 14.0,
-      "slots": [
-        {
-          "type": "choose_one",
-          "codes": [
-            "MATH 141",
-            "MATH 141G"
-          ],
-          "credits": 4.0,
-          "gen_ed": "GQ"
+          "code": "FR 1",
+          "credits": 4.0
         },
         {
           "type": "choose_one",
           "codes": [
             "ENGL 15",
             "ENGL 30H",
-            "ESL 15"
+            "ESL 15",
+            "ENGL 137H",
+            "CAS 138T"
           ],
           "credits": 3.0,
           "gen_ed": "GWS"
         },
         {
           "type": "course",
-          "code": "PHYS 211",
-          "credits": 4.0,
-          "gen_ed": "GN"
+          "code": "LA 283",
+          "credits": 1.5
         },
         {
-          "type": "course",
-          "code": "METEO 273",
+          "type": "gen_ed",
+          "category": "GQ",
           "credits": 3.0
-        }
-      ]
-    },
-    {
-      "year": 2,
-      "term_season": "FA",
-      "credits": 15.0,
-      "slots": [
-        {
-          "type": "course",
-          "code": "PHYS 212",
-          "credits": 4.0,
-          "gen_ed": "GN"
         },
         {
-          "type": "course",
-          "code": "METEO 300",
-          "credits": 4.0
-        },
-        {
-          "type": "course",
-          "code": "MATH 230",
-          "credits": 4.0
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
         },
         {
           "type": "gen_ed",
@@ -111,23 +53,28 @@
       ]
     },
     {
-      "year": 2,
+      "year": 1,
       "term_season": "SP",
-      "credits": 16.0,
+      "credits": 14.5,
       "slots": [
         {
           "type": "course",
-          "code": "METEO 431",
-          "credits": 3.0
-        },
-        {
-          "type": "course",
-          "code": "MATH 251",
+          "code": "FR 2",
           "credits": 4.0
         },
         {
-          "type": "course",
-          "code": "STAT 401",
+          "type": "choose_one",
+          "codes": [
+            "ENGL 138T",
+            "CAS 138T",
+            "CAS 100"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
           "credits": 3.0
         },
         {
@@ -138,6 +85,70 @@
         {
           "type": "gen_ed",
           "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 3",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "US",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "FR 201",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "FR 202",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         }
       ]
@@ -145,33 +156,36 @@
     {
       "year": 3,
       "term_season": "FA",
-      "credits": 14.0,
+      "credits": 15.0,
       "slots": [
         {
           "type": "course",
-          "code": "METEO 421",
-          "credits": 4.0
+          "code": "FR 316",
+          "credits": 3.0
         },
         {
           "type": "choose_one",
           "codes": [
-            "METEO 436",
-            "METEO 437",
-            "METEO 454"
+            "FR 331",
+            "FR 332",
+            "FR 351",
+            "FR 352"
           ],
           "credits": 3.0
         },
         {
-          "type": "course",
-          "code": "METEO 411",
-          "credits": 4.0
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "METEO 473",
-            "METEO 474"
-          ],
+          "type": "course",
+          "code": "FR 401",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         }
       ]
@@ -182,18 +196,28 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "course",
-          "code": "METEO 470",
+          "type": "choose_one",
+          "codes": [
+            "FR 332",
+            "FR 331",
+            "FR 351",
+            "FR 352"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "FR 351",
+            "FR 331",
+            "FR 332",
+            "FR 352"
+          ],
           "credits": 3.0
         },
         {
           "type": "course",
-          "code": "METEO 440W",
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": "GWS",
+          "code": "FR 402Y",
           "credits": 3.0
         },
         {
@@ -203,7 +227,7 @@
         },
         {
           "type": "elective",
-          "label": "Professional Elective",
+          "label": "Elective Course",
           "credits": 3.0
         }
       ]
@@ -214,6 +238,17 @@
       "credits": 15.0,
       "slots": [
         {
+          "type": "course",
+          "code": "ENGL 202B",
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
           "type": "gen_ed",
           "category": null,
           "credits": 3.0
@@ -225,17 +260,7 @@
         },
         {
           "type": "elective",
-          "label": "Professional Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Professional Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Professional Elective",
+          "label": "Elective",
           "credits": 3.0
         }
       ]
@@ -243,35 +268,34 @@
     {
       "year": 4,
       "term_season": "SP",
-      "credits": 16.0,
+      "credits": 15.0,
       "slots": [
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "course",
+          "code": "FR 430",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Professional Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Professional Elective",
+          "label": "Elective",
           "credits": 3.0
         },
         {
           "type": "elective",
           "label": "Elective",
           "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective",
-          "credits": 4.0
         }
       ]
     }
-  ],
-  "source_plan": "General Option: Meteorology and Atmospheric Science, B.S. at University Park Campus"
+  ]
 }

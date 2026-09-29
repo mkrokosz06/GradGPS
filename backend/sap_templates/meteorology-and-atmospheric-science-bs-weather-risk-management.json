@@ -1,10 +1,11 @@
 {
   "program_name": "Meteorology and Atmospheric Science, B.S.",
-  "subplan": null,
+  "subplan": "Weather Risk Management",
   "catalog_year": "2024",
   "degree": "B.S.",
   "total_credits": 121.0,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/earth-mineral-sciences/meteorology-atmospheric-science-bs/",
+  "source_plan": "Weather Risk Management Option: Meteorology and Atmospheric Science, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
@@ -39,8 +40,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "course",
+          "code": "ECON 102",
           "credits": 3.0
         }
       ]
@@ -167,11 +168,8 @@
           "credits": 4.0
         },
         {
-          "type": "choose_one",
-          "codes": [
-            "METEO 473",
-            "METEO 474"
-          ],
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         }
       ]
@@ -192,8 +190,12 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": "GWS",
+          "type": "choose_one",
+          "codes": [
+            "METEO 415",
+            "METEO 473",
+            "METEO 474"
+          ],
           "credits": 3.0
         },
         {
@@ -202,8 +204,8 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "gen_ed",
+          "category": "GWS",
           "credits": 3.0
         }
       ]
@@ -214,8 +216,17 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "gen_ed",
-          "category": null,
+          "type": "choose_one",
+          "codes": [
+            "METEO 415",
+            "METEO 473",
+            "METEO 474"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EBF 473",
           "credits": 3.0
         },
         {
@@ -224,18 +235,13 @@
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
           "type": "elective",
-          "label": "Professional Elective",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Professional Elective",
+          "label": "Elective",
           "credits": 3.0
         }
       ]
@@ -246,18 +252,18 @@
       "credits": 16.0,
       "slots": [
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "course",
+          "code": "METEO 460",
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
-          "type": "elective",
-          "label": "Professional Elective",
+          "type": "gen_ed",
+          "category": null,
           "credits": 3.0
         },
         {
@@ -272,6 +278,5 @@
         }
       ]
     }
-  ],
-  "source_plan": "General Option: Meteorology and Atmospheric Science, B.S. at University Park Campus"
+  ]
 }

@@ -1,0 +1,269 @@
+{
+  "program_name": "Middle Level Education, B.S.",
+  "subplan": "Mathematics 4-8",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 124.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/middle-level-education-bs/",
+  "source_plan": "Math Option: Middle Level Education, B.S. at University Park Campus and Commonwealth Campuses",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HDFS 239",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 200",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 201",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 295B",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "LLED 400",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LLED 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LLED 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MTHED 428",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MTHED 429",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 403A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MTHED 431",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 18.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MTHED 420",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SCIED 458",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SSED 430W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 495B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MTHED 433",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 405",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495D",
+          "credits": 12.0
+        },
+        {
+          "type": "course",
+          "code": "CI 495F",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

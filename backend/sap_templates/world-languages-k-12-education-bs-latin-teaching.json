@@ -1,0 +1,280 @@
+{
+  "program_name": "World Languages (K-12) Education, B.S.",
+  "subplan": "Latin Teaching",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 125.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/world-languages-k-12-education-bs/",
+  "source_plan": "Latin Option: World Languages (K-12) Education, B.S. at University Park Campus and Commonwealth Campuses",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "ENGL 15",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CAMS 50",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CAMS 5",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HDFS 229",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LING 102",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAMS 45",
+            "CAMS 33"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LATIN 404",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "HDFS 239",
+            "PSYCH 412"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 295",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 300",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAMS 101",
+            "CAMS 150"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "WLED 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 495B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LATIN 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CAMS 410",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAMS 440W",
+            "CAMS 497",
+            "LATIN 404",
+            "LATIN 497"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CAMS 400W",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 403B",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 412W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "WLED 495C",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LATIN 403",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "LATIN 450W",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495E",
+          "credits": 15.0
+        }
+      ]
+    }
+  ]
+}

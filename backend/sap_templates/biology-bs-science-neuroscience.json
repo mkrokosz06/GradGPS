@@ -1,10 +1,11 @@
 {
   "program_name": "Biology, B.S. (Science)",
-  "subplan": null,
+  "subplan": "Neuroscience",
   "catalog_year": "2024",
   "degree": "B.S.",
   "total_credits": 124.5,
   "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/biology-bs/",
+  "source_plan": "Neuroscience Option: Biology, B.S. at University Park Campus",
   "scraped": true,
   "semesters": [
     {
@@ -81,17 +82,17 @@
           "credits": 1.0
         },
         {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
           "type": "choose_one",
           "codes": [
             "STAT 250",
             "STAT 200",
             "STAT 240"
           ],
-          "credits": 3.0
-        },
-        {
-          "type": "gen_ed",
-          "category": null,
           "credits": 3.0
         }
       ]
@@ -157,15 +158,6 @@
         {
           "type": "choose_one",
           "codes": [
-            "CAS 100A",
-            "CAS 100B",
-            "CAS 100C"
-          ],
-          "credits": 3.0
-        },
-        {
-          "type": "choose_one",
-          "codes": [
             "CHEM 212",
             "CHEM 203"
           ],
@@ -175,6 +167,15 @@
           "type": "course",
           "code": "CHEM 213W",
           "credits": 2.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
         },
         {
           "type": "gen_ed",
@@ -196,17 +197,17 @@
         },
         {
           "type": "course",
+          "code": "BMB 401",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
           "code": "PHYS 250",
           "credits": 4.0
         },
         {
           "type": "gen_ed",
           "category": "GS",
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective (see notes)",
           "credits": 3.0
         },
         {
@@ -229,6 +230,11 @@
         },
         {
           "type": "course",
+          "code": "BMB 402",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
           "code": "PHYS 251",
           "credits": 4.0
         },
@@ -239,12 +245,7 @@
         },
         {
           "type": "gen_ed",
-          "category": null,
-          "credits": 3.0
-        },
-        {
-          "type": "elective",
-          "label": "Elective (see notes)",
+          "category": "GN",
           "credits": 3.0
         }
       ]
@@ -255,9 +256,8 @@
       "credits": 16.5,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
+          "type": "course",
+          "code": "BIOL 469",
           "credits": 3.0
         },
         {
@@ -277,8 +277,8 @@
           "credits": 3.0
         },
         {
-          "type": "gen_ed",
-          "category": "IL",
+          "type": "elective",
+          "label": "Elective (see notes)",
           "credits": 3.0
         },
         {
@@ -294,9 +294,12 @@
       "credits": 15.0,
       "slots": [
         {
-          "type": "pool",
-          "ref": "major_elective",
-          "label": "BIOL 4XX",
+          "type": "choose_one",
+          "codes": [
+            "BIOL 426",
+            "BIOL 470",
+            "BIOL 478"
+          ],
           "credits": 3.0
         },
         {
@@ -307,7 +310,7 @@
         },
         {
           "type": "gen_ed",
-          "category": "GN",
+          "category": "IL",
           "credits": 3.0
         },
         {
@@ -322,6 +325,5 @@
         }
       ]
     }
-  ],
-  "source_plan": "General Biology Option: Biology, B.S. at University Park Campus"
+  ]
 }

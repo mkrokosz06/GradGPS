@@ -1,0 +1,314 @@
+{
+  "program_name": "Mathematics, B.S. (Science)",
+  "subplan": "Computational Mathematics",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 119.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/eberly-science/mathematics-bs/",
+  "source_plan": "Computational Mathematics Option: Mathematics, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H",
+            "ESL 15"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "PSU 16",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 13.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 230",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 311W",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 121",
+            "CMPSC 131"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 250",
+            "MATH 251"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 312",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CMPSC 122",
+            "CMPSC 132"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 414",
+            "STAT 414"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 467",
+            "CMPSC 467"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "CAS 100A",
+            "CAS 100B",
+            "CAS 100C"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (CMPSC 221 is recommended)",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 16.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 415",
+            "STAT 415"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202A",
+            "ENGL 202B",
+            "ENGL 202D"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 455",
+            "CMPSC 455"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 411",
+            "MATH 412",
+            "MATH 417"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 456",
+            "CMPSC 456"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CMPSC 465",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (Chosen in consultation with an academic adviser)",
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

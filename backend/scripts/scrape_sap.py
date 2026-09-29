@@ -11,11 +11,13 @@ Usage:
     python scripts/scrape_sap.py                 # scrape the PROGRAMS list, validate, write
     python scripts/scrape_sap.py --dry-run       # parse + validate only, write nothing
     python scripts/scrape_sap.py --check-catalog # also cross-check codes vs the catalog
+    python scripts/scrape_sap.py --options [--dry-run]  # one template per UP option grid
 
 Only templates that pass validation are written — a bad scrape never goes live.
 """
 
 import argparse
+import collections
 import json
 import os
 import re
@@ -589,15 +591,352 @@ def _run_all(dry_run: bool):
     return 0
 
 
+# ── Option grids ─────────────────────────────────────────────────────────────
+#
+# A bulletin page for a major with options publishes one plan grid PER OPTION
+# ("Biology Teaching Option: Secondary Education, B.S. at University Park
+# Campus"). `--all` keeps only the first, and load_template() fell back to it
+# for every option — so a Social Studies teaching student was scheduled the
+# Biology Teaching plan. `--options` writes one subplan-tagged template per
+# University Park option grid, named with the catalog's own option name (the
+# value the student's profile stores), and cross-checks every match against
+# that option's requirement group before writing it.
+
+_OPTION_HEAD = re.compile(r"^(.+?)\s+Option\s*:\s*(.*)$", re.I)
+_OPTION_STOP = {"option", "focused", "the", "of", "in", "and", "to", "for", "a"}
+
+
+def parse_grid_heading(heading: str) -> tuple[str | None, str]:
+    """'Biology Teaching Option: Secondary Education, B.S. at University Park
+    Campus' -> ('Biology Teaching', 'University Park Campus')."""
+    heading = re.sub(r"\s+", " ", heading or "").strip()
+    option, rest = None, heading
+    m = _OPTION_HEAD.match(heading)
+    if m:
+        option, rest = m.group(1).strip(), m.group(2)
+    campus = rest.split(" at ", 1)[1].strip() if " at " in rest else ""
+    return option, campus
+
+
+def is_up_grid(campus: str) -> bool:
+    """A grid University Park students follow: UP-only, UP-and-elsewhere, or no
+    campus named at all. It must START at University Park — "Starting at Berks
+    Campus and Ending at University Park Campus" is a 2+2 transfer plan."""
+    return not campus or campus.lower().startswith("university park")
+
+
+def _option_tokens(name: str) -> list[str]:
+    words = re.findall(r"[a-z0-9]+", (name or "").lower().replace("&", " and "))
+    out = []
+    for w in words:
+        if w in _OPTION_STOP or w.isdigit():
+            continue
+        if w.endswith("ies"):
+            w = w[:-3] + "y"                     # studies -> study
+        out.append(w)
+    return out
+
+
+def _token_eq(a: str, b: str) -> bool:
+    """Same word up to inflection: biology/biological, computation/computational,
+    math/mathematics, resource/resources."""
+    if a == b:
+        return True
+    if len(a) >= 5 and len(b) >= 5 and a[:5] == b[:5]:
+        return True
+    short, long_ = sorted((a, b), key=len)
+    return len(short) >= 4 and long_.startswith(short)
+
+
+def match_option(grid_option: str, subplans: list[str]) -> str | None:
+    """The catalog subplan a grid's option heading names, or None.
+
+    PSU words the two differently — 'Biology Teaching' / 'Biological Science
+    Teaching', 'Math' / 'Mathematics 4-8', 'Graduate Studies' / 'Graduate
+    Study' — so this matches on word containment: every word of the shorter
+    name must appear (up to inflection) in the longer. A match must be UNIQUE;
+    an ambiguous one returns None rather than guess (the caller reports it).
+    """
+    g = _option_tokens(grid_option)
+    if not g:
+        return None
+    hits = []
+    for sp in subplans:
+        s = _option_tokens(sp)
+        if not s:
+            continue
+        short, long_ = (g, s) if len(g) <= len(s) else (s, g)
+        if all(any(_token_eq(w, x) for x in long_) for w in short):
+            # Prefer the closest: fewest unmatched words on the longer side.
+            hits.append((len(long_) - len(short), sp))
+    if not hits:
+        return None
+    hits.sort()
+    if len(hits) > 1 and hits[0][0] == hits[1][0]:
+        return None
+    return hits[0][1]
+
+
+def is_exact_option_match(grid_option: str, subplan: str) -> bool:
+    """Same words on both sides (up to inflection) — the grid is headed with the
+    option's own name, so no course evidence is needed to trust it."""
+    g, s = _option_tokens(grid_option), _option_tokens(subplan)
+    return len(g) == len(s) and all(any(_token_eq(w, x) for x in s) for w in g)
+
+
+def collapse_renamed_duplicates(semesters: list[dict]) -> list[tuple[str, str]]:
+    """A grid that lists a course under BOTH its old and new number (LA 83 in
+    one cohort-year cell, LA 283 in another) schedules the same course twice,
+    and the matcher's one-course-one-slot rule leaves the second forever
+    unsatisfied. Keep the first slot under the current code, drop the other.
+    This is the LA 83 / LA 283 fix (0a16a24) made part of the scrape, so a
+    re-scrape can't reintroduce it."""
+    from audit_engine import _MANUAL_RENAME_PAIRS
+    collapsed = []
+    for old, new in _MANUAL_RENAME_PAIRS:
+        spots = [(si, i) for si, sem in enumerate(semesters)
+                 for i, slot in enumerate(sem["slots"])
+                 if slot.get("type") == "course" and _base_code(slot.get("code", "")) in (old, new)]
+        if len(spots) < 2:
+            continue
+        (fs, fi), rest = spots[0], spots[1:]
+        semesters[fs]["slots"][fi]["code"] = new
+        for si, i in sorted(rest, reverse=True):
+            del semesters[si]["slots"][i]
+        for sem in semesters:
+            sem["credits"] = round(sum(slot_credits(s) for s in sem["slots"]), 1)
+        collapsed.append((old, new))
+    return collapsed
+
+
+def option_group_codes(rows: list[dict], subplan: str) -> set[str]:
+    """Course codes of the catalog's own requirement group(s) for one option —
+    the same substring rule routers/audit._filter_rows uses to pick them."""
+    sl = subplan.lower()
+    return {_base_code(r["course_code"]) for r in rows
+            if sl in r.get("requirement_group", "").lower()
+            and " at " not in r.get("requirement_group", "").lower()
+            and r.get("course_code")}
+
+
+def best_option_by_courses(template_codes: set[str], option_codes: dict[str, set[str]]) -> list[str]:
+    """Options ranked by how much of each option's OWN course list the plan
+    contains. The name matcher's independent witness: a plan for Biology
+    Teaching must overlap the Biological Science Teaching group more than any
+    other option's group."""
+    # Only courses UNIQUE to one option discriminate: options share most of their
+    # lists (Chemistry Teaching's group carries biology too), and scoring shared
+    # courses crowned whichever option had the shortest list.
+    scored = []
+    for sp, codes in option_codes.items():
+        others = set().union(*(c for o, c in option_codes.items() if o != sp)) if len(option_codes) > 1 else set()
+        own = codes - others
+        if own:
+            scored.append((len(template_codes & own), sp))
+    scored.sort(reverse=True)
+    if len(scored) > 1 and scored[0][0] == scored[1][0]:
+        return []                               # no discriminating signal: can't rank
+    return [sp for score, sp in scored if score > 0]
+
+
+def page_option_codes(html: str) -> dict[str, set[str]]:
+    """{option name: course codes} from the page's own Program Requirements tab —
+    each "French Teaching Option (36 credits)" heading to the next heading.
+
+    A witness that shares nothing with the catalog: the catalog's option groups
+    carry every scrape bug the loader has had (Biology's are bloated with
+    duplicates, World Languages' route everything to ESL), while this reads the
+    page directly. Course codes come from CourseLeaf's course links."""
+    soup = BeautifulSoup(html.replace("\xa0", " "), "html.parser")
+    box = soup.find(id="programrequirementstextcontainer")
+    if not box:
+        return {}
+    out: dict[str, set[str]] = {}
+    current = None
+    for el in box.descendants:
+        name = getattr(el, "name", None)
+        if name in ("h2", "h3", "h4", "h5", "h6"):
+            text = el.get_text(" ", strip=True)
+            m = re.match(r"(.+?)\s+Option\b", text)
+            current = m.group(1).strip() if m else None
+            if current:
+                out.setdefault(current, set())
+        elif name == "a" and current:
+            m = re.search(r"[?&]P=([A-Z][A-Z-]{1,6})%20(\d{1,3}[A-Z]?)", el.get("href", ""))
+            if m:
+                out[current].add(_base_code(f"{m.group(1)} {m.group(2)}"))
+    return out
+
+
+def _subplans_for(program: str) -> list[str]:
+    from routers.audit import get_subplans
+    return get_subplans(program)["subplans"]
+
+
+def _program_rows(program: str) -> list[dict]:
+    from db import requirements_table
+    from boto3.dynamodb.conditions import Key
+    rows, kw = [], {"KeyConditionExpression": Key("program_name").eq(program)}
+    while True:
+        r = requirements_table.query(**kw)
+        rows += r["Items"]
+        if "LastEvaluatedKey" not in r:
+            return rows
+        kw["ExclusiveStartKey"] = r["LastEvaluatedKey"]
+
+
+def build_option_templates(program: str, url: str, html: str, subplans: list[str],
+                           rows: list[dict], known: set[str]) -> tuple[list[dict], list[str]]:
+    """Every University Park option grid on one page as a subplan template, plus
+    a report line for each grid or option that could not be placed."""
+    soup = BeautifulSoup(html.replace("\xa0", " "), "html.parser")
+    grids = []
+    for t in soup.find_all("table", class_="sc_plangrid"):
+        h = t.find_previous(lambda tag: tag.name == "h3" and "toggle" in (tag.get("class") or []))
+        heading = h.get_text(" ", strip=True) if h else ""
+        option, campus = parse_grid_heading(heading)
+        if option and is_up_grid(campus):
+            grids.append((option, heading, str(t)))
+    if len({o for o, _, _ in grids}) < 2:
+        return [], []
+    # Courses in more than one option's plan (every Biology plan takes CHEM
+    # 202/203) can't tell the plans apart, so the witnesses only see the rest.
+    plan_sets = [{_base_code(c) for c in fixed_codes({"semesters": parse_plangrid(g)})}
+                 for _, _, g in grids]
+    seen = collections.Counter(c for codes in plan_sets for c in codes)
+    shared = {c for c, n in seen.items() if n > 1}
+
+    manual = {s["subplan"] for s in SUBPLAN_PROGRAMS if s["program_name"] == program}
+    option_codes = {sp: option_group_codes(rows, sp) for sp in subplans}
+    # The page's own option sections, keyed by the catalog subplan they name.
+    page_codes: dict[str, set[str]] = {}
+    for section, codes in page_option_codes(html).items():
+        sp = next((s for s in subplans if is_exact_option_match(section, s)), None)
+        if sp:
+            page_codes[sp] = codes
+    out, report, taken = [], [], set()
+    for option, heading, grid_html in grids:
+        sp = match_option(option, subplans)
+        if sp is None:
+            report.append(f"no selectable option for grid {option!r}")
+            continue
+        if sp in taken:
+            report.append(f"second grid for {sp!r} ignored: {heading!r}")
+            continue
+        taken.add(sp)
+        if sp in manual:
+            continue                                  # hand-pinned in SUBPLAN_PROGRAMS
+        semesters = parse_plangrid(grid_html)
+        collapse_renamed_duplicates(semesters)
+        tpl = {
+            "program_name": program, "subplan": sp, "catalog_year": "2024",
+            "degree": _degree(program),
+            "total_credits": round(sum(s["credits"] for s in semesters), 1),
+            "source": url, "source_plan": heading, "scraped": True,
+            "semesters": semesters,
+        }
+        problems = _validate(tpl, known)
+        # A grid headed with the option's own name needs no second opinion. A
+        # REWORDED match ('Biology Teaching' for 'Biological Science Teaching')
+        # needs its courses to agree: accepted if either witness — the page's
+        # own option sections, or the catalog's option groups — ranks it first,
+        # or if neither can tell the options apart; rejected if a witness points
+        # at another option and none backs it.
+        if not is_exact_option_match(option, sp):
+            plan_codes = {_base_code(c) for c in fixed_codes(tpl)} - shared
+            votes = [best_option_by_courses(plan_codes, page_codes),
+                     best_option_by_courses(plan_codes, option_codes)]
+            firsts = [v[0] for v in votes if v]
+            if firsts and sp not in firsts:
+                problems.append(f"reworded match {option!r}->{sp!r} but its courses "
+                                f"point at {firsts[0]!r}")
+        if problems:
+            report.append(f"INVALID {sp!r}: {problems[:2]}")
+            continue
+        out.append(tpl)
+    for sp in subplans:
+        if sp not in taken:
+            report.append(f"option {sp!r} has no plan grid (falls back to the audit-driven planner)")
+    return out, report
+
+
+def _slot_shape(semesters: list[dict]) -> list[list]:
+    return [[s.get("code") or s.get("codes") or s.get("ref") or s.get("category")
+             for s in sem["slots"]] for sem in semesters]
+
+
+def _general_base(program: str, base: dict, html: str, known: set[str]) -> dict | None:
+    """The base template (a student who picked no option) of an option major
+    should be its "General …" grid when the page has one no student can select —
+    not whichever option happened to come first (Biology's base was Ecology).
+
+    Only replaces a base that is still exactly the scrape of the page's first
+    grid, so a hand-corrected base is never overwritten."""
+    soup = BeautifulSoup(html.replace("\xa0", " "), "html.parser")
+    grids = []
+    for t in soup.find_all("table", class_="sc_plangrid"):
+        h = t.find_previous(lambda tag: tag.name == "h3" and "toggle" in (tag.get("class") or []))
+        heading = h.get_text(" ", strip=True) if h else ""
+        option, campus = parse_grid_heading(heading)
+        if option and is_up_grid(campus):
+            grids.append((option, heading, str(t)))
+    subplans = _subplans_for(program)
+    general = [g for g in grids if g[0].lower().startswith("general")
+               and match_option(g[0], subplans) is None]
+    if len(general) != 1 or grids[0][0] == general[0][0]:
+        return None
+    first = parse_plangrid(grids[0][2])
+    collapse_renamed_duplicates(first)
+    if _slot_shape(first) != _slot_shape(base["semesters"]):
+        return None                                    # hand-edited: leave it alone
+    semesters = parse_plangrid(general[0][2])
+    collapse_renamed_duplicates(semesters)
+    tpl = dict(base, semesters=semesters, source_plan=general[0][1],
+               total_credits=round(sum(s["credits"] for s in semesters), 1))
+    return None if _validate(tpl, known) else tpl
+
+
+def _run_options(dry_run: bool) -> int:
+    _, known = _load_catalog()
+    written = 0
+    for f in sorted(os.listdir(_OUT_DIR)):
+        base = json.load(open(os.path.join(_OUT_DIR, f), encoding="utf-8"))
+        if base.get("subplan"):
+            continue
+        program = base["program_name"]
+        html = fetch(base["source"])
+        tpls, report = build_option_templates(
+            program, base["source"], html, _subplans_for(program), _program_rows(program), known)
+        if not tpls and not report:
+            continue
+        print(f"{program}")
+        general = _general_base(program, base, html, known)
+        if general:
+            dest = "" if dry_run else f"  -> {os.path.basename(_write(general))}"
+            print(f"  BASE now the {general['source_plan']!r} grid{dest}")
+        for tpl in tpls:
+            written += 1
+            dest = "" if dry_run else f"  -> {os.path.basename(_write(tpl))}"
+            print(f"  OK   {tpl['subplan']}: {len(tpl['semesters'])}sem {tpl['total_credits']}cr{dest}")
+        for line in report:
+            print(f"  --   {line}")
+    print(f"\n{written} option templates {'valid (dry run)' if dry_run else 'written'}")
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true", help="parse + validate only, write nothing")
     ap.add_argument("--check-catalog", action="store_true", help="cross-check codes vs the catalog")
     ap.add_argument("--all", action="store_true", help="discover + scrape every UP major from the sitemap")
+    ap.add_argument("--options", action="store_true",
+                    help="write one subplan template per University Park option grid")
     args = ap.parse_args()
 
     if args.all:
         return _run_all(args.dry_run)
+    if args.options:
+        return _run_options(args.dry_run)
 
     known: set[str] = set()
     if args.check_catalog:

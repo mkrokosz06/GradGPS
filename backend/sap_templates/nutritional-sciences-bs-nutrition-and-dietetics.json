@@ -1,0 +1,302 @@
+{
+  "program_name": "Nutritional Sciences, B.S.",
+  "subplan": "Nutrition and Dietetics",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 121.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/health-human-development/nutritional-sciences-bs/",
+  "source_plan": "Nutrition and Dietetics Option: Nutritional Sciences, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 162",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BIOL 164",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GN",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Supporting Course (CHEM 111 recommended)",
+          "credits": 1.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GS",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "CHEM 202",
+            "CHEM 210"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MICRB 106",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 360",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GH",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GQ",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 361",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "BMB 211",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 320",
+          "credits": 4.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GA",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 358",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 445",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "HM 230",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Select Supporting Course 400 level in consultation with adviser",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 386",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 446",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 391",
+          "credits": 2.0
+        },
+        {
+          "type": "course",
+          "code": "HM 330",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SU",
+      "credits": 3.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 495",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 393",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 400",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 452",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 453",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Select Supporting Course 400 level in consultation with adviser",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 14.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "NUTR 451",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "NUTR 490W",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": "GWS",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "supporting",
+          "label": "Select Supporting Course 400 level in consultation with adviser",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 2.0
+        }
+      ]
+    }
+  ]
+}
