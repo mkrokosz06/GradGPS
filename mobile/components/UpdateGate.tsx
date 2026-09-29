@@ -4,8 +4,9 @@ import * as Application from "expo-application";
 import { fetchAppConfig, cmpVersions, AppConfig } from "../services/configService";
 
 // Where "Update" sends the user when the backend doesn't specify a URL.
-// itms-beta:// opens the TestFlight app directly on a device that has it.
-const TESTFLIGHT_FALLBACK = "itms-beta://";
+// itms-apps:// opens GradGPS's page directly in the App Store app.
+const APP_STORE_URL = "itms-apps://apps.apple.com/app/id6803643612";
+const APP_STORE_WEB_URL = "https://apps.apple.com/app/id6803643612";
 
 // Native marketing version of the running build (CFBundleShortVersionString on
 // iOS). Null on Expo web and unavailable outside a real build — in that case we
@@ -13,11 +14,11 @@ const TESTFLIGHT_FALLBACK = "itms-beta://";
 const CURRENT_VERSION = Application.nativeApplicationVersion;
 
 function openUpdate(url: string) {
-  const target = url || TESTFLIGHT_FALLBACK;
+  const target = url || APP_STORE_URL;
   Linking.openURL(target).catch(() => {
-    // If the specific target can't open (e.g. TestFlight not installed), try the
-    // App Store product page as a last resort — harmless no-op if it also fails.
-    Linking.openURL("https://apps.apple.com/app/gradgps/id0").catch(() => {});
+    // If the specific target can't open, try the App Store web page as a last
+    // resort — harmless no-op if it also fails.
+    Linking.openURL(APP_STORE_WEB_URL).catch(() => {});
   });
 }
 

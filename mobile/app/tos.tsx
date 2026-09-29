@@ -16,7 +16,7 @@ export default function TermsOfUseScreen() {
       </View>
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <Text style={styles.updated}>Last updated: September 21, 2026</Text>
+        <Text style={styles.updated}>Last updated: September 28, 2026</Text>
 
         <Callout>
           <Text style={styles.calloutStrong}>The short version.</Text> GradGPS is a free planning tool built by a student. It is not official academic advising and it is not always right. Use it to prepare for your advising appointment, not to replace it. Your degree is your responsibility, and the university's own records are the ones that count.
@@ -56,8 +56,8 @@ export default function TermsOfUseScreen() {
           • Upload malicious files or content you don't have the right to upload.
         </Section>
 
-        <Section title="7. Beta software">
-          The Service is distributed as a beta through Apple TestFlight. It is under active development, may be unavailable, may lose data, and may change or be discontinued at any time without notice. Features described on the GradGPS website may not be present in the build you install.
+        <Section title="7. Availability and changes">
+          The Service is under active development. It may occasionally be unavailable, and features may change, be added, or be removed, or the Service may be discontinued, at any time. Features described on the GradGPS website may not be present in the version of the app you have installed.
         </Section>
 
         <Section title="8. No warranty">

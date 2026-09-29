@@ -764,6 +764,11 @@ courses inside the plan. Pilot is 5 majors (`MAJORS` list); widen once Search Co
 A GPA floor is published only when the bulletin names exactly one figure (`gpa_candidates` is unreliable
 otherwise). `build.py` now walks subdirectories. Search Console is verified (Domain property via GoDaddy).
 
+**Download CTA.** GradGPS is public on the App Store (app ID `6803643612`, since Sept 28 2026). Every
+"Get the app" CTA points at `/download`; `website/beta.html` is a noindex redirect stub kept so the old
+beta link still works. The Smart App Banner meta lives in `tools/site/partials/head-common.html`.
+The mobile `UpdateGate` falls back to the App Store page when `ios_update_url` is blank.
+
 ## Adding a new school
 Not started. Step-by-step plan: `docs/new-school-playbook.md` (replaced the removed "Charlie" agent).
 

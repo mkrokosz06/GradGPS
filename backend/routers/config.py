@@ -9,7 +9,7 @@ never blocks or nags anyone.
 
   - min_supported_version: below this, the app hard-blocks with an update screen.
   - latest_version:        below this (but >= min), a dismissible "update" nudge.
-  - ios_update_url:        where "Update" sends the user (empty → TestFlight).
+  - ios_update_url:        where "Update" sends the user (empty → the App Store page).
 """
 
 from fastapi import APIRouter

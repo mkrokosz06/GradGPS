@@ -213,7 +213,7 @@ CTA = """  <section class="cta">
       <img class="pin" src="/logo.png" width="68" height="68" alt="" aria-hidden="true" />
       <h2>Already partway through?</h2>
       <p>This plan assumes you start from zero. GradGPS reads your LionPATH transcript, checks off what you&rsquo;ve done, and reflows the rest of this plan around you, including AP, transfer credit and switched majors.</p>
-      <a class="btn btn-navy" href="/beta">Get the beta</a>
+      <a class="btn btn-navy" href="/download">Get the app</a>
       <p class="hero-note">Free &middot; iPhone &middot; not affiliated with Penn State</p>
     </div>
   </section>"""
