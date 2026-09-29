@@ -228,6 +228,38 @@ The timeline has **two paths**, both in `routers/timeline.py`:
 - Summer is skipped (`_next_term` jumps SP→FA, FA→next SP).
 - Satisfied `choose_one` pairs excluded via `pair_status`; satisfied `choose_credits` pools excluded entirely.
 
+### Prerequisite / corequisite ordering
+
+Both timeline paths now respect PSU's published requisites. Before, the SAP **rebalance** (every
+student with a transcript) sliced the flattened template into even chunks straight across its
+semester boundaries: ARCH 203 landed a term before its corequisites AE 421 / ARCH 231, ME 340 before
+ME 320, and a student missing ACCTG 211 had FIN 301 pulled into the very term they make it up. A
+check over 320 majors × 3 synthetic students found 98 violations for an on-track student and 211 for
+one with gaps; after the fix, **0** real ones remain. The only hits the checker still reports are
+"or concurrent" wording that the runtime parser reads more accurately than the checker does.
+
+- **Data**: `scripts/bulletin_prereqs.json` (3,751 courses) — written by `scrape_bulletin_courses.py`
+  alongside `bulletin_courses.json`, parsed by `course_prereqs.parse()`. `pre` clauses must be done in
+  an earlier term, `co` clauses by the same term. The parse only ever *weakens*: a clause with an
+  escape hatch (placement, permission, "or equivalent", standing) is dropped, and `A or (B and C)`
+  flattens to "any of A, B, C". Missing file = no constraints = old behaviour.
+- **`_pack_ordered()`** replaces `_slice_even()` in the SAP rebalance and the Layer 1 packer (and *is*
+  `_slice_even` when no requisites apply). A critical-path bound starts a chain early enough to
+  finish on time (a course with N courses still to follow must be done N terms before the end), and
+  a fixpoint pass settles mutual corequisites (KINES 366/464/468 each name the others). Overloaded
+  terms are relieved by moving placeholders first, then a course earlier, then a course with slack later.
+- **`_enforce_prereq_order()`** is the last word on both paths, after `_hold_for_entrance`, and
+  before pins (a pin is the student's call). It moves a course later and swaps a placeholder back.
+  Moved courses carry `moved_for_prerequisite`.
+- **PSU's plan overrides the bulletin**: a pair the template puts in the same semester (EBF 200 beside
+  ECON 102) may share one; a pair the template orders the other way is waived. So a no-transcript
+  student sees the official plan **unchanged — verified identical for all 307 templates**.
+- Cost: 11 of 934 synthetic plans gain a term, each a genuine chain the old plan only fitted by
+  breaking it (SPLED 415 → 395W → 404 → 409A → 495D; ARCH 491 → 492 → 499). Plans with a term over
+  18 credits dropped from 411 to 180.
+
+Tests: `backend/tests/test_prereq_order.py` (17, pytest or plain `python`).
+
 ### Suggested Academic Plans (SAP hybrid)
 For University Park majors with a published PSU bulletin plan, the timeline reflows the student's real state against the official, prerequisite-sequenced, credit-balanced plan instead of packing from scratch. Design doc: `docs/timeline-sap-hybrid.md`.
 

@@ -26,6 +26,7 @@ from substitutions import get_substitutions
 import credential_choices
 from credentials_audit import audit_declared_credentials
 import entrance_to_major
+import course_prereqs
 
 router = APIRouter()
 
@@ -705,6 +706,304 @@ def _slice_even(items: list, n: int) -> list[list]:
     return [items[(i * L) // n:((i + 1) * L) // n] for i in range(n)]
 
 
+# ── Prerequisite / corequisite ordering ──────────────────────────────────────
+#
+# Neither packer knew a course's prerequisites: the SAP rebalance sliced the
+# template into even chunks across its semester boundaries (splitting ARCH 203
+# from its corequisites AE 421 / ARCH 231), and a student who skipped ACCTG 211
+# had FIN 301 pulled into the very term they make it up. `course_prereqs` holds
+# PSU's published requisites; these helpers keep a course at least one term after
+# a prerequisite still in the plan and no earlier than its corequisites.
+#
+# PSU's own plan overrides the bulletin: where a template puts a course in the
+# same semester as its prerequisite (EBF 200 beside ECON 102) that pairing is
+# allowed, and where it puts the course first the constraint is waived. A
+# no-transcript student therefore still sees the official plan unchanged.
+
+def _slot_codes(c: dict) -> set[str]:
+    """Definite course codes a slot provides: 'MATH 140' or 'MATH 110 or MATH 140'.
+    A pool / gen-ed placeholder provides none until a course is chosen for it."""
+    raw = c.get("course_code") or ""
+    out = set()
+    for part in re.split(r"\s+or\s+", raw, flags=re.I):
+        code = course_prereqs.norm(part)
+        if re.fullmatch(r"[A-Z]{2,6}(?:-[A-Z]{1,4})? \d{1,3}[A-Z]?", code):
+            out.add(code)
+    return out
+
+
+def _one_code(c: dict) -> str | None:
+    """The slot's course when it names exactly one — only then are its own
+    requisites known (a choose-one slot could become either course)."""
+    codes = _slot_codes(c)
+    return next(iter(codes)) if len(codes) == 1 else None
+
+
+def _template_sem_index(template: dict | None) -> dict[str, int]:
+    """course -> the first template semester that lists it."""
+    out: dict[str, int] = {}
+    for i, sem in enumerate((template or {}).get("semesters", [])):
+        for slot in sem.get("slots", []):
+            for code in ([slot["code"]] if slot.get("code") else (slot.get("codes") or [])):
+                out.setdefault(course_prereqs.norm(code), i)
+    return out
+
+
+def _needs(code: str, done: set[str], tsem: dict[str, int] | None) -> list[tuple[frozenset, bool]]:
+    """Unmet requisite clauses of `code` as (alternatives, strictly_earlier)."""
+    pre, co = course_prereqs.constraints(code)
+    out = []
+    for alts, strict in [(a, True) for a in pre] + [(a, False) for a in co]:
+        if alts & done:
+            continue
+        if tsem and code in tsem:
+            placed = [tsem[a] for a in alts if a in tsem]
+            if placed:
+                if tsem[code] < min(placed):
+                    continue            # PSU's plan puts this course first
+                if tsem[code] == min(placed):
+                    strict = False      # ... or in the same semester
+        out.append((alts, strict))
+    return out
+
+
+def _requisite_needs(items: list[dict], done: set[str],
+                     tsem: dict[str, int] | None) -> list[list[tuple[set[int], bool]]]:
+    """Per item: [(indices of items that can meet the clause, strict)]. Clauses no
+    item in the list can meet are dropped — nothing to order against. Mutual
+    requirements (bad data, or cross-listed twins) are ignored."""
+    providers: dict[str, set[int]] = defaultdict(set)
+    for i, it in enumerate(items):
+        for code in _slot_codes(it):
+            providers[code].add(i)
+    raw: list[list[tuple[set[int], bool]]] = []
+    for i, it in enumerate(items):
+        code = _one_code(it)
+        clauses = []
+        for alts, strict in (_needs(code, done, tsem) if code else []):
+            js = set().union(*(providers.get(a, set()) for a in alts)) - {i}
+            if js:
+                clauses.append((js, strict))
+        raw.append(clauses)
+    # Drop a strict edge i -> j when j also strictly needs i: no order satisfies both.
+    strict_on = [{j for js, s in cl if s for j in js} for cl in raw]
+    return [[(js, s) for js, s in cl if not (s and all(i in strict_on[j] for j in js))]
+            for i, cl in enumerate(raw)]
+
+
+def _pack_ordered(items: list[dict], n: int, done: set[str] | None = None,
+                  tsem: dict[str, int] | None = None, cap: float = _MAX_CREDITS) -> list[list[dict]]:
+    """Split `items` into >= n ordered chunks the way `_slice_even` does, except that
+    an item lands at least one chunk after a prerequisite still in the list and
+    in the same chunk as (or after) its corequisites. With no requisites among
+    the items this IS `_slice_even`."""
+    if n <= 0 or not items:
+        return []
+    done = done or set()
+    needs = _requisite_needs(items, done, tsem)
+    if not any(needs):
+        return _slice_even(items, n)
+
+    ideal = [0] * len(items)
+    for ci, idxs in enumerate(_slice_even(list(range(len(items))), n)):
+        for i in idxs:
+            ideal[i] = ci
+
+    # Place in a stable topological order (lowest index first) so every requisite
+    # still in the list is placed before the course that needs it. A corequisite
+    # is "same term or earlier", so it is an ordering edge like any other — not a
+    # bond: tying the two together makes a cycle as soon as one of them also has
+    # a prerequisite on the other's side (BE 404 -> BE 301 -> MATH 251).
+    deps = [{j for js, _ in needs[i] for j in js} for i in range(len(items))]
+    order, placed = [], set()
+    pending = list(range(len(items)))
+    while pending:
+        nxt = next((i for i in pending if deps[i] <= placed), pending[0])
+        pending.remove(nxt)
+        order.append(nxt)
+        placed.add(nxt)
+
+    # Critical path: a course with a chain of N courses still to follow it must be
+    # done N terms before the end, or the chain spills into an extra semester
+    # (DS 340W left in the final term pushes DS 440W past graduation).
+    # Iterated to a fixpoint: mutual corequisites (KINES 366 / 464 / 468 each name
+    # the others) form cycles a single pass would not settle.
+    height = [0] * len(items)
+    for _ in range(len(items)):
+        changed = False
+        for i in order:
+            for js, strict in needs[i]:
+                for j in js:      # a corequisite must be ready by the same term
+                    h = height[i] + (1 if strict else 0)
+                    if h > height[j]:
+                        height[j], changed = h, True
+        if not changed:
+            break
+
+    chunk_of: dict[int, int] = {}
+    loads: dict[int, float] = defaultdict(float)
+    named: dict[int, list] = defaultdict(list)       # (height, credits) of courses placed
+    for i in order:
+        latest = max(0, n - 1 - height[i])
+        floor = 0
+        for js, strict in needs[i]:
+            at = [chunk_of[j] for j in js if j in chunk_of]
+            if at:
+                floor = max(floor, min(at) + (1 if strict else 0))
+        target = max(min(ideal[i], latest), floor)
+        cr = _display_credits(items[i])
+        if target > ideal[i]:
+            # Pushed later: don't pile onto a full semester.
+            while loads[target] and loads[target] + cr > cap:
+                target += 1
+        elif target < ideal[i]:
+            # Pulled earlier: placeholders there, and courses with more slack than
+            # this one, can make room (the relief pass below moves them).
+            while target < ideal[i] and sum(c for h, c in named[target]
+                                            if h >= height[i]) + cr > _TARGET_CREDITS:
+                target += 1
+        chunk_of[i] = target
+        loads[target] += cr
+        if _slot_codes(items[i]):
+            named[target].append((height[i], cr))
+
+    # Placement only sees requisites placed before it, so a corequisite cycle can
+    # land split. Raise every course to the first term its requisites allow.
+    for _ in range(len(items)):
+        changed = False
+        for i in range(len(items)):
+            for js, strict in needs[i]:
+                at = min(chunk_of[j] for j in js) + (1 if strict else 0)
+                if chunk_of[i] < at:
+                    chunk_of[i], changed = at, True
+        if not changed:
+            break
+
+    # Rebalance. Placeholders have no prerequisites and may sit in any term; a
+    # course may move one term later when nothing that needs it is disturbed.
+    n_chunks = max(chunk_of.values()) + 1
+    cr_i = [_display_credits(it) for it in items]
+    movable = [not _slot_codes(it) and not _is_internship(it) for it in items]
+    load = lambda c: sum(cr_i[i] for i in chunk_of if chunk_of[i] == c)
+    needed_by = defaultdict(list)
+    for k, clauses in enumerate(needs):
+        for js, strict in clauses:
+            for j in js:
+                needed_by[j].append((k, js, strict))
+
+    def _can_delay(i: int, dest: int) -> bool:
+        for k, js, strict in needed_by[i]:
+            at = min(dest if j == i else chunk_of[j] for j in js)
+            if chunk_of[k] < at + (1 if strict else 0):
+                return False
+        return True
+
+    for c in range(n_chunks):
+        guard = len(items)
+        while load(c) > cap and guard:
+            guard -= 1
+            here = sorted((i for i in chunk_of if chunk_of[i] == c), reverse=True)
+            ph = next((i for i in here if movable[i]), None)
+            if ph is not None:
+                room = [d for d in range(n_chunks) if d != c and load(d) + cr_i[ph] <= cap]
+                if room:
+                    chunk_of[ph] = min(room, key=load)
+                    continue
+            # Then move a course EARLIER, into the latest term with room its own
+            # requisites allow — earlier never disturbs what depends on it.
+            early = None
+            for i in sorted(here, key=lambda i: (height[i], -i)):
+                if movable[i]:
+                    continue
+                floor = max((min(chunk_of[j] for j in js) + (1 if st else 0)
+                             for js, st in needs[i]), default=0)
+                fits = [d for d in range(floor, c) if load(d) + cr_i[i] <= cap]
+                if fits:
+                    early = (i, fits[-1])
+                    break
+            if early:
+                chunk_of[early[0]] = early[1]
+                continue
+            # Otherwise delay the course with the most slack; if that fills the next
+            # term, its own turn in this loop passes the excess on.
+            late = next((i for i in sorted(here, key=lambda i: (height[i], -i))
+                         if not movable[i] and c + 1 < n_chunks and _can_delay(i, c + 1)), None)
+            if late is None:
+                break
+            chunk_of[late] = c + 1
+
+    # Refill semesters a pushed course left light with placeholders from later ones.
+    per = sum(cr_i) / max(n, 1)
+    for c in range(n_chunks):
+        while load(c) < per - 1.5:
+            src = next((i for i in sorted(chunk_of) if chunk_of[i] > c and movable[i]), None)
+            if src is None or load(c) + cr_i[src] > cap:
+                break
+            chunk_of[src] = c
+
+    chunks: list[list[dict]] = [[] for _ in range(n_chunks)]
+    for i in range(len(items)):
+        chunks[chunk_of[i]].append(items[i])
+    return chunks
+
+
+def _cr_of(items: list[dict]) -> float:
+    return sum(_display_credits(it) for it in items)
+
+
+def _enforce_prereq_order(future: list[dict], done: set[str],
+                          tsem: dict[str, int] | None = None) -> list[dict]:
+    """Final pass over the emitted plan: move any course sitting before (or, for a
+    prerequisite, beside) a requisite that is still in the plan to the first term
+    it may occupy, swapping a placeholder back so credits balance. Catches what
+    the entrance hold and credential merge can disturb, on both timeline paths.
+    Pinned courses are the student's decision and are left alone."""
+    if not future:
+        return future
+    courses = lambda: [(i, c) for i, s in enumerate(future) for c in s["courses"]]
+    moves = 0
+    budget = 4 * sum(len(s["courses"]) for s in future)
+    while moves < budget:
+        flat = courses()
+        items = [c for _, c in flat]
+        needs = _requisite_needs(items, done, tsem)
+        hit = None
+        for k, (i, c) in enumerate(flat):
+            if c.get("pinned"):
+                continue
+            need = i
+            for js, strict in needs[k]:
+                at = min(flat[j][0] for j in js)
+                need = max(need, at + (1 if strict else 0))
+            if need > i:
+                hit = (i, c, need)
+                break
+        if not hit:
+            break
+        i, c, need = hit
+        origin_summer = future[i]["term"].startswith("SU")
+        while need < len(future) and future[need]["term"].startswith("SU") and not origin_summer:
+            need += 1
+        while need >= len(future):
+            last = max((s["term"] for s in future), key=_term_key)
+            future.append({"term": _next_term(last), "label": _term_label(_next_term(last)),
+                           "status": "upcoming", "credits": 0.0, "courses": []})
+        future[i]["courses"].remove(c)
+        dest = future[need]
+        filler = next((f for f in dest["courses"]
+                       if _is_placeholder(f) and not _slot_codes(f) and not f.get("pinned")), None)
+        if filler and _semester_credits(dest["courses"]) + float(c.get("credits_earned", 3) or 3) > _TARGET_CREDITS:
+            dest["courses"].remove(filler)
+            future[i]["courses"].append(filler)
+        dest["courses"].append(c)
+        c["moved_for_prerequisite"] = True
+        moves += 1
+
+    for s in future:
+        s["credits"] = _semester_credits(s["courses"])
+    return [s for s in future if s["courses"]]
+
+
 def _emit_semester(term: str, courses: list[dict]) -> dict:
     """Build an upcoming-semester object in the mobile-facing schema."""
     return {
@@ -751,6 +1050,7 @@ def _build_future_semesters(
     pool_slots: list[dict],
     base_term: str,
     internship_items: list[dict] | None = None,
+    done: set[str] | None = None,
 ) -> list[dict]:
     """Pack the remaining requirements into ~15-credit future semesters.
 
@@ -765,7 +1065,8 @@ def _build_future_semesters(
 
     total_cr = sum(_display_credits(c) for c in (*named, *gen_ed_slots, *pool_slots))
     n_sems = max(1, math.ceil(total_cr / _TARGET_CREDITS)) if total_cr else 0
-    named_alloc = _slice_even(named, n_sems)
+    # Prerequisite-aware: a course lands after the prerequisites it still needs.
+    named_alloc = _pack_ordered(named, n_sems, done) if named else [[] for _ in range(n_sems)]
 
     # Even out the load: aim for total/n_sems credits per semester rather than a
     # hard 15, so the final semester isn't left holding a small remainder.
@@ -790,8 +1091,8 @@ def _build_future_semesters(
         return cr
 
     chunks: list[list[dict]] = []
-    for s in range(n_sems):
-        chunk = list(named_alloc[s])
+    for s in range(max(n_sems, len(named_alloc))):
+        chunk = list(named_alloc[s]) if s < len(named_alloc) else []
         _fill(chunk, sum(_display_credits(c) for c in chunk))
         chunks.append(chunk)
 
@@ -877,7 +1178,8 @@ def _reflow_reproduce(records: list[dict], base_term: str) -> list[dict]:
     return semesters
 
 
-def _reflow_rebalance(records: list[dict], base_term: str) -> list[dict]:
+def _reflow_rebalance(records: list[dict], base_term: str, done: set[str] | None = None,
+                      tsem: dict[str, int] | None = None) -> list[dict]:
     """Reflow for a partially-complete student, re-packing the REMAINING slots.
 
     A behind/scattered student who has finished many early template slots would,
@@ -899,7 +1201,9 @@ def _reflow_rebalance(records: list[dict], base_term: str) -> list[dict]:
     # the even split avoids two maxed-out semesters next to a light one.
     total_cr = sum(_display_credits(it) for it in academic)
     n_sems = max(1, math.ceil(total_cr / _MAX_CREDITS)) if total_cr else 0
-    chunks = [c for c in _slice_even(academic, n_sems) if c]
+    # Slicing the flattened template ignores its semester boundaries, so keep each
+    # course after its prerequisites and beside its corequisites while packing.
+    chunks = [c for c in _pack_ordered(academic, n_sems, done, tsem) if c]
 
     # Lay chunks onto alternating Fall/Spring terms.
     acad: list[tuple[str, list[dict]]] = []
@@ -928,7 +1232,8 @@ def _reflow_rebalance(records: list[dict], base_term: str) -> list[dict]:
     return semesters
 
 
-def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
+def _reflow_template(records: list[dict], base_term: str, done: set[str] | None = None,
+                     tsem: dict[str, int] | None = None) -> list[dict]:
     """Reflow matched SAP-template slots into future semesters.
 
     A no-transcript / on-track student (nothing satisfied) reproduces the
@@ -939,7 +1244,7 @@ def _reflow_template(records: list[dict], base_term: str) -> list[dict]:
     the real remaining load rather than the template's now-lopsided groupings.
     """
     if any(r["satisfied"] for r in records):
-        return _reflow_rebalance(records, base_term)
+        return _reflow_rebalance(records, base_term, done, tsem)
     return _reflow_reproduce(records, base_term)
 
 
@@ -952,6 +1257,7 @@ def _build_layer1_future(
     base_term: str,
     course_choices: dict[str, str] | None = None,
     gate_codes: set[str] | None = None,
+    done: set[str] | None = None,
 ) -> list[dict]:
     """Layer 1 fallback: build future semesters from the audit alone (no SAP
     template) with the credit-band packer.  Used for every major that doesn't
@@ -1055,6 +1361,7 @@ def _build_layer1_future(
 
     return _build_future_semesters(
         named_courses, gen_ed_slots, pool_slots, base_term, internship_items,
+        done=done,
     )
 
 
@@ -1539,6 +1846,13 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # puts the gate in the first two years, which is the whole point of it.
     gate_codes = entrance_to_major.priority_codes(major)
 
+    # Courses whose requisites are already met: everything done, in progress or
+    # transferred (with equivalences), plus requirements the audit counts as met.
+    done_codes = {course_prereqs.norm(c) for c in
+                  build_taken_set(transcript_courses, declared_subs)
+                  | build_satisfied_req_codes(audit_result)}
+    tsem = _template_sem_index(template)
+
     if template:
         # The major audit is the source of truth for course equivalences/pairs
         # (MATH 110/140, STAT 200/SCM 200): fold its satisfied requirement codes
@@ -1555,13 +1869,14 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             course_choices=course_choices,
             gen_ed_open=build_gen_ed_open(gen_ed_result),
         )
-        future = _reflow_template(records, base_term)
+        future = _reflow_template(records, base_term, done_codes, tsem)
     else:
         future = _build_layer1_future(
             audit_result, gen_ed_result, requirement_rows,
             transcript_courses, transfer_courses, base_term,
             course_choices=course_choices,
             gate_codes=gate_codes,
+            done=done_codes,
         )
 
     # Declared minors / certificates schedule after the major's plan is built, so the
@@ -1619,6 +1934,10 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         sum(1 for t in sorted_terms if t.split()[0] in ("FA", "SP")),
         _template_open_codes(template, gate_codes),
     )
+
+    # Last word on order: nothing before a prerequisite or apart from a corequisite
+    # still in the plan, whatever the hold / credential merge above did.
+    future = _enforce_prereq_order(future, done_codes, tsem)
 
     semesters.extend(_apply_pins(future, pins))
 

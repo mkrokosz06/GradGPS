@@ -37,6 +37,12 @@ Credit formats — 4 shapes cover 2600 sampled strings:
 Output (both written, so `fix_junk_titles.py` keeps working):
     scripts/bulletin_courses.json       code -> {title, credits, credits_max}
     scripts/bulletin_course_titles.json code -> title
+    scripts/bulletin_prereqs.json       code -> {pre, co}   (see course_prereqs.py)
+
+Prerequisites / corequisites come from the same course block's
+"Enforced Prerequisite at Enrollment:" / "Concurrent at Enrollment:" lines and
+are parsed by `course_prereqs.parse()` — the timeline uses them to keep a course
+after its prerequisites and beside its corequisites.
 
 Usage:
     python scripts/scrape_bulletin_courses.py            # ~5-10 min, ~274 depts
@@ -55,9 +61,12 @@ if sys.stdout.encoding != "utf-8":
 
 sys.path.append(str(Path(__file__).parent))
 from scrape_gen_ed_courses import get_soup, get_all_departments, _CODE_RE
+sys.path.append(str(Path(__file__).parent.parent))
+import course_prereqs
 
 OUT_COURSES = Path(__file__).parent / "bulletin_courses.json"
 OUT_TITLES  = Path(__file__).parent / "bulletin_course_titles.json"
+OUT_PREREQS = course_prereqs.DATA_FILE
 
 # "4 Credits" / "1.5-3 Credits" — anchored at the start so the trailing
 # "/Maximum of 12" (a repeat cap, not this term's credits) is ignored.
@@ -100,6 +109,7 @@ def scrape_department(dept_url: str) -> dict[str, dict]:
         return {}
     out: dict[str, dict] = {}
     for block in soup.select(".courseblocktitle"):
+        course = block.find_parent(class_="courseblock")
         ct = block.select_one(".course_codetitle")
         if not ct:
             continue
@@ -118,6 +128,13 @@ def scrape_department(dept_url: str) -> dict[str, dict]:
                 credits, credits_max = got
 
         rec = {"title": title}
+        requisites = [
+            p.get_text(" ", strip=True)
+            for p in (course.select(".courseblockextra p") if course else [])
+            if p.find("strong") and "requisite" in p.find("strong").get_text().lower()
+        ]
+        if requisites:
+            rec["_requisites"] = requisites     # popped before writing
         if credits is not None:
             rec["credits"] = credits
             if credits_max is not None:
@@ -164,6 +181,15 @@ if __name__ == "__main__":
     if args.dry_run:
         print("(dry run — nothing written)")
         sys.exit(0)
+
+    prereqs = {}
+    for code, rec in courses.items():
+        parsed = course_prereqs.parse(rec.pop("_requisites", []))
+        if parsed:
+            prereqs[code] = parsed
+    OUT_PREREQS.write_text(
+        json.dumps(prereqs, indent=1, ensure_ascii=False, sort_keys=True), encoding="utf-8")
+    print(f"Wrote {OUT_PREREQS} ({len(prereqs)} courses with requisites)")
 
     OUT_COURSES.write_text(
         json.dumps(courses, indent=1, ensure_ascii=False, sort_keys=True), encoding="utf-8")
