@@ -334,11 +334,17 @@ async def _get_course_meta(code: str) -> dict | None:
     """Course title + credits: the bulletin if it knows the course, else a vote
     across the catalog rows. Cached either way."""
     norm = _normalize_code(code)
-    if norm in _course_cache:
-        return _course_cache[norm]
+    # Cached under the code as asked, not `norm`: a few suffixed courses are a
+    # different course from their bare twin (FRNSC 485W is 4 cr, FRNSC 485 is 2),
+    # so sharing one entry returned whichever was looked up first for both.
+    key = code.strip().upper()
+    if key in _course_cache:
+        return _course_cache[key]
 
-    # 1. The bulletin — authoritative, and O(1).
-    rec = _bulletin_courses().get(norm)
+    # 1. The bulletin — authoritative, and O(1). It keys writing courses with
+    # their suffix ('CHEM 423W'; 359 have no bare twin), so try the raw code first.
+    bulletin = _bulletin_courses()
+    rec = bulletin.get(code.strip().upper()) or bulletin.get(norm)
     if rec and rec.get("credits") is not None:
         credits = rec["credits"]
         meta = {
@@ -347,7 +353,7 @@ async def _get_course_meta(code: str) -> dict | None:
             "credits":       int(credits) if credits == int(credits) else float(credits),
             "credits_label": _credits_label(credits, rec.get("credits_max")),
         }
-        _course_cache[norm] = meta
+        _course_cache[key] = meta
         return meta
 
     # 2. Fallback: full paginated scan, every matching row gets a vote (see above).
@@ -383,7 +389,7 @@ async def _get_course_meta(code: str) -> dict | None:
         "credits":       credits,
         "credits_label": _credits_label(credits) if credits else "",
     }
-    _course_cache[norm] = meta
+    _course_cache[key] = meta
     return meta
 
 

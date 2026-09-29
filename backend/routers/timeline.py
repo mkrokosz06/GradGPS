@@ -21,6 +21,7 @@ from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_used_codes, build_satisfied_req_codes,
                           build_gen_ed_courses, build_gen_ed_open, match_template)
 from routers.user_choices import get_user_choices
+from routers.courses import _bulletin_courses
 from substitutions import get_substitutions
 import credential_choices
 from credentials_audit import audit_declared_credentials
@@ -513,21 +514,64 @@ def _catalog_titles() -> dict[str, str]:
 _REAL_CODE_RE = re.compile(r"^[A-Z]{2,6}\s+\d")
 
 
+def _bulletin_record(code: str) -> dict | None:
+    """The bulletin's {title, credits} for a code (keyed with its W suffix, e.g.
+    'CHEM 423W'), falling back to the suffix-stripped form."""
+    b = _bulletin_courses()
+    code = code.strip().upper()
+    return b.get(code) or b.get(re.sub(r"[WHNMXY]$", "", code).strip())
+
+
+def _transcript_display_code(c: dict) -> str:
+    """A transcript row's code as the student registered it. Storage strips the
+    writing suffix into `is_writing` ('FRNSC 485W' -> 'FRNSC 485'), but a few
+    suffixed courses are different courses from their bare twin — FRNSC 485W is
+    4 cr 'Coalescence of Forensic Science Concepts', FRNSC 485 is 2 cr — so the
+    card (and the course screen it opens) needs the suffix back. Take the letter
+    the bulletin actually lists; with none listed, keep the stored code."""
+    code = c.get("course_code", "")
+    if c.get("is_writing") and code and code[-1].isdigit():
+        b = _bulletin_courses()
+        for sfx in "WMXY":
+            if code + sfx in b:
+                return code + sfx
+    return code
+
+
 def _fill_future_titles(semesters: list[dict]) -> None:
-    """Backfill empty course_title on real (non-pool) recommended cards from the
-    catalog, so 'Plan your registration' shows names, not just codes."""
+    """Backfill empty course_title on real (non-pool) recommended cards, and the
+    title + credits of each dropdown option, so 'Plan your registration' shows
+    names, not just codes. The bulletin is authoritative (catalog rows carry
+    scraper junk like FRNSC 475 = 'Supporting Course (consult your adviser) *3');
+    the catalog vote is the fallback for codes the bulletin doesn't list."""
     titles: dict[str, str] | None = None
+
+    def title_for(code: str) -> str | None:
+        nonlocal titles
+        rec = _bulletin_record(code)
+        if rec and rec.get("title"):
+            return rec["title"]
+        if titles is None:
+            titles = _catalog_titles()
+        return titles.get(code) or titles.get(re.sub(r"[WHNMXY]$", "", code).strip())
+
     for sem in semesters:
         for c in sem.get("courses", []):
+            for o in c.get("options") or []:
+                ocode = (o.get("course_code") or "").strip().upper()
+                if not _REAL_CODE_RE.match(ocode):
+                    continue
+                rec = _bulletin_record(ocode)
+                if rec and rec.get("credits") is not None:
+                    o["credits"] = float(rec["credits"])
+                if not o.get("course_title"):
+                    o["course_title"] = title_for(ocode) or ""
             if c.get("course_title") or c.get("is_pool"):
                 continue
             code = (c.get("course_code") or "").strip().upper()
             if " OR " in code or not _REAL_CODE_RE.match(code):
                 continue
-            if titles is None:
-                titles = _catalog_titles()
-            norm = re.sub(r"[WHNMXY]$", "", code).strip()
-            t = titles.get(code) or titles.get(norm)
+            t = title_for(code)
             if t:
                 c["course_title"] = t
 
@@ -1281,7 +1325,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
             "credits": credits,
             "courses": [
                 {
-                    "course_code":    c.get("course_code", ""),
+                    "course_code":    _transcript_display_code(c),
                     "grade":          c.get("grade", ""),
                     "credits_earned": _past_display_credits(c),
                     "course_title":   c.get("course_title", ""),

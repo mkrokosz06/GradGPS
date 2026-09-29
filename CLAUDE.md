@@ -430,18 +430,16 @@ side by side loses nothing (0 of 5 programs lost a course) and gains only the re
 > pre-existing prod-vs-current-bulletin drift, not a scraper regression — verified by running the old
 > scraper against the same pages and getting byte-identical output (ETI: 66 rows / 53 codes, zero diff).
 
-**Still unfixed in the scraper** (each deserves its own diff): the code regex requires **three digits**
-(`\d{3}`), so `ENGL 15`, `ECON 14`, `SOC 1`, `PSU 6` are invisible to it — that, not a dropped row, is
-why first-year writing never appears in a major's rows (it is carried by `__GEN_ED__` instead);
-`title[:120]` truncates 416 titles mid-word; "select 3 credits of 400-level courses" is still
+**Short codes are fixed**: `_CODE_IN_CELL_WIDE` matches 1–3 digits (`ENGL 15`, `SOC 1`), gated on
+`bulletin_courses.json` so a stray number can't become a course. **Still unfixed in the scraper**
+(each deserves its own diff): `title[:120]` truncates 416 titles mid-word; "select 3 credits of 400-level courses" is still
 parsed as a course, inventing codes like `PSYCH 400` with the title `"3"`; and a **plan-grid row
 captures only one course code**, because that path does a single `search()` over the whole `<tr>`.
 The grid holds two terms side by side (`A-I 100 | 3 | ENGL 15 | 3`), so the second is dropped — and
 which one survives can change under you: `ENGL 15` disappeared from the AI major the moment the
 hyphen fix below made `A-I 100` matchable.
 
-**Nothing in the catalog carries a branch id yet** — the engine and the scraper are both in place, but
-no data has been loaded.
+**Loaded in prod** (Sept 22 2026 reload): 757 rows carry a `pair_branch_id`.
 
 ### Requirement pools — one section holds SEVERAL of them
 
@@ -522,8 +520,8 @@ made against the whole pool still lands.
 > **The catalog data is gitignored.** `PSU_Major_Requirements.xlsx` is not in the repo, so this ships
 > as code only — every environment needs its own `scrape_psu.py` → `load_catalog.py --replace`, and
 > that reload **must re-run the patch scripts in the same pass** or the ~629 injected alternatives
-> vanish. **As of the Sept 2026 push, prod has NOT been reloaded**: the engine is live and inert
-> there, and CYBER 100 still does not appear for a real ETI student until it is.
+> vanish. **Prod was reloaded on Sept 22 2026** (`load_catalog.py --replace` + `apply_catalog_patches.py`):
+> 11,896 rows carry `pool_seq`, ETI's `CYBER 100` sits in its own pool, and there are 0 singleton pairs.
 
 Tests: `backend/tests/test_pool_split.py` (37, pytest or plain `python`); the fixture
 `tests/fixtures/eti_courselist.html` is the real ETI courselist table.
@@ -618,6 +616,15 @@ vote survives as the fallback for anything the bulletin doesn't list (e.g. `IST 
 > bulletin puts the two in separate elements — reading each directly fixed **2,904 mangled titles,
 > 31% of the file**. `scrape_bulletin_courses.py` writes `bulletin_course_titles.json` too, so
 > `fix_junk_titles.py` keeps working and gets the corrected titles.
+
+**The bulletin keys writing courses with their suffix** (`CHEM 423W`; 359 have no bare twin, and 16
+are a *different course* from it — FRNSC 485W is 4 cr, FRNSC 485 is 2). So `_get_course_meta()` tries
+the raw code before the stripped one **and caches under the code as asked** (keying on the stripped code
+served whichever twin was looked up first for both); the timeline's transcript cards re-attach the suffix
+from `is_writing` (`_transcript_display_code()`, letter taken from the bulletin), and
+`_fill_future_titles()` fills recommended cards *and* dropdown options (title + credits) from the
+bulletin before the catalog vote — catalog rows carry junk like FRNSC 475 = *"Supporting Course
+(consult your adviser) \*3"*.
 
 Variable-credit courses (2,270 of them) carry `credits_max`; the API adds a `credits_label`
 ("4", or "1.5-3") which the mobile badge prefers when present.
@@ -770,7 +777,15 @@ beta link still works. The Smart App Banner meta lives in `tools/site/partials/h
 The mobile `UpdateGate` falls back to the App Store page when `ios_update_url` is blank.
 
 ## Adding a new school
-Not started. Step-by-step plan: `docs/new-school-playbook.md` (replaced the removed "Charlie" agent).
+No second school is planned. Step-by-step plan: `docs/new-school-playbook.md` (replaced the removed
+"Charlie" agent).
+
+**Step 0 (per-school config) is built but parked on branch `per-school-config`, not merged.** It moves
+every PSU convention onto one `School` object (`backend/schools/psu.py`) that the engine and routers
+read via `schools.current()`; it was proven byte-identical for PSU by snapshotting 235 students'
+responses before and after. Merge it when a second school is actually on the way — expect conflicts
+in `audit_engine.py`, `routers/courses.py` and `routers/timeline.py` if those change first. Until
+then, PSU values stay hardcoded on `main`.
 
 ## Adding a new requirement pair to the catalog
 If two courses should be choose-one alternatives but aren't paired in the catalog, add them to the

@@ -1,6 +1,7 @@
 # Adding a new school — playbook
 
-Status: **plan, not started** (2026-09-28). Replaces the old "Charlie" add-my-school agent,
+Status: **Step 0 built and parked on branch `per-school-config` (not merged, 2026-09-29); no second
+school planned.** Replaces the old "Charlie" add-my-school agent,
 which was removed because its feasibility triage predated almost everything Penn State taught
 us about where catalog data goes wrong.
 
@@ -12,6 +13,12 @@ source. Most of them told students they owed *less* than they did.
 ---
 
 ## Step 0 — Pull Penn State out of the engine (one-time, blocks everything)
+
+> **Built, not merged.** Branch `per-school-config` has it: every coupling below lives on a
+> `School` object in `backend/schools/psu.py`, read via `schools.current()` (defaults to PSU), with
+> a per-request hook that is a no-op while PSU is the only school. Proven byte-identical for PSU
+> (235 students' audit/timeline/class-picker responses snapshotted before and after). The branch's
+> own copy of this doc describes it in full. Kept off `main` by choice until a second school is real.
 
 A second school cannot run until PSU conventions stop being hardcoded. Known couplings:
 

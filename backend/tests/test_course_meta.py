@@ -233,6 +233,27 @@ def test_attribute_suffix_is_stripped_before_lookup():
     assert meta["course_code"] == "IST 301"
 
 
+def test_suffixed_twin_is_its_own_course():
+    """FRNSC 485W (4 cr) and FRNSC 485 (2 cr) are different bulletin courses; a
+    lookup of one must not be served from the other's cache entry."""
+    courses._course_cache.clear()
+    real_tbl, real_bul = courses.requirements_table, courses._bulletin
+    courses.requirements_table = _FakeTable([[]])
+    courses._bulletin = {
+        "FRNSC 485W": {"title": "Coalescence of Forensic Science Concepts", "credits": 4.0},
+        "FRNSC 485":  {"title": "The Profession of Forensic Science", "credits": 2.0},
+    }
+    try:
+        w = asyncio.run(courses._get_course_meta("FRNSC 485W"))
+        bare = asyncio.run(courses._get_course_meta("FRNSC 485"))
+        assert (w["credits"], bare["credits"]) == (4, 2)
+        assert bare["course_title"] == "The Profession of Forensic Science"
+    finally:
+        courses.requirements_table = real_tbl
+        courses._bulletin = real_bul
+        courses._course_cache.clear()
+
+
 # ── plain-python runner ──────────────────────────────────────────────────────
 
 if __name__ == "__main__":
