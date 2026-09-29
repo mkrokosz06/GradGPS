@@ -171,6 +171,23 @@ def _focus_areas(plan_tab) -> dict:
     return areas
 
 
+def _offered_here(heading, url: str) -> bool:
+    """False when the section under `heading` carries an "Only Available through
+    the <college> …" note (an <h6> before its table) that doesn't name the college
+    whose page this is (from the URL: /colleges/eberly-science/…)."""
+    note = heading.find_next(["h2", "h3", "h4", "h5", "h6", "table"])
+    if note is None or note.name != "h6":
+        return True
+    text = note.get_text(" ", strip=True).lower()
+    if "only available" not in text:
+        return True
+    m = re.search(r"/colleges/([^/]+)/", url or "")
+    if not m:
+        return True
+    words = [w for w in m.group(1).split("-") if w not in ("and", "of", "the")]
+    return all(w in text for w in words)
+
+
 def _drop_suffix_twins(codes: list[str]) -> list[str]:
     """MKTG 301 and MKTG 301W are one course to the audit (the W is stripped from
     the transcript), so listing both lets one course count twice toward a pool."""
@@ -414,6 +431,7 @@ def scrape_program_requirements(program):
                 focus_codes.append(code)
 
     in_option_section = False
+    skip_section = False
     # "Select an emphasis" closes its own table; the emphases follow as separate
     # tables, each under an <h6> ("French Emphasis"). Remember the block pool so
     # those tables join it rather than each becoming required courses.
@@ -463,6 +481,11 @@ def scrape_program_requirements(program):
             current_group_type, current_threshold = detect_group_type(text)
             last_block         = None
             emphasis_block     = None
+            # "Only Available through the College of Engineering": Data Sciences
+            # prints all three options on each college's page, but each college
+            # offers one. An option this page's college doesn't offer is skipped,
+            # so its students can't pick it or be audited against it.
+            skip_section = not _offered_here(el, program.get("url", ""))
             # A new section ends any open pool and becomes the fallback the
             # pool's members revert to once the pool closes.
             heading_group_type = current_group_type
@@ -475,6 +498,8 @@ def scrape_program_requirements(program):
         # ── Also check paragraph/span text immediately before tables for pool instructions ──
         # e.g. "Select 3-4 credits from the following:"
         elif tag == "table":
+            if skip_section:
+                continue
             # A new table is a new context. Pools were only ever closed by an
             # <h2>-<h5>, but CourseLeaf splits a section across several tables
             # (one per option) with no heading between them, so a pool opened in

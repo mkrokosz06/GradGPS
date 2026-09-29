@@ -184,6 +184,30 @@ def test_the_audit_keeps_only_the_chosen_area():
     assert tags("Not A Real Area") == {"*"}                        # unknown focus: any-area pool
 
 
+def test_an_option_another_college_offers_is_skipped():
+    # The Data Sciences page is published once per college with all three options,
+    # each marked "Only Available through …". Scraped as the Engineering page, only
+    # Computational Data Sciences may remain.
+    html = open(os.path.join(FIXTURES, "req_data_sciences_ist.html"), encoding="utf-8").read()
+    original = scrape_psu.get_soup
+    scrape_psu.get_soup = lambda url, retries=3: BeautifulSoup(html, "lxml")
+    try:
+        rows, _ = scrape_psu.scrape_program_requirements(
+            {"url": "https://bulletins.psu.edu/undergraduate/colleges/engineering/data-sciences-bs/",
+             "name": "x", "college": "engineering"})
+    finally:
+        scrape_psu.get_soup = original
+    # (Campus plan-grid groups — "… at University Park Campus" — are the plan tab's,
+    # dropped by the audit; the requirement options are what's being checked.)
+    options = {r["requirement_group"].split(" Option")[0] for r in rows
+               if " Option" in r["requirement_group"] and "All Options" not in r["requirement_group"]
+               and " at " not in r["requirement_group"]}
+    assert options == {"Computational Data Sciences"}
+    # …and as the IST page, Applied (with its focus areas) stays.
+    assert "Applied Data Sciences Option (DATSC_BS, DTSAB_BS): 47 credits" in \
+        {r["requirement_group"] for r in _scrape("data_sciences_ist")}
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0

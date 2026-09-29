@@ -345,8 +345,14 @@ encoded as threshold 12 + the overlapping major pool's 3 = 15 — all five items
 on the users row (`focus`); `GET /programs/focus-areas?major=`, `PUT /users/me/focus` (validated against
 the major's areas; cleared when the major changes). Timeline `application_focus` slots search the chosen
 area (`routers/courses._focus_universe`). Mobile: `components/ApplicationFocusCard.tsx` on Account,
-`services/focusService.ts`. Data Sciences Science/Engineering publish no lists on their own pages — their
-focus requirement is still unrepresented.
+`services/focusService.ts`.
+
+**Options another college offers.** The Data Sciences page is published once per college (IST,
+Engineering, Science) and prints all three options, each under an `<h6>` "Only Available through the
+College of …" note — every college offers one. `scrape_psu._offered_here` skips an option whose note
+doesn't name the page's own college (from its URL), so each program lists only its option (IST: Applied,
+with the focus; Engineering: Computational; Science: Statistical Modeling). The focus lists "missing" from
+the Science/Engineering pages were never theirs — the focus is Applied-only.
 
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`, `--options`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
