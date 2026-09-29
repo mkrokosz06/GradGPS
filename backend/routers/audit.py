@@ -251,3 +251,64 @@ def get_audit(
         major, transcript_courses, declared_subs)
 
     return result
+
+
+# The mobile major picker (onboarding + Major screen) calls this before saving a
+# major. It was deleted by accident in 5814ac2 (Sept 2 2026), and onboarding then
+# failed with "Could not check tracks." and never saved the major; no one could
+# pick an option either. tests/test_subplans_route.py keeps it from vanishing again.
+@router.get("/subplans")
+def get_subplans(major: str):
+    """
+    Returns the available subplans for a given major by inspecting the
+    requirement group names in the catalog.
+
+    Example: major="Forensic Science, B.S."
+    Returns: ["Forensic Chemistry", "Forensic Molecular Biology"]
+    """
+    if not major or not major.strip():
+        raise HTTPException(status_code=422, detail="major must not be empty.")
+    resp = requirements_table.query(
+        KeyConditionExpression=Key("program_name").eq(major),
+        ProjectionExpression="requirement_group",
+    )
+    items = resp.get("Items", [])
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.query(
+            KeyConditionExpression=Key("program_name").eq(major),
+            ProjectionExpression="requirement_group",
+            ExclusiveStartKey=resp["LastEvaluatedKey"]
+        )
+        items.extend(resp.get("Items", []))
+
+    import re
+
+    subplans = set()
+
+    # Group names that are NOT subplans — generic section headers used across
+    # all programs. Any name that matches one of these words is skipped.
+    skip_words = {
+        "common", "all options", "university park", "commonwealth",
+        "math 22", "general", "requirements", "core", "elective",
+        "suggested", "curriculum",
+    }
+
+    for item in items:
+        g  = item.get("requirement_group", "")
+        gl = g.lower()
+
+        # Skip campus-specific / suggested-plan duplicates
+        if " at " in gl:
+            continue
+        # Skip generic section headers
+        if any(w in gl for w in skip_words):
+            continue
+
+        # Extract the subplan name: take text before the first "(" or ":"
+        name = re.split(r"[(:（]", g)[0].strip()
+        # Remove trailing "Option" word to get just the subplan label
+        name = re.sub(r"\s+option$", "", name, flags=re.IGNORECASE).strip()
+        if name:
+            subplans.add(name)
+
+    return {"major": major, "subplans": sorted(subplans)}
