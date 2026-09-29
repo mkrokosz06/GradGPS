@@ -155,6 +155,10 @@ with table.batch_writer() as batch:
         # String optional fields
         if row.get("min_grade", "").strip():
             item["min_grade"] = row["min_grade"].strip()
+        # focus_area tags an Application Focus pool ("Business Competency", or "*"
+        # for the any-area pool); routers.audit._filter_rows keeps one of them.
+        if str(row.get("focus_area", "")).strip():
+            item["focus_area"] = str(row["focus_area"]).strip()
 
         # pair_branch_id marks the members of a compound choose-one branch
         # ("ACCTG 211 or (ACCTG 201 and ACCTG 202)"). It is a STRING, so it can't

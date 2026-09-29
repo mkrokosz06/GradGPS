@@ -91,6 +91,94 @@ _PICK_BLOCK = re.compile(
     re.I,
 )
 
+# The Application Focus requirement row, however a page words it: "Select 12
+# credits from the lists of Application Focus courses" (Data Sciences), "A student
+# must complete 12 credits from a single Application Focus" (ETI), "Select 9
+# credits from one of the Application Focus course lists" (Cybersecurity), "Select
+# 12 credits from the Application Focus course listings" (HCDD).
+_FOCUS_HEADER = re.compile(
+    r"(?:select|complete)\s+(\d+)\s+credits\s+from\s+(?:the\s+lists?\s+of\s+|one\s+of\s+the\s+|a\s+single\s+|the\s+)?"
+    r"application\s+focus"
+    # IT Ethics and Compliance: "Focus Area: Select 12 credits from department list"
+    r"|focus\s+area:\s*select\s+(\d+)\s+credits",
+    re.I,
+)
+
+
+def _focus_areas(plan_tab) -> dict:
+    """{area name: {"threshold": N or None, "codes": [...], "text": str}} from a
+    Suggested Academic Plan tab. Two layouts: an <h4> per area followed by a
+    courselist (Data Sciences, HCDD), or a bulleted list whose items open with the
+    area name in <strong> and say "Select N credits from ..." (ETI,
+    Cybersecurity, IT Ethics). Codes come from course links and the item's text;
+    a course named only in prose ("Any 200-400 level HCDD Course") is not listed.
+    The first occurrence of an area wins -- pages repeat the lists per campus."""
+    areas: dict = {}
+    if plan_tab is None:
+        return areas
+    for h in plan_tab.find_all("h4"):
+        name = h.get_text(" ", strip=True)
+        if "custom" in name.lower() or name in areas:
+            continue
+        if not any("application focus" in p.get_text(" ", strip=True).lower()
+                   for p in h.find_all_previous("p", limit=12)):
+            continue
+        table = h.find_next("table")
+        if table is None or "sc_courselist" not in (table.get("class") or []):
+            continue
+        codes = []
+        # Codes from the cell TEXT: a course PSU has renamed or retired (IST 311,
+        # FDSC 206) still appears in the list but has no working link.
+        for td in table.select("td.codecol"):
+            for m in _CODE_IN_CELL.finditer(td.get_text(" ", strip=True)):
+                code = f"{m.group(1)} {m.group(2)}"
+                if code not in codes:
+                    codes.append(code)
+        areas[name] = {"threshold": None, "codes": codes, "text": ""}
+    for li in plan_tab.find_all("li"):
+        strong = li.find("strong")
+        if strong is None or strong.find_parent("li") is not li:
+            continue
+        name = strong.get_text(" ", strip=True)
+        text = re.sub(r"\s+", " ", li.get_text(" ", strip=True).replace("\xa0", " "))
+        m = re.search(r"select\s+(\d+)\s+credits", text, re.I)
+        if not m or "custom" in name.lower() or name in areas:
+            continue
+        codes = []
+        # Codes only from the entries that ARE course lists ("BA 301 or FIN 100
+        # or FIN 301", "HCDD 264, HCDD 311, …") — never from an area's notes or
+        # description, which cite (and link) prerequisites: ETI Business
+        # Competency's notes name ACCTG 211, ECON 102 and BA 302. A course list
+        # has next to no prose words; a note has many.
+        for sub in li.find_all("li"):
+            if sub.find("li"):
+                continue                      # a container, not an entry
+            st = re.sub(r"\s+", " ", sub.get_text(" ", strip=True).replace("\xa0", " "))
+            prose = [w for w in re.findall(r"\b[a-z]{3,}\b", st) if w not in ("and", "any", "level")]
+            if len(prose) > 4:
+                continue
+            for a in sub.find_all("a", href=True):
+                mm = re.search(r"[?&]P=([A-Z][A-Z-]{1,6})%20(\d{1,3}[A-Z]?)", a["href"])
+                if mm and f"{mm.group(1)} {mm.group(2)}" not in codes:
+                    codes.append(f"{mm.group(1)} {mm.group(2)}")
+            for mm in _CODE_IN_CELL.finditer(st):
+                code = f"{mm.group(1)} {mm.group(2)}"
+                if code not in codes:
+                    codes.append(code)
+        areas[name] = {"threshold": int(m.group(1)), "codes": _drop_suffix_twins(codes), "text": text}
+    for area in areas.values():
+        area["codes"] = _drop_suffix_twins(area["codes"])
+    return areas
+
+
+def _drop_suffix_twins(codes: list[str]) -> list[str]:
+    """MKTG 301 and MKTG 301W are one course to the audit (the W is stripped from
+    the transcript), so listing both lets one course count twice toward a pool."""
+    bases = set(codes)
+    return [c for c in codes
+            if not (re.search(r"\d[WHMXY]$", c) and c[:-1] in bases)]
+
+
 HEADERS = {
     "User-Agent": "GradGPS-CatalogScraper/1.0 (educational use; mkrokosz06@gmail.com)"
 }
@@ -318,25 +406,12 @@ def scrape_program_requirements(program):
     # can't enforce the single-area part, and a custom focus won't count toward
     # it; both are closer to the truth than 500 phantom required credits.
     plan_tab = soup.find(id="suggestedacademicplantextcontainer")
+    focus_areas = _focus_areas(plan_tab)
     focus_codes: list[str] = []
-    if plan_tab is not None:
-        for h in plan_tab.find_all("h4"):
-            if "custom" in h.get_text(" ", strip=True).lower():
-                continue
-            if not any("application focus" in p.get_text(" ", strip=True).lower()
-                       for p in h.find_all_previous("p", limit=12)):
-                continue
-            table = h.find_next("table")
-            if table is None or "sc_courselist" not in (table.get("class") or []):
-                continue
-            # Codes from the cell TEXT, like every other row here: a course PSU
-            # has renamed or retired (IST 311, FDSC 206) still appears in the
-            # list but has no working link.
-            for td in table.select("td.codecol"):
-                for m in _CODE_IN_CELL.finditer(td.get_text(" ", strip=True)):
-                    code = f"{m.group(1)} {m.group(2)}"
-                    if code not in focus_codes:
-                        focus_codes.append(code)
+    for area in focus_areas.values():
+        for code in area["codes"]:
+            if code not in focus_codes:
+                focus_codes.append(code)
 
     in_option_section = False
     # "Select an emphasis" closes its own table; the emphases follow as separate
@@ -600,28 +675,56 @@ def scrape_program_requirements(program):
                             last_block = (current_pool_seq, current_group_type, current_threshold)
                             if picked_block:
                                 emphasis_block = last_block
-                    if pool_match and focus_codes and "application focus" in full_row.lower():
+                    focus_match = _FOCUS_HEADER.search(full_row)
+                    if focus_match and focus_codes:
                         # "Select 12 credits from the lists of Application Focus
-                        # courses": the pool's members live in the plan tab.
-                        current_pool_seq += 1
-                        for code in focus_codes:
-                            info = BULLETIN.get(code) or {}
-                            rows.append({
-                                "program_name":      full_title,
-                                "college":           program["college"].replace("-", " ").title(),
-                                "degree":            degree,
-                                "campus":            campus,
-                                "requirement_group": current_group,
-                                "group_type":        "choose_credits",
-                                "group_threshold":   int(pool_match.group(1)),
-                                "course_code":       code,
-                                "course_title":      (info.get("title") or "")[:120],
-                                "credits":           info.get("credits") if info.get("credits") is not None else "",
-                                "min_grade":         "",
-                                "pair_group_id":     None,
-                                "pool_seq":          current_pool_seq,
-                                "url":               program["url"],
-                            })
+                        # courses" / "must complete 12 credits from a single
+                        # Application Focus": the members live in the plan tab.
+                        # One pool per area (focus_area = its name) plus an
+                        # any-area pool ("*"); routers.audit._filter_rows keeps
+                        # the chosen area's pool, or the any-area one until the
+                        # student picks.
+                        need = int(next(g for g in focus_match.groups() if g))
+
+                        def emit(codes, threshold, tag):
+                            nonlocal current_pool_seq
+                            current_pool_seq += 1
+                            for code in codes:
+                                info = BULLETIN.get(code) or {}
+                                rows.append({
+                                    "program_name":      full_title,
+                                    "college":           program["college"].replace("-", " ").title(),
+                                    "degree":            degree,
+                                    "campus":            campus,
+                                    "requirement_group": current_group,
+                                    "group_type":        "choose_credits",
+                                    "group_threshold":   threshold,
+                                    "course_code":       code,
+                                    "course_title":      (info.get("title") or "")[:120],
+                                    "credits":           info.get("credits") if info.get("credits") is not None else "",
+                                    "min_grade":         "",
+                                    "pair_group_id":     None,
+                                    "pool_seq":          current_pool_seq,
+                                    "focus_area":        tag,
+                                    "url":               program["url"],
+                                })
+
+                        emit(focus_codes, need, "*")
+                        for name, area in focus_areas.items():
+                            if not area["codes"]:
+                                continue
+                            threshold = area["threshold"] or need
+                            # ETI Business Competency, Note 3: one of these courses
+                            # satisfies a MAJOR pool and "may not double-count" --
+                            # the student takes the rest for the focus. So the
+                            # area needs the major pool's credits on top of its own.
+                            if re.search(r"double[- ]count", area["text"], re.I):
+                                for r in rows:
+                                    if (r.get("group_type") == "choose_credits" and not r.get("focus_area")
+                                            and r["course_code"] in area["codes"] and r.get("group_threshold")):
+                                        threshold += int(r["group_threshold"])
+                                        break
+                            emit(area["codes"], threshold, name)
                         close_pool()
                         pool_match = None
                     if pool_match:

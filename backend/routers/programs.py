@@ -226,17 +226,52 @@ def select_major(
         if any(body.subplan.lower() in g for g in all_group_names):
             effective_subplan = body.subplan
 
+    # An Application Focus belongs to one major: a new major starts without one.
+    previous = (users_table.get_item(Key={"user_id": user_id}).get("Item") or {}).get("major")
+    drop_focus = ", focus" if previous and previous != body.major else ""
     if effective_subplan:
         users_table.update_item(
             Key={"user_id": user_id},
-            UpdateExpression="SET major = :m, subplan = :s",
+            UpdateExpression="SET major = :m, subplan = :s" + (" REMOVE focus" if drop_focus else ""),
             ExpressionAttributeValues={":m": body.major, ":s": effective_subplan},
         )
     else:
         users_table.update_item(
             Key={"user_id": user_id},
-            UpdateExpression="SET major = :m REMOVE subplan",
+            UpdateExpression="SET major = :m REMOVE subplan" + drop_focus,
             ExpressionAttributeValues={":m": body.major},
         )
 
     return {"status": "ok", "major": body.major, "subplan": effective_subplan}
+
+
+def focus_areas(major: str) -> list[dict]:
+    """A major's Application Focus areas, from the catalog's per-area pools
+    (scrape_psu tags each with `focus_area`): [{name, credits, courses}]. Empty
+    for a major without one."""
+    from boto3.dynamodb.conditions import Key
+    rows, kw = [], {"KeyConditionExpression": Key("program_name").eq(major)}
+    while True:
+        r = requirements_table.query(**kw)
+        rows += r["Items"]
+        if "LastEvaluatedKey" not in r:
+            break
+        kw["ExclusiveStartKey"] = r["LastEvaluatedKey"]
+    areas: dict[str, dict] = {}
+    for r in rows:
+        name = r.get("focus_area")
+        if not name or name == "*":
+            continue
+        a = areas.setdefault(name, {"name": name, "credits": float(r.get("group_threshold") or 0),
+                                    "courses": []})
+        if r["course_code"] not in a["courses"]:
+            a["courses"].append(r["course_code"])
+    return list(areas.values())
+
+
+@router.get("/focus-areas")
+def get_focus_areas(major: str):
+    """The Application Focus areas a student of `major` chooses between (ETI,
+    Data Sciences, HCDD, Cybersecurity, IT Ethics). An empty list means the major
+    has none and the app shows nothing."""
+    return {"major": major, "areas": focus_areas(major)}

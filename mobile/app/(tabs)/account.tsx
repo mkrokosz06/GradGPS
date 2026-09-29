@@ -10,6 +10,7 @@ import { setCredentials, credentialErrorMessage } from "../../services/credentia
 import { CredentialPickerModal } from "../../components/CredentialPickerModal";
 import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
 import { EntranceToMajorCard } from "../../components/EntranceToMajorCard";
+import { ApplicationFocusCard } from "../../components/ApplicationFocusCard";
 import {
   getTimeline, getCachedTimeline, type TimelineData,
 } from "../../services/timelineService";
@@ -214,6 +215,11 @@ export default function AccountScreen() {
               onChanged={refresh}
             />
           )}
+
+        {/* Application Focus — only for majors that require one (renders nothing otherwise) */}
+        {audit?.major && (
+          <ApplicationFocusCard userId={userId!} major={audit.major} onChanged={refresh} />
+        )}
 
         {/* Minors & certificates — declared here, never during onboarding */}
         {audit && (

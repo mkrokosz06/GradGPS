@@ -117,7 +117,30 @@ def _focus_codes(soup) -> list[frozenset]:
                                   if _code_ok(m.group(1), m.group(2)))
                 if codes and codes not in out:
                     out.append(codes)
-    return out
+    # ETI, Cybersecurity and IT Ethics publish their areas as bulleted lists. A
+    # course entry is a leaf <li> that is almost all course codes; an area's notes
+    # (which cite prerequisites) are sentences. Checked here by the share of the
+    # entry's words that are course codes, independently of the scraper's rule.
+    for li in tab.find_all("li"):
+        if li.find("li"):
+            continue
+        text = li.get_text(" ", strip=True).replace("\xa0", " ")
+        found = [(m.group(1), m.group(2)) for m in _CODE_RE.finditer(text) if _code_ok(m.group(1), m.group(2))]
+        words = re.findall(r"[A-Za-z]+", text)
+        if not found or len(found) * 2 < len(words) - len(found) - text.lower().count(" or "):
+            continue
+        for d, n in found:
+            code = frozenset({f"{d} {n}"})
+            if code not in out:
+                out.append(code)
+    # A course and its writing / honors twin (MKTG 301, MKTG 301W) are one
+    # requirement: the audit strips the suffix, so either spelling satisfies it.
+    merged: dict[str, set] = {}
+    for group in out:
+        for code in group:
+            base = re.sub(r"(\d)[WHMXY]$", r"\1", code)
+            merged.setdefault(base, set()).add(code)
+    return [frozenset(v) for v in merged.values()]
 
 
 def pools_from_page(html: str) -> list[dict]:
@@ -185,7 +208,13 @@ def pools_from_page(html: str) -> list[dict]:
                 # the following:") or counts options ("Select one of the
                 # following sequences:"). Both open a list.
                 m = _POOL_RE.search(text) or _POOL_COUNT_RE.search(text)
-                if m and focus and "application focus" in text.lower():
+                # The focus requirement, however worded: "Select 12 credits from
+                # … Application Focus", "must complete 12 credits from a single
+                # Application Focus" (ETI), "Focus Area: Select 12 credits" (IT Ethics).
+                low = text.lower()
+                is_focus = ("application focus" in low or low.startswith("focus area")) and \
+                    re.search(r"\b\d+\s+credits\b", low)
+                if is_focus and focus:
                     # The pool's members are the plan tab's focus menus.
                     pools.append({"codes": list(focus), "confirmed": True})
                     current = None
@@ -219,8 +248,12 @@ def pools_from_page(html: str) -> list[dict]:
 # ── Scraper output ───────────────────────────────────────────────────────────
 
 def pools_from_frame(df: pd.DataFrame) -> list[dict]:
-    """Pools as the scraper recorded them, for one program."""
+    """Pools as the scraper recorded them, for one program. A per-area
+    Application Focus pool is a view of the any-area pool ("*"), which is the one
+    checked against the page."""
     rows = df[df.group_type.isin(POOL_TYPES)]
+    if "focus_area" in rows:
+        rows = rows[rows.focus_area.isna() | rows.focus_area.isin(["", "*"])]
     out = []
     for (_group, thr, seq), grp in rows.groupby(
         ["requirement_group", "group_threshold", "pool_seq"], dropna=False

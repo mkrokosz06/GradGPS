@@ -106,6 +106,9 @@ def get_me(
         # Declared minors / certificates. Strictly additive: an older mobile build
         # ignores the field, and an account that has declared none omits it entirely.
         "credentials": user.get("credentials", []),
+        # The student's Application Focus area, when their major has them. Absent
+        # until they pick one; an older build ignores it.
+        "focus": user.get("focus"),
     }
 
 
@@ -179,6 +182,32 @@ def set_my_credentials(
             UpdateExpression="REMOVE credentials",
         )
     return {"status": "ok", "credentials": credentials}
+
+
+class FocusBody(BaseModel):
+    focus: str | None = None
+
+
+@router.put("/me/focus")
+def set_my_focus(body: FocusBody, user_id: str = Depends(get_user_id)):
+    """Choose (or clear, with null) the caller's Application Focus area. It must be
+    one of their major's areas — the audit then requires that area's courses
+    instead of accepting any mix of every area's."""
+    from routers.programs import focus_areas
+    user = users_table.get_item(Key={"user_id": user_id}).get("Item")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    focus = (body.focus or "").strip()
+    if not focus:
+        users_table.update_item(Key={"user_id": user_id}, UpdateExpression="REMOVE focus")
+        return {"status": "ok", "focus": None}
+    names = [a["name"] for a in focus_areas(user.get("major") or "")]
+    if focus not in names:
+        raise HTTPException(status_code=400,
+                            detail=f"{focus} is not an Application Focus for your major.")
+    users_table.update_item(Key={"user_id": user_id}, UpdateExpression="SET focus = :f",
+                            ExpressionAttributeValues={":f": focus})
+    return {"status": "ok", "focus": focus}
 
 
 @router.delete("/me")

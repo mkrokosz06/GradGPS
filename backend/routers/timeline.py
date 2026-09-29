@@ -1828,7 +1828,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         requirement_rows.extend(req_resp.get("Items", []))
 
     taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
-    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes)
+    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes, user.get("focus"))
 
     # A published-plan template renders the timeline on its own (it uses the
     # transcript + gen-ed audit, not the major's requirement rows), so a major

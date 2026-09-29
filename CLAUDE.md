@@ -331,6 +331,23 @@ by the scraper (git history is scraper output + LA 83/283 + 6f6fea7 + Forensic C
 `SUBPLAN_PROGRAMS`). Verified: 300 of 307 fresh-student plans identical in length/credits (the 7 are the
 majors PSU changed); every real-user plan change was traced. Tests: `tests/test_plan_placeholders.py`.
 
+**Application Focus (Sept 2026).** Five majors require credits from ONE focus area the student picks —
+ETI (12), Data Sciences IST (12), HCDD (12), Cybersecurity A&O (9), IT Ethics (12). ETI, Cybersecurity and
+IT Ethics publish the areas as bulleted lists in the plan tab ("**Business Competency** Select 12 credits
+from the courses below: …") and word the requirement "must *complete* 12 credits from a single
+Application Focus" / "Focus Area: Select 12 credits", so the catalog had no focus requirement at all.
+`scrape_psu._focus_areas` reads both layouts (codes only from list entries, never an area's notes, which
+cite prerequisites; suffix twins like MKTG 301/301W merged so one course can't count twice) and emits one
+pool per area (`focus_area` = its name) plus an any-area pool (`focus_area = "*"`).
+`routers/audit._filter_rows(..., focus)` keeps the student's area, or the any-area pool until they pick.
+ETI Business Competency's Note 3 ("one of these satisfies a major requirement … may not double-count") is
+encoded as threshold 12 + the overlapping major pool's 3 = 15 — all five items. The student's choice lives
+on the users row (`focus`); `GET /programs/focus-areas?major=`, `PUT /users/me/focus` (validated against
+the major's areas; cleared when the major changes). Timeline `application_focus` slots search the chosen
+area (`routers/courses._focus_universe`). Mobile: `components/ApplicationFocusCard.tsx` on Account,
+`services/focusService.ts`. Data Sciences Science/Engineering publish no lists on their own pages — their
+focus requirement is still unrepresented.
+
 **Scraper** — `python scripts/scrape_sap.py` (`--dry-run`, `--check-catalog`, `--options`). Deterministic HTML parse of the CourseLeaf `table.sc_plangrid` (each `<td>` `header` attr encodes exact year/term), **not** an LLM extraction. Only templates that pass `validate_template()` are written — a bad scrape never goes live. Smeal-style mirrored multi-family cells — `(MATH 110 or MATH 140) or (SCM 200 or STAT 200)` repeated once per family across semesters — are split by `_narrow_family_slots()` into one `choose_one` per family (each occurrence keeps its first-listed/suggested family), so the timeline shows "MATH 110 or MATH 140" and "SCM 200 or STAT 200" as distinct slots and the matcher can't satisfy both from a single family. A one-off multi-family cell stays flat (genuine N-way choice).
 
 ### Minors & certificates (credentials)

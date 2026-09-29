@@ -241,6 +241,22 @@ def _user_program(user_id: str) -> str | None:
     return item.get("major")
 
 
+def _focus_universe(user_id: str) -> list[dict]:
+    """An Application Focus slot offers the student's chosen area's courses — or,
+    before they pick one, every area's — from the catalog's focus pools."""
+    from routers.programs import focus_areas
+    try:
+        item = (users_table.get_item(Key={"user_id": user_id}).get("Item")) or {}
+    except Exception:
+        return []
+    areas = focus_areas(item.get("major") or "")
+    chosen = [a for a in areas if a["name"] == item.get("focus")] or areas
+    codes = list(dict.fromkeys(c for a in chosen for c in a["courses"]))
+    bulletin = _bulletin_courses()
+    return [{"course_code": c, "course_title": (bulletin.get(c) or {}).get("title", ""),
+             "credits": (bulletin.get(c) or {}).get("credits") or 3} for c in codes]
+
+
 def _breadth_courses(program_name: str | None, area: str | None) -> list[dict]:
     """Business-breadth candidates in the picker's shape. With `area`, just that
     area's two-piece-sequence courses; else every breadth course available to the
@@ -495,7 +511,10 @@ def courses_for_slot(
     gen-ed union, which the domain chips avoid) returns `needs_query: true`.
     """
     program = _user_program(user_id) if slot_key.upper().startswith("POOL:BUSINESS_BREADTH") else None
-    universe = _resolve_slot_universe(slot_key, category, program)
+    if slot_key.upper().startswith("POOL:APPLICATION_FOCUS"):
+        universe = _focus_universe(user_id)
+    else:
+        universe = _resolve_slot_universe(slot_key, category, program)
     ql = (q or "").strip().lower()
 
     if not ql:

@@ -49,7 +49,8 @@ _OPTION_RE = _re.compile(r"\boption\b", _re.IGNORECASE)
 
 
 def _filter_rows(rows: list[dict], subplan: str | None,
-                 taken_codes: set[str] | None = None) -> list[dict]:
+                 taken_codes: set[str] | None = None,
+                 focus: str | None = None) -> list[dict]:
     """
     Filter requirement rows to only those relevant to the student's subplan.
 
@@ -67,8 +68,19 @@ def _filter_rows(rows: list[dict], subplan: str | None,
     """
     filtered = []
     subplan_lower = subplan.lower() if subplan else None
+    # Application Focus (ETI, Data Sciences, HCDD, Cybersecurity…): the catalog
+    # carries one pool per area (`focus_area` = its name) and an any-area pool
+    # ("*"). A student who picked an area is audited against that area alone; one
+    # who hasn't, against the any-area pool. A focus the catalog doesn't know
+    # (renamed, or another major's) falls back to the any-area pool.
+    known = {r.get("focus_area") for r in rows if r.get("focus_area") not in (None, "", "*")}
+    focus = focus if focus in known else None
 
     for row in rows:
+        fa = row.get("focus_area")
+        if fa:
+            if fa != (focus or "*"):
+                continue
         group = row.get("requirement_group", "")
         gl    = group.lower()
 
@@ -96,7 +108,7 @@ def _filter_rows(rows: list[dict], subplan: str | None,
 
     # Defensive fallback: if the subplan matched zero requirement groups
     if subplan_lower and not filtered:
-        return _filter_rows(rows, None, taken_codes)
+        return _filter_rows(rows, None, taken_codes, focus)
 
     # ── Auto-select best option when no subplan set ──────────────────────────
     # Programs with multiple named options (83+ programs like Biology, Integrative
@@ -191,7 +203,7 @@ def get_audit(
     # when the student hasn't explicitly chosen a subplan (prevents inflation
     # from 83+ multi-option programs counting the same courses multiple times).
     taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
-    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes)
+    requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes, user.get("focus"))
 
     # ── 5. Fetch gen ed requirements ──────────────────────────────────────────
     gen_ed_resp = requirements_table.query(

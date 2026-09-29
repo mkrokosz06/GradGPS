@@ -83,6 +83,8 @@ def build_items(rows: list[dict], id_base: int) -> list[dict]:
         pid = _num(row.get("pair_group_id"))
         if pid is not None:
             item["pair_group_id"] = pid + id_base
+        if str(row.get("focus_area") or "").strip():
+            item["focus_area"] = str(row["focus_area"]).strip()
         if str(row.get("min_grade") or "").strip():
             item["min_grade"] = str(row["min_grade"]).strip()
         branch = str(row.get("pair_branch_id") or "").strip()

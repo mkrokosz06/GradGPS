@@ -131,7 +131,7 @@ def _used_codes(user_id: str, courses: list[dict]) -> set[str]:
 
         rows = _query_program(major)
         taken_codes = {subs.norm_code(c.get("course_code", "")) for c in courses}
-        rows = _filter_rows(rows, profile.get("subplan"), taken_codes)
+        rows = _filter_rows(rows, profile.get("subplan"), taken_codes, profile.get("focus"))
         declared = subs.get_substitutions(user_id)
 
         results = [run_audit(rows, courses, declared)]

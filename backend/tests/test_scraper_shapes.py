@@ -142,6 +142,48 @@ def test_options_without_the_word_option_are_named_as_options():
     assert sum("Data Sciences Option" in g for g in kept) == 1
 
 
+# ── Application Focus areas ──────────────────────────────────────────────────
+
+def _areas(rows):
+    out = {}
+    for r in rows:
+        if r.get("focus_area"):
+            a = out.setdefault(r["focus_area"], {"thr": r["group_threshold"], "codes": set()})
+            a["codes"].add(r["course_code"])
+    return out
+
+
+def test_eti_focus_areas_come_from_the_plan_tab_lists():
+    areas = _areas(_scrape("eti"))
+    assert {"*", "Business Competency", "Cybersecurity", "Application Development"} <= set(areas)
+    biz = areas["Business Competency"]
+    assert {"BA 301", "FIN 301", "MKTG 301", "MGMT 301", "BLAW 243", "IB 303"} <= biz["codes"]
+    # The area's NOTES cite prerequisites — they are not members.
+    assert not {"ACCTG 211", "ECON 102", "BA 302"} & biz["codes"]
+    # A writing twin of a listed course is the same course to the audit.
+    assert "MKTG 301W" not in biz["codes"]
+
+
+def test_business_competency_may_not_double_count_with_the_major_pool():
+    # "One of these courses is required to be taken to satisfy major requirements
+    # … may not double-count": the focus needs the major pool's 3 credits on top.
+    assert _areas(_scrape("eti"))["Business Competency"]["thr"] == 15
+
+
+def test_every_listed_focus_program_gets_its_areas():
+    assert {"Economics", "Law and Policy"} <= set(_areas(_scrape("cybersecurity")))
+    assert _areas(_scrape("cybersecurity"))["Economics"]["thr"] == 9
+    assert "Security Risk Analysis" in _areas(_scrape("it_ethics"))     # "Focus Area: Select 12 credits"
+
+
+def test_the_audit_keeps_only_the_chosen_area():
+    rows = _scrape("eti")
+    tags = lambda focus: {r.get("focus_area") for r in _filter_rows(rows, None, set(), focus)} - {None}
+    assert tags(None) == {"*"}
+    assert tags("Business Competency") == {"Business Competency"}
+    assert tags("Not A Real Area") == {"*"}                        # unknown focus: any-area pool
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0
