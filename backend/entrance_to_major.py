@@ -157,6 +157,60 @@ def priority_codes(program_name: str) -> set[str]:
         return set()
     return {c.strip().upper() for g in spec.get("groups", []) for b in g for c in b}
 
+def _base(code: str) -> str:
+    return re.sub(r"[WHNMXY]$", "", (code or "").strip().upper()).strip()
+
+
+def slot_codes(slot: dict) -> set[str]:
+    """Every course a timeline slot could be — its dropdown options plus the
+    alternatives in an "A or B" label — with attribute suffixes stripped."""
+    codes = [o.get("course_code", "") for o in (slot.get("options") or [])]
+    codes += re.split(r"\s+or\s+", slot.get("course_code") or "", flags=re.I)
+    return {_base(c) for c in codes if _base(c)}
+
+
+# ── Major-only courses ───────────────────────────────────────────────────────
+#
+# Some courses can only be registered for once a student is IN the major. PSU
+# publishes no per-course list of those locks we may read (the bulletin carries
+# prerequisites, not enrollment restrictions, and public LionPATH disallows all
+# crawling), so this is a heuristic: a 300/400-level course in the major's own
+# department is locked — EXCEPT the gate courses, which exist precisely to be
+# taken before entrance (Smeal's gate includes FIN 301 for a Finance major).
+# Getting it wrong only schedules a course later than necessary, never earlier.
+
+# "FIN 408" or a pool placeholder's "FIN 4XX"; group 2 is the hundreds digit.
+_CODE_RE = re.compile(r"^([A-Z][A-Z&-]*) (\d)(?:\d\d|XX?)(?!\d)")  # _base() eats one X
+
+
+def major_depts(codes) -> set[str]:
+    """The major's own department(s): the subject prefix that dominates its
+    300/400-level requirements (FIN for Finance, ETI for ETI), plus any prefix
+    close behind it (a co-owned major). Too little signal returns nothing, and
+    nothing is then locked."""
+    counts: dict[str, int] = {}
+    for code in codes:
+        m = _CODE_RE.match(_base(code))
+        if m and int(m.group(2)) >= 3:
+            counts[m.group(1)] = counts.get(m.group(1), 0) + 1
+    if not counts:
+        return set()
+    top = max(counts.values())
+    if top < 3:
+        return set()
+    return {p for p, n in counts.items() if n >= top / 2}
+
+
+def is_major_locked(code: str, depts: set[str], gate_codes: set[str]) -> bool:
+    code = _base(code)
+    m = _CODE_RE.match(code)
+    if not m or m.group(1) not in depts or int(m.group(2)) < 3:
+        return False
+    # The catalog and the gate can spell a course one trailing letter apart
+    # (MATH 141G vs MATH 141) — the same allowance the timeline's gate badge makes.
+    return not any(code == g or code[:-1] == g or g[:-1] == code for g in gate_codes)
+
+
 def attach_slots(gate: dict | None, slots: list[dict]) -> dict | None:
     """Give each unmet gate group the timeline slot that can satisfy it.
 
@@ -181,15 +235,7 @@ def attach_slots(gate: dict | None, slots: list[dict]) -> dict | None:
     if not gate:
         return gate
 
-    def _base(code: str) -> str:
-        return re.sub(r"[WHNMXY]$", "", (code or "").strip().upper()).strip()
-
-    def _slot_codes(slot: dict) -> set[str]:
-        codes = [o.get("course_code", "") for o in (slot.get("options") or [])]
-        codes += re.split(r"\s+or\s+", slot.get("course_code") or "", flags=re.I)
-        return {_base(c) for c in codes if _base(c)}
-
-    usable = [(s, _slot_codes(s)) for s in slots if s.get("slot_key")]
+    usable = [(s, slot_codes(s)) for s in slots if s.get("slot_key")]
 
     for group in gate.get("groups", []):
         if group.get("status") == "done":

@@ -340,6 +340,94 @@ def test_remaining_courses_excludes_cleared_groups():
     assert "IST 220" in res["remaining_courses"]
 
 
+# ── Major-only courses wait for entrance ─────────────────────────────────────
+#
+# PSU's flow: the semester a student finishes their last gate course is when
+# they conditionally declare; major-only courses open the semester after.
+
+def _sem(term, *codes):
+    return {"term": term, "label": term, "status": "upcoming", "credits": 0.0,
+            "courses": [{"course_code": c, "credits_earned": 3.0,
+                         "is_pool": c.startswith("Elective"),
+                         "entrance_to_major": c == "FIN 301"} for c in codes]}
+
+
+def _gate(status="missing"):
+    return {"groups": [{"options": ["FIN 301"], "status": status,
+                        "branches": [{"codes": ["FIN 301"], "status": status}]}],
+            "semester_standing": None}
+
+
+def _hold(future, gate, past=0, open_codes=None):
+    from routers.timeline import _hold_for_entrance
+    return _hold_for_entrance(future, gate, {"FIN"}, past, open_codes)
+
+
+def _where(future):
+    return {c["course_code"]: s["term"] for s in future for c in s["courses"]}
+
+
+def test_locked_course_waits_for_semester_after_gate():
+    fut = [_sem("FA 2026", "FIN 301", "FIN 408", "GEOG 30"),
+           _sem("SP 2027", "Elective A", "Elective B")]
+    gate = _gate()
+    out = _where(_hold(fut, gate))
+    assert out["FIN 408"] == "SP 2027"
+    # Swapped with a placeholder, so the early semester keeps its load.
+    assert out["Elective A"] == "FA 2026"
+    assert gate["major_courses_from"] == "SP 2027"
+
+
+def test_gate_course_itself_is_never_locked():
+    # FIN 301 is 300-level Finance, but it exists to be taken before entrance.
+    fut = [_sem("FA 2026", "FIN 301"), _sem("SP 2027", "Elective A")]
+    assert _where(_hold(fut, _gate()))["FIN 301"] == "FA 2026"
+
+
+def test_gate_finished_on_transcript_locks_nothing():
+    fut = [_sem("FA 2026", "FIN 408"), _sem("SP 2027", "Elective A")]
+    for status in ("done", "in_progress"):
+        assert _where(_hold([dict(s, courses=list(s["courses"])) for s in fut],
+                            _gate(status)))["FIN 408"] == "FA 2026"
+
+
+def test_student_ahead_gets_major_courses_earlier():
+    # Gate done in semester 1 -> major courses may start in semester 2.
+    fut = [_sem("FA 2026", "FIN 301"), _sem("SP 2027", "FIN 408"),
+           _sem("FA 2027", "Elective A")]
+    assert _where(_hold(fut, _gate()))["FIN 408"] == "SP 2027"
+
+
+def test_semester_standing_can_push_entrance_later():
+    fut = [_sem("FA 2026", "FIN 301"), _sem("SP 2027", "FIN 408", "Elective A"),
+           _sem("FA 2027", "Elective B")]
+    gate = _gate()
+    gate["semester_standing"] = 3
+    assert _where(_hold(fut, gate))["FIN 408"] == "FA 2027"
+
+
+def test_course_psu_plan_offers_before_entrance_stays_put():
+    # Supply Chain's own plan puts SCM 301 beside FIN 301 — not major-only.
+    fut = [_sem("FA 2026", "FIN 301", "FIN 305"), _sem("SP 2027", "Elective A")]
+    out = _where(_hold(fut, _gate(), open_codes={"FIN 305"}))
+    assert out["FIN 305"] == "FA 2026"
+
+
+def test_no_room_adds_a_semester():
+    fut = [_sem("FA 2026", "FIN 301", "FIN 408"),
+           _sem("SP 2027", *[f"GEOG {n}" for n in range(1, 7)])]   # 18 cr, full
+    out = _hold(fut, _gate())
+    assert _where(out)["FIN 408"] == "FA 2027"
+
+
+def test_major_depts_takes_dominant_upper_level_prefix():
+    codes = ["FIN 301", "FIN 406", "FIN 408", "FIN 4XX", "BA 411", "MATH 110"]
+    assert etm.major_depts(codes) == {"FIN"}
+    assert etm.major_depts(["FIN 301"]) == set()          # too little signal
+    assert etm.is_major_locked("FIN 4XX - Finance Elective", {"FIN"}, set())
+    assert not etm.is_major_locked("FIN 100", {"FIN"}, set())
+
+
 if __name__ == "__main__":
     fns = [v for k, v in sorted(globals().items()) if k.startswith("test_")]
     failed = 0

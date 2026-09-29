@@ -1247,6 +1247,141 @@ def _apply_pins(future: list[dict], pins: dict[str, str]) -> list[dict]:
     return result
 
 
+def _plan_codes(requirement_rows: list[dict], template: dict | None) -> list[str]:
+    """Every course code the major names — catalog rows plus its SAP template, so
+    a templated major with thin catalog rows still has a department."""
+    codes = [r.get("course_code", "") for r in requirement_rows]
+    for sem in (template or {}).get("semesters", []):
+        for slot in sem.get("slots", []):
+            codes += [slot["code"]] if slot.get("code") else list(slot.get("codes") or [])
+    return codes
+
+
+def _template_open_codes(template: dict | None, gate_codes: set[str]) -> set[str]:
+    """Courses PSU's own plan schedules in or before its entrance semester (the
+    last one holding a gate course). PSU would not recommend a course a student
+    cannot yet register for, so these are open whatever their department —
+    Supply Chain's plan puts SCM 301 beside FIN 301, Advertising's puts COMM 320
+    in semester 2. The department heuristic is only a fallback beneath this."""
+    sems = (template or {}).get("semesters", [])
+    gate_codes = {entrance_to_major._base(c) for c in gate_codes}
+    codes_by_sem = [
+        {entrance_to_major._base(c) for slot in sem.get("slots", [])
+         for c in ([slot["code"]] if slot.get("code") else (slot.get("codes") or []))}
+        for sem in sems
+    ]
+    last = max((i for i, codes in enumerate(codes_by_sem) if codes & gate_codes), default=-1)
+    return set().union(*codes_by_sem[:last + 1]) if last >= 0 else set()
+
+
+def _is_placeholder(c: dict) -> bool:
+    """A pool / gen-ed / elective slot — safe to move earlier, unlike a named
+    course that may have prerequisites."""
+    return bool(c.get("is_pool") or c.get("gen_ed_categories"))
+
+
+def _hold_for_entrance(future: list[dict], gate: dict | None, depts: set[str],
+                       past_semesters: int, open_codes: set[str] | None = None) -> list[dict]:
+    """Keep major-only courses out of semesters before the student is in the major.
+
+    PSU's flow: the semester a student finishes their last Entrance to Major
+    course is the semester they conditionally declare, and major-only courses
+    open the semester AFTER. So the earliest a locked course may sit is the term
+    after the last unmet gate course in the plan — earlier for a student who is
+    ahead, later for one who is behind. A gate stating a minimum semester
+    standing ("third-semester classification") can push that later still.
+
+    A locked course found too early is swapped with a pool / gen-ed placeholder
+    from the first semester it may occupy, so credit balance holds and no named
+    course is pulled earlier than its prerequisites allow. Runs before pins: a
+    student who pins a course early is making a decision we honour.
+
+    Sets `gate["major_courses_from"]` to the first term locked courses may use.
+    """
+    if not gate or not gate.get("groups") or not depts or not future:
+        return future
+
+    gate_codes = {entrance_to_major._base(c)
+                  for g in gate["groups"] for c in g.get("options", [])}
+    # Never locked: the gate itself, plus whatever PSU's plan offers before entrance.
+    open_codes = gate_codes | (open_codes or set())
+
+    # Semester number of each future Fall/Spring term, continuing from the
+    # transcript. Summer terms are neither counted nor used.
+    regular = [s for s in future if not str(s.get("term", "")).startswith("SU")]
+    number = {s["term"]: past_semesters + i + 1 for i, s in enumerate(regular)}
+
+    # The semester the student declares: the last one holding a gate course they
+    # still need. A gate already finished (or finishing this term) declares now.
+    declare = past_semesters
+    for group in gate["groups"]:
+        if group.get("status") in ("done", "in_progress"):
+            continue
+        wanted = {entrance_to_major._base(c) for c in group.get("options", [])}
+        found = next((number[s["term"]] for s in regular
+                      if any(wanted & entrance_to_major.slot_codes(c) for c in s["courses"])),
+                     None)
+        if found:                           # a gate course the plan never schedules
+            declare = max(declare, found)   # (e.g. a gen-ed one) can't be placed
+    unlock = max(declare + 1, gate.get("semester_standing") or 0)
+
+    gate["major_courses_from"] = next(
+        (s["term"] for s in regular if number[s["term"]] == unlock), None)
+
+    early = [s for s in regular if number[s["term"]] < unlock]
+    late  = [s for s in regular if number[s["term"]] >= unlock]
+
+    def _locked(c: dict) -> bool:
+        if c.get("entrance_to_major"):
+            return False
+        codes = entrance_to_major.slot_codes(c)
+        # Every alternative must be locked — a slot offering one open option can
+        # be filled with it before entrance.
+        return bool(codes) and all(
+            entrance_to_major.is_major_locked(code, depts, open_codes) for code in codes)
+
+    held: list[tuple[dict, dict]] = []
+    for sem in early:
+        keep = []
+        for c in sem["courses"]:
+            if _locked(c):
+                c["held_for_entrance"] = True
+                held.append((c, sem))
+            else:
+                keep.append(c)
+        sem["courses"] = keep
+    if not held:
+        return future
+
+    for c, origin in held:
+        cr = float(c.get("credits_earned", 3) or 3)
+        placed = False
+        for sem in late:
+            filler = next((f for f in sem["courses"]
+                           if _is_placeholder(f) and not f.get("pinned")
+                           and not _locked(f)), None)
+            load = _semester_credits(sem["courses"])
+            if filler and load - float(filler.get("credits_earned", 3) or 3) + cr <= _MAX_CREDITS:
+                sem["courses"].remove(filler)
+                origin["courses"].append(filler)
+            elif load + cr > _MAX_CREDITS:
+                continue
+            sem["courses"].append(c)
+            placed = True
+            break
+        if not placed:
+            # Nowhere left in the plan: holding the course costs a semester.
+            term = _next_term(max((s["term"] for s in future), key=_term_key))
+            sem = {"term": term, "label": _term_label(term), "status": "upcoming",
+                   "credits": 0.0, "courses": [c]}
+            future.append(sem)
+            late.append(sem)
+
+    for sem in future:
+        sem["credits"] = _semester_credits(sem["courses"])
+    return [s for s in future if s["courses"]]
+
+
 @router.get("")
 def get_timeline(user_id: str = Depends(get_user_id)):
     # ── 1. User ──────────────────────────────────────────────────────────────
@@ -1475,6 +1610,14 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     gate = entrance_to_major.attach_slots(
         entrance_to_major.evaluate(major, transcript_courses, declared_subs),
         [c for term in future for c in term.get("courses", [])],
+    )
+
+    # Major-only courses wait until the semester after the gate is finished.
+    future = _hold_for_entrance(
+        future, gate,
+        entrance_to_major.major_depts(_plan_codes(requirement_rows, template)),
+        sum(1 for t in sorted_terms if t.split()[0] in ("FA", "SP")),
+        _template_open_codes(template, gate_codes),
     )
 
     semesters.extend(_apply_pins(future, pins))

@@ -580,13 +580,29 @@ to choose from.
 Gate courses also sort first on the Layer 1 path (`_sort_named(priority=…)`) and carry an
 `entrance_to_major` flag on both paths.
 
+**Major-only courses wait for entrance.** PSU's flow: the semester a student finishes their last gate
+course is when they *conditionally declare*; major-only courses open the **semester after**.
+`_hold_for_entrance()` (`routers/timeline.py`, runs on both paths before pins) finds the last planned
+term holding an unmet gate course and moves any locked course sitting at or before it into the next
+term, swapping a pool/gen-ed placeholder back so credits balance (a named course is never pulled
+earlier). A gate `semester_standing` can push entrance later; a gate already done/in-progress locks
+nothing. The response's gate carries `major_courses_from`; moved slots carry `held_for_entrance`.
+- **"Locked" is a heuristic** — no source publishes per-course major restrictions we may read (the
+  bulletin has prerequisites only; public LionPATH's `robots.txt` is `Disallow: /`). A course is locked
+  if it is 300/400-level (incl. `FIN 4XX` placeholders) in the major's dominant upper-level prefix
+  (`major_depts()`) and is **not** a gate course (Smeal's gate includes FIN 301).
+- **PSU's plan overrides the heuristic**: anything a SAP template schedules in or before its own entrance
+  semester is open (`_template_open_codes()` — SCM 301 sits beside FIN 301 in Supply Chain's plan). With
+  that, a fresh student in all 157 gated templated majors sees **zero** moves; it only bites for students
+  who are behind on the gate or ahead elsewhere. Being wrong schedules a course later, never earlier.
+
 **Mobile**: `components/EntranceToMajorCard.tsx`, a checklist on the Account page only — no
 onboarding step, no blocking. Choosing a course writes an ordinary `user_course_choices` row against
 the slot the timeline **already** emits for that requirement, which is what lets the pick flow into
 the plan without scheduling a second copy. The semester is optional; the default is "GradGPS
 decides". The card hides entirely once the gate is cleared with nothing left to confirm.
 
-Tests: `backend/tests/test_entrance_to_major.py` (30); the `tests/fixtures/etm_*.html` fixtures are
+Tests: `backend/tests/test_entrance_to_major.py` (38); the `tests/fixtures/etm_*.html` fixtures are
 real bulletin sections covering each shape.
 
 ### Course title & credits come from the bulletin, not the catalog
