@@ -1,0 +1,313 @@
+{
+  "program_name": "Cybersecurity Analytics and Operations, B.S. (Information Sciences and Technology)",
+  "subplan": "Cybersecurity Analytics",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 120.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/information-sciences-technology/cybersecurity-analytics-operations-bs/",
+  "source_plan": "Cybersecurity Analytics Option: Cybersecurity Analytics and Operations, B.S. at University Park Campus",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 140",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CYBER 100",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 26",
+            "MATH 41",
+            "MATH 110",
+            "MATH 140"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 220",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SRA 111",
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "course",
+          "code": "STAT 200",
+          "credits": 4.0,
+          "gen_ed": "GQ"
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "CAS 100A",
+            "CAS 100B"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 210",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ECON 102",
+            "ECON 104"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "PSYCH 100",
+            "SOC 5"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GS"
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SRA 231",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CYBER 221",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "GEOG 128",
+            "PLSC 1",
+            "PLSC 14"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CYBER 451",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SRA 365",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202C",
+            "ENGL 202D"
+          ],
+          "credits": 3.0,
+          "gen_ed": "GWS"
+        },
+        {
+          "type": "gen_ed",
+          "category": "GHW",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Course 1",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CYBER 342W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SRA 311",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CYBER 454",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Selection 2",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SU",
+      "credits": 1.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 495",
+          "credits": 1.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 16.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "IST 432",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "List B Course",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "application_focus",
+          "label": "Application Focus Course 3",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        },
+        {
+          "type": "elective",
+          "label": "Elective",
+          "credits": 4.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CYBER 440",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CYBER 456",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "List B Course",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 3.0
+        }
+      ]
+    }
+  ]
+}

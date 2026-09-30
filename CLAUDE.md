@@ -306,7 +306,7 @@ actionable; the timeline's dropdown rows and the home screen's pool row open the
 first was scraped and `load_template()` fell back to it for every option — a Social Studies teaching
 student got the Biology Teaching plan (278 wrong-option course slots across 134 major/option pairs;
 20 after). `scrape_sap.py --options` writes one subplan template per University Park option grid
-(**126**, across 46 majors), named with the catalog's option name — the value `/audit/subplans` offers and
+(**129**, across 47 majors), named with the catalog's option name — the value `/audit/subplans` offers and
 the profile stores. PSU words the two differently ("Biology Teaching" / "Biological Science Teaching",
 "Math" / "Mathematics 4-8"), so `match_option()` matches on word containment and refuses ties. A
 **reworded** match must also not be contradicted by the plan's courses: two witnesses vote — the page's
@@ -319,7 +319,11 @@ grid of its own when the program has option templates, instead of another option
 without option templates keeps the shared-plan fallback. A "General …" grid no one can select becomes
 the base (no-option) plan when the base is still an untouched first-grid scrape (Biology, Meteorology;
 Mathematics' base was hand-edited and left alone). Rejected on purpose: RN to BSN (a 90-credit
-completion degree). Tests: `tests/test_sap_options.py` (13).
+completion degree). **PSU adds option grids after we scrape** — Cybersecurity Analytics and
+Operations went from one shared grid to one per option, so an Operations student (Nate, Sept 30 2026)
+got the Analytics plan while his audit listed Operations courses; a fresh-cache re-run of the options
+build over every base template also found Secondary Education's new Mathematics Teaching grid. The
+scraper reads `scripts/.sap_cache`, so a stale cache hides such changes — re-fetch before trusting a sweep. Tests: `tests/test_sap_options.py` (13).
 
 **Placeholder slots + template refresh (Sept 2026).** A codeless grid cell the classifier didn't know
 ("400-Level HIST Course", "Option Course", "Application Focus Selection", "Chemical Engineering

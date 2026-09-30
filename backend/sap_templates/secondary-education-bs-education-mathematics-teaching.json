@@ -1,0 +1,296 @@
+{
+  "program_name": "Secondary Education, B.S. (Education)",
+  "subplan": "Mathematics Teaching",
+  "catalog_year": "2024",
+  "degree": "B.S.",
+  "total_credits": 128.0,
+  "source": "https://bulletins.psu.edu/undergraduate/colleges/education/secondary-education-bs/",
+  "source_plan": "Mathematics Teaching Option: Secondary Education, B.S. at University Park Campus and Commonwealth Campuses",
+  "scraped": true,
+  "semesters": [
+    {
+      "year": 1,
+      "term_season": "FA",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 15",
+            "ENGL 30H"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDUC 100",
+          "credits": 1.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 140",
+          "credits": 4.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Literature Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDPSY 14",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Arts Selection",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 1,
+      "term_season": "SP",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MATH 141",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 220",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "EDTHP 115",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Science Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CAS 100A",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "FA",
+      "credits": 17.5,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 230",
+            "MATH 231"
+          ],
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 311W",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Science Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "ENGL 202A",
+            "ENGL 202B"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 280",
+          "credits": 3.0
+        },
+        {
+          "type": "gen_ed",
+          "category": null,
+          "credits": 1.5
+        }
+      ]
+    },
+    {
+      "year": 2,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "HDFS 239",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 310",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 312",
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Science Selection",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 295",
+          "credits": 2.0
+        },
+        {
+          "type": "pool",
+          "ref": "major_selection",
+          "label": "Arts Selection",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "FA",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "choose_one",
+          "codes": [
+            "EDPSY 422",
+            "CI 492"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 414",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 435",
+            "MATH 470"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "MATH 436",
+            "MATH 441"
+          ],
+          "credits": 3.0
+        },
+        {
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MTHED",
+          "level": 400,
+          "label": "MTHED 400-Level Course",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 3,
+      "term_season": "SP",
+      "credits": 17.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "SPLED 400",
+          "credits": 4.0
+        },
+        {
+          "type": "course",
+          "code": "MTHED 411",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MTHED 427",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "MATH 471",
+          "credits": 4.0
+        },
+        {
+          "type": "pool",
+          "ref": "dept_level",
+          "dept": "MTHED",
+          "level": 400,
+          "label": "MTHED 400-Level Course",
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "FA",
+      "credits": 12.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "MTHED 412W",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "CI 495C",
+          "credits": 3.0
+        },
+        {
+          "type": "course",
+          "code": "SPLED 403B",
+          "credits": 3.0
+        },
+        {
+          "type": "choose_one",
+          "codes": [
+            "STAT 401",
+            "MATH 415"
+          ],
+          "credits": 3.0
+        }
+      ]
+    },
+    {
+      "year": 4,
+      "term_season": "SP",
+      "credits": 15.0,
+      "slots": [
+        {
+          "type": "course",
+          "code": "CI 495E",
+          "credits": 15.0
+        }
+      ]
+    }
+  ]
+}
