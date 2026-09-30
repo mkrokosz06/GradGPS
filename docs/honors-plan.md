@@ -137,6 +137,11 @@ Reviewed in prod Sept 29 2026 with `scripts/inspect_user_timeline.py`.
 
 This adds a Phase 3 data shape: **"thesis replaces electives"** per major (ME: 494H + 493 → ETE + GTE).
 
+**Resolved Sept 29 2026, confirmed by Jack.** Phase 1 shipped (`dc5f92e`) and his transcript was
+re-parsed (honors codes restored); the Schreyer declaration + ME thesis rule shipped in `bd6dc58`
+with the Account card over the air (EAS update `eaaf8151`). His plan: no ENGL 15 / CAS 100, ME 494H
+fills the thesis slot, ME 493 in SP 2028, one ETE + the GTE gone, graduation SP 2028.
+
 ## Appendix — per major
 
 "FYS slot" = the plan's year-1 seminar the timeline will schedule for a Scholar (138T covers it).

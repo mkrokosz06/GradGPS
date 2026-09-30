@@ -156,6 +156,7 @@ Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 | File | Purpose |
 |------|---------|
 | `components/NavHeader.tsx` | Top bar with hamburger side-menu. Routes use `router.navigate()`. |
+| `components/SchreyerHonorsCard.tsx` | Account-page Schreyer Scholar declaration (`services/honorsService.ts`) |
 | `context/AuthContext.tsx` | Auth state. Real path exchanges an OIDC token for a session (`signInWithIdToken`); a legacy dev `signIn(uid, name, email)` seeds the `x-user-id` model against `AUTH_DEV_BYPASS` backends. |
 | `services/api.ts` | Base axios instance (uses `API_BASE`) |
 | `services/*Service.ts` | Typed wrappers for each backend endpoint |
@@ -927,6 +928,10 @@ thesis for other majors.
   template). Each swap replaces the first slot with a given label, credits preserved overall.
   Only ME so far: ME 494H (5) + ME 493 (1) for one ETE + the GTE. Add a major only from a published
   department rule.
+- **Live in prod Sept 29 2026** (backend `dc5f92e` + `bd6dc58`, Account card via EAS update `eaaf8151`).
+  Prod transcripts were re-parsed the same day to restore `raw_code`/`is_honors` for 6 of 7 users with a
+  stored PDF (backup `backend/backups/honors_reparse_20260929_205315.json`); the 7th has manual class
+  edits a re-parse would wipe, so it picks the fields up on its next upload.
 - Tests: `backend/tests/test_honors.py` (22).
 
 ### Official vs unofficial transcripts
