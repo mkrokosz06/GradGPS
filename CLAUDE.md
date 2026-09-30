@@ -897,8 +897,9 @@ compares the running build to `latest_version` (dismissible "update available" b
   build-distribution bar (`/admin/stats` → `versions`).
 
 ### Honors (Schreyer) courses
-Phase 1 of `docs/honors-plan.md` (Sept 29 2026): stop penalizing honors coursework. Phases 2–3
-(Schreyer credit tracker, GPA, thesis, per-major thesis rules) are not built.
+Phase 1 of `docs/honors-plan.md` (Sept 29 2026): stop penalizing honors coursework. Plus the Schreyer
+declaration and the first per-major thesis rule (ME). Still not built: honors-credit tracker, GPA,
+thesis for other majors.
 - **RCL fills ENGL 15 / CAS 100 / the First-Year Seminar, one way.** ENGL/CAS 137H → ENGL 15,
   ENGL/CAS 138T → CAS 100 + every UP seminar code (`HONORS_FILLS`, `_FYS_CODES` in
   `audit_engine.py`). Applied in `_build_taken()` with `setdefault` after real courses, as a tagged
@@ -914,8 +915,19 @@ Phase 1 of `docs/honors-plan.md` (Sept 29 2026): stop penalizing honors coursewo
 - **Storage keeps `raw_code` + `is_honors`** (H/M/T/U suffix, `is_honors_code()`) on upload, manual
   add/swap and `reparse_stored_transcript.py` (which also now writes `credits`/`course_title` like the
   upload route). The timeline's past cards show `raw_code` when present. Existing rows need a reparse.
-- **Deliberately not done**: ENGL 202H for "ENGL 202C or 202D" (unverified whether majors accept it).
-- Tests: `backend/tests/test_honors.py` (15).
+- **ENGL 202H covers ENGL 202A–D** (product decision): a one-way fill, named-only like the seminar
+  fills so a pool listing 202C and 202D can't count one 202H twice; the plan matcher skips it
+  (`honors_fills(for_plan=True)`) because its section-letter rule already pairs `ENGL 202` with a 202C slot.
+- **Schreyer declaration** (`honors.py`): `honors = {program: "schreyer", entry: first_year |
+  second_year | third_year}` on the users row, set by `PUT /users/me/honors` (null program clears),
+  returned by `GET /users/me`. Absent = no-op. Mobile: `components/SchreyerHonorsCard.tsx` on Account,
+  `services/honorsService.ts`.
+- **Thesis in place of electives** — `honors.THESIS_RULES`, applied by `apply_thesis_rule()` right
+  after `load_template()` in the timeline (SAP path only; deep-copies, never mutates the cached
+  template). Each swap replaces the first slot with a given label, credits preserved overall.
+  Only ME so far: ME 494H (5) + ME 493 (1) for one ETE + the GTE. Add a major only from a published
+  department rule.
+- Tests: `backend/tests/test_honors.py` (22).
 
 ### Official vs unofficial transcripts
 Students sometimes upload their **official** transcript instead of the unofficial LionPATH one. Official transcripts have a different layout that the plain-text parser mangles (validated against a real signed sample: 13 partly-wrong courses, every term `Unknown`). Handling:

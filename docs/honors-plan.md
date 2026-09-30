@@ -1,6 +1,8 @@
 # Honors (Schreyer) support — findings and plan
 
-Status: **Phase 1 built** (Sept 29 2026, see CLAUDE.md "Honors (Schreyer) courses"); Phases 2–3 not started. Triggered by a new beta user, Jack Vantine,
+Status: **Phase 1 built**, plus ENGL 202H, the Schreyer declaration (Phase 2 item 1) and the ME thesis rule
+(first Phase 3 rule) — Sept 29 2026, see CLAUDE.md "Honors (Schreyer) courses". Remaining: credit tracker,
+GPA, thesis timeline for other majors, the 88 unmapped thesis courses. Triggered by a new beta user, Jack Vantine,
 a Schreyer Scholar. His own data is not reviewed yet (prod SSO had expired) — see the last section.
 
 ## What PSU requires of a Schreyer Scholar

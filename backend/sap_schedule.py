@@ -25,7 +25,7 @@ try:  # course renames / cross-listings (IST→ETI, etc.) so a taken course stil
 except Exception:  # pragma: no cover - audit engine always importable in practice
     _EQUIVALENCE_PAIRS = []
 
-    def honors_fills(code: str) -> tuple[str, ...]:
+    def honors_fills(code: str, for_plan: bool = False) -> tuple[str, ...]:
         return ()
 
 # Attribute suffixes PSU appends that don't change course identity for matching.
@@ -79,7 +79,7 @@ def _taken_tokens(code: str) -> set[str]:
     First-Year Seminar — audit_engine.HONORS_FILLS). Transcript side only; a
     template code is never expanded this way, so ENGL 15 can't fill an RCL slot."""
     out = _equivalents(code)
-    for target in honors_fills(code):
+    for target in honors_fills(code, for_plan=True):
         out |= _equivalents(target)
     return out
 

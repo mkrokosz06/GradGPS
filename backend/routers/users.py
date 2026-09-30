@@ -109,6 +109,8 @@ def get_me(
         # The student's Application Focus area, when their major has them. Absent
         # until they pick one; an older build ignores it.
         "focus": user.get("focus"),
+        # Schreyer Honors declaration ({program, entry}); absent for everyone else.
+        "honors": user.get("honors"),
     }
 
 
@@ -208,6 +210,34 @@ def set_my_focus(body: FocusBody, user_id: str = Depends(get_user_id)):
     users_table.update_item(Key={"user_id": user_id}, UpdateExpression="SET focus = :f",
                             ExpressionAttributeValues={":f": focus})
     return {"status": "ok", "focus": focus}
+
+
+class HonorsBody(BaseModel):
+    program: str | None = None     # "schreyer", or null to clear
+    entry: str | None = None       # admit year: first_year / second_year / third_year
+
+
+@router.put("/me/honors")
+def set_my_honors(body: HonorsBody, user_id: str = Depends(get_user_id)):
+    """Declare (or clear, with a null program) the caller a Schreyer Scholar. It is
+    the student's own declaration, like a minor: the plan then swaps in their
+    major's honors thesis where the department lets it replace electives."""
+    from honors import SCHREYER, SCHREYER_ENTRIES
+    user = users_table.get_item(Key={"user_id": user_id}).get("Item")
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+    if not body.program:
+        users_table.update_item(Key={"user_id": user_id}, UpdateExpression="REMOVE honors")
+        return {"status": "ok", "honors": None}
+    if body.program != SCHREYER:
+        raise HTTPException(status_code=400, detail="Unknown honors program.")
+    entry = body.entry or "first_year"
+    if entry not in SCHREYER_ENTRIES:
+        raise HTTPException(status_code=400, detail="Unknown Schreyer entry year.")
+    honors = {"program": SCHREYER, "entry": entry}
+    users_table.update_item(Key={"user_id": user_id}, UpdateExpression="SET honors = :h",
+                            ExpressionAttributeValues={":h": honors})
+    return {"status": "ok", "honors": honors}
 
 
 @router.delete("/me")

@@ -192,6 +192,114 @@ def test_sap_rcl_is_not_also_a_free_elective():
     assert recs[1]["satisfied"] is False
 
 
+# ── ENGL 202H ────────────────────────────────────────────────────────────────
+
+def test_engl_202h_covers_the_202_a_through_d_a_major_names():
+    rows = [_req("ENGL 202C", gtype="choose_one", pair_group_id=3),
+            _req("ENGL 202D", gtype="choose_one", pair_group_id=3)]
+    assert run_audit(rows, [_tx("ENGL 202H")])["missing"] == 0
+    # one way: a 202C doesn't satisfy a 202H requirement
+    assert run_audit([_req("ENGL 202H")], [_tx("ENGL 202C")])["missing"] == 1
+
+
+def test_engl_202h_counts_once_in_a_pool():
+    rows = [_req(c, "GWS", "choose_courses", group_threshold=2)
+            for c in ("ENGL 202A", "ENGL 202B", "ENGL 202C", "ENGL 202D", "ENGL 202H")]
+    result = run_gen_ed_audit(rows, [_tx("ENGL 202H")])
+    assert _group(result, "GWS")["satisfied"] is False   # one course, not five
+
+
+def test_plan_matches_engl_202h_to_one_slot_only():
+    tpl = _template({"type": "course", "code": "ENGL 202C", "credits": 3},
+                    {"type": "course", "code": "ENGL 202D", "credits": 3})
+    tx = [_tx("ENGL 202H")]
+    recs = match_template(tpl, build_taken_set(tx), {}, transcript_courses=tx, used_codes=set())
+    assert [r["satisfied"] for r in recs] == [True, False]
+
+
+# ── Schreyer declaration + thesis rule ───────────────────────────────────────
+
+ME = "Mechanical Engineering, B.S. (Engineering)"
+SCHOLAR = {"honors": {"program": "schreyer", "entry": "first_year"}}
+
+
+def _me_template():
+    return {"program_name": ME, "total_credits": 12, "semesters": [
+        {"year": 4, "term_season": "FA", "credits": 6, "slots": [
+            {"type": "pool", "ref": "major_selection", "label": "Engineering Technical Elective (ETE)", "credits": 3.0},
+            {"type": "pool", "ref": "major_selection", "label": "Mechanical Engineering Technical Elective (METE)", "credits": 3.0}]},
+        {"year": 4, "term_season": "SP", "credits": 6, "slots": [
+            {"type": "pool", "ref": "major_selection", "label": "General Technical Elective (GTE)", "credits": 3.0},
+            {"type": "pool", "ref": "major_selection", "label": "Engineering Technical Elective (ETE)", "credits": 3.0}]},
+    ]}
+
+
+def test_me_thesis_replaces_one_ete_and_the_gte_for_a_scholar():
+    from honors import apply_thesis_rule
+    tpl = _me_template()
+    out = apply_thesis_rule(tpl, SCHOLAR)
+    codes = [s.get("code") or s.get("label") for sem in out["semesters"] for s in sem["slots"]]
+    assert codes == ["ME 494H", "Mechanical Engineering Technical Elective (METE)",
+                     "ME 493", "Engineering Technical Elective (ETE)"]
+    total = lambda t: sum(s["credits"] for sem in t["semesters"] for s in sem["slots"])
+    assert total(out) == total(tpl) == 12
+    # the shared template object is never mutated
+    assert tpl["semesters"][0]["slots"][0]["label"] == "Engineering Technical Elective (ETE)"
+
+
+def test_thesis_rule_is_a_no_op_without_the_declaration_or_a_rule():
+    from honors import apply_thesis_rule
+    tpl = _me_template()
+    assert apply_thesis_rule(tpl, {}) is tpl
+    assert apply_thesis_rule(tpl, {"honors": {"program": "other"}}) is tpl
+    other = {**tpl, "program_name": "Accounting, B.S. (Business)"}
+    assert apply_thesis_rule(other, SCHOLAR) is other
+
+
+def test_in_progress_thesis_fills_the_swapped_slot():
+    """Jack: ME 494H in progress (stored 'ME 494') satisfies the thesis slot."""
+    from honors import apply_thesis_rule
+    tpl = apply_thesis_rule(_me_template(), SCHOLAR)
+    tx = [_tx("ME 494H", status="in_progress")]
+    recs = match_template(tpl, build_taken_set(tx), {}, transcript_courses=tx, used_codes=set())
+    assert recs[0]["satisfied"] is True
+
+
+class _FakeUsers:
+    def __init__(self, item):
+        self.item = item
+
+    def get_item(self, Key):
+        return {"Item": self.item} if self.item else {}
+
+    def update_item(self, Key, UpdateExpression, ExpressionAttributeValues=None):
+        if UpdateExpression.startswith("REMOVE"):
+            self.item.pop(UpdateExpression.split()[1], None)
+        else:
+            self.item["honors"] = ExpressionAttributeValues[":h"]
+
+
+def test_set_honors_endpoint():
+    from fastapi import HTTPException
+    from routers import users
+    real = users.users_table
+    users.users_table = fake = _FakeUsers({"user_id": "u1", "major": ME})
+    try:
+        out = users.set_my_honors(users.HonorsBody(program="schreyer", entry="second_year"), "u1")
+        assert out["honors"] == fake.item["honors"] == {"program": "schreyer", "entry": "second_year"}
+        assert users.set_my_honors(users.HonorsBody(program="schreyer"), "u1")["honors"]["entry"] == "first_year"
+        for bad in (users.HonorsBody(program="paterno"), users.HonorsBody(program="schreyer", entry="x")):
+            try:
+                users.set_my_honors(bad, "u1")
+                assert False, "should refuse"
+            except HTTPException as e:
+                assert e.status_code == 400
+        assert users.set_my_honors(users.HonorsBody(program=None), "u1")["honors"] is None
+        assert "honors" not in fake.item
+    finally:
+        users.users_table = real
+
+
 if __name__ == "__main__":
     import inspect
     fns = [f for n, f in inspect.getmembers(sys.modules[__name__], inspect.isfunction)

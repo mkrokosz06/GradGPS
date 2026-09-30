@@ -965,18 +965,30 @@ _FYS_CODES = tuple(sorted(set(_FIRST_YEAR_SEMINARS) | {
     "LHR 83S", "MUSIC 129S", "NUTR 123S", "PLANT 150S", "PLSC 83S", "PSYCH 83S",
     "RPTM 100S", "THEA 1S", "WFS 150S",
 }))
+# ENGL 202H "Writing for Honors" is the honors ENGL 202: it covers any of the
+# 202A-D a major names (product decision, Sept 29 2026). There is no plain
+# 'ENGL 202', so the stored form of 202H is unambiguous. Named-only like the
+# seminar fills: a pool listing 202C and 202D must not count one 202H twice.
+_ENGL_202 = ("ENGL 202A", "ENGL 202B", "ENGL 202C", "ENGL 202D")
 # Keyed on the storage form (137H is stored as '... 137'; 138T keeps its T).
 HONORS_FILLS: dict[str, tuple[str, ...]] = {
     "ENGL 137":  _RCL_WRITING,
     "CAS 137":   _RCL_WRITING,
+    "ENGL 202":  _ENGL_202,
     "ENGL 138T": _RCL_SPEECH + _FYS_CODES,
     "CAS 138T":  _RCL_SPEECH + _FYS_CODES,
 }
 
 
-def honors_fills(code: str) -> tuple[str, ...]:
-    """Requirement codes a transcript course fills one-way (see HONORS_FILLS)."""
-    return HONORS_FILLS.get(_strip_attr(code), ())
+def honors_fills(code: str, for_plan: bool = False) -> tuple[str, ...]:
+    """Requirement codes a transcript course fills one-way (see HONORS_FILLS).
+    `for_plan` drops the 202A-D fills: the plan matcher already pairs 'ENGL 202'
+    with a 202C slot through its section-letter rule, and four extra tokens would
+    let one 202H satisfy a 202C slot and a 202D slot both."""
+    fills = HONORS_FILLS.get(_strip_attr(code), ())
+    if for_plan:
+        fills = tuple(t for t in fills if t not in _ENGL_202)
+    return fills
 
 
 def _build_taken(transcript_courses: list[dict], substitutions: dict | None = None) -> dict:
@@ -1017,11 +1029,12 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
             continue
         for target in honors_fills(code):
             fill = {**entry, "_fill_of": code}
-            if target in _FYS_CODES:
+            if target in _FYS_CODES or target in _ENGL_202:
                 # Many seminars also carry a gen-ed attribute (GER 83 is GH/IL/US,
                 # KINES 123S is GHW). RCL II fills the *seminar requirement*, not
                 # the seminar's gen-ed credits, so a seminar fill is hidden from
-                # credit pools (_pool_taken).
+                # credit pools (_pool_taken). Same for 202H's four 202A-D fills,
+                # which a pool would otherwise count as four courses.
                 fill["_fill_named_only"] = True
             taken.setdefault(target, fill)
 

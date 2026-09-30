@@ -17,6 +17,7 @@ from audit_engine import run_audit, run_gen_ed_audit
 from routers.audit import _filter_rows
 from deps import get_user_id
 from plan_templates import load_template
+from honors import apply_thesis_rule
 from sap_schedule import (build_taken_set, build_gen_ed_satisfied,
                           build_used_codes, build_satisfied_req_codes, build_major_pool_codes,
                           build_gen_ed_courses, build_gen_ed_open, match_template)
@@ -1840,6 +1841,9 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # with a template but thin/empty catalog requirements must NOT 404 — only a
     # major with neither is a real dead end.
     template = load_template(major, subplan)
+    # A declared Schreyer Scholar's thesis stands in for the electives their
+    # department lets it replace (ME: 494H + 493 for an ETE + a GTE).
+    template = apply_thesis_rule(template, user)
     if not requirement_rows and not template:
         raise HTTPException(
             status_code=404,

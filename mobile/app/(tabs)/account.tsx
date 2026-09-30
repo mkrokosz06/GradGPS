@@ -11,6 +11,7 @@ import { CredentialPickerModal } from "../../components/CredentialPickerModal";
 import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
 import { EntranceToMajorCard } from "../../components/EntranceToMajorCard";
 import { ApplicationFocusCard } from "../../components/ApplicationFocusCard";
+import { SchreyerHonorsCard } from "../../components/SchreyerHonorsCard";
 import {
   getTimeline, getCachedTimeline, type TimelineData,
 } from "../../services/timelineService";
@@ -220,6 +221,9 @@ export default function AccountScreen() {
         {audit?.major && (
           <ApplicationFocusCard userId={userId!} major={audit.major} onChanged={refresh} />
         )}
+
+        {/* Schreyer Honors — the student's own declaration (any major) */}
+        {audit && <SchreyerHonorsCard userId={userId!} onChanged={refresh} />}
 
         {/* Minors & certificates — declared here, never during onboarding */}
         {audit && (
