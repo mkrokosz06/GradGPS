@@ -1775,6 +1775,83 @@ def _chosen_first(future: list[dict], done: set[str],
     return future
 
 
+def _mark_movable_terms(future: list[dict], done: set[str],
+                        tsem: dict[str, int] | None = None,
+                        locked=None, unlock_term: str | None = None) -> None:
+    """Give every upcoming slot `movable_terms`: the Fall/Spring terms (plus one
+    past the plan's end) the student may pin it to without breaking the plan.
+
+    A term is allowed when each of the course's prerequisites is done or planned
+    in an earlier term (a corequisite: no later), when no course planned later
+    that needs it would then come first, and — for a major-only course — when the
+    term is not before the student can be in the major. Slots offering
+    alternatives take the loosest of them. Placeholders may go anywhere. Its own
+    term is always allowed. Summer terms are never offered: a summer term in the
+    plan is there for a reason (an internship)."""
+    regular = [s["term"] for s in future if not s["term"].startswith("SU")]
+    if not regular:
+        return
+    options = regular + [_next_term(max(regular, key=_term_key))]
+    placed = [(c, s["term"]) for s in future for c in s["courses"]]
+    where: dict[str, list[str]] = defaultdict(list)
+    for c, term in placed:
+        for code in _slot_codes(c):
+            where[code].append(term)
+    k = _term_key
+
+    def _clause_ok(alts, strict: bool, t: str, skip: dict) -> bool:
+        if alts & done:
+            return True
+        return any((k(p) < k(t)) if strict else (k(p) <= k(t))
+                   for a in alts for p in where.get(a, []) if not (a in skip))
+
+    for c, term in placed:
+        if not c.get("slot_key"):
+            continue
+        codes = _slot_codes(c)
+        if not codes:
+            c["movable_terms"] = list(options)
+            continue
+        own = {code: True for code in codes}
+
+        def _fits(t: str) -> bool:
+            if locked and unlock_term and locked(c) and k(t) < k(unlock_term):
+                return False
+            # Its own prerequisites — any one alternative of the slot may qualify.
+            if not any(all(_clause_ok(alts, st, t, own)
+                           for alts, st in _needs(code, done, tsem)
+                           if alts & set(where) or alts & done)
+                       for code in codes):
+                return False
+            # Courses that need it: moving it must not strand one of them. A slot
+            # offering alternatives is stranded only if every alternative is.
+            for d, td in placed:
+                if d is c:
+                    continue
+
+                def _viable(dcode: str, at: str) -> bool:
+                    # Every requisite of `dcode` met, with this slot's courses at `at`.
+                    for alts, st in _needs(dcode, done, tsem):
+                        if alts & done or not (alts & (set(where) | codes)):
+                            continue
+                        spots = [at if a in codes else p
+                                 for a in alts for p in ([at] if a in codes else where.get(a, []))]
+                        if not any((k(p) < k(td)) if st else (k(p) <= k(td)) for p in spots):
+                            return False
+                    return True
+
+                dcodes = _slot_codes(d)
+                if (dcodes and any(_viable(x, term) for x in dcodes)
+                        and not any(_viable(x, t) for x in dcodes)):
+                    return False
+            return True
+
+        if _is_internship(c):
+            c["movable_terms"] = [term]
+            continue
+        c["movable_terms"] = [t for t in options if t == term or _fits(t)]
+
+
 def _relieve_overload(future: list[dict]) -> list[dict]:
     """Move pool / gen-ed placeholders out of a term above the target load into
     the lightest LATER Fall/Spring term that stays within it. The entrance hold
@@ -2043,12 +2120,12 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     )
 
     # Major-only courses wait until the semester after the gate is finished.
+    depts = entrance_to_major.major_depts(_plan_codes(requirement_rows, template))
+    open_codes = _template_open_codes(template, gate_codes)
     future = _hold_for_entrance(
-        future, gate,
-        entrance_to_major.major_depts(_plan_codes(requirement_rows, template)),
+        future, gate, depts,
         sum(1 for t in sorted_terms if t.split()[0] in ("FA", "SP")),
-        _template_open_codes(template, gate_codes),
-        done_codes, tsem,
+        open_codes, done_codes, tsem,
     )
 
     # Last word on order: nothing before a prerequisite or apart from a corequisite
@@ -2060,7 +2137,22 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         future = _relieve_overload(future)
     future = _chosen_first(future, done_codes, tsem)
 
-    semesters.extend(_apply_pins(future, pins))
+    future = _apply_pins(future, pins)
+
+    # Where each course may be moved (the class selector's semester chips).
+    gate_open = {entrance_to_major._base(c) for g in (gate or {}).get("groups", [])
+                 for c in g.get("options", [])} | (open_codes or set())
+
+    def _locked(c: dict) -> bool:
+        if c.get("entrance_to_major"):
+            return False
+        codes = entrance_to_major.slot_codes(c)
+        return bool(codes) and all(entrance_to_major.is_major_locked(x, depts, gate_open)
+                                   for x in codes)
+
+    _mark_movable_terms(future, done_codes, tsem, _locked,
+                        (gate or {}).get("major_courses_from"))
+    semesters.extend(future)
 
     # Recommended courses often come from major rows with no title — fill from the
     # cross-program catalog so Home/Timeline show names next to the codes.

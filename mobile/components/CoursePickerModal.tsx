@@ -11,9 +11,17 @@ import { useAuth } from "../context/AuthContext";
 const WIN_H  = Dimensions.get("window").height;
 const LIST_H = Math.round(WIN_H * 0.42);   // tall, scrollable results area
 
+const SEASON: Record<string, string> = { FA: "Fall", SP: "Spring", SU: "Summer" };
+/** "FA 2027" -> "Fall 2027". */
+function termLabel_(t: string): string {
+  const [s, y] = t.split(" ");
+  return SEASON[s] ? `${SEASON[s]} ${y}` : t;
+}
+
 /**
  * Class selector — long-press (or tap the affordance on) a suggested course to
- * lock in which course fills the slot and/or which semester it lands in.
+ * lock in which course fills the slot and/or which semester it lands in — its
+ * own, or any term the server says it can move to without breaking a prerequisite.
  * Course swaps are offered only when the slot carries bounded `options`
  * (choose-one pairs, anchored pools); pinning works for any slot with a slot_key.
  */
@@ -45,7 +53,7 @@ export function CoursePickerModal({
   const isBreadth = course?.pool_ref === "business_breadth";
   const useChips = isGenEd || isBreadth;   // pick a category/area chip, then a course
   const [selected, setSelected] = useState<string | null>(null);
-  const [pinned, setPinned]     = useState(false);
+  const [pinTerm, setPinTerm]   = useState<string | null>(null);   // null = GradGPS places it
   const [query, setQuery]       = useState("");
   const [results, setResults]   = useState<SlotCourse[]>([]);
   const [searching, setSearching] = useState(false);
@@ -60,7 +68,7 @@ export function CoursePickerModal({
   useEffect(() => {
     if (!visible || !course) return;
     setSelected(course.chosen_code ?? null);
-    setPinned(!!course.pinned);
+    setPinTerm(course.pinned ? term : null);
     setQuery("");
     setResults([]);
     setNeedsQuery(false);
@@ -164,7 +172,7 @@ export function CoursePickerModal({
   function save() {
     const payload: ChoicePayload = { slot_key: slotKey, slot_kind: slotKind };
     if (selected) payload.chosen_course = selected;
-    if (pinned)   payload.pinned_term   = term;
+    if (pinTerm)  payload.pinned_term   = pinTerm;
     if (!payload.chosen_course && !payload.pinned_term) {
       onClear(slotKey);          // nothing selected — same as letting GradGPS decide
     } else {
@@ -306,18 +314,37 @@ export function CoursePickerModal({
             </View>
           )}
 
-          {/* Pin toggle */}
-          <TouchableOpacity
-            style={[styles.pinRow, pinned && styles.pinRowActive]}
-            activeOpacity={0.7}
-            onPress={() => setPinned(p => !p)}
+          {/* Semester — lock it where it is, or move it to any term it can
+              legally sit in (the server's movable_terms). */}
+          <Text style={styles.sectionLabel}>SEMESTER</Text>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ gap: 6, paddingBottom: 6 }}
           >
-            <Text style={[styles.pinGlyph, pinned && styles.pinGlyphActive]}>📌</Text>
-            <Text style={[styles.pinText, pinned && styles.pinTextActive]}>
-              {pinned ? `Locked to ${termLabel}` : `Lock to ${termLabel}`}
-            </Text>
-            <Text style={[styles.pinCheck, pinned && styles.pinCheckActive]}>{pinned ? "✓" : ""}</Text>
-          </TouchableOpacity>
+            {(course.movable_terms?.length ? course.movable_terms : [term]).map((t) => {
+              const on = t === pinTerm;
+              return (
+                <TouchableOpacity
+                  key={t}
+                  onPress={() => setPinTerm(on ? null : t)}
+                  activeOpacity={0.7}
+                  style={[styles.chip, on && styles.chipOn]}
+                >
+                  <Text style={[styles.chipText, on && styles.chipTextOn]}>
+                    {on ? "📌 " : ""}{termLabel_(t)}{t === term ? " · now" : ""}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+          <Text style={styles.pinCaption}>
+            {!pinTerm
+              ? "GradGPS places this. Tap a semester to lock it there."
+              : pinTerm === term
+              ? `Locked to ${termLabel}.`
+              : `Moves to ${termLabel_(pinTerm)} and stays there.`}
+          </Text>
           {course.pin_moved ? (
             <Text style={styles.note}>
               Your pinned term had already passed, so this moved to the earliest upcoming semester.
@@ -422,18 +449,11 @@ const styles = StyleSheet.create({
   selectedNote: { fontSize: 12, color: "#64748b", marginTop: 2 },
   selectedCode: { color: "#1a3a6b", fontWeight: "700" },
 
-  pinRow: {
-    flexDirection: "row", alignItems: "center",
-    paddingVertical: 12, paddingHorizontal: 12,
-    borderRadius: 12, borderWidth: 1, borderColor: "#e2e8f0", marginTop: 4, marginBottom: 4,
+  sectionLabel: {
+    fontSize: 11, fontWeight: "700", color: "#94a3b8", letterSpacing: 0.8,
+    marginTop: 8, marginBottom: 8,
   },
-  pinRowActive:  { borderColor: "#1a3a6b", backgroundColor: "#eff4fb" },
-  pinGlyph:      { fontSize: 15, marginRight: 10, opacity: 0.4 },
-  pinGlyphActive:{ opacity: 1 },
-  pinText:       { flex: 1, fontSize: 14, fontWeight: "600", color: "#64748b" },
-  pinTextActive: { color: "#1a3a6b" },
-  pinCheck:      { fontSize: 14, fontWeight: "800", color: "transparent" },
-  pinCheckActive:{ color: "#1a3a6b" },
+  pinCaption: { fontSize: 12, color: "#64748b", marginBottom: 4, lineHeight: 17 },
 
   note: { fontSize: 11, color: "#b45309", marginTop: 6, marginBottom: 2, lineHeight: 16 },
 

@@ -33,6 +33,9 @@ export type TimelineCourse = {
   chosen_code?:         string | null;
   pinned?:              boolean;
   pin_moved?:           boolean;
+  /** Terms this slot may be pinned to without breaking a prerequisite or the
+   *  Entrance to Major hold (always includes its own). Absent on older servers. */
+  movable_terms?:       string[];
   searchable?:          boolean;
   // Set when the slot comes from a declared minor / certificate rather than the
   // major, so the card can say which one put it in the plan.

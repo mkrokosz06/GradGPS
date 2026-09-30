@@ -264,6 +264,15 @@ one with gaps; after the fix, **0** real ones remain. The only hits the checker 
 
 Tests: `backend/tests/test_prereq_order.py` (17, pytest or plain `python`).
 
+**Moving a course to another semester (Sept 30 2026).** Pins used to lock a course only to the term
+it was already in. Each upcoming slot now carries `movable_terms` (`_mark_movable_terms()`, after
+`_apply_pins`): the Fall/Spring terms, plus one past the plan's end, where it can sit with its
+prerequisites earlier, nothing planned later left without it (a choose-one slot only counts if *every*
+alternative would be), and a major-only course not before `major_courses_from`. Placeholders may go
+anywhere; an internship keeps its summer. The class selector shows these as semester chips, and a chip
+sends `pinned_term`, which `_apply_pins` already honours. An older server sends no field, so the app
+shows the one current term, the old "Lock to" behaviour. Tests: `tests/test_movable_terms.py` (4).
+
 ### Suggested Academic Plans (SAP hybrid)
 For University Park majors with a published PSU bulletin plan, the timeline reflows the student's real state against the official, prerequisite-sequenced, credit-balanced plan instead of packing from scratch. Design doc: `docs/timeline-sap-hybrid.md`.
 
