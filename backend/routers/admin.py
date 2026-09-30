@@ -148,6 +148,7 @@ def get_users():
             "transcript_s3_key":    u.get("transcript_s3_key", ""),
             "app_version":          u.get("app_version", ""),
             "last_seen":            u.get("last_seen", ""),
+            "created_at":           u.get("created_at", ""),
         })
     result.sort(key=lambda x: x["transcript_parsed_at"] or "", reverse=True)
     return {"users": result, "count": len(result)}

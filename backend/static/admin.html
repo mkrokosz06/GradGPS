@@ -340,6 +340,23 @@
   <div class="panel-header">
     <strong>All Users</strong>
     <span class="count-badge" id="users-count">—</span>
+    <input type="text" id="users-search" placeholder="Search name, ID, major…" oninput="renderUsers()" />
+    <select id="users-sort" onchange="renderUsers()">
+      <option value="created_at">Newest signups</option>
+      <option value="last_seen">Recently active</option>
+      <option value="transcript_parsed_at">Latest transcript upload</option>
+      <option value="name">Name (A–Z)</option>
+      <option value="major">Major (A–Z)</option>
+      <option value="app_version">App version (newest)</option>
+    </select>
+    <select id="users-status" onchange="renderUsers()">
+      <option value="">All users</option>
+      <option value="uploaded">Transcript uploaded</option>
+      <option value="none">No transcript</option>
+    </select>
+    <select id="users-version" onchange="renderUsers()">
+      <option value="">All versions</option>
+    </select>
   </div>
   <div class="table-wrap">
     <table>
@@ -349,6 +366,7 @@
           <th>Name</th>
           <th>Major</th>
           <th>Subplan</th>
+          <th>Joined</th>
           <th>App Version</th>
           <th>Last Seen</th>
           <th>Transcript Uploaded</th>
@@ -356,7 +374,7 @@
         </tr>
       </thead>
       <tbody id="users-tbody">
-        <tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+        <tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
       </tbody>
     </table>
   </div>
@@ -576,22 +594,75 @@
   }
 
   // ── Users ────────────────────────────────────────────────────
+  let _usersData = [];
+
+  // "1.10.0" > "1.9.2" — compare numerically, part by part.
+  function cmpVersion(a, b) {
+    const pa = String(a).split('.').map(Number), pb = String(b).split('.').map(Number);
+    for (let i = 0; i < Math.max(pa.length, pb.length); i++) {
+      const d = (pa[i] || 0) - (pb[i] || 0);
+      if (d) return d;
+    }
+    return 0;
+  }
+
   async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="8"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
     try {
       const d = await get('/admin/users');
-      document.getElementById('users-count').textContent = d.count + ' users';
-      if (!d.users.length) {
-        tbody.innerHTML = '<tr><td colspan="8"><div class="empty">No signups yet</div></td></tr>';
-        return;
-      }
-      tbody.innerHTML = d.users.map(u => `
+      _usersData = d.users;
+      const sel = document.getElementById('users-version');
+      const cur = sel.value;
+      const versions = [...new Set(d.users.map(u => u.app_version).filter(Boolean))].sort(cmpVersion).reverse();
+      sel.innerHTML = '<option value="">All versions</option>' +
+        versions.map(v => `<option value="${esc(v)}">${esc(v)}</option>`).join('') +
+        '<option value="__none__">Unknown version</option>';
+      sel.value = cur;
+      renderUsers();
+    } catch(e) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty">Error: ${e.message}</div></td></tr>`;
+    }
+  }
+
+  function renderUsers() {
+    const tbody = document.getElementById('users-tbody');
+    const q = document.getElementById('users-search').value.trim().toLowerCase();
+    const sortBy = document.getElementById('users-sort').value;
+    const status = document.getElementById('users-status').value;
+    const version = document.getElementById('users-version').value;
+
+    let rows = _usersData.filter(u => {
+      if (status === 'uploaded' && !u.transcript_parsed_at) return false;
+      if (status === 'none' && u.transcript_parsed_at) return false;
+      if (version === '__none__' && u.app_version) return false;
+      if (version && version !== '__none__' && u.app_version !== version) return false;
+      if (q && ![u.user_id, u.name, u.major, u.subplan].some(f => (f || '').toLowerCase().includes(q))) return false;
+      return true;
+    });
+
+    // Empty values always sort last, whatever the direction.
+    rows = rows.slice().sort((a, b) => {
+      const va = a[sortBy] || '', vb = b[sortBy] || '';
+      if (!va !== !vb) return va ? -1 : 1;
+      if (sortBy === 'name' || sortBy === 'major') return va.localeCompare(vb);
+      if (sortBy === 'app_version') return cmpVersion(vb, va);
+      return vb.localeCompare(va);  // ISO timestamps: newest first
+    });
+
+    document.getElementById('users-count').textContent =
+      rows.length === _usersData.length ? `${rows.length} users` : `${rows.length} of ${_usersData.length} users`;
+    if (!rows.length) {
+      tbody.innerHTML = `<tr><td colspan="9"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = rows.map(u => `
         <tr>
           <td style="font-family:monospace;font-size:12px;">${esc(u.user_id)}</td>
           <td>${esc(u.name) || '<span style="color:var(--muted)">—</span>'}</td>
           <td>${esc(u.major)}</td>
           <td style="color:var(--muted)">${esc(u.subplan)}</td>
+          <td style="color:var(--muted);font-size:12px;">${fmtDate(u.created_at)}</td>
           <td>${u.app_version
             ? `<span class="badge badge-purple">${esc(u.app_version)}</span>`
             : '<span style="color:var(--muted)">—</span>'}</td>
@@ -601,9 +672,6 @@
             ? '<span class="badge badge-green">Uploaded</span>'
             : '<span class="badge badge-muted">No transcript</span>'}</td>
         </tr>`).join('');
-    } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="8"><div class="empty">Error: ${e.message}</div></td></tr>`;
-    }
   }
 
   // ── Majors ────────────────────────────────────────────────────
