@@ -19,12 +19,17 @@ source. Most of them told students they owed *less* than they did.
 > a per-request hook that is a no-op while PSU is the only school. Proven byte-identical for PSU
 > (235 students' audit/timeline/class-picker responses snapshotted before and after). The branch's
 > own copy of this doc describes it in full. Kept off `main` by choice until a second school is real.
+> **The branch predates the honors work (Sept 29 2026).** It hardcodes the audit's suffix set as
+> `"WHN"` (`main` now strips `"WHMN"`) and has no honors fields. Merging it means moving the honors
+> data above onto `School` too, and re-proving byte-identical output — expect conflicts in
+> `audit_engine.py` and `routers/timeline.py`.
 
 A second school cannot run until PSU conventions stop being hardcoded. Known couplings:
 
 | Coupling | Where |
 |---|---|
-| Course-suffix rules (W/H/N stripped, W/M/X/Y = writing-intensive) | `audit_engine.py`, `transcript_parser.py`, `routers/transcript.py` |
+| Course-suffix rules (W/H/M/N stripped, W/M/X/Y = writing-intensive, H/M/T/U = honors) | `audit_engine.py` (`_strip_attr`), `transcript_parser.py` (`is_honors_code`), `routers/transcript.py` |
+| Honors program (Schreyer): one-way fills (RCL → ENGL 15 / CAS 100 / seminar, ENGL 202H → 202A–D), seminar list, thesis-for-electives rules, admit tracks | `HONORS_FILLS` / `_FYS_CODES` in `audit_engine.py`, `honors.py`, `routers/users.py` (`/me/honors`) |
 | Gen-ed model (`__GEN_ED__`, GA/GN/GH/GS/GHW/GQ/US/IL, WAC rule) | `audit_engine.run_gen_ed_audit()`, `rebuild_gen_ed.py` |
 | Built-in equivalences (IST→ETI, first-year-seminar family) | `_EQUIVALENCE_PAIRS` in `audit_engine.py` |
 | World-language depts | `_WORLD_LANGUAGE_DEPTS` in `sap_schedule.py` |
@@ -92,6 +97,11 @@ Every one of these happened at PSU. Check each against the new school's pages:
 - [ ] **Branch-campus programs** leaking into the major picker
 - [ ] **Renamed courses** (old code on transcripts, new code in catalog) → equivalences
 - [ ] **Unverifiable rules** (adviser-approved lists, portfolios, GPA ranges) → `needs_confirmation`, never auto-satisfied
+- [ ] **Honors program** — how honors shows on a transcript (suffix? attribute? title?), which honors
+  courses replace regular requirements (one-way — the regular course never fills the honors one), whether
+  an honors course is also a first-year seminar, and which majors let the thesis replace electives. At
+  PSU, missing this told every Schreyer Scholar they owed ENGL 15 and CAS 100 (`docs/honors-plan.md`).
+  Only encode a thesis rule a department publishes.
 
 ## Step 5 — Gen eds, minors, entrance rules
 
