@@ -2,6 +2,9 @@
 
 AI advisor app for Penn State students. FastAPI backend + React Native (Expo) mobile app.
 
+**Status:** publicly released on the App Store since Sept 28 2026 (1.1.0, app ID `6803643612`).
+Prod has real users — a push to `main` deploys immediately.
+
 ## Answering style
 
 Be brief. Be concise. Avoid being too verbose or giving unnecessary information.
@@ -874,10 +877,10 @@ phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap t
   `scripts/make_demo_transcript_pdf.py` regenerates the sample upload PDF in
   `scripts/demo_assets/`, which needs the `.gitignore` exception to the blanket `*.pdf` PII rule.
   Submission paperwork: `docs/app-store-submission.md`.
-  **Live in prod since 2026-09-22** (`REVIEW_EMAIL=appreview@gradgps.com`, account seeded) and
-  **in App Review as of 2026-09-23** (1.1.0 build 10): while review is pending, don't touch this
-  path, unset either var, or re-seed the account. **Rotate `REVIEW_CODE` after approval** — the
-  current value has been in App Store Connect.
+  **Live in prod since 2026-09-22** (`REVIEW_EMAIL=appreview@gradgps.com`, account seeded).
+  1.1.0 (build 10) **cleared App Review on 2026-09-28**. Keep the path and account in place — every
+  future version submission is reviewed with them. **`REVIEW_CODE` rotation is still pending** — the
+  current value has been in App Store Connect; rotate it and update the review notes there together.
 
 ### App version gate & client version reporting
 The mobile `UpdateGate` (`components/UpdateGate.tsx`) polls `GET /config/app` at launch and
