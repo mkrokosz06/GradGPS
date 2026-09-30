@@ -56,9 +56,13 @@ def main(user_id: str):
                 "course_code":    c["course_code"],
                 "grade":          c.get("grade", ""),
                 "credits_earned": Decimal(str(c.get("credits_earned", 0))),
+                "credits":        Decimal(str(c.get("credits", c.get("credits_earned", 0)) or 0)),
+                "course_title":   c.get("course_title", ""),
                 "term":           c.get("term", ""),
                 "status":         c.get("status", "done"),
                 "is_writing":     bool(c.get("is_writing")),
+                "is_honors":      bool(c.get("is_honors")),
+                "raw_code":       c.get("raw_code") or c["course_code"],
             })
     print(f"Replaced {len(existing)} stored rows with {len(courses)} re-parsed rows.")
 

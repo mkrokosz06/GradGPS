@@ -21,9 +21,12 @@ from plan_templates import iter_slots
 import business_breadth as _bb
 
 try:  # course renames / cross-listings (IST→ETI, etc.) so a taken course still matches
-    from audit_engine import _EQUIVALENCE_PAIRS
+    from audit_engine import _EQUIVALENCE_PAIRS, honors_fills
 except Exception:  # pragma: no cover - audit engine always importable in practice
     _EQUIVALENCE_PAIRS = []
+
+    def honors_fills(code: str) -> tuple[str, ...]:
+        return ()
 
 # Attribute suffixes PSU appends that don't change course identity for matching.
 _ATTR_SUFFIX = "WHNMXYRSU"
@@ -70,6 +73,17 @@ def _equivalents(code: str) -> set[str]:
     return {b} | _EQUIV.get(b, set())
 
 
+def _taken_tokens(code: str) -> set[str]:
+    """What a transcript course satisfies: its equivalents plus the requirements
+    it fills one-way (the honors RCL sequence fills ENGL 15 / CAS 100 / the
+    First-Year Seminar — audit_engine.HONORS_FILLS). Transcript side only; a
+    template code is never expanded this way, so ENGL 15 can't fill an RCL slot."""
+    out = _equivalents(code)
+    for target in honors_fills(code):
+        out |= _equivalents(target)
+    return out
+
+
 def build_taken_set(transcript_courses: list[dict],
                     substitutions: dict | None = None) -> set[str]:
     """Base course codes the student has completed or is taking, expanded with
@@ -83,7 +97,7 @@ def build_taken_set(transcript_courses: list[dict],
     taken: set[str] = set()
     for c in transcript_courses:
         if c.get("status") in ("done", "in_progress", "transfer"):
-            taken |= _equivalents(c.get("course_code", ""))
+            taken |= _taken_tokens(c.get("course_code", ""))
     for req_code, sub_code in (substitutions or {}).items():
         if _base(sub_code) in taken:
             taken |= _equivalents(req_code)
@@ -369,7 +383,7 @@ def _leftover_courses(transcript_courses: list[dict], consumed: set[str],
     for c in transcript_courses:
         if c.get("status") not in ("done", "in_progress", "transfer"):
             continue
-        toks = _equivalents(c.get("course_code", ""))
+        toks = _taken_tokens(c.get("course_code", ""))
         if any(_codes_match(t, u) for t in toks for u in claimed):
             continue
         out.append(c)
@@ -779,7 +793,7 @@ def match_template(
         pool_courses = [c for c in transcript_courses
                         if c.get("status") in ("done", "in_progress", "transfer")
                         and _base(c.get("course_code", "")) in major_pool_codes
-                        and not any(_codes_match(t, u) for t in _equivalents(c.get("course_code", ""))
+                        and not any(_codes_match(t, u) for t in _taken_tokens(c.get("course_code", ""))
                                     for u in consumed)]
         _assign_major_selections(records, pool_courses)
 

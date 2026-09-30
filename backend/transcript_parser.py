@@ -103,6 +103,7 @@ def _normalise_code(code: str) -> str:
     transcript variants match their base catalog entry:
       W  — Writing Across the Curriculum  (e.g. IST 440W  → IST 440)
       H  — Honors section                 (e.g. ENGL 30H  → ENGL 30)
+      M  — Honors + Writing               (e.g. BIOL 230M → BIOL 230)
       N  — Non-Western / Diversity attr   (e.g. SOC 119N  → SOC 119)
 
     Section letters (A/B/C in CAS 100A, 100B, 100C) are intentionally kept —
@@ -111,7 +112,16 @@ def _normalise_code(code: str) -> str:
     Only a suffix directly after a digit is stripped, so XFR placeholder codes
     ('ENGL XFRGH' — generic transfer credit) keep their attribute letters.
     """
-    return re.sub(r"(?<=\d)[WHN]$", "", code.strip())
+    return re.sub(r"(?<=\d)[WHMN]$", "", code.strip())
+
+
+def is_honors_code(code: str) -> bool:
+    """Whether a course code, as registered, is an honors course. PSU marks honors
+    with a suffix on the number: H (honors), M (honors + writing), T (honors
+    first-year seminar, e.g. CAS 138T), U (honors + US/IL). Captured before
+    _normalise_code strips H/M. Honors *options* on a regular course carry no
+    mark on the transcript, so they can't be detected here."""
+    return bool(re.search(r"\d[HMTU]$", (code or "").strip().upper()))
 
 
 def _normalise_term(match: re.Match) -> str:
@@ -156,6 +166,7 @@ def _make_entry(dept: str, number: str, attempted: float, earned: float,
         # Writing Across the Curriculum designation: a W/M/X/Y suffix on the
         # course number. Captured here because norm_code strips the W.
         "is_writing":     bool(re.search(r"[WMXY]$", number.strip().upper())),
+        "is_honors":      is_honors_code(raw_code),
     }
 
 

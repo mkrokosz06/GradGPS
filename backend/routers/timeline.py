@@ -529,7 +529,12 @@ def _transcript_display_code(c: dict) -> str:
     suffixed courses are different courses from their bare twin — FRNSC 485W is
     4 cr 'Coalescence of Forensic Science Concepts', FRNSC 485 is 2 cr — so the
     card (and the course screen it opens) needs the suffix back. Take the letter
-    the bulletin actually lists; with none listed, keep the stored code."""
+    the bulletin actually lists; with none listed, keep the stored code.
+    A row that kept its registered code (raw_code, stored since the honors fix)
+    shows exactly that — 'ENGL 137H', 'BIOL 230M'."""
+    raw = (c.get("raw_code") or "").strip()
+    if raw:
+        return raw
     code = c.get("course_code", "")
     if c.get("is_writing") and code and code[-1].isdigit():
         b = _bulletin_courses()

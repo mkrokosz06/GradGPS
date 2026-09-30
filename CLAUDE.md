@@ -896,6 +896,27 @@ compares the running build to `latest_version` (dismissible "update available" b
   to ~one write per user per active day. The admin dashboard shows a per-user version column and a
   build-distribution bar (`/admin/stats` → `versions`).
 
+### Honors (Schreyer) courses
+Phase 1 of `docs/honors-plan.md` (Sept 29 2026): stop penalizing honors coursework. Phases 2–3
+(Schreyer credit tracker, GPA, thesis, per-major thesis rules) are not built.
+- **RCL fills ENGL 15 / CAS 100 / the First-Year Seminar, one way.** ENGL/CAS 137H → ENGL 15,
+  ENGL/CAS 138T → CAS 100 + every UP seminar code (`HONORS_FILLS`, `_FYS_CODES` in
+  `audit_engine.py`). Applied in `_build_taken()` with `setdefault` after real courses, as a tagged
+  copy (`_fill_of`), so rule pools (`dept_credits`, writing-intensive) skip it; seminar fills are also
+  hidden from credit pools (`_pool_taken()`) because many seminars carry gen-ed attributes (GER 83 is
+  GH/IL/US). Not `_EQUIVALENCE_PAIRS` — those are symmetric, and ENGL 15 must never fill an RCL slot.
+  SAP side: `sap_schedule._taken_tokens()` (transcript side only; also used for leftover detection so
+  137H can't double as a free elective).
+- **M (honors + writing) is stripped like W** by `_normalise_code`; the audit's suffix strip is
+  `_strip_attr()` (`[WHMN]`). Old prod rows still holding `BIOL 230M` match via a normalized key.
+- **Cross-listings are keyed on storage form too** — `CAS 137H`/`ENGL 137H` and 165 other suffixed
+  pairs never fired because the transcript row is stored stripped.
+- **Storage keeps `raw_code` + `is_honors`** (H/M/T/U suffix, `is_honors_code()`) on upload, manual
+  add/swap and `reparse_stored_transcript.py` (which also now writes `credits`/`course_title` like the
+  upload route). The timeline's past cards show `raw_code` when present. Existing rows need a reparse.
+- **Deliberately not done**: ENGL 202H for "ENGL 202C or 202D" (unverified whether majors accept it).
+- Tests: `backend/tests/test_honors.py` (15).
+
 ### Official vs unofficial transcripts
 Students sometimes upload their **official** transcript instead of the unofficial LionPATH one. Official transcripts have a different layout that the plain-text parser mangles (validated against a real signed sample: 13 partly-wrong courses, every term `Unknown`). Handling:
 - **Detection** — `official_detector.detect_official(pdf_bytes, full_text)` returns a scored `OfficialDetection`. Byte anchor is `/ByteRange` + `adbe.pkcs7` (a certified PDF; **do not** test the spaced `/Type /Sig` — the real sample has `/Type/Sig` with no space) worth +4, plus the "OFFICIAL TRANSCRIPT" header (+3), registrar language (capped +2), and a `UNOFFICIAL` hard veto (−5). Threshold 4 → the signature bytes alone trigger.

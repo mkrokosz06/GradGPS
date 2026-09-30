@@ -16,6 +16,7 @@ from decimal import Decimal
 from db import transcript_table, users_table, get_s3, requirements_table
 from transcript_parser import (
     detect_kind, parse_with_detection, official_parse_looks_bad, _normalise_code,
+    is_honors_code,
 )
 from deps import get_user_id
 
@@ -50,13 +51,18 @@ _COURSE_CODE_RE = re.compile(r"^[A-Z]{1,6} [0-9]{1,4}[A-Z]?$")
 _MAX_COURSE_CREDITS = 12.0
 
 
+def _registered_code(raw: str) -> str:
+    """A user-entered code as registered, suffix kept ('ENGL 137H')."""
+    return re.sub(r"\s+", " ", (raw or "").strip().upper())
+
+
 def _clean_course_code(raw: str) -> tuple[str, bool]:
     """
     Normalise a user-entered course code to storage form and derive its
     writing-intensive flag, matching the transcript parser exactly:
       - collapse/upcase to canonical "DEPT NUMBER"
       - is_writing = a W/M/X/Y suffix on the number (captured before it's stripped)
-      - course_code = base code with a trailing W/H/N attribute letter removed
+      - course_code = base code with a trailing W/H/M/N attribute letter removed
 
     Returns (course_code, is_writing). Raises HTTPException(400) on a bad code.
     """
@@ -341,6 +347,8 @@ async def upload_transcript(
                 "term":           c.get("term", ""),
                 "status":         c.get("status", "done"),
                 "is_writing":     bool(c.get("is_writing")),
+                "is_honors":      bool(c.get("is_honors")),
+                "raw_code":       c.get("raw_code") or c["course_code"],
             }
             batch.put_item(Item=item)
 
@@ -486,6 +494,8 @@ def add_course(body: CourseAdd, user_id: str = Depends(get_user_id)):
         "term":           body.term.strip(),
         "status":         "in_progress",
         "is_writing":     is_writing,
+        "is_honors":      is_honors_code(_registered_code(body.course_code)),
+        "raw_code":       _registered_code(body.course_code),
         "source":         "manual",
     }
     transcript_table.put_item(Item=item)
@@ -522,6 +532,8 @@ def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
         "term":           existing.get("term", ""),
         "status":         "in_progress",
         "is_writing":     is_writing,
+        "is_honors":      is_honors_code(_registered_code(body.course_code)),
+        "raw_code":       _registered_code(body.course_code),
         "source":         "manual",
     }
 

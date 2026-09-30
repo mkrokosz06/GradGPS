@@ -919,11 +919,64 @@ _EQUIVALENCE_PAIRS: list[tuple[str, str]] = (
 )
 
 
-# Build bidirectional lookup at module load: code → [equivalent codes]
+def _strip_attr(code: str) -> str:
+    """The storage form of a course code: the transcript parser strips a trailing
+    W/H/M/N attribute letter ('ENGL 137H' is stored as 'ENGL 137')."""
+    return re.sub(r"(?<=\d)[WHMN]$", "", (code or "").strip().upper())
+
+
+# Build bidirectional lookup at module load: code → [equivalent codes].
+# Pairs are registered under their storage form too: a cross-listing is scraped
+# as 'CAS 137H' / 'ENGL 137H', but the transcript row is stored as 'ENGL 137',
+# so a lookup keyed only on the suffixed code never fired (165 of the pairs).
 _COURSE_ALIASES: dict[str, list[str]] = {}
 for _a, _b in _EQUIVALENCE_PAIRS:
-    _COURSE_ALIASES.setdefault(_a, []).append(_b)
-    _COURSE_ALIASES.setdefault(_b, []).append(_a)
+    for _x, _y in {(_a, _b), (_strip_attr(_a), _strip_attr(_b))}:
+        if _x == _y:
+            continue
+        _COURSE_ALIASES.setdefault(_x, []).append(_y)
+        _COURSE_ALIASES.setdefault(_y, []).append(_x)
+
+
+# ── Schreyer Honors first-year sequence (one-way) ────────────────────────────
+# Rhetoric and Civic Life I/II (ENGL/CAS 137H fall, ENGL/CAS 138T spring) "replace
+# both ENGL 030 and CAS 100", and 138T satisfies the First-Year Seminar (bulletin
+# footnote on every UP plan; SHC Scholar Handbook: "RCL II satisfies the FYS
+# requirement for all majors"). Honors students never take ENGL 15, CAS 100 or
+# their college's seminar, so without this every Scholar is told they owe all three.
+#
+# One-way on purpose: RCL fills an ENGL 15 / CAS 100 / seminar requirement, but
+# ENGL 15 or PSU 6 must never fill a requirement that names RCL. That is why these
+# are not _EQUIVALENCE_PAIRS (which are symmetric).
+_RCL_WRITING = ("ENGL 15", "ENGL 30")
+_RCL_SPEECH  = ("CAS 100", "CAS 100A", "CAS 100B", "CAS 100C")
+# Every University Park First-Year Seminar code: the bulletin courses titled
+# "First-Year Seminar", the S-suffixed seminars with no plain twin (an S course
+# WITH a twin — BIOL 110S, CYBER 100S — is a content course taught as a seminar,
+# and RCL must not fill its content), and the engineering seminar family above.
+_FYS_CODES = tuple(sorted(set(_FIRST_YEAR_SEMINARS) | {
+    "AA 1", "ABSM 100", "AERSP 1", "AFAM 83", "AGSC 100", "AMST 83", "APLNG 83",
+    "ART 11", "BE 100", "CAS 83", "CAS 84", "EDUC 100", "ESC 121", "GER 83",
+    "HIST 83", "IT 83", "JST 83", "LA 83", "LA 283", "MUSIC 40", "NURS 100",
+    "PHIL 83", "RUS 83", "SOC 83", "SPAN 83",
+    "AED 101S", "ANSC 150S", "ANTH 83S", "ARTH 1S", "ASIA 83S", "BBH 102S",
+    "BBH 123S", "CE 100S", "CMLIT 83S", "EMSC 100S", "ENGL 83S", "ERM 150S",
+    "FDSC 150S", "FOR 150S", "GD 1S", "HM 100S", "HPA 123S", "KINES 123S",
+    "LHR 83S", "MUSIC 129S", "NUTR 123S", "PLANT 150S", "PLSC 83S", "PSYCH 83S",
+    "RPTM 100S", "THEA 1S", "WFS 150S",
+}))
+# Keyed on the storage form (137H is stored as '... 137'; 138T keeps its T).
+HONORS_FILLS: dict[str, tuple[str, ...]] = {
+    "ENGL 137":  _RCL_WRITING,
+    "CAS 137":   _RCL_WRITING,
+    "ENGL 138T": _RCL_SPEECH + _FYS_CODES,
+    "CAS 138T":  _RCL_SPEECH + _FYS_CODES,
+}
+
+
+def honors_fills(code: str) -> tuple[str, ...]:
+    """Requirement codes a transcript course fills one-way (see HONORS_FILLS)."""
+    return HONORS_FILLS.get(_strip_attr(code), ())
 
 
 def _build_taken(transcript_courses: list[dict], substitutions: dict | None = None) -> dict:
@@ -949,8 +1002,28 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
             "is_writing":     bool(c.get("is_writing")),
         }
         taken[code] = entry
+        # A row stored before M was stripped ('BIOL 230M') still matches its
+        # requirement ('BIOL 230W' -> 'BIOL 230').
+        taken.setdefault(_strip_attr(code), entry)
         for alias in _COURSE_ALIASES.get(code, []):
             taken.setdefault(alias, entry)
+
+    # Honors first-year sequence fills ENGL 15 / CAS 100 / the seminar. Applied
+    # after every real course so it only fills codes the student didn't take, and
+    # as a tagged copy so rule-based pools (dept credits, writing-intensive) that
+    # walk every key don't count it as a second course in another department.
+    for code, entry in list(taken.items()):
+        if entry.get("_fill_of"):
+            continue
+        for target in honors_fills(code):
+            fill = {**entry, "_fill_of": code}
+            if target in _FYS_CODES:
+                # Many seminars also carry a gen-ed attribute (GER 83 is GH/IL/US,
+                # KINES 123S is GHW). RCL II fills the *seminar requirement*, not
+                # the seminar's gen-ed credits, so a seminar fill is hidden from
+                # credit pools (_pool_taken).
+                fill["_fill_named_only"] = True
+            taken.setdefault(target, fill)
 
     # Student-declared substitutions, applied last so they can only ever fill a
     # code nothing else did (setdefault), and only when the substitute course is
@@ -960,6 +1033,14 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
         if entry:
             taken.setdefault(_norm_sub_code(req_code), entry)
     return taken
+
+
+def _pool_taken(taken: dict) -> dict:
+    """`taken` as a credit/count pool sees it: without the seminar fills, which
+    only satisfy a requirement that names the seminar (see _build_taken)."""
+    if not any(e.get("_fill_named_only") for e in taken.values()):
+        return taken
+    return {k: e for k, e in taken.items() if not e.get("_fill_named_only")}
 
 
 def _norm_sub_code(code: str) -> str:
@@ -1278,7 +1359,7 @@ def _eval_writing_intensive(taken: dict, threshold) -> dict:
     done = ip = 0
     items = []
     for code, entry in taken.items():
-        if not entry.get("is_writing") or id(entry) in seen_ids:
+        if not entry.get("is_writing") or id(entry) in seen_ids or entry.get("_fill_of"):
             continue
         seen_ids.add(id(entry))
         status = entry.get("status", "done")
@@ -1375,7 +1456,7 @@ def _eval_dept_credits(rows: list[dict], taken: dict, threshold) -> dict:
     sub_credits = float(spec.get("sub_credits") or 0)
 
     for code, entry in sorted(taken.items()):
-        if id(entry) in seen or not _in_dept_pool(code, spec):
+        if id(entry) in seen or entry.get("_fill_of") or not _in_dept_pool(code, spec):
             continue
         seen.add(id(entry))
         status = entry.get("status", "done")
@@ -1502,7 +1583,7 @@ def _eval_type_exclusive(
     for row in rows:
         code = row.get("course_code", "").strip().upper()
         # Also check W-stripped and variant-suffix forms (mirrors _course_status logic)
-        w_stripped = re.sub(r"[WHN]$", "", code)
+        w_stripped = _strip_attr(code)
         variant    = next(
             (k for k in taken if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
             None,
@@ -1709,6 +1790,7 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
 
 
 def _eval_choose_credits_consumed(rows: list[dict], taken: dict, threshold) -> dict:
+    taken = _pool_taken(taken)
     items = []
     credits_earned = 0.0
     done = ip = missing = 0
@@ -1743,6 +1825,7 @@ def _eval_choose_credits_consumed(rows: list[dict], taken: dict, threshold) -> d
 
 
 def _eval_choose_courses_consumed(rows: list[dict], taken: dict, threshold) -> dict:
+    taken = _pool_taken(taken)
     items = []
     done = ip = missing = 0
     credits_earned = 0.0
@@ -1803,13 +1886,13 @@ def _course_status(row: dict, taken: dict) -> str:
     min_grade = row.get("min_grade", "")
     # Try matches in order of specificity:
     #  1. Exact: "CAS 100" → "CAS 100"
-    #  2. W-stripped: catalog "IST 440W" → transcript "IST 440"
+    #  2. Suffix-stripped: catalog "IST 440W" / "BIOL 230M" → transcript "IST 440" / "BIOL 230"
     #     (transcript_parser normalises trailing W from transcript codes)
     #  3. Variant suffix: catalog "CAS 100" → transcript "CAS 100C"
     #     (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
     entry = (
         taken.get(code)
-        or taken.get(re.sub(r"[WHN]$", "", code))
+        or taken.get(_strip_attr(code))
         or next(
             (v for k, v in taken.items()
              if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
@@ -1975,6 +2058,7 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
 
 def _eval_choose_credits(rows: list[dict], taken: dict, threshold: int | None) -> dict:
     """Sum credits of completed pool courses; satisfied when >= threshold."""
+    taken = _pool_taken(taken)
     items              = []
     credits_earned     = 0.0
     credits_in_progress = 0.0
@@ -2024,6 +2108,7 @@ def _eval_choose_credits(rows: list[dict], taken: dict, threshold: int | None) -
 
 def _eval_choose_courses(rows: list[dict], taken: dict, threshold: int | None) -> dict:
     """Count completed pool courses; satisfied when count >= threshold."""
+    taken = _pool_taken(taken)
     items = []
     done = ip = missing = 0
     credits_earned = 0.0
