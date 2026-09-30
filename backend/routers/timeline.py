@@ -1701,7 +1701,19 @@ def _hold_for_entrance(future: list[dict], gate: dict | None, depts: set[str],
                 sem["courses"].remove(filler)
                 origin["courses"].append(filler)
             elif load + cr > _MAX_CREDITS:
-                continue
+                # Full, with no placeholder to trade: trade an open course the
+                # student can take in the vacated term instead of skipping ahead.
+                # Skipping cost an ETI student a semester — ETI 302 fell past a
+                # full fall, and ETI 420 → 421 slid a term behind it.
+                oi = future.index(origin)
+                swap = next((f for f in sem["courses"]
+                             if not f.get("pinned") and not _locked(f) and not _is_placeholder(f)
+                             and load - float(f.get("credits_earned", 3) or 3) + cr <= _MAX_CREDITS
+                             and _eligible_in(f, oi, future, done or set(), tsem)), None)
+                if not swap:
+                    continue
+                sem["courses"].remove(swap)
+                origin["courses"].append(swap)
             else:
                 # No placeholder to trade back: pull forward a course the student
                 # CAN take in the vacated term — not major-locked, not pinned, its
@@ -1731,6 +1743,61 @@ def _hold_for_entrance(future: list[dict], gate: dict | None, depts: set[str],
     for sem in future:
         sem["credits"] = _semester_credits(sem["courses"])
     return [s for s in future if s["courses"]]
+
+
+def _chosen_first(future: list[dict], done: set[str],
+                  tsem: dict[str, int] | None = None) -> list[dict]:
+    """Within one requirement pool, a slot the student has picked a course for
+    comes before a still-blank one. The packer shuffles blank placeholders freely
+    to balance credits while a picked slot, now a named course, keeps its template
+    position — so an ETI student's chosen BA 301 sat in SP 2028 behind a blank
+    Application Focus slot in SP 2027. Swaps positions (equal credits, so loads
+    hold) only where the picked course's prerequisites are met in the earlier term."""
+    def family(c: dict) -> str | None:
+        key = c.get("slot_key") or ""
+        return key.split("#")[0] if c.get("slot_kind") == "pool" and "#" in key else None
+
+    for si, sem in enumerate(future):
+        for bi, blank in enumerate(sem["courses"]):
+            fam = family(blank)
+            if not fam or blank.get("chosen_code") or blank.get("pinned"):
+                continue
+            cr = float(blank.get("credits_earned", 3) or 3)
+            for later in future[si + 1:]:
+                pick = next((c for c in later["courses"]
+                             if family(c) == fam and c.get("chosen_code") and not c.get("pinned")
+                             and float(c.get("credits_earned", 3) or 3) == cr
+                             and _eligible_in(c, si, future, done, tsem)), None)
+                if pick:
+                    later["courses"][later["courses"].index(pick)] = blank
+                    sem["courses"][bi] = pick
+                    break
+    return future
+
+
+def _relieve_overload(future: list[dict]) -> list[dict]:
+    """Move pool / gen-ed placeholders out of a term above the target load into
+    the lightest LATER Fall/Spring term that stays within it. The entrance hold
+    trades placeholders back into the term it empties, so an ETI student had both
+    Application Focus slots stacked into an 18-credit spring while their last two
+    terms held 6 and 3. Moving a placeholder later can't break a prerequisite."""
+    regular = [s for s in future if not str(s.get("term", "")).startswith("SU")]
+    for i, sem in enumerate(regular):
+        for f in list(sem["courses"]):
+            if _semester_credits(sem["courses"]) <= _TARGET_CREDITS:
+                break
+            if not _is_placeholder(f) or f.get("pinned"):
+                continue
+            cr = float(f.get("credits_earned", 3) or 3)
+            dest = min((s for s in regular[i + 1:]
+                        if _semester_credits(s["courses"]) + cr <= _TARGET_CREDITS),
+                       key=lambda s: _semester_credits(s["courses"]), default=None)
+            if dest:
+                sem["courses"].remove(f)
+                dest["courses"].append(f)
+    for sem in future:
+        sem["credits"] = _semester_credits(sem["courses"])
+    return future
 
 
 @router.get("")
@@ -1987,6 +2054,11 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # Last word on order: nothing before a prerequisite or apart from a corequisite
     # still in the plan, whatever the hold / credential merge above did.
     future = _enforce_prereq_order(future, done_codes, tsem)
+    # Only when the hold moved something: a plan it left alone (every fresh
+    # student in a templated major) stays exactly PSU's.
+    if any(c.get("held_for_entrance") for s in future for c in s["courses"]):
+        future = _relieve_overload(future)
+    future = _chosen_first(future, done_codes, tsem)
 
     semesters.extend(_apply_pins(future, pins))
 

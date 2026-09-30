@@ -249,9 +249,18 @@ def _focus_universe(user_id: str) -> list[dict]:
         item = (users_table.get_item(Key={"user_id": user_id}).get("Item")) or {}
     except Exception:
         return []
+    from audit_engine import _strip_attr
     areas = focus_areas(item.get("major") or "")
     chosen = [a for a in areas if a["name"] == item.get("focus")] or areas
-    codes = list(dict.fromkeys(c for a in chosen for c in a["courses"]))
+    # A course already on the transcript is credited, not something to plan.
+    try:
+        tx = transcript_table.query(KeyConditionExpression=Key("user_id").eq(user_id)).get("Items", [])
+    except Exception:
+        tx = []
+    taken = {_strip_attr(r["course_code"]) for r in tx
+             if r.get("status") in ("done", "in_progress")}
+    codes = [c for c in dict.fromkeys(c for a in chosen for c in a["courses"])
+             if _strip_attr(c) not in taken]
     bulletin = _bulletin_courses()
     return [{"course_code": c, "course_title": (bulletin.get(c) or {}).get("title", ""),
              "credits": (bulletin.get(c) or {}).get("credits") or 3} for c in codes]

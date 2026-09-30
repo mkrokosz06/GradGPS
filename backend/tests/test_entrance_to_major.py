@@ -414,10 +414,36 @@ def test_course_psu_plan_offers_before_entrance_stays_put():
 
 
 def test_no_room_adds_a_semester():
+    # Full of locked courses: nothing can trade back, so the hold costs a term.
     fut = [_sem("FA 2026", "FIN 301", "FIN 408"),
-           _sem("SP 2027", *[f"GEOG {n}" for n in range(1, 7)])]   # 18 cr, full
+           _sem("SP 2027", *[f"FIN 4{n}0" for n in range(1, 7)])]   # 18 cr, full
     out = _hold(fut, _gate())
     assert _where(out)["FIN 408"] == "FA 2027"
+
+
+def test_full_term_trades_an_open_course_instead_of_skipping_ahead():
+    # ETI-shaped: the next term is full of named courses, one of them open. It
+    # trades places rather than pushing the held course (and its chain) a term.
+    from routers.timeline import _hold_for_entrance
+    fut = [_sem("FA 2026", "FIN 301", "FIN 408"),
+           _sem("SP 2027", "GEOG 30", *[f"FIN 4{n}0" for n in range(1, 6)])]
+    out = _where(_hold_for_entrance(fut, _gate(), {"FIN"}, 0, None, set(), None))
+    assert out["FIN 408"] == "SP 2027"
+    assert out["GEOG 30"] == "FA 2026"
+    assert "FA 2027" not in out.values()
+
+
+def test_relieve_overload_spreads_placeholders_later():
+    from routers.timeline import _relieve_overload
+    fut = [_sem("SP 2027", "A 1", "A 2", "A 3", "Elective A", "Elective B", "A 4"),
+           _sem("SU 2027", "IST 495"),
+           _sem("FA 2027", "B 1", "B 2", "B 3", "B 4"),
+           _sem("SP 2028", "C 1")]
+    fut[0]["courses"][4]["pinned"] = True                 # a pin stays put
+    out = _where(_relieve_overload(fut))
+    assert out["Elective A"] == "SP 2028"                 # lightest later term
+    assert out["Elective B"] == "SP 2027"
+    assert out["IST 495"] == "SU 2027"                    # summers never receive
 
 
 def test_no_placeholder_pulls_an_eligible_course_into_the_gap():
@@ -440,6 +466,18 @@ def test_a_course_is_not_pulled_ahead_of_its_prerequisite():
            _sem("SP 2027", "BA 302")]
     out = _where(_hold_for_entrance(fut, _gate(), {"FIN"}, 0, None, set(), None))
     assert out["BA 302"] == "SP 2027"
+
+
+def test_picked_pool_slot_comes_before_a_blank_one():
+    from routers.timeline import _chosen_first
+    def slot(key, chosen=None):
+        return {"course_code": chosen or "Application Focus Selection", "credits_earned": 3.0,
+                "is_pool": not chosen, "slot_kind": "pool", "slot_key": key, "chosen_code": chosen}
+    fut = [{"term": "SP 2027", "courses": [slot("pool:APPLICATION_FOCUS::#s32")]},
+           {"term": "FA 2027", "courses": [slot("pool:APPLICATION_FOCUS::#s27", "GEOG 30")]}]
+    out = _where(_chosen_first(fut, set()))
+    assert out["GEOG 30"] == "SP 2027"
+    assert out["Application Focus Selection"] == "FA 2027"
 
 
 def test_major_depts_takes_dominant_upper_level_prefix():

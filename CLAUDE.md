@@ -745,6 +745,16 @@ nothing. The response's gate carries `major_courses_from`; moved slots carry `he
   forward a later course that isn't locked or pinned and whose prerequisites are met by then
   (`_eligible_in`, via `course_prereqs`). Without it an ETI student whose ETI 301/302 waited got a
   9-credit spring while BA 302 and ENGL 202C — open to them — sat a term later.
+- **A full term trades, it doesn't skip** (Sept 30 2026): with no placeholder to swap back, the hold
+  trades an open, eligible named course out of a full term rather than skipping to the next one. Skipping
+  pushed an ETI student's ETI 302 past a full fall and slid ETI 420 → 421 a whole term. When the hold
+  moved anything, `_relieve_overload()` then moves unpinned placeholders out of terms above
+  `_TARGET_CREDITS` into the lightest later Fall/Spring term, because the traded-back placeholders stacked
+  both Application Focus slots into one 18-credit spring. The Application Focus picker
+  (`_focus_universe`) also drops courses already on the transcript. And `_chosen_first()` (both paths,
+  after prereq order) swaps a picked pool slot ahead of a still-blank one from the same pool: the packer
+  moves blank placeholders freely but a picked slot is a named course that keeps its template spot, so a
+  chosen BA 301 sat behind a blank focus slot.
 - **PSU's plan overrides the heuristic**: anything a SAP template schedules in or before its own entrance
   semester is open (`_template_open_codes()` — SCM 301 sits beside FIN 301 in Supply Chain's plan). With
   that, a fresh student in all 157 gated templated majors sees **zero** moves; it only bites for students
