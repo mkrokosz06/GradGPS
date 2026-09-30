@@ -354,6 +354,16 @@
       <option value="uploaded">Transcript uploaded</option>
       <option value="none">No transcript</option>
     </select>
+    <select id="users-focus" onchange="renderUsers()">
+      <option value="">Any focus</option>
+      <option value="chosen">Chose a focus</option>
+      <option value="none">No focus</option>
+    </select>
+    <select id="users-honors" onchange="renderUsers()">
+      <option value="">Honors + non-honors</option>
+      <option value="yes">Honors only</option>
+      <option value="no">Non-honors only</option>
+    </select>
     <select id="users-version" onchange="renderUsers()">
       <option value="">All versions</option>
     </select>
@@ -366,6 +376,8 @@
           <th>Name</th>
           <th>Major</th>
           <th>Subplan</th>
+          <th>Focus</th>
+          <th>Honors</th>
           <th>Joined</th>
           <th>App Version</th>
           <th>Last Seen</th>
@@ -374,7 +386,7 @@
         </tr>
       </thead>
       <tbody id="users-tbody">
-        <tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+        <tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
       </tbody>
     </table>
   </div>
@@ -608,7 +620,7 @@
 
   async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="9"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
     try {
       const d = await get('/admin/users');
       _usersData = d.users;
@@ -621,7 +633,7 @@
       sel.value = cur;
       renderUsers();
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="9"><div class="empty">Error: ${e.message}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">Error: ${e.message}</div></td></tr>`;
     }
   }
 
@@ -631,13 +643,19 @@
     const sortBy = document.getElementById('users-sort').value;
     const status = document.getElementById('users-status').value;
     const version = document.getElementById('users-version').value;
+    const focus = document.getElementById('users-focus').value;
+    const honors = document.getElementById('users-honors').value;
 
     let rows = _usersData.filter(u => {
       if (status === 'uploaded' && !u.transcript_parsed_at) return false;
       if (status === 'none' && u.transcript_parsed_at) return false;
+      if (focus === 'chosen' && !u.focus) return false;
+      if (focus === 'none' && u.focus) return false;
+      if (honors === 'yes' && !u.honors) return false;
+      if (honors === 'no' && u.honors) return false;
       if (version === '__none__' && u.app_version) return false;
       if (version && version !== '__none__' && u.app_version !== version) return false;
-      if (q && ![u.user_id, u.name, u.major, u.subplan].some(f => (f || '').toLowerCase().includes(q))) return false;
+      if (q && ![u.user_id, u.name, u.major, u.subplan, u.focus].some(f => (f || '').toLowerCase().includes(q))) return false;
       return true;
     });
 
@@ -653,7 +671,7 @@
     document.getElementById('users-count').textContent =
       rows.length === _usersData.length ? `${rows.length} users` : `${rows.length} of ${_usersData.length} users`;
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="9"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map(u => `
@@ -662,6 +680,10 @@
           <td>${esc(u.name) || '<span style="color:var(--muted)">—</span>'}</td>
           <td>${esc(u.major)}</td>
           <td style="color:var(--muted)">${esc(u.subplan)}</td>
+          <td style="color:var(--muted)">${esc(u.focus)}</td>
+          <td>${u.honors
+            ? `<span class="badge badge-purple">${u.honors === 'schreyer' ? 'Schreyer' : esc(u.honors)}</span>`
+            : '<span style="color:var(--muted)">—</span>'}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.created_at)}</td>
           <td>${u.app_version
             ? `<span class="badge badge-purple">${esc(u.app_version)}</span>`

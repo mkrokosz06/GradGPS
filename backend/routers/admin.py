@@ -149,6 +149,11 @@ def get_users():
             "app_version":          u.get("app_version", ""),
             "last_seen":            u.get("last_seen", ""),
             "created_at":           u.get("created_at", ""),
+            "focus":                u.get("focus") or "",
+            # Raw read of the users-row field (see honors.py) so this stays
+            # independent of the honors module.
+            "honors":               (u.get("honors") or {}).get("program", "")
+                                    if isinstance(u.get("honors"), dict) else "",
         })
     result.sort(key=lambda x: x["transcript_parsed_at"] or "", reverse=True)
     return {"users": result, "count": len(result)}
