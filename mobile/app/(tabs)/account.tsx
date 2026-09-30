@@ -1,7 +1,7 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import { View, Text, ScrollView, TouchableOpacity, Alert } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useFocusEffect } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { useAuth } from "../../context/AuthContext";
 import { NavHeader } from "../../components/NavHeader";
 import { getAudit, getCachedAudit, type AuditSummary } from "../../services/auditService";
@@ -10,7 +10,7 @@ import { setCredentials, credentialErrorMessage } from "../../services/credentia
 import { CredentialPickerModal } from "../../components/CredentialPickerModal";
 import { CredentialRequirementModal } from "../../components/CredentialRequirementModal";
 import { EntranceToMajorCard } from "../../components/EntranceToMajorCard";
-import { ApplicationFocusCard } from "../../components/ApplicationFocusCard";
+import { ApplicationFocusCard, type FocusReturn } from "../../components/ApplicationFocusCard";
 import { SchreyerHonorsCard } from "../../components/SchreyerHonorsCard";
 import {
   getTimeline, getCachedTimeline, type TimelineData,
@@ -138,6 +138,32 @@ export default function AccountScreen() {
 
   useFocusEffect(useCallback(() => { refresh(); }, [refresh]));
 
+  // Arrived from a plan slot that needs a focus area (openFocusPicker): scroll
+  // the focus card into view and open it. The cards above it load on their own
+  // schedule, so re-scroll whenever its position changes until the student
+  // takes over (drags) or picks an area.
+  const router = useRouter();
+  const params = useLocalSearchParams<{ focus?: string; from?: string; t?: string }>();
+  // A request is used up once the student leaves Account, picked or not.
+  const [handledToken, setHandledToken] = useState<string | null>(null);
+  const pickFocus = params.focus === "pick" && !!params.t && params.t !== handledToken;
+  const tokenRef = useRef(params.t);
+  tokenRef.current = params.t;
+  useFocusEffect(useCallback(() => () => setHandledToken(tokenRef.current ?? null), []));
+  const returnTo = (params.from === "home" || params.from === "timeline")
+    ? (params.from as FocusReturn) : null;
+  const scrollRef = useRef<ScrollView>(null);
+  const [followFocus, setFollowFocus] = useState(false);
+  React.useEffect(() => { setFollowFocus(pickFocus); }, [pickFocus]);
+  const onFocusCardLayout = useCallback((y: number) => {
+    if (followFocus) scrollRef.current?.scrollTo({ y: Math.max(0, y - 16), animated: true });
+  }, [followFocus]);
+  const leaveFocusPick = useCallback(() => {
+    setFollowFocus(false);
+    setHandledToken(params.t ?? null);
+    router.navigate(returnTo === "home" ? "/" : "/timeline");
+  }, [router, returnTo, params.t]);
+
   const creditPct = audit ? Math.min(100, Math.round((audit.transcript_credits / 120) * 100)) : 0;
   const year      = audit ? classYear(audit.transcript_credits) : null;
 
@@ -145,6 +171,8 @@ export default function AccountScreen() {
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
       <NavHeader subtitle="Account" />
       <ScrollView
+        ref={scrollRef}
+        onScrollBeginDrag={() => setFollowFocus(false)}
         className="flex-1"
         contentContainerStyle={{ padding: 24, paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}
@@ -219,7 +247,15 @@ export default function AccountScreen() {
 
         {/* Application Focus — only for majors that require one (renders nothing otherwise) */}
         {audit?.major && (
-          <ApplicationFocusCard userId={userId!} major={audit.major} onChanged={refresh} />
+          <View onLayout={(e) => onFocusCardLayout(e.nativeEvent.layout.y)}>
+            <ApplicationFocusCard
+              userId={userId!}
+              major={audit.major}
+              onChanged={refresh}
+              autoOpen={pickFocus}
+              onReturn={pickFocus && returnTo ? leaveFocusPick : undefined}
+            />
+          </View>
         )}
 
         {/* Schreyer Honors — the student's own declaration (any major) */}

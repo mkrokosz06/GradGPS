@@ -1,6 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, ActivityIndicator, Alert } from "react-native";
+import type { Router } from "expo-router";
 import { getFocusAreas, getMyFocus, setMyFocus, type FocusArea } from "../services/focusService";
+
+/** Where a "pick your focus" tap came from, so Account can send the student back. */
+export type FocusReturn = "timeline" | "home";
+
+/**
+ * An unfilled Application Focus slot before a focus is chosen (`needs_focus`)
+ * isn't a course choice yet — send the student to the Account page's focus
+ * card, scrolled into view and open, and remember where to return them.
+ */
+export function openFocusPicker(router: Router, from: FocusReturn) {
+  // `t` makes each request distinct: tab screens stay mounted and keep their
+  // params, so Account marks a request handled by its token, not by its values.
+  router.navigate({ pathname: "/account", params: { focus: "pick", from, t: String(Date.now()) } });
+}
 
 /**
  * Account-page card for a major that requires an Application Focus (ETI, Data
@@ -11,8 +26,15 @@ import { getFocusAreas, getMyFocus, setMyFocus, type FocusArea } from "../servic
  * slots then offer that area's courses in the picker.
  */
 export function ApplicationFocusCard({
-  userId, major, onChanged,
-}: { userId: string; major: string; onChanged: () => void }) {
+  userId, major, onChanged, autoOpen = false, onReturn,
+}: {
+  userId: string; major: string; onChanged: () => void;
+  /** Open the area list as soon as it loads (arrived from a plan slot). */
+  autoOpen?: boolean;
+  /** Set when the student arrived from their plan: shown as a back link, and
+   *  called after they pick an area so they land back where they were. */
+  onReturn?: () => void;
+}) {
   const [areas, setAreas] = useState<FocusArea[]>([]);
   const [focus, setFocus] = useState<string | null>(null);
   const [open, setOpen] = useState(false);
@@ -26,6 +48,10 @@ export function ApplicationFocusCard({
     return () => { active = false; };
   }, [userId, major]);
 
+  useEffect(() => {
+    if (autoOpen && areas.length > 0) setOpen(true);
+  }, [autoOpen, areas.length]);
+
   if (areas.length === 0) return null;
   const chosen = areas.find((a) => a.name === focus);
   const credits = (chosen ?? areas[0]).credits;
@@ -37,6 +63,7 @@ export function ApplicationFocusCard({
       setFocus(saved);
       setOpen(false);
       onChanged();
+      if (saved && onReturn) onReturn();
     } catch (e: any) {
       const detail = e?.response?.data?.detail;
       Alert.alert("Couldn't save", typeof detail === "string" ? detail : "Please try again.");
@@ -52,6 +79,11 @@ export function ApplicationFocusCard({
         borderWidth: 1, borderColor: "#dbeafe", marginBottom: 16,
       }}
     >
+      {onReturn && (
+        <TouchableOpacity onPress={onReturn} style={{ alignSelf: "flex-start", paddingBottom: 8 }}>
+          <Text style={{ color: "#2a5298", fontSize: 12, fontWeight: "600" }}>‹ Back to your plan</Text>
+        </TouchableOpacity>
+      )}
       <Text style={{ color: "#94a3b8", fontSize: 11, fontWeight: "700", marginBottom: 5, letterSpacing: 0.8 }}>
         APPLICATION FOCUS
       </Text>

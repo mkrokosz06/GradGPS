@@ -17,6 +17,7 @@ import { getAudit, type AuditSummary } from "../../services/auditService";
 import { getTimeline, type TimelineData, type TimelineCourse, type Semester } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
 import { useInProgressEditor } from "../../components/InProgressEditor";
+import { openFocusPicker } from "../../components/ApplicationFocusCard";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -197,6 +198,10 @@ function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: T
     let poolLabel: string;
     if (isGenEdSlot) {
       poolLabel = `Gen Ed — ${cats![0]}`;
+    } else if (course.pool_ref === "application_focus") {
+      // The server names it: "Application Focus (please select one)" before a
+      // focus is picked, "<area> course" after — not a generic elective pool.
+      poolLabel = course.course_code;
     } else {
       const needed = course.pool_needed_credits ?? course.pool_needed_courses ?? 0;
       const unit   = course.pool_needed_credits != null ? "credits" : "courses";
@@ -205,7 +210,7 @@ function RegistrationCourseRow({ course, onEdit, onEditInProgress }: { course: T
 
     // Searchable gen-ed slots are actionable — tap/long-press to search for a course.
     const poolActionable = !!onEdit && !!course.slot_key && course.status === "missing"
-      && (!!course.searchable || (course.options?.length ?? 0) > 1);
+      && (!!course.searchable || (course.options?.length ?? 0) > 1 || !!course.needs_focus);
     return (
       <TouchableOpacity
         activeOpacity={poolActionable ? 0.75 : 1}
@@ -557,7 +562,11 @@ export default function HomeScreen() {
           <RegistrationSection
             semester={nextSem}
             audit={audit!}
-            onEditCourse={(course, term, label) => setEditing({ course, term, label })}
+            onEditCourse={(course, term, label) =>
+              course.needs_focus
+                ? openFocusPicker(router, "home")
+                : setEditing({ course, term, label })
+            }
             onEditInProgress={openInProgressMenu}
           />
         ) : (

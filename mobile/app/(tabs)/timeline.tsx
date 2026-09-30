@@ -18,6 +18,7 @@ import { useAuth } from "../../context/AuthContext";
 import { getTimeline, type TimelineCourse, type Semester, type TimelineData } from "../../services/timelineService";
 import { putChoice, deleteChoice, type ChoicePayload } from "../../services/userChoicesService";
 import { useInProgressEditor } from "../../components/InProgressEditor";
+import { openFocusPicker } from "../../components/ApplicationFocusCard";
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -432,7 +433,7 @@ function CourseRow({ course, onEdit, onEditInProgress }: { course: TimelineCours
     // options and nothing to search — tapping it opens the confirm screen instead.
     const poolActionable = !!onEdit && !!course.slot_key && course.status === "missing"
       && (!!course.searchable || (course.options?.length ?? 0) > 1
-          || !!course.needs_confirmation);
+          || !!course.needs_confirmation || !!course.needs_focus);
     return (
       <TouchableOpacity
         activeOpacity={poolActionable ? 0.7 : 1}
@@ -629,6 +630,7 @@ export default function TimelineScreen() {
   const [substituting, setSubstituting] = useState<{ code: string; title?: string } | null>(null);
   const [saving, setSaving] = useState(false);
   const { userId } = useAuth();
+  const router = useRouter();
   const timelineScrollRef = useRef<ScrollView>(null);
   const timelineViewportW = useRef(0);
   const timelineContentW  = useRef(0);
@@ -826,7 +828,9 @@ export default function TimelineScreen() {
             refreshing={refreshing}
             onRefresh={onRefresh}
             onEditCourse={(course, term, label) =>
-              course.needs_confirmation
+              course.needs_focus
+                ? openFocusPicker(router, "timeline")
+                : course.needs_confirmation
                 ? setConfirming(course)
                 : setEditing({ course, term, label })
             }

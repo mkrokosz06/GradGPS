@@ -44,6 +44,10 @@ export type TimelineCourse = {
   // An adviser-defined credential requirement: shown in the bulletin's own words
   // and never auto-satisfied, so there is no course picker to offer.
   needs_confirmation?:  boolean;
+  /** An Application Focus slot before the student has picked a focus area: it
+   *  is not a course choice yet, so tapping it goes to the Account page's focus
+   *  picker (see openFocusPicker). */
+  needs_focus?:         boolean;
   /** The requirement's full size, so a partly-confirmed one can show "6 of 9". */
   requirement_credits?: number | null;
 };

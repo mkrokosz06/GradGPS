@@ -362,7 +362,12 @@ encoded as threshold 12 + the overlapping major pool's 3 = 15 — all five items
 on the users row (`focus`); `GET /programs/focus-areas?major=`, `PUT /users/me/focus` (validated against
 the major's areas; cleared when the major changes). Timeline `application_focus` slots search the chosen
 area (`routers/courses._focus_universe`). Mobile: `components/ApplicationFocusCard.tsx` on Account,
-`services/focusService.ts`.
+`services/focusService.ts`. **Before a focus is picked, the slots aren't a course choice**: `_label_focus_slots()` (timeline,
+post-pass, only majors with `focus_area` rows) renames unfilled ones "Application Focus (please select
+one)" with `needs_focus`; after, "<area> course". The app sends a `needs_focus` tap (timeline + home) to
+Account via `openFocusPicker()` — it scrolls to the card, opens the area list, and returns the student to
+the screen they came from after they pick (a "‹ Back to your plan" link if they don't). Tests:
+`tests/test_focus_slot_label.py`.
 
 **Options another college offers.** The Data Sciences page is published once per college (IST,
 Engineering, Science) and prints all three options, each under an `<h6>` "Only Available through the

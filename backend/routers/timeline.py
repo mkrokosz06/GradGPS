@@ -1010,6 +1010,33 @@ def _enforce_prereq_order(future: list[dict], done: set[str],
     return [s for s in future if s["courses"]]
 
 
+FOCUS_UNCHOSEN_LABEL = "Application Focus (please select one)"
+
+
+def _label_focus_slots(semesters: list[dict], focus: str | None, has_areas: bool) -> None:
+    """Name the plan's unfilled Application Focus slots after the student's state.
+    Before a focus is picked the slot is not a course choice at all — the student
+    has to choose an area first — so it reads "please select one" and carries
+    `needs_focus` (the app sends that tap to the Account page's focus picker, not
+    to a course list mixing every area). After, it names the area. A slot the
+    student already filled with a course keeps that course. Only majors with
+    focus areas in the catalog are touched."""
+    if not has_areas:
+        return
+    for sem in semesters:
+        if sem.get("status") != "upcoming":
+            continue
+        for c in sem["courses"]:
+            if c.get("pool_ref") != "application_focus" or not c.get("is_pool") or c.get("chosen_code"):
+                continue
+            if focus:
+                c["course_code"] = f"{focus} course"
+            else:
+                c["course_code"] = FOCUS_UNCHOSEN_LABEL
+                c["course_title"] = "Choose your focus area to see its courses"
+                c["needs_focus"] = True
+
+
 def _emit_semester(term: str, courses: list[dict]) -> dict:
     """Build an upcoming-semester object in the mobile-facing schema."""
     return {
@@ -1978,6 +2005,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         requirement_rows.extend(req_resp.get("Items", []))
 
     taken_codes = {c.get("course_code", "").strip().upper() for c in transcript_courses}
+    has_focus_areas = any(r.get("focus_area") for r in requirement_rows)
     requirement_rows = _filter_rows(requirement_rows, subplan, taken_codes, user.get("focus"))
 
     # A published-plan template renders the timeline on its own (it uses the
@@ -2157,6 +2185,7 @@ def get_timeline(user_id: str = Depends(get_user_id)):
     # Recommended courses often come from major rows with no title — fill from the
     # cross-program catalog so Home/Timeline show names next to the codes.
     _fill_future_titles(semesters)
+    _label_focus_slots(semesters, user.get("focus"), has_focus_areas)
 
     # ── 6. Summary ───────────────────────────────────────────────────────────
     transcript_credits = round(
