@@ -154,6 +154,11 @@ def get_users():
             # independent of the honors module.
             "honors":               (u.get("honors") or {}).get("program", "")
                                     if isinstance(u.get("honors"), dict) else "",
+            # Declared minors/certificates: [{program, kind}] on the users row.
+            "credentials":          [
+                {"program": c.get("program", ""), "kind": c.get("kind", "")}
+                for c in (u.get("credentials") or []) if isinstance(c, dict)
+            ],
         })
     result.sort(key=lambda x: x["transcript_parsed_at"] or "", reverse=True)
     return {"users": result, "count": len(result)}

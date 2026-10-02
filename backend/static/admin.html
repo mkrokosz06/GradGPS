@@ -364,6 +364,11 @@
       <option value="yes">Honors only</option>
       <option value="no">Non-honors only</option>
     </select>
+    <select id="users-creds" onchange="renderUsers()">
+      <option value="">Any minors/certs</option>
+      <option value="yes">Declared one</option>
+      <option value="no">None declared</option>
+    </select>
     <select id="users-version" onchange="renderUsers()">
       <option value="">All versions</option>
     </select>
@@ -378,6 +383,7 @@
           <th>Subplan</th>
           <th>Focus</th>
           <th>Honors</th>
+          <th>Minors / Certs</th>
           <th>Joined</th>
           <th>App Version</th>
           <th>Last Seen</th>
@@ -386,7 +392,7 @@
         </tr>
       </thead>
       <tbody id="users-tbody">
-        <tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+        <tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
       </tbody>
     </table>
   </div>
@@ -620,7 +626,7 @@
 
   async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
     try {
       const d = await get('/admin/users');
       _usersData = d.users;
@@ -633,7 +639,7 @@
       sel.value = cur;
       renderUsers();
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">Error: ${e.message}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12"><div class="empty">Error: ${e.message}</div></td></tr>`;
     }
   }
 
@@ -645,8 +651,12 @@
     const version = document.getElementById('users-version').value;
     const focus = document.getElementById('users-focus').value;
     const honors = document.getElementById('users-honors').value;
+    const creds = document.getElementById('users-creds').value;
 
     let rows = _usersData.filter(u => {
+      const credNames = (u.credentials || []).map(c => c.program).join(' ');
+      if (creds === 'yes' && !credNames) return false;
+      if (creds === 'no' && credNames) return false;
       if (status === 'uploaded' && !u.transcript_parsed_at) return false;
       if (status === 'none' && u.transcript_parsed_at) return false;
       if (focus === 'chosen' && !u.focus) return false;
@@ -655,7 +665,7 @@
       if (honors === 'no' && u.honors) return false;
       if (version === '__none__' && u.app_version) return false;
       if (version && version !== '__none__' && u.app_version !== version) return false;
-      if (q && ![u.user_id, u.name, u.major, u.subplan, u.focus].some(f => (f || '').toLowerCase().includes(q))) return false;
+      if (q && ![u.user_id, u.name, u.major, u.subplan, u.focus, credNames].some(f => (f || '').toLowerCase().includes(q))) return false;
       return true;
     });
 
@@ -671,7 +681,7 @@
     document.getElementById('users-count').textContent =
       rows.length === _usersData.length ? `${rows.length} users` : `${rows.length} of ${_usersData.length} users`;
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="12"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map(u => `
@@ -683,6 +693,9 @@
           <td style="color:var(--muted)">${esc(u.focus)}</td>
           <td>${u.honors
             ? `<span class="badge badge-purple">${u.honors === 'schreyer' ? 'Schreyer' : esc(u.honors)}</span>`
+            : '<span style="color:var(--muted)">—</span>'}</td>
+          <td style="font-size:12px;">${(u.credentials || []).length
+            ? u.credentials.map(c => esc(c.program)).join('<br>')
             : '<span style="color:var(--muted)">—</span>'}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.created_at)}</td>
           <td>${u.app_version
