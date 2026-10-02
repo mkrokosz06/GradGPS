@@ -3,6 +3,7 @@
 AI advisor app for Penn State students. FastAPI backend + React Native (Expo) mobile app.
 
 **Status:** publicly released on the App Store since Sept 28 2026 (1.1.0, app ID `6803643612`).
+1.1.1 (build 11) uploaded Oct 1 2026, awaiting review. OTA updates (`eas update`) now target runtime 1.1.1 only.
 Prod has real users — a push to `main` deploys immediately.
 
 ## Answering style
