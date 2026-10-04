@@ -74,6 +74,31 @@ def test_suggestions_named_requirements_only():
     assert [s["code"] for s in self_report.suggestions_from_rows(rows, BULLETIN)] == ["IST 140", "MATH 110"]
 
 
+def test_pool_options_unitemized_and_focus():
+    """A plan's list slots get the courses their requirement pool lists; a pool
+    the plan itemizes belongs to its named slot and is left out."""
+    rows = [
+        {"requirement_group": "Major", "group_type": "choose_credits", "group_threshold": 3,
+         "pool_seq": 1, "course_code": c} for c in ("IST 140", "CMPSC 131")
+    ] + [
+        {"requirement_group": "Major", "group_type": "choose_credits", "group_threshold": 3,
+         "pool_seq": 2, "course_code": c} for c in ("BA 301", "MKTG 301")
+    ] + [
+        {"requirement_group": "Major", "group_type": "choose_credits", "group_threshold": 12,
+         "pool_seq": 3, "focus_area": "Business Competency", "course_code": "FIN 100"},
+    ]
+    tpl = {"semesters": [{"year": 1, "term_season": "FA", "slots": [
+        {"type": "course", "code": "IST 140", "credits": 3},
+        {"type": "pool", "ref": "major_selection", "label": "Pick from the list", "credits": 3},
+        {"type": "pool", "ref": "application_focus", "label": "Application Focus Selection", "credits": 3},
+    ]}]}
+    pools = self_report.pool_options(rows, tpl)
+    assert pools == {"focus": ["FIN 100"], "major": ["BA 301", "MKTG 301"]}
+    items = self_report.plan_semesters(tpl, BULLETIN, pools)[0]["items"]
+    assert [c["code"] for c in items[1]["suggested"]] == ["BA 301", "MKTG 301"] and items[1]["fills_from"]
+    assert [c["code"] for c in items[2]["suggested"]] == ["FIN 100"]
+
+
 def _status(result, code):
     for g in result["groups"]:
         for src in (g.get("sub_groups") or [g]):

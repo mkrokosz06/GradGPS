@@ -495,6 +495,11 @@ Transcript screen ("No transcript? Enter your classes").
   pre-filled. `current_term` counts summer toward the coming fall.
   A plan class left unchecked (or a choose-one set to "Neither") carries to the next semester's card,
   checked and labelled "Moved from <term>", until it's checked or this semester is passed.
+  Rows the student already has are left off entirely (no "already taken" line): a plan class or
+  choose-one entered on an earlier card or as transfer, and a list slot ("Pick from Smeal Business
+  Fundamentals", Application Focus) already filled by an earlier extra/transfer class from its list.
+  The backend attaches those lists (`self_report.pool_options()`: un-itemized major pools + focus
+  pools, same rule as `build_major_pool_codes`) as `suggested` with `fills_from: true`.
 - Tests: `backend/tests/test_self_report.py`.
 
 ### Two patch-script bugs that only surface against prod

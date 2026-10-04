@@ -146,7 +146,10 @@ export type WalkItem =
   | ({ kind: "course" } & WalkCourse)
   | { kind: "choice"; credits: number; options: WalkCourse[] }
   | { kind: "open"; label: string; credits: number; gen_ed?: string | null;
-      dept?: string; suggested?: WalkCourse[] };
+      dept?: string; suggested?: WalkCourse[];
+      /** `suggested` is the list this slot stands for (e.g. the Smeal Business
+       *  Fundamentals list), so a class from it entered earlier fills the slot. */
+      fills_from?: boolean };
 
 export type WalkSemester = { year: number; season: "FA" | "SP"; items: WalkItem[] };
 

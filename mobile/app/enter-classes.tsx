@@ -64,6 +64,8 @@ const ORDINAL_WORD = [
 const ORDINAL = ["1st", "2nd", "3rd", "4th", "5th", "6th", "7th", "8th", "9th", "10th", "11th", "12th"];
 
 const norm = (code: string) => code.replace(/\s+/g, " ").trim().toUpperCase();
+/** Code without a W/H/M/N attribute suffix, so "ETI 300W" matches "ETI 300". */
+const baseCode = (code: string) => norm(code).replace(/(\d)[WHMN]$/, "$1");
 
 // ── Card construction ────────────────────────────────────────────────────────
 
@@ -77,26 +79,53 @@ function choiceOf(card: Card, s: Slot): string | null {
 }
 
 function slotCodes(item: WalkItem): string[] {
-  if (item.kind === "course") return [norm(item.code)];
-  if (item.kind === "choice") return item.options.map((o) => norm(o.code));
+  if (item.kind === "course") return [baseCode(item.code)];
+  if (item.kind === "choice") return item.options.map((o) => baseCode(o.code));
   return [];
 }
 
 /** Each semester's rows: classes carried over from the semester before (plan
- *  classes the student said they didn't take then), then the plan's own. */
-function buildSlots(walk: Walkthrough, cards: Card[], terms: string[]): Slot[][] {
+ *  classes the student said they didn't take then), then the plan's own.
+ *
+ *  A row the student already has is left off entirely: a plan class (or any
+ *  option of a "one of these") entered on an earlier card or as transfer credit,
+ *  and a list slot ("Pick from the Business Fundamentals list") that a class from
+ *  that list, added earlier as an extra or transfer, already fills. Each such
+ *  class fills one list slot only. */
+function buildSlots(walk: Walkthrough, cards: Card[], terms: string[], transfer: WalkCourse[]): Slot[][] {
   const out: Slot[][] = [];
   let carry: Slot[] = [];
+  const taken = new Set(transfer.map((c) => baseCode(c.code)));
+  const loose = transfer.map((c) => baseCode(c.code));   // can still fill a list slot
+  const useLoose = (codes: string[]) => {
+    for (const c of codes) {
+      const i = loose.indexOf(c);
+      if (i >= 0) loose.splice(i, 1);
+    }
+  };
   terms.forEach((term, k) => {
     const plan: Slot[] = (walk.semesters[k]?.items ?? []).map((item, i) => ({ id: `p${k}-${i}`, item }));
     const planned = new Set(plan.flatMap((sl) => slotCodes(sl.item)));
-    const slots = [...carry.filter((sl) => !slotCodes(sl.item).some((c) => planned.has(c))), ...plan];
+    const slots = [...carry.filter((sl) => !slotCodes(sl.item).some((c) => planned.has(c))), ...plan]
+      .filter((sl) => {
+        const it = sl.item;
+        const had = slotCodes(it).filter((c) => taken.has(c));
+        if (had.length) { useLoose(had); return false; }
+        if (it.kind === "open" && it.fills_from && it.suggested?.length) {
+          const list = new Set(it.suggested.map((c) => baseCode(c.code)));
+          const hit = loose.find((c) => list.has(c));
+          if (hit) { useLoose([hit]); return false; }
+        }
+        return true;
+      });
     out.push(slots);
     const card = cards[k] ?? emptyCard();
     carry = slots
       .filter((sl) => (sl.item.kind === "course" && !isChecked(card, sl))
         || (sl.item.kind === "choice" && choiceOf(card, sl) === null))
       .map((sl) => ({ ...sl, movedFrom: sl.movedFrom ?? term }));
+    cardCourses(slots, card).forEach((c) => taken.add(baseCode(c.code)));
+    card.extras.forEach((c) => loose.push(baseCode(c.code)));
   });
   return out;
 }
@@ -196,7 +225,7 @@ export default function EnterClassesScreen() {
     setSemNum(n);
     const built: Card[] = [];
     terms.forEach((t, k) => {
-      built.push(prefilledCard(buildSlots(w, built, terms.slice(0, k + 1))[k], byTerm[t] ?? []));
+      built.push(prefilledCard(buildSlots(w, built, terms.slice(0, k + 1), xfer)[k], byTerm[t] ?? []));
     });
     setCards(built);
     setTransfer(xfer);
@@ -224,8 +253,8 @@ export default function EnterClassesScreen() {
   }
 
   const slots = useMemo(
-    () => (walk && semNum ? buildSlots(walk, cards, terms) : []),
-    [walk, semNum, cards, terms],
+    () => (walk && semNum ? buildSlots(walk, cards, terms, transfer) : []),
+    [walk, semNum, cards, terms, transfer],
   );
 
   function updateCard(k: number, fn: (c: Card) => Card) {

@@ -629,21 +629,23 @@ def get_walkthrough(user_id: str = Depends(get_user_id)):
         raise HTTPException(status_code=400, detail="Pick your major first.")
     bulletin = _bulletin()
 
+    resp = requirements_table.query(KeyConditionExpression=DKey("program_name").eq(major))
+    rows = resp.get("Items", [])
+    while "LastEvaluatedKey" in resp:
+        resp = requirements_table.query(
+            KeyConditionExpression=DKey("program_name").eq(major),
+            ExclusiveStartKey=resp["LastEvaluatedKey"],
+        )
+        rows.extend(resp.get("Items", []))
+    rows = _filter_rows(rows, subplan, set(), user.get("focus"))
+
     template = load_template(major, subplan)
     if template:
-        semesters = self_report.plan_semesters(template, bulletin)
+        pools = self_report.pool_options(rows, template)
+        semesters = self_report.plan_semesters(template, bulletin, pools)
         suggestions = []
     else:
         semesters = []
-        resp = requirements_table.query(KeyConditionExpression=DKey("program_name").eq(major))
-        rows = resp.get("Items", [])
-        while "LastEvaluatedKey" in resp:
-            resp = requirements_table.query(
-                KeyConditionExpression=DKey("program_name").eq(major),
-                ExclusiveStartKey=resp["LastEvaluatedKey"],
-            )
-            rows.extend(resp.get("Items", []))
-        rows = _filter_rows(rows, subplan, set(), user.get("focus"))
         suggestions = self_report.suggestions_from_rows(rows, bulletin)
 
     return {
