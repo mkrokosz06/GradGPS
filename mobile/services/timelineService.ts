@@ -106,6 +106,8 @@ export type TimelineData = {
   subplan:            string | null;
   transcript_credits: number;
   semesters:          Semester[];
+  /** History was entered by the student, not parsed from a transcript. */
+  self_reported?:     boolean;
   /** `null` for the majors that publish no gate, and absent on older backends. */
   entrance_to_major?: EntranceToMajor | null;
 };

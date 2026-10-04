@@ -225,6 +225,10 @@ def get_audit(
     result = run_audit(requirement_rows, transcript_courses, declared_subs)
     result["major"]   = major    # always use the stored value, not run_audit's fallback
     result["subplan"] = subplan
+    # No-transcript mode: grades are a single "C or better" answer, so
+    # grade-dependent results are the student's word, not a record.
+    result["self_reported"] = bool(transcript_courses) and all(
+        c.get("source") == "self_reported" for c in transcript_courses)
 
     # Total credits earned across all transcript courses (done + transfer)
     result["transcript_credits"] = round(

@@ -106,9 +106,9 @@ export default function OnboardingUploadScreen() {
         ) : (
           /* ── Upload state ── */
           <View style={{ flex: 1 }}>
-            <Text style={styles.heading}>Upload your transcript</Text>
+            <Text style={styles.heading}>Add your classes</Text>
             <Text style={styles.sub}>
-              We'll map your completed courses to your degree plan automatically.
+              Upload your transcript, or tell us what you've taken. Either way we'll map it to your degree plan.
             </Text>
 
             <View style={styles.instructionCard}>
@@ -148,6 +148,16 @@ export default function OnboardingUploadScreen() {
               )}
             </TouchableOpacity>
 
+            <TouchableOpacity
+              onPress={() => router.push("/enter-classes?from=onboarding" as any)}
+              disabled={uploading}
+              activeOpacity={0.85}
+              style={styles.altBtn}
+            >
+              <Text style={styles.altBtnTitle}>No transcript? Enter your classes</Text>
+              <Text style={styles.altBtnSub}>We'll walk you through your plan semester by semester.</Text>
+            </TouchableOpacity>
+
             <TouchableOpacity onPress={finish} style={styles.skipBtn} activeOpacity={0.6}>
               <Text style={styles.skipText}>Skip for now</Text>
             </TouchableOpacity>
@@ -175,8 +185,14 @@ const styles = StyleSheet.create({
   uploadZone: {
     borderWidth: 2, borderStyle: "dashed", borderColor: "#1a3a6b",
     borderRadius: 20, paddingVertical: 44, alignItems: "center",
-    backgroundColor: "#f0f4ff", marginBottom: 20,
+    backgroundColor: "#f0f4ff", marginBottom: 14,
   },
+  altBtn: {
+    borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 16,
+    paddingVertical: 16, paddingHorizontal: 18, alignItems: "center", marginBottom: 12,
+  },
+  altBtnTitle: { color: "#1a3a6b", fontSize: 15, fontWeight: "700" },
+  altBtnSub:   { color: "#94a3b8", fontSize: 12, marginTop: 4, textAlign: "center" },
   uploadIcon: {
     width: 52, height: 52, borderRadius: 14,
     backgroundColor: "#1a3a6b", alignItems: "center", justifyContent: "center",

@@ -785,6 +785,11 @@ export default function TimelineScreen() {
           <View className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
             <View className="h-full bg-navy rounded-full" style={{ width: `${creditPct}%` }} />
           </View>
+          {data.self_reported && (
+            <Text style={{ color: "#94a3b8", fontSize: 11, marginTop: 6 }}>
+              Based on classes you entered (self-reported)
+            </Text>
+          )}
         </View>
 
         {/* Horizontal timeline */}

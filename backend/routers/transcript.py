@@ -3,6 +3,8 @@ Transcript endpoints:
   POST /transcript/upload  — parse & store a PDF transcript
   GET  /transcript         — return stored transcript courses grouped by term
   DELETE /transcript       — delete all transcript courses and clear user record
+  GET  /transcript/walkthrough: no-transcript mode: the plan as a checklist
+  POST /transcript/self-report: no-transcript mode: save the classes entered
 """
 
 import os
@@ -19,6 +21,8 @@ from transcript_parser import (
     is_honors_code,
 )
 from deps import get_user_id
+import self_report
+from self_report import SELF_REPORTED
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
@@ -45,6 +49,12 @@ _SEASON_LABELS = {"SP": "Spring", "SU": "Summer", "FA": "Fall"}
 # student can change classes they're registered for but not rewrite graded
 # history. See the "edit scope" decision in CLAUDE.md / the timeline docs.
 _EDITABLE_STATUSES = {"in_progress"}
+# Classes the student entered themselves (no-transcript mode) are theirs to edit
+# whatever their status, since there's no graded record to protect.
+
+
+def _editable(item: dict) -> bool:
+    return item.get("status") in _EDITABLE_STATUSES or item.get("source") == "self_reported"
 _TERM_RE = re.compile(r"^(FA|SP|SU) \d{4}$")
 # DEPT NUMBER with an optional attribute-suffix letter (W/H/N/M/X/Y, e.g. IST 440W).
 _COURSE_CODE_RE = re.compile(r"^[A-Z]{1,6} [0-9]{1,4}[A-Z]?$")
@@ -83,10 +93,36 @@ class CourseAdd(BaseModel):
     credits_earned: float = 3.0
 
 
+class SelfReportCourse(BaseModel):
+    course_code: str
+    term:        str = ""          # "" for transfer / AP credit
+    status:      str = "done"      # done | in_progress | transfer
+    credits:     float | None = None
+    below_c:     bool = False
+
+
+class SelfReport(BaseModel):
+    courses: list[SelfReportCourse]
+
+
 class CourseSwap(BaseModel):
     original_code:  str
     course_code:    str
     credits_earned: float | None = None
+
+
+def _all_course_keys(user_id: str) -> list[dict]:
+    from boto3.dynamodb.conditions import Key as DKey
+    query_kwargs = {
+        "KeyConditionExpression": DKey("user_id").eq(user_id),
+        "ProjectionExpression": "user_id, course_code",
+    }
+    resp = transcript_table.query(**query_kwargs)
+    items = list(resp.get("Items", []))
+    while "LastEvaluatedKey" in resp:
+        resp = transcript_table.query(**query_kwargs, ExclusiveStartKey=resp["LastEvaluatedKey"])
+        items.extend(resp.get("Items", []))
+    return items
 
 
 def _term_key(term: str) -> tuple:
@@ -141,7 +177,9 @@ def get_transcript(user_id: str = Depends(get_user_id)):
                     "course_code":    c.get("course_code", ""),
                     "grade":          "TR",
                     "credits_earned": float(c.get("credits_earned", 0)),
+                    "course_title":   c.get("course_title", ""),
                     "status":         "transfer",
+                    "source":         c.get("source", "parsed"),
                 }
                 for c in transfer
             ],
@@ -166,6 +204,7 @@ def get_transcript(user_id: str = Depends(get_user_id)):
 
     return {
         "has_transcript": True,
+        "self_reported":  all(c.get("source") == SELF_REPORTED for c in courses),
         "courses_total":  len(courses),
         "terms":          terms,
     }
@@ -509,7 +548,7 @@ def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
     existing = _get_course(user_id, original_code)
     if existing is None:
         raise HTTPException(status_code=404, detail=f"{original_code} isn't on your transcript.")
-    if existing.get("status") not in _EDITABLE_STATUSES:
+    if not _editable(existing):
         raise HTTPException(
             status_code=409,
             detail="Only in-progress classes can be changed. Completed and transfer courses are read-only.",
@@ -536,6 +575,10 @@ def swap_course(body: CourseSwap, user_id: str = Depends(get_user_id)):
         "raw_code":       _registered_code(body.course_code),
         "source":         "manual",
     }
+    if existing.get("source") == SELF_REPORTED:
+        # A self-entered class keeps its place in the student's history.
+        item.update(status=existing.get("status", "done"),
+                    grade=existing.get("grade", ""), source=SELF_REPORTED)
 
     if new_code != original_code:
         if _get_course(user_id, new_code) is not None:
@@ -552,10 +595,136 @@ def drop_course(course_code: str = Query(...), user_id: str = Depends(get_user_i
     existing = _get_course(user_id, code)
     if existing is None:
         raise HTTPException(status_code=404, detail=f"{code} isn't on your transcript.")
-    if existing.get("status") not in _EDITABLE_STATUSES:
+    if not _editable(existing):
         raise HTTPException(
             status_code=409,
             detail="Only in-progress classes can be dropped. Completed and transfer courses are read-only.",
         )
     transcript_table.delete_item(Key={"user_id": user_id, "course_code": code})
     return {"status": "ok", "course_code": code}
+
+
+# ── No-transcript mode ─────────────────────────────────────────────────────────
+# A full alternative to uploading: the student walks their major's plan semester
+# by semester and confirms what they took. Rows are stored source="self_reported"
+# and stay editable. Uploading a real transcript later replaces them (the upload
+# path deletes every row first).
+
+def _bulletin() -> dict:
+    from routers.courses import _bulletin_courses
+    return _bulletin_courses()
+
+
+@router.get("/walkthrough")
+def get_walkthrough(user_id: str = Depends(get_user_id)):
+    """The student's plan as walkthrough cards, or (no template) quick-add
+    suggestions from the major's named requirements."""
+    from boto3.dynamodb.conditions import Key as DKey
+    from plan_templates import load_template
+    from routers.audit import _filter_rows
+
+    user = users_table.get_item(Key={"user_id": user_id}).get("Item") or {}
+    major, subplan = user.get("major"), user.get("subplan")
+    if not major:
+        raise HTTPException(status_code=400, detail="Pick your major first.")
+    bulletin = _bulletin()
+
+    template = load_template(major, subplan)
+    if template:
+        semesters = self_report.plan_semesters(template, bulletin)
+        suggestions = []
+    else:
+        semesters = []
+        resp = requirements_table.query(KeyConditionExpression=DKey("program_name").eq(major))
+        rows = resp.get("Items", [])
+        while "LastEvaluatedKey" in resp:
+            resp = requirements_table.query(
+                KeyConditionExpression=DKey("program_name").eq(major),
+                ExclusiveStartKey=resp["LastEvaluatedKey"],
+            )
+            rows.extend(resp.get("Items", []))
+        rows = _filter_rows(rows, subplan, set(), user.get("focus"))
+        suggestions = self_report.suggestions_from_rows(rows, bulletin)
+
+    return {
+        "major":         major,
+        "current_term":  self_report.current_term(),
+        "has_plan":      bool(template),
+        "semesters":     semesters,
+        "suggestions":   suggestions,
+    }
+
+
+@router.post("/self-report")
+def save_self_report(body: SelfReport, user_id: str = Depends(get_user_id)):
+    """Replace the student's courses with the classes they entered."""
+    if "/" in user_id or ".." in user_id:
+        raise HTTPException(status_code=400, detail="Invalid user id.")
+    if not body.courses:
+        raise HTTPException(status_code=400, detail="Add at least one class.")
+    if len(body.courses) > self_report.MAX_COURSES:
+        raise HTTPException(status_code=400, detail="That's more classes than a degree holds.")
+
+    bulletin = _bulletin()
+    items: dict[str, dict] = {}
+    for c in body.courses:
+        code, is_writing = _clean_course_code(c.course_code)
+        raw = _registered_code(c.course_code)
+        if c.status not in ("done", "in_progress", "transfer"):
+            raise HTTPException(status_code=400, detail=f"Invalid status for {raw}.")
+        term = (c.term or "").strip()
+        if c.status != "transfer" and not _TERM_RE.match(term):
+            raise HTTPException(status_code=400, detail=f"Invalid term for {raw}.")
+        if code in items:
+            raise HTTPException(status_code=400, detail=f"{raw} is listed twice.")
+        info = bulletin.get(raw) or bulletin.get(code) or {}
+        credits = _validate_credits(c.credits if c.credits is not None
+                                    else float(info.get("credits") or 3))
+        grade = "TR" if c.status == "transfer" else (
+            self_report.BELOW_C_GRADE if c.below_c and c.status == "done" else "")
+        items[code] = {
+            "user_id":        user_id,
+            "course_code":    code,
+            "grade":          grade,
+            "credits_earned": credits,
+            "credits":        credits,
+            "course_title":   info.get("title", ""),
+            "term":           term if c.status != "transfer" else "",
+            "status":         c.status,
+            "is_writing":     is_writing,
+            "is_honors":      is_honors_code(raw),
+            "raw_code":       raw,
+            "source":         SELF_REPORTED,
+        }
+
+    existing = _all_course_keys(user_id)
+    with transcript_table.batch_writer() as batch:
+        for item in existing:
+            batch.delete_item(Key={"user_id": item["user_id"], "course_code": item["course_code"]})
+    with transcript_table.batch_writer() as batch:
+        for item in items.values():
+            batch.put_item(Item=item)
+
+    # No PDF backs these rows; drop any old one so storage matches what we show.
+    try:
+        get_s3().delete_object(Bucket=S3_BUCKET, Key=f"transcripts/{user_id}/transcript.pdf")
+    except Exception as e:
+        logger.warning("S3 delete on self-report failed for %s: %s", user_id, e)
+
+    from datetime import datetime, timezone
+    users_table.update_item(
+        Key={"user_id": user_id},
+        UpdateExpression=("SET transcript_parsed_at = :ts, transcript_kind = :kind "
+                          "REMOVE transcript_s3_key, official_transcript_ack_at"),
+        ExpressionAttributeValues={":ts": datetime.now(timezone.utc).isoformat(),
+                                   ":kind": SELF_REPORTED},
+    )
+
+    vals = list(items.values())
+    return {
+        "status":         "ok",
+        "courses_saved":  len(vals),
+        "done":           sum(1 for i in vals if i["status"] == "done"),
+        "in_progress":    sum(1 for i in vals if i["status"] == "in_progress"),
+        "transfer":       sum(1 for i in vals if i["status"] == "transfer"),
+    }

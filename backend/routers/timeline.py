@@ -2199,6 +2199,9 @@ def get_timeline(user_id: str = Depends(get_user_id)):
         "subplan":             subplan,
         "transcript_credits":  transcript_credits,
         "semesters":           semesters,
+        # No-transcript mode: the history is the student's own entry, not a parse.
+        "self_reported":       bool(transcript_courses) and all(
+            c.get("source") == "self_reported" for c in transcript_courses),
         # Strictly additive: an older mobile build ignores this, and a student who
         # has declared nothing gets an empty list.
         "credential_added_terms": credential_added_terms,

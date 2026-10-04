@@ -543,6 +543,36 @@ def courses_for_slot(
     return {"results": hits[:limit], "needs_query": False}
 
 
+@router.get("/search")
+def search_courses(
+    q: str = Query(..., min_length=1, description="Substring of a code or title"),
+    gen_ed: str | None = Query(None, description="Limit to one gen-ed domain, e.g. 'GH'"),
+    dept: str | None = Query(None, description="Limit to one subject, e.g. 'AERSP'"),
+    limit: int = Query(40, ge=1, le=200),
+):
+    """Search every undergraduate course in the bulletin: the no-transcript
+    walkthrough's "add a class" box (any course a student might have taken)."""
+    ql = q.strip().lower()
+    if gen_ed:
+        pool = _resolve_slot_universe(f"gened:{gen_ed.upper()}", gen_ed.upper(), None)
+    else:
+        pool = [{"course_code": code, "course_title": info.get("title", ""),
+                 "credits": info.get("credits") or 0}
+                for code, info in _bulletin_courses().items()]
+    if dept:
+        d = dept.strip().upper() + " "
+        pool = [c for c in pool if c["course_code"].startswith(d)]
+    compact = ql.replace(" ", "")
+    hits = [c for c in pool
+            if compact in c["course_code"].lower().replace(" ", "")
+            or ql in (c.get("course_title") or "").lower()]
+    hits.sort(key=lambda c: (not c["course_code"].lower().replace(" ", "").startswith(compact),
+                             c["course_code"]))
+    return {"results": [{"course_code": c["course_code"],
+                         "course_title": c.get("course_title", ""),
+                         "credits": float(c.get("credits") or 0)} for c in hits[:limit]]}
+
+
 @router.get("/{code}")
 async def get_course(code: str):
     """Return course metadata and PSU bulletin description."""

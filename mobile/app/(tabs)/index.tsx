@@ -112,7 +112,7 @@ function NoTranscriptBanner() {
           Projected plan — no transcript
         </Text>
         <Text style={{ color: "#a16207", fontSize: 12, lineHeight: 17 }}>
-          Upload your transcript to track completed courses and personalize this timeline.
+          Upload your transcript or enter your classes to track completed courses and personalize this timeline.
         </Text>
       </View>
       <Text style={{ color: "#92400e", fontSize: 16 }}>→</Text>
@@ -517,7 +517,7 @@ export default function HomeScreen() {
 
   // ── State detection ───────────────────────────────────────────────────────
   const hasMajor      = !!(audit?.major);
-  const hasTranscript = !!(audit?.transcript_credits && audit.transcript_credits > 0);
+  const hasTranscript = !!(audit?.self_reported || (audit?.transcript_credits && audit.transcript_credits > 0));
 
   // State 1 — no major
   if (!hasMajor) {

@@ -10,6 +10,8 @@ export type AuditSummary = {
   major:              string;
   subplan:            string | null;
   transcript_credits: number;
+  /** History was entered by the student, not parsed from a transcript. */
+  self_reported?:     boolean;
   total:              number;
   done:               number;
   in_progress:        number;

@@ -150,7 +150,8 @@ Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 - `app/(tabs)/_layout.tsx` — **Tabs layout with tab bar hidden** (`tabBarStyle: { display: "none" }`). Do NOT change this to Stack — it breaks `router.navigate()` between sibling screens. Navigation is via the hamburger menu in `NavHeader`.
 - `app/(tabs)/index.tsx` — Home screen (main screen: greeting + current/next-semester registration dashboard)
 - `app/(tabs)/timeline.tsx` — Full academic timeline screen
-- `app/(tabs)/upload.tsx` — Transcript upload
+- `app/(tabs)/upload.tsx`: Transcript screen (menu label "Transcript"): upload, or view/edit history
+- `app/enter-classes.tsx`: No-transcript mode walkthrough (see below)
 - `app/(tabs)/major.tsx` — Major + subplan selection (two-step flow)
 - `app/(tabs)/account.tsx` — Account / audit summary
 - `app/(tabs)/support.tsx` — Contact-support form (posts to `/support/contact`)
@@ -474,6 +475,27 @@ home dashboard, and gen-ed check with no extra wiring.
   badge in the mobile UI) and future-proofs a "reset to uploaded" affordance.
 - **Mobile**: `transcriptService.{addCourse,swapCourse,dropCourse}`; edit UI (Swap / ✕ drop / "+ Add a
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
+
+### No-transcript mode (self-reported classes)
+A full alternative to uploading (Oct 2026, local only so far): the student walks their major's SAP
+semester by semester and confirms what they took. Entry points: onboarding upload step and the
+Transcript screen ("No transcript? Enter your classes").
+- **Backend**: `GET /transcript/walkthrough` (plan Fall/Spring semesters as cards via
+  `self_report.plan_semesters()`; un-templated majors get `suggestions` from named requirement rows),
+  `POST /transcript/self-report` (replaces **all** rows, deletes any stored PDF, sets
+  `transcript_kind="self_reported"`), `GET /courses/search` (whole bulletin, optional `gen_ed`/`dept`).
+  Rows are `source="self_reported"` and editable whatever their status (`_editable()`); a later real
+  upload wipes them like any re-upload. Audit + timeline responses carry `self_reported`.
+- **Grades are one question** ("C or better in all of these?"). Yes = stored with no grade (which
+  `_grade_meets` treats as meeting any minimum); a course marked below C is stored as grade `D`, so a
+  C-minimum requirement isn't met. Transfer/AP rows are `status="transfer"`, grade `TR`.
+- **Mobile flow**: which semester are you in → one card per past semester (plan courses pre-checked,
+  choose-one as chips, gen-ed/elective slots open `CourseSearchModal`) → this semester (in progress) →
+  AP/transfer → C-or-better → review → save. Re-opening with a self-reported history starts at review,
+  pre-filled. `current_term` counts summer toward the coming fall.
+  A plan class left unchecked (or a choose-one set to "Neither") carries to the next semester's card,
+  checked and labelled "Moved from <term>", until it's checked or this semester is passed.
+- Tests: `backend/tests/test_self_report.py`.
 
 ### Two patch-script bugs that only surface against prod
 

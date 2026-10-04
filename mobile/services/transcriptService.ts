@@ -29,7 +29,9 @@ export type TranscriptCourse = {
   grade:          string;
   credits_earned: number;
   status:         string;
-  source?:        string;   // "parsed" | "manual" — manual = student-added/edited
+  course_title?:  string;
+  /** "parsed" | "manual" (student-edited) | "self_reported" (no-transcript mode) */
+  source?:        string;
 };
 
 export type EditedCourse = {
@@ -49,6 +51,8 @@ export type TranscriptTerm = {
 
 export type TranscriptData = {
   has_transcript: boolean;
+  /** Every course was entered by the student (no-transcript mode). */
+  self_reported?: boolean;
   courses_total:  number;
   terms:          TranscriptTerm[];
 };
@@ -131,4 +135,65 @@ export async function dropCourse(userId: string, courseCode: string): Promise<vo
     headers: { "x-user-id": userId },
   });
   invalidateDerived(userId);
+}
+
+
+// ── No-transcript mode ─────────────────────────────────────────────────────────
+
+export type WalkCourse = { code: string; title: string; credits: number };
+
+export type WalkItem =
+  | ({ kind: "course" } & WalkCourse)
+  | { kind: "choice"; credits: number; options: WalkCourse[] }
+  | { kind: "open"; label: string; credits: number; gen_ed?: string | null;
+      dept?: string; suggested?: WalkCourse[] };
+
+export type WalkSemester = { year: number; season: "FA" | "SP"; items: WalkItem[] };
+
+export type Walkthrough = {
+  major:        string;
+  current_term: string;          // e.g. "FA 2026"
+  has_plan:     boolean;
+  semesters:    WalkSemester[];  // the major's plan, Fall/Spring only
+  suggestions:  WalkCourse[];    // quick-add chips for a major with no plan
+};
+
+export type SelfReportCourse = {
+  course_code: string;
+  term:        string;           // "" for transfer / AP credit
+  status:      "done" | "in_progress" | "transfer";
+  credits?:    number;
+  below_c?:    boolean;
+};
+
+export async function getWalkthrough(userId: string): Promise<Walkthrough> {
+  const res = await api.get<Walkthrough>("/transcript/walkthrough", {
+    headers: { "x-user-id": userId },
+  });
+  return res.data;
+}
+
+/** Replace every course with the classes the student entered. */
+export async function saveSelfReport(
+  userId: string,
+  courses: SelfReportCourse[],
+): Promise<{ courses_saved: number; done: number; in_progress: number; transfer: number }> {
+  const res = await api.post("/transcript/self-report", { courses }, {
+    headers: { "x-user-id": userId },
+  });
+  invalidateDerived(userId);
+  return res.data;
+}
+
+export type SearchCourse = { course_code: string; course_title: string; credits: number };
+
+/** Search every bulletin course, optionally scoped to a gen-ed domain or subject. */
+export async function searchAllCourses(
+  q: string,
+  opts: { gen_ed?: string | null; dept?: string } = {},
+): Promise<SearchCourse[]> {
+  const res = await api.get<{ results: SearchCourse[] }>("/courses/search", {
+    params: { q, gen_ed: opts.gen_ed || undefined, dept: opts.dept || undefined },
+  });
+  return res.data.results;
 }

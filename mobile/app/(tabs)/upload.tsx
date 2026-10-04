@@ -210,6 +210,8 @@ export default function UploadScreen() {
   }
 
   // ── View mode: transcript exists ───────────────────────────────────────────
+  // Self-reported = no-transcript mode; those classes are edited in the walkthrough.
+  const selfReported = !!transcript?.self_reported;
   if (transcript?.has_transcript) {
     return (
       <SafeAreaView style={{ flex: 1, backgroundColor: "#f8fafc" }} edges={["top", "left", "right"]}>
@@ -222,13 +224,14 @@ export default function UploadScreen() {
           {/* Header — light dashboard treatment (matches Home / Account) */}
           <View style={{ marginBottom: 24 }}>
             <Text style={{ color: "#94a3b8", fontSize: 11, fontWeight: "700", letterSpacing: 0.9, marginBottom: 6 }}>
-              YOUR TRANSCRIPT
+              {selfReported ? "CLASSES YOU ENTERED" : "YOUR TRANSCRIPT"}
             </Text>
             <Text style={{ color: "#1a3a6b", fontSize: 26, fontWeight: "900" }}>
               {transcript.courses_total} courses
             </Text>
             <Text style={{ color: "#64748b", fontSize: 13, marginTop: 4 }}>
               {transcript.terms.length} semester{transcript.terms.length !== 1 ? "s" : ""} on record
+              {selfReported ? " · self-reported" : ""}
             </Text>
           </View>
 
@@ -236,7 +239,7 @@ export default function UploadScreen() {
           {transcript.terms.map((termGroup) => {
             // Only the in-progress semester is editable — a student can change
             // classes they're registered for, not rewrite graded history.
-            const editable = termGroup.courses.some((c) => c.status === "in_progress");
+            const editable = !selfReported && termGroup.courses.some((c) => c.status === "in_progress");
             return (
             <View key={termGroup.term} style={{ marginBottom: 20 }}>
               <Text style={{
@@ -287,7 +290,11 @@ export default function UploadScreen() {
                     ) : (
                       <View style={{ alignItems: "flex-end", gap: 2 }}>
                         <Text style={{ color: "#374151", fontSize: 13, fontWeight: "600" }}>
-                          {course.grade || "—"}
+                          {selfReported
+                            ? (course.status === "in_progress" ? "IP"
+                              : course.status === "transfer" ? "TR"
+                              : course.grade === "D" ? "< C" : "C+")
+                            : (course.grade || "—")}
                         </Text>
                         <Text style={{ color: "#94a3b8", fontSize: 11 }}>
                           {course.credits_earned} cr
@@ -318,17 +325,36 @@ export default function UploadScreen() {
 
           {/* Replace / Delete actions */}
           <View style={{ gap: 12, marginTop: 8 }}>
+            {selfReported && (
+              <TouchableOpacity
+                onPress={() => router.push("/enter-classes" as any)}
+                disabled={uploading || deleting}
+                activeOpacity={0.85}
+                style={{
+                  backgroundColor: "#1a3a6b", borderRadius: 14,
+                  paddingVertical: 15, alignItems: "center",
+                }}
+              >
+                <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>
+                  Edit my classes
+                </Text>
+              </TouchableOpacity>
+            )}
             <TouchableOpacity
               onPress={pickAndUpload}
               disabled={uploading || deleting}
               activeOpacity={0.85}
-              style={{
+              style={selfReported ? {
+                backgroundColor: "#ffffff", borderRadius: 14,
+                paddingVertical: 15, alignItems: "center",
+                borderWidth: 1, borderColor: "#e2e8f0",
+              } : {
                 backgroundColor: "#1a3a6b", borderRadius: 14,
                 paddingVertical: 15, alignItems: "center",
               }}
             >
-              <Text style={{ color: "#ffffff", fontSize: 14, fontWeight: "700" }}>
-                Replace transcript
+              <Text style={{ color: selfReported ? "#1a3a6b" : "#ffffff", fontSize: 14, fontWeight: "700" }}>
+                {selfReported ? "Upload my transcript instead" : "Replace transcript"}
               </Text>
             </TouchableOpacity>
 
@@ -346,7 +372,7 @@ export default function UploadScreen() {
                 <ActivityIndicator color="#e11d48" size="small" />
               ) : (
                 <Text style={{ color: "#e11d48", fontSize: 14, fontWeight: "700" }}>
-                  Delete transcript
+                  {selfReported ? "Delete my classes" : "Delete transcript"}
                 </Text>
               )}
             </TouchableOpacity>
@@ -442,7 +468,7 @@ export default function UploadScreen() {
   // ── Upload mode: no transcript ─────────────────────────────────────────────
   return (
     <SafeAreaView className="flex-1 bg-white" edges={["top", "left", "right"]}>
-      <NavHeader subtitle="Upload Transcript" />
+      <NavHeader subtitle="Transcript" />
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ padding: 24, paddingBottom: 60 }}
@@ -472,7 +498,7 @@ export default function UploadScreen() {
             paddingVertical: 44,
             alignItems: "center",
             backgroundColor: uploading ? "#f8fafc" : "#f0f4ff",
-            marginBottom: 28,
+            marginBottom: 14,
           }}
         >
           {uploading ? (
@@ -497,6 +523,23 @@ export default function UploadScreen() {
             </>
           )}
         </TouchableOpacity>
+
+        {!result && (
+          <TouchableOpacity
+            onPress={() => router.push("/enter-classes" as any)}
+            disabled={uploading}
+            activeOpacity={0.85}
+            style={{
+              borderWidth: 1.5, borderColor: "#e2e8f0", borderRadius: 16,
+              paddingVertical: 16, paddingHorizontal: 18, alignItems: "center", marginBottom: 28,
+            }}
+          >
+            <Text style={{ color: "#1a3a6b", fontSize: 15, fontWeight: "700" }}>No transcript? Enter your classes</Text>
+            <Text style={{ color: "#94a3b8", fontSize: 12, marginTop: 4, textAlign: "center" }}>
+              We'll walk you through your plan semester by semester.
+            </Text>
+          </TouchableOpacity>
+        )}
 
         {/* Result */}
         {result && (
