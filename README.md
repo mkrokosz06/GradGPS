@@ -1,221 +1,96 @@
 # GradGPS
 
-AI-powered degree advisor for Penn State students. Upload your transcript, pick your major, and get an instant audit of every requirement — done, in progress, or missing — plus a projected semester-by-semester timeline to graduation.
+A degree-planning app for Penn State students. Upload your transcript (or enter your classes), pick your
+major, and get an audit of every requirement — done, in progress, or missing — plus a semester-by-semester
+plan to graduation that respects prerequisites and PSU's own suggested academic plans.
 
-Launching exclusively at **Penn State University Park**. Free for students.
-
----
-
-## What It Does
-
-1. Student signs up with name + PSU email
-2. Uploads their unofficial PSU transcript (PDF)
-3. Selects their major (and subplan if applicable)
-4. Gets an instant audit: every requirement marked **Done**, **In Progress**, or **Missing**
-5. Views a projected timeline showing which future semesters remaining courses fall in
-6. Taps any course to see professor ratings (via RateMyProfessors)
+**Live on the App Store** — [GradGPS for iOS](https://apps.apple.com/app/id6803643612) ·
+[gradgps.com](https://gradgps.com) · Free for Penn State University Park students.
 
 ---
 
-## Project Status
+## What it does
 
-| Phase | Description | Status |
-|-------|-------------|--------|
-| 1 | PSU catalog scraper | Complete |
-| 2 | Audit engine + FastAPI backend | Complete |
-| 3 | React Native mobile app | Complete |
-| 4 | Deploy + App Store launch | Upcoming |
+- **Degree audit** — every major, gen-ed, and Writing Across the Curriculum requirement checked against
+  the student's transcript, including choose-one alternatives, credit pools, and compound branches
+  ("ACCTG 211 *or* (ACCTG 201 *and* ACCTG 202)").
+- **Graduation timeline** — follows PSU's published Suggested Academic Plan for ~180 majors (and their
+  options), reflowed around what the student has already taken; falls back to a credit-balanced planner
+  for every other major. Prerequisites and corequisites are enforced.
+- **Entrance to Major** — tracks gated majors' course, grade, and GPA requirements and holds major-only
+  courses until the student is in.
+- **Minors & certificates** — 200+ University Park credentials audited and merged into the plan.
+- **Transcript parsing** — unofficial LionPATH PDFs, official (signed, two-column, watermarked)
+  transcripts, AP/transfer credit, and honors courses. Students without a transcript can walk their
+  major's plan and confirm what they've taken instead.
+- **Plan editing** — swap in-progress classes, pick courses for elective/gen-ed slots, move a course to
+  another semester, and declare adviser-approved substitutions.
 
----
-
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 |-------|-----------|
-| Mobile | React Native 0.81 + Expo SDK 54 + Expo Router v6 |
-| Styling | NativeWind v4 (Tailwind for React Native) |
-| Backend | Python + FastAPI |
-| Database | AWS DynamoDB (DynamoDB Local in dev) |
-| File storage | AWS S3 / MinIO (MinIO in dev) |
-| Local dev | Docker — DynamoDB Local (port 8000) + MinIO (port 9000) |
-| Scraper | httpx + BeautifulSoup4 |
-| Transcript parsing | pdfplumber |
+| Mobile | React Native + Expo SDK 54, Expo Router, NativeWind (Tailwind) |
+| Backend | Python, FastAPI |
+| Data | AWS DynamoDB, S3 |
+| Hosting | AWS App Runner (container via ECR), GitHub Actions CI/CD with OIDC (no stored keys) |
+| Scheduled jobs | EventBridge Scheduler → ECS Fargate (monthly catalog refresh) |
+| Auth | Sign in with Apple, Google OIDC, email one-time codes; server-side sessions |
+| Data pipeline | httpx + BeautifulSoup scrapers over the PSU Undergraduate Bulletin |
+| PDF parsing | pdfplumber |
+| Website | Static site on GitHub Pages, generated per-major SEO pages |
 
----
+## How the data is built
 
-## Repository Structure
+Requirements come from the [Penn State Undergraduate Bulletin](https://bulletins.psu.edu) — ~31k
+requirement rows across every program, plus course titles/credits, prerequisites, suggested academic
+plans, and Entrance to Major rules. The scrapers parse the bulletin's HTML structure deterministically
+(no LLM extraction), and every parse is checked by an independent verifier or against PSU's own published
+credit totals before it ships — e.g. 206 of 207 minors/certificates match PSU's stated totals exactly.
+
+## Repository layout
 
 ```
-/
-├── docker-compose.yml             # DynamoDB Local + MinIO S3
-├── README.md
-├── CLAUDE.md                      # Full architecture + dev guide
-├── backend/
-│   ├── main.py                    # FastAPI app entry point
-│   ├── audit_engine.py            # Degree audit + gen ed audit logic
-│   ├── transcript_parser.py       # pdfplumber PDF → course list
-│   ├── db.py                      # DynamoDB + S3 clients
-│   ├── deps.py                    # Shared FastAPI dependency (user_id header)
-│   ├── requirements.txt
-│   ├── routers/
-│   │   ├── audit.py               # GET /audit
-│   │   ├── timeline.py            # GET /timeline
-│   │   ├── transcript.py          # POST /transcript/upload
-│   │   ├── programs.py            # GET /programs/search, POST /programs/select
-│   │   ├── courses.py             # GET /courses/:code + professor ratings
-│   │   ├── users.py               # User profile
-│   │   └── admin.py               # Admin utilities
-│   └── scripts/
-│       ├── setup_tables.py        # Create DynamoDB tables + S3 bucket
-│       ├── load_catalog.py        # Load 31k PSU requirement rows
-│       ├── rebuild_gen_ed.py      # Load gen ed requirements (scraped bulletin data)
-│       ├── seed_matthew.py        # Seed test user + transcript + catalog patches
-│       └── scrape_psu.py          # Original bulletin scraper → PSU_Major_Requirements.xlsx
-└── mobile/
-    ├── app/
-    │   ├── _layout.tsx            # Root Stack + AuthProvider
-    │   ├── (tabs)/                # Main app screens (tab bar hidden)
-    │   │   ├── index.tsx          # Timeline screen
-    │   │   ├── account.tsx        # Account + audit summary
-    │   │   ├── major.tsx          # Major + subplan selection
-    │   │   └── upload.tsx         # Transcript upload
-    │   ├── onboarding/            # Welcome → signup → major → upload flow
-    │   ├── course/[code].tsx      # Course detail + professor ratings
-    │   ├── tos.tsx                # Terms of Service
-    │   └── privacy.tsx            # Privacy Policy
-    ├── components/
-    │   └── NavHeader.tsx          # Top bar + hamburger side-menu
-    ├── context/
-    │   └── AuthContext.tsx        # Auth state + AsyncStorage
-    ├── services/                  # Typed API wrappers (axios)
-    └── constants/
-        └── api.ts                 # API_BASE + dev USER_ID
+backend/            FastAPI app
+  audit_engine.py     degree + gen-ed audit
+  transcript_parser.py, official_detector.py
+  sap_schedule.py, plan_templates.py   suggested-academic-plan matching
+  routers/            audit, timeline, transcript, programs, courses, users, ...
+  scripts/            scrapers, catalog loaders, maintenance jobs
+  sap_templates/      suggested academic plans (JSON)
+  tests/              pytest suite
+credentials/        minor/certificate scraper + parser
+mobile/             Expo app (screens in app/, API wrappers in services/)
+website/            gradgps.com
+docs/               design docs
 ```
 
----
+## Local development
 
-## Local Development
+Requires Docker, Python 3.12, Node 20+.
 
-### Prerequisites
-- Docker Desktop
-- Python 3.11+
-- Node.js 20+
-- Expo Go on your phone (or iOS/Android simulator)
-
-### 1. Start infrastructure
 ```bash
-docker-compose up -d   # DynamoDB Local (port 8000) + MinIO S3 (port 9000)
-```
+docker-compose up -d                  # DynamoDB Local + MinIO (S3)
 
-### 2. Seed the database
-Data is in-memory — run these after every Docker restart:
-```bash
 cd backend
-python scripts/setup_tables.py    # create tables/buckets
-python scripts/load_catalog.py    # load 31k PSU requirement rows (~2 min)
-python scripts/rebuild_gen_ed.py  # load gen ed requirements from scraped bulletin data
-python scripts/seed_matthew.py    # seed test user + transcript
-python scripts/build_rmp_index.py # rebuild RateMyProfessors course→professor index (~20-40 min)
-```
-> Without the RMP index, `/courses/:code/professors` returns no professors for any course.
-
-### 3. Start the backend
-```bash
-cd backend
+python scripts/setup_tables.py        # tables + bucket
+python scripts/load_catalog.py        # PSU requirements (~2 min)
+python scripts/rebuild_gen_ed.py      # gen-ed requirements
 python -m uvicorn main:app --host 0.0.0.0 --port 8080 --reload
-```
 
-### 4. Start the mobile app
-```bash
-cd mobile
+cd ../mobile
 npx expo start
 ```
-Scan the QR code in Expo Go. The app connects to `API_BASE` in `mobile/constants/api.ts`.
+
+Run the tests with `cd backend && python -m pytest tests`.
+
+## Docs
+
+- [`docs/timeline-sap-hybrid.md`](docs/timeline-sap-hybrid.md) — how the timeline uses PSU's suggested plans
+- [`docs/minors-certificates.md`](docs/minors-certificates.md) — minors & certificates
+- [`docs/official-transcript-handling.md`](docs/official-transcript-handling.md) — official transcript detection and parsing
+- [`CLAUDE.md`](CLAUDE.md) — full architecture notes
 
 ---
 
-## DynamoDB Tables
-
-| Table | PK | SK | Contents |
-|-------|----|----|---------|
-| `requirements` | `program_name` | `group_course` | All PSU major + gen ed requirements |
-| `users` | `user_id` | — | User profile (major, subplan, timestamps) |
-| `transcript_courses` | `user_id` | `course_code` | Parsed transcript courses |
-
-Gen ed requirements are stored under `program_name = "__GEN_ED__"`.
-
----
-
-## Audit Logic
-
-```
-For each requirement group in the student's major:
-
-  required:        each course must be in done/in_progress list
-  choose_one:      group by pair_group_id — at least one per pair must be done/in_progress
-  choose_credits:  sum credits of completed pool courses >= group_threshold
-  choose_courses:  count of completed pool courses >= group_threshold
-```
-
----
-
-## Authentication
-
-Real sign-in via Google/Apple OIDC — ID tokens are verified in `backend/auth.py`
-(JWKS signature, audience, issuer, expiry) and the canonical `user_id` is the
-provider-scoped subject (`google:<sub>` / `apple:<sub>`). In dev,
-`AUTH_DEV_BYPASS=1` in `backend/.env` accepts the legacy `x-user-id` header
-(how Expo Go works with the test user). Never set the bypass in prod.
-See CLAUDE.md § Auth for details.
-
-## Official Transcripts
-
-Students sometimes upload their **official** transcript instead of the
-unofficial LionPATH one. The backend detects these (`official_detector.py`),
-parses them with a dedicated parser, and gates storage behind a consent dialog
-(409 + `acknowledge_official` re-submit). See
-[`docs/official-transcript-handling.md`](docs/official-transcript-handling.md).
-
----
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/transcript/upload` | Accept PDF, parse, store to DB |
-| GET | `/audit` | Full degree audit for user |
-| GET | `/timeline` | Semester-by-semester projection |
-| GET | `/programs/search` | Fuzzy search program names |
-| POST | `/programs/select` | Save major + subplan selection |
-| GET | `/courses/:code` | Course detail (title, credits, description) |
-| GET | `/courses/:code/professors` | Auto-detect professors + RMP ratings |
-| GET | `/users/me` | User profile |
-
----
-
-## Test User
-
-| Field | Value |
-|-------|-------|
-| user_id | `matthew-test-001` |
-| major | Enterprise Technology Integration, B.S. |
-| transcript | Real PSU unofficial transcript, 26 courses |
-
----
-
-## Roadmap
-
-- **Session refresh** — ID tokens expire after ~1 h; add a refresh/session mechanism
-- **Deploy** — AWS backend + EAS Build for App Store / Google Play
-- **Multi-school** — expand scraper and parser to other universities
-- **Prerequisite warnings** — flag deep chains so students know what to take first
-
----
-
-## Data Source
-
-Penn State Undergraduate Bulletin — [bulletins.psu.edu](https://bulletins.psu.edu)
-
-- `/undergraduate/` and `/programs/` permitted per robots.txt
-- 0.35s delay between requests, 15s timeout, 3 retries
-- Catalog accuracy maintained via periodic re-scrape
+GradGPS is an independent project and is not affiliated with or endorsed by The Pennsylvania State University.
