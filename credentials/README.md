@@ -165,6 +165,16 @@ which gates satisfaction — 11 credits of 100-level PSYCH does not complete the
    `GET /programs/credentials`, `PUT /users/me/credentials`, the Account card, and the
    major-screen pointer.
 
+## Counting check (Oct 2026)
+
+Agreeing with PSU's total proves the requirements were *read* right, not that the audit
+*counts* a student's courses right. `check_counting.py` builds, for every credential, a
+transcript that completes it with each course used once, runs the app's own credential
+audit, and removes one course at a time. It found credentials reading complete early
+(a course filling two requirements, merged pools, "0-6 credit" ranges satisfied at zero)
+and six pages the parser can't model, now corrected in `overrides.py`, which
+`scrape_credentials.build()` applies after parsing. See CLAUDE.md, "Counting".
+
 ## Re-running this later
 
 `--report` prints the agreement figure every time, so a PSU page edit that breaks a parse

@@ -449,6 +449,33 @@ screen + "Major Saved" screen), and a violet chip on timeline cards.
 Tests: `backend/tests/test_credentials.py` (18, pytest or plain `python`) plus 31 parser tests in
 `credentials/tests/`.
 
+**Counting (Oct 2026): one course, one requirement.** A per-credential check
+(`credentials/check_counting.py`: build a transcript that completes each credential, run the app's own
+audit, drop one course at a time) found credentials reading complete too early. Fixes:
+- **Exclusive counting**: `run_audit(..., exclusive=True)` (credentials only; majors rely on shared
+  courses) evaluates requirements most-specific first (`_allocate_exclusive`) and a course fills one
+  requirement. Kinesiology lists KINES 100/101/202 in both pools (12 of 18 credits read as done); HDFS's
+  400-level courses filled both its HDFS pools. This replaces the old "named codes excluded from dept
+  pools" rule, so a list course a list didn't need can still fill a departmental pool.
+- **Every catalog group is its own pool** (`pool_seq = group index + 1` in `to_requirement_rows`):
+  same-size pools in a section were merged (East European Studies' "choose 1 course" ×3).
+- **Credit ranges vs PSU's total** (`credentials_audit._apply_total_gate`): "Select 0-6 credits" pools
+  satisfy at zero (Ethics read done at 9 of 18). Owed = PSU's total − the catalog minimum, capped at the
+  ranges' room, and only credits a range pool counted above its own minimum go toward it. Unmet adds a
+  "Total credits" requirement shaped as a dept pool so the timeline schedules it. Deliberately NOT a
+  blanket total: variable-credit courses would wrongly hold back finished students.
+- **Engine, all programs**: `_entry_of()` reads a matched course's credits/grade the way `_course_status`
+  matches it (PSYCH 301W stored as PSYCH 301 counted 0 credits); a list naming one course twice
+  (PHIL 103 / PHIL 103W, also 44 majors) counts it once (item flagged `duplicate`, status kept); a
+  choose-one uses one option (PPEM 300 *or* 405 kept the other for the pool); a no-credit adviser item
+  ("Demonstrate proficiency") is met once the student names a course instead of never.
+- **Data**: `credentials/overrides.py` repairs six pages the parser can't model (Agribusiness's
+  "ABGM"/"AGMB" typos, Dispute Management, Environmental Resource Management, and three track/branch
+  pages modelled as one adviser-confirmed block); `include` codes on dept pools. Re-scraped Oct 4 2026:
+  no requirement drift, 206/207 still match PSU, +Jewish Studies and Religious Studies minors (209).
+Result: 207 of 209 complete correctly; the 2 others are limits of the check script. Tests: 11 new in
+`tests/test_credentials.py`.
+
 **Degree-program scoping.** `is_degree_program()` in `routers/programs.py` keeps minors/certificates
 out of the **major** list (`/programs/all`, `/programs/search`: 487 → 225 programs, then 184 after UP scoping below) and `POST
 /programs/select` refuses one with a 400, because the major is the single program the whole plan is

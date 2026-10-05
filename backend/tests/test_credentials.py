@@ -74,12 +74,13 @@ def test_psychology_minor_end_to_end():
 def test_prescribed_courses_do_not_also_fill_the_additional_pool():
     """PSU's word is "Additional": a course that already satisfies a named
     requirement must not also count toward the departmental pool, or two courses
-    plus one elective would read as a finished minor."""
+    plus one elective would read as a finished minor. Credentials are audited
+    exclusively (one course, one requirement), which is what enforces it."""
     _meta, rows = cc.load_credential("Psychology, Minor")
     result = run_audit(rows, tx(
         ("PSYCH 100", "done", "A", 3), ("PSYCH 301W", "done", "A", 4),
         ("PSYCH 412", "done", "A", 4),
-    ))
+    ), exclusive=True)
     pool = group_named(result, "dept_credits")[0]
     assert pool["satisfied"] is False
     assert pool["credits_earned"] == 4.0      # only the one additional course
@@ -363,6 +364,132 @@ def test_adviser_deferred_requirement_is_scheduled_whole_and_flagged():
     assert len(flagged) == 1
     assert flagged[0]["credits_earned"] >= 9
     assert "areas of concentration" in flagged[0]["course_title"]
+
+
+# ── Counting (Oct 2026): one course, one requirement ─────────────────────────
+# Found by credentials/check_counting.py, which builds a transcript that really
+# completes every credential and checks each course is needed.
+
+import credentials_audit                               # noqa: E402
+
+
+def audit_one(program, rows_tx, attested=None):
+    """A declared credential audited the way the app does it."""
+    from credential_choices import _SEP
+    att = {f"{program}{_SEP}{g}": v for g, v in (attested or {}).items()}
+    return credentials_audit.audit_declared_credentials(
+        {"credentials": [{"program": program}]}, tx(*rows_tx), None, att)[0]
+
+
+def done(*codes, cr=3):
+    return [(c, "done", "A", cr) for c in codes]
+
+
+def complete(result):
+    return all(g["satisfied"] for g in result["groups"])
+
+
+def test_a_course_listed_in_two_pools_fills_only_one():
+    """Kinesiology lists KINES 100/101/202 in both its 6- and 12-credit pools; 12
+    credits used to read as a finished 18-credit minor."""
+    assert not complete(audit_one("Kinesiology, Minor",
+                                  done("KINES 100", "KINES 101", "KINES 202", "KINES 303")))
+    assert complete(audit_one("Kinesiology, Minor", done(
+        "KINES 100", "KINES 101", "KINES 202", "KINES 303", "KINES 321", "KINES 341")))
+
+
+def test_level_pool_courses_do_not_also_fill_the_open_pool():
+    """HDFS: 9 credits of HDFS plus 6 of 400-level HDFS are 15 distinct credits."""
+    r = audit_one("Human Development and Family Studies, Minor",
+                  done("HDFS 129", "HDFS 401", "HDFS 402", "HDFS 403"))
+    assert not complete(r)
+    assert complete(audit_one("Human Development and Family Studies, Minor", done(
+        "HDFS 129", "HDFS 401", "HDFS 402", "HDFS 216", "HDFS 229", "HDFS 239")))
+
+
+def test_every_catalog_group_is_its_own_pool():
+    """Two same-size pools in one section used to merge into one requirement."""
+    for entry in cc._catalog().values():
+        rows = cc.to_requirement_rows(entry)
+        seqs = {r["requirement_group"]: set() for r in rows}
+        for r in rows:
+            seqs[r["requirement_group"]].add(r["pool_seq"])
+        groups = [g["name"] for g in entry["groups"]]
+        for name in set(groups):
+            assert len(seqs[name]) == groups.count(name), entry["program_name"]
+
+
+def test_credit_ranges_are_owed_up_to_psus_total():
+    """Ethics: its fixed requirements need 9 credits, PSU says 18. The "0-6
+    credit" pools satisfy at zero, so 9 credits read as a finished minor."""
+    nine = done("PHIL 103", "PHIL 105", "PHIL 403")
+    r = audit_one("Ethics, Minor", nine)
+    total = [g for g in r["groups"] if g["name"] == credentials_audit.TOTAL_GROUP]
+    assert total and total[0]["credits_needed"] == 9 and not complete(r)
+    r = audit_one("Ethics, Minor", nine + done("PHIL 2", "PHIL 3", "AFAM 103"))
+    assert complete(r)
+
+
+def test_range_owed_never_exceeds_the_ranges_room():
+    """Turfgrass (Advanced) states 30 against a 27 minimum, but its range has only
+    1 credit of room, so owing 3 made it impossible to finish."""
+    meta, _ = cc.load_credential("Turfgrass Management, Advanced, Certificate")
+    room = sum(hi - lo for lo, hi in meta["ranges"].values())
+    assert room < meta["required_total"] - meta["credits"]["min"]
+
+
+def test_a_suffixed_course_brings_its_real_credits():
+    """PSYCH 301W is stored as PSYCH 301 and used to count 0 credits."""
+    r = run_audit(*cc.load_credential("Psychology, Minor")[1:], tx(
+        ("PSYCH 100", "done", "A", 3), ("PSYCH 301", "done", "A", 4)))
+    prescribed = [g for g in r["groups"] if g["group_type"] == "required"][0]
+    assert prescribed["credits_earned"] == 7.0
+
+
+def test_one_course_named_twice_in_a_list_counts_once():
+    rows = [{"program_name": "X", "requirement_group": "Pool", "group_type": "choose_credits",
+             "group_threshold": 6, "course_code": c, "credits": 3}
+            for c in ("PHIL 103", "PHIL 103W", "PHIL 105")]
+    r = run_audit(rows, tx(("PHIL 103", "done", "A", 3)))
+    assert r["groups"][0]["satisfied"] is False
+    assert r["groups"][0]["credits_earned"] == 3.0
+    assert run_audit(rows, tx(("PHIL 103", "done", "A", 3), ("PHIL 105", "done", "A", 3)))["groups"][0]["satisfied"]
+
+
+def test_a_choose_one_keeps_only_one_option():
+    """Plant Pathology: "PPEM 300 or PPEM 405", and both are also in the 12-credit
+    pool. A student who took both keeps the second for the pool."""
+    r = audit_one("Plant Pathology, Minor", done(
+        "BIOL 110", "PPEM 496", "PPEM 300", "PPEM 405", "AGECO 121", "AGECO 457", "PPEM 120"))
+    assert complete(r)
+
+
+def test_no_credit_adviser_item_is_met_once_named():
+    """"Demonstrate 12th-credit-level proficiency" used to be unsatisfiable."""
+    program = "Global Security, Minor"
+    entry = cc.get_credential(program)
+    item = [g["name"] for g in entry["groups"]
+            if g["group_type"] == "unstructured_credits" and not g.get("threshold")][0]
+    r = audit_one(program, [("FR 3", "done", "A", 4)])
+    assert not [g for g in r["groups"] if g["name"] == item][0]["satisfied"]
+    r = audit_one(program, [("FR 3", "done", "A", 4)], {item: ["FR 3"]})
+    assert [g for g in r["groups"] if g["name"] == item][0]["satisfied"]
+
+
+def test_repaired_pages_can_be_completed():
+    """Agribusiness's page misspells AGBM; Environmental Resource Management lists
+    "ABSM 327, SOILS 101, any ERM course"."""
+    assert complete(audit_one("Agribusiness Management, Minor", done(
+        "AGBM 102", "AGBM 106", "AGBM 200", "AGBM 101", "AGBM 302", "AGBM 410", "AGBM 420")))
+    assert not complete(audit_one("Agribusiness Management, Minor", done(
+        "AGBM 102", "AGBM 106", "AGBM 200", "AGBM 101", "AGBM 302", "AGBM 308W", "AGBM 410")))
+    assert complete(audit_one("Environmental Resource Management, Minor", done(
+        "ABSM 327", "SOILS 101", "ERM 210", "ERM 300", "ERM 411", "ERM 412")))
+
+
+def test_new_minors_are_in_the_catalog():
+    assert cc.is_credential("Jewish Studies, Minor")
+    assert cc.is_credential("Religious Studies, Minor")
 
 
 if __name__ == "__main__":

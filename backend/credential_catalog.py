@@ -114,7 +114,7 @@ def _pool_row(entry_name: str, group: dict, code: str) -> dict:
         "pool_text":         spec.get("text", ""),
     }
     for key in ("dept", "depts", "min_level", "max_level",
-                "sub_level", "sub_credits", "exclude"):
+                "sub_level", "sub_credits", "exclude", "include"):
         if spec.get(key) not in (None, [], ""):
             row[key] = spec[key]
     return row
@@ -129,27 +129,27 @@ def to_requirement_rows(entry: dict) -> list[dict]:
     rows: list[dict] = []
     name = entry["program_name"]
 
-    # Every course the credential names explicitly, anywhere.  A departmental pool is
-    # "Select 11 credits … in PSYCH" on top of the *prescribed* PSYCH courses — so a
-    # course that already fills a named requirement must not also fill the pool, or a
-    # student who took only the two prescribed courses plus one elective would read as
-    # done.  PSU's word for the pool is "Additional".
-    named_codes = [
-        c["course_code"]
-        for g in entry.get("groups", [])
-        if g["group_type"] not in (DEPT_CREDITS, UNSTRUCTURED_CREDITS)
-        for c in g.get("courses", [])
-    ]
+    # A departmental pool is "Select 11 credits … in PSYCH" on top of the prescribed
+    # PSYCH courses; PSU's word for it is "Additional". That is enforced by auditing
+    # credentials exclusively (run_audit(exclusive=True)): a course a named
+    # requirement used can't fill the pool too, while a list course the list didn't
+    # need still can.
 
     for gi, group in enumerate(entry.get("groups", [])):
         gtype = group["group_type"]
+        # Each catalog group is its own pool. Without this, two pools in one section
+        # with the same size ("choose 1 course" twice in East European Studies)
+        # bucketed together and only one was enforced. 1-based: run_audit treats 0
+        # as "no pool_seq".
+        extra = {"pool_seq": gi + 1}
+        if group.get("threshold_max"):
+            # "Select 0-6 credits": the top of the range still counts toward the
+            # credential's total (credentials_audit).
+            extra["group_threshold_max"] = group["threshold_max"]
 
         if gtype in (DEPT_CREDITS, UNSTRUCTURED_CREDITS):
             subject = (group.get("pool") or {}).get("dept") or "ANY"
-            row = _pool_row(name, group, f"__{gtype.upper()}_{subject}_{gi}__")
-            if named_codes:
-                row["exclude"] = sorted(set(row.get("exclude", [])) | set(named_codes))
-            rows.append(row)
+            rows.append({**_pool_row(name, group, f"__{gtype.upper()}_{subject}_{gi}__"), **extra})
             continue
 
         for course in group.get("courses", []):
@@ -163,6 +163,7 @@ def to_requirement_rows(entry: dict) -> list[dict]:
                 "credits":           course.get("credits"),
                 "min_grade":         group.get("min_grade", ""),
                 "pair_group_id":     course.get("pair_group_id"),
+                **extra,
             }
             # run_audit() is shared with majors and cannot tell a credential from
             # one, so a compound branch must survive the conversion. No credential
@@ -200,6 +201,15 @@ def to_requirement_rows(entry: dict) -> list[dict]:
     return rows
 
 
+def required_total(entry: dict) -> float:
+    """Credits the credential takes in all: PSU's own stated total where our parse
+    agrees with it (206 of 207), else the reconstructed minimum."""
+    stated = entry.get("stated_credits")
+    if stated and entry.get("agrees"):
+        return float(stated)
+    return float((entry.get("credits") or {}).get("min") or 0)
+
+
 def load_credential(program_name: str) -> tuple[dict, list[dict]] | None:
     """(metadata, requirement rows) for a declared credential, or None if unknown."""
     entry = get_credential(program_name)
@@ -212,5 +222,12 @@ def load_credential(program_name: str) -> tuple[dict, list[dict]] | None:
         "credits":        entry.get("credits", {}),
         "manual_credits": entry.get("manual_credits", 0),
         "url":            entry.get("url", ""),
+        "required_total": required_total(entry),
+        # pool_seq -> (min, max) of each "Select 0-6 credits" range: per-requirement
+        # checks can't say how much of a range is owed, so credentials_audit weighs
+        # them against the credential's total.
+        "ranges": {gi + 1: (float(g.get("threshold") or 0), float(g["threshold_max"]))
+                   for gi, g in enumerate(entry.get("groups", []))
+                   if (g.get("threshold_max") or 0) > (g.get("threshold") or 0)},
     }
     return meta, to_requirement_rows(entry)

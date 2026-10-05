@@ -205,7 +205,7 @@ def _collect_missing(audit_result: dict, course_choices: dict[str, str] | None =
                     ip_credits = sum(
                         float(it.get("credits") or 3)
                         for it in pool_items
-                        if it.get("status") == "in_progress"
+                        if it.get("status") == "in_progress" and not it.get("duplicate")
                     )
                     earned_so_far = (src.get("credits_earned") or 0) + ip_credits
                     needed = max(0, (src.get("threshold") or 0) - earned_so_far)

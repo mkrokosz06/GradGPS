@@ -29,6 +29,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from courseleaf import parse_courselist
 from validate import validate, credit_range, manual_credits
 from verify import check as verify_against_psu
+import overrides
 
 HERE       = pathlib.Path(__file__).parent
 CACHE_DIR  = HERE / ".cache"
@@ -107,6 +108,11 @@ def build(program: dict, refresh: bool = False) -> dict:
         "groups":       groups,
         "warnings":     warnings,
     }
+    # Pages the parser can't model on its own (overrides.py). A page that changed
+    # shape since its override was written fails the run rather than mis-applying.
+    if overrides.apply(entry):
+        entry["overridden"] = True
+    groups = entry["groups"]
     lo, hi = credit_range(groups)
     entry["credits"] = {"min": lo, "max": hi}
 

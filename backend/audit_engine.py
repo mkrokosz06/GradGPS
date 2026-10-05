@@ -1157,7 +1157,8 @@ def run_gen_ed_audit(requirement_rows: list[dict], transcript_courses: list[dict
 
 def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
               substitutions: dict | None = None,
-              attested_by_group: dict[str, list[str]] | None = None) -> dict:
+              attested_by_group: dict[str, list[str]] | None = None,
+              exclusive: bool = False) -> dict:
     """
     Parameters
     ----------
@@ -1172,6 +1173,10 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
         Only `unstructured_credits` groups read this — the adviser-defined minor
         requirements PSU never resolves into a course list (credential_choices.py).
         Omitting it is a byte-identical no-op.
+
+    exclusive : one course fills one requirement (minors / certificates). Off for
+        majors, whose catalog relies on the same course appearing in several
+        groups. See `_allocate_exclusive`. Adds `credits_counted` to the result.
 
     Returns
     -------
@@ -1209,6 +1214,16 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
     total_done = total_ip = total_missing = 0
     total_credits = 0.0
 
+    attested_by_group = attested_by_group or {}
+    buckets_by_group: dict[str, dict] = {}
+    for group_name, rows in groups_map.items():
+        buckets_by_group[group_name] = _type_buckets(rows)
+    precomputed: dict = {}
+    counted = (0.0, 0.0)
+    if exclusive:
+        precomputed, counted = _allocate_exclusive(buckets_by_group, group_meta, taken,
+                                                   attested_by_group)
+
     for group_name, rows in groups_map.items():
         # A group may contain rows with different group_types (e.g. ETI Requirements
         # has both choose_one and choose_credits rows). Split and evaluate each
@@ -1228,22 +1243,15 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
         # Rows loaded before that column existed have no pool_seq, so they key
         # on None and bucket exactly as they did before — the engine is a
         # no-op until the catalog is reloaded.
-        type_buckets: dict[tuple, list[dict]] = defaultdict(list)
-        for row in rows:
-            gtype = row.get("group_type", "required")
-            is_pool = gtype in (
-                "choose_credits", "choose_courses", "dept_credits", "unstructured_credits"
-            )
-            thr_key = int(row["group_threshold"]) if is_pool and row.get("group_threshold") else None
-            seq_key = int(row["pool_seq"]) if is_pool and row.get("pool_seq") else None
-            type_buckets[(gtype, thr_key, seq_key)].append(row)
+        type_buckets = buckets_by_group[group_name]
 
         if len(type_buckets) == 1:
             # Homogeneous — simple path
-            (gtype, _, _) = next(iter(type_buckets))
+            bkey = next(iter(type_buckets))
+            gtype = bkey[0]
             threshold  = group_meta[group_name]["group_threshold"]
-            result     = _eval_type(gtype, rows, taken, threshold,
-                                    (attested_by_group or {}).get(group_name))
+            result     = precomputed.get((group_name, bkey)) or _eval_type(
+                gtype, rows, taken, threshold, attested_by_group.get(group_name))
 
             d, ip, m = _pool_counts(gtype, result)
             total_done    += d
@@ -1267,9 +1275,14 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             # Credential pools carry the bulletin's own wording so the UI can show the
             # requirement as written ("Select 6 credits ... in consultation with the
             # minor adviser") rather than a generic placeholder.
-            for extra in ("pool_text", "needs_confirmation", "credits_needed"):
+            for extra in ("pool_text", "needs_confirmation", "credits_needed",
+                          "credits_counted", "credits_counted_in_progress"):
                 if result.get(extra):
                     gr[extra] = result[extra]
+            if exclusive and bkey[2] is not None:
+                # Not "pool_seq": the timeline builds class-selector keys from that,
+                # and a new key would orphan picks students already saved.
+                gr["pool_index"] = bkey[2]
             group_results.append(gr)
 
         else:
@@ -1282,7 +1295,8 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
                 # thr is the pool threshold for choose_credits/choose_courses,
                 # or None for required/choose_one rows. seq distinguishes two
                 # pools that share a threshold within the same section.
-                res = _eval_type(gtype, bucket_rows, taken, thr)
+                res = precomputed.get((group_name, (gtype, thr, seq))) or _eval_type(
+                    gtype, bucket_rows, taken, thr, attested_by_group.get(group_name))
                 d, ip, m = _pool_counts(gtype, res)
                 agg_done    += d
                 agg_ip      += ip
@@ -1304,6 +1318,9 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
                 }
                 if "credits_in_progress" in res:
                     sr["credits_in_progress"] = res["credits_in_progress"]
+                for extra in ("credits_counted", "credits_counted_in_progress"):
+                    if res.get(extra):
+                        sr[extra] = res[extra]
                 sub_results.append(sr)
 
             total_done    += agg_done
@@ -1327,7 +1344,7 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
 
     major = requirement_rows[0]["program_name"] if requirement_rows else "Unknown"
 
-    return {
+    out = {
         "major":          major,
         "total":          total_done + total_ip + total_missing,
         "done":           total_done,
@@ -1336,6 +1353,147 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
         "credits_earned": round(total_credits, 1),
         "groups":         group_results,
     }
+    if exclusive:
+        # Distinct credits the requirements actually used, each course once.
+        out["credits_counted"] = round(counted[0], 1)
+        out["credits_counted_in_progress"] = round(counted[1], 1)
+    return out
+
+
+_POOL_TYPES = ("choose_credits", "choose_courses", "dept_credits", "unstructured_credits")
+
+
+def _type_buckets(rows: list[dict]) -> dict[tuple, list[dict]]:
+    """A group's rows split by (group_type, threshold, pool_seq) — see run_audit."""
+    type_buckets: dict[tuple, list[dict]] = defaultdict(list)
+    for row in rows:
+        gtype = row.get("group_type", "required")
+        is_pool = gtype in _POOL_TYPES
+        thr_key = int(row["group_threshold"]) if is_pool and row.get("group_threshold") else None
+        seq_key = int(row["pool_seq"]) if is_pool and row.get("pool_seq") else None
+        type_buckets[(gtype, thr_key, seq_key)].append(row)
+    return type_buckets
+
+
+def _bucket_rank(gtype: str, rows: list[dict]) -> tuple:
+    """Evaluation order for exclusive counting: most specific requirement first, so
+    a course goes to the requirement that can use nothing else. Named courses, then
+    short lists before long ones, then subject rules with a level before open ones,
+    then adviser-defined blocks."""
+    if gtype == "required":
+        return (0, 0)
+    if gtype == "choose_one":
+        return (1, 0)
+    if gtype in ("choose_credits", "choose_courses"):
+        return (2, len(rows))
+    if gtype == "dept_credits":
+        spec = _pool_spec(rows)
+        narrow = any(spec.get(k) for k in ("min_level", "max_level", "sub_level", "include"))
+        return (3, 0 if narrow else 1)
+    return (4, 0)
+
+
+def _allocate_exclusive(buckets_by_group: dict, group_meta: dict, taken: dict,
+                        attested: dict) -> tuple[dict, tuple[float, float]]:
+    """Evaluate every requirement so that one course fills one requirement.
+
+    PSU doesn't let a minor's course count twice inside the minor, but its pages
+    routinely list a course in two places (Kinesiology names KINES 100/101/202 in
+    both of its pools; HDFS asks for 9 credits of HDFS *and* 6 of 400-level HDFS).
+    Evaluated independently, the same course filled both and a student read as done
+    with 12 of 18 credits. Here requirements run most-specific first, each sees
+    only courses no earlier one used, and each uses only what it needs.
+
+    Returns ({(group, bucket_key): result}, (credits counted, in progress))."""
+    order = []
+    for g, buckets in buckets_by_group.items():
+        for key, rows in buckets.items():
+            thr = group_meta[g]["group_threshold"] if len(buckets) == 1 else key[1]
+            order.append((_bucket_rank(key[0], rows), g, key, rows, thr))
+    order.sort(key=lambda o: o[0])
+
+    consumed: set[int] = set()
+    done_cr = ip_cr = 0.0
+    out: dict = {}
+    for _, g, key, rows, thr in order:
+        gtype = key[0]
+        view = {k: v for k, v in taken.items() if id(v) not in consumed}
+        res = _eval_type(gtype, rows, view, thr, attested.get(g))
+        pool_done = pool_ip = 0.0
+        for entry, cr in _used_entries(gtype, res, view, rows, thr):
+            if id(entry) in consumed:
+                continue
+            consumed.add(id(entry))
+            if entry.get("status") == "in_progress":
+                ip_cr += cr; pool_ip += cr
+            else:
+                done_cr += cr; pool_done += cr
+        # What this requirement used, so a caller can weigh credit ranges.
+        out[(g, key)] = {**res, "credits_counted": round(pool_done, 1),
+                         "credits_counted_in_progress": round(pool_ip, 1)}
+    return out, (done_cr, ip_cr)
+
+
+def _satisfying_options(items: list[dict]) -> list[dict]:
+    """A choose-one uses ONE option per pair: the branch that satisfied it (all of
+    a compound branch's members), else the first taken option. A student who took
+    both PPEM 300 and PPEM 405 for "PPEM 300 or PPEM 405" keeps the other for the
+    elective pool that also lists it."""
+    out, by_pair = [], defaultdict(list)
+    for it in items:
+        pid = it.get("pair_group_id")
+        if pid is None:
+            out.append(it)
+        else:
+            by_pair[pid].append(it)
+    rank = {"done": 0, "transfer": 0, "in_progress": 1}
+    for members in by_pair.values():
+        taken = [it for it in members if it.get("status") in rank]
+        if not taken:
+            continue
+        branched = [it for it in taken if it.get("pair_branch_id")
+                    and it.get("branch_status") in ("done", "in_progress")]
+        if branched:
+            bid = branched[0]["pair_branch_id"]
+            out += [it for it in members if it.get("pair_branch_id") == bid]
+        else:
+            out.append(min(taken, key=lambda it: rank[it["status"]]))
+    return out
+
+
+def _used_entries(gtype: str, res: dict, view: dict, rows: list[dict], thr) -> list:
+    """The transcript entries a requirement used, with the credits each brings.
+
+    A named requirement uses every course it matched. A pool uses courses until it
+    is full (finished courses first), up to the top of a stated range ("Select 0-6
+    credits") so those extra credits still count toward the credential's total."""
+    picked = []
+    seen: set[int] = set()
+    items = res.get("items", [])
+    if gtype == "choose_one":
+        items = _satisfying_options(items)
+    for it in items:
+        if it.get("status") not in ("done", "in_progress", "transfer"):
+            continue
+        entry = _find_entry(it.get("course_code", ""), view)
+        if entry is None or entry.get("_fill_of") or id(entry) in seen:
+            continue
+        seen.add(id(entry))
+        cr = float(entry.get("credits_earned") or 0) or float(it.get("credits") or 0) or 3.0
+        picked.append((entry, cr))
+    if gtype not in _POOL_TYPES:
+        return picked
+
+    picked.sort(key=lambda ec: ec[0].get("status") == "in_progress")
+    top = max(float(thr or 0), max((float(r.get("group_threshold_max") or 0) for r in rows),
+                                   default=0.0))
+    used, have = [], 0.0
+    for entry, cr in picked:
+        if have >= top:
+            break
+        used.append((entry, cr))
+        have += 1 if gtype == "choose_courses" else cr
+    return used
 
 
 # ── Helpers ──────────────────────────────────────────────────────────────────
@@ -1423,6 +1581,13 @@ def _in_dept_pool(code: str, spec: dict) -> bool:
         return False
     dept, number, _suffix = parsed
 
+    # Courses the pool names outright ("ABSM 327, SOILS 101, or any ERM course")
+    # count whatever their subject or level; exclusions still win below.
+    included = {_strip_attr(c) for c in spec.get("include", [])}
+    if _strip_attr(f"{dept} {number}") in included and not any(
+            (_split_course_code(x) or ())[:2] == (dept, number) for x in spec.get("exclude", [])):
+        return True
+
     subjects = set(spec.get("depts") or ([spec["dept"]] if spec.get("dept") else []))
     if subjects and dept not in subjects:
         return False
@@ -1442,7 +1607,7 @@ def _pool_spec(rows: list[dict]) -> dict:
     row = rows[0] if rows else {}
     return {k: row[k] for k in
             ("dept", "depts", "min_level", "max_level", "sub_level", "sub_credits",
-             "exclude", "pool_text")
+             "exclude", "include", "pool_text")
             if row.get(k) not in (None, [], "")}
 
 
@@ -1564,7 +1729,18 @@ def _eval_unstructured_credits(rows: list[dict], taken: dict, threshold,
             "attested":     True,
         })
 
-    satisfied = bool(thr) and credits_earned >= thr
+    proficiency = "proficien" in (spec.get("pool_text") or "").lower()
+    if thr:
+        satisfied = credits_earned >= thr
+    elif proficiency or not any((r.get("group_threshold_max") or 0) > 0 for r in rows):
+        # No credits of its own ("Demonstrate 12th-credit-level proficiency in a
+        # world language", stored as 0-12): met once the student names the course
+        # that showed it. Never assumed.
+        satisfied = done > 0
+    else:
+        # "Select 0-3 credits": optional on its own; the credential's total
+        # (credentials_audit) decides how much of a range is owed.
+        satisfied = True
     return {
         "satisfied":           satisfied,
         "credits_earned":      round(min(credits_earned, thr) if thr else credits_earned, 1),
@@ -1646,7 +1822,7 @@ def _eval_required_consumed(rows: list[dict], taken: dict) -> dict:
         status = _course_status_consumed(row, taken)
         if status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
@@ -1657,7 +1833,7 @@ def _eval_required_consumed(rows: list[dict], taken: dict) -> dict:
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "min_grade":    row.get("min_grade", ""),
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         }
         if row.get("multi_category"):
             item["multi_category"] = True
@@ -1706,7 +1882,7 @@ def _branch_status(members: list[dict], taken: dict, status_fn) -> str:
 def _earned(members: list[dict], taken: dict) -> float:
     """Credits earned across a branch — the sum, so 201+202 counts 6, not 3."""
     return sum(
-        taken.get(m.get("course_code", "").strip().upper(), {}).get("credits_earned", 0)
+        _entry_of(m.get("course_code", ""), taken).get("credits_earned", 0)
         for m in members
     )
 
@@ -1766,7 +1942,7 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
                 "credits":       float(row["credits"]) if row.get("credits") else None,
                 "min_grade":     row.get("min_grade", ""),
                 "status":        _course_status_consumed(row, taken),
-                "grade":         taken.get(code, {}).get("grade", ""),
+                "grade":         _entry_of(code, taken).get("grade", ""),
                 "pair_group_id": pid,
                 "pair_status":   pair_status,
             }
@@ -1782,7 +1958,7 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
         status = _course_status_consumed(row, taken)
         if status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
@@ -1792,7 +1968,7 @@ def _eval_choose_one_consumed(rows: list[dict], taken: dict) -> dict:
             "course_title": row.get("course_title", ""),
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         }
         if row.get("multi_category"):
             uitem["multi_category"] = True
@@ -1812,7 +1988,7 @@ def _eval_choose_credits_consumed(rows: list[dict], taken: dict, threshold) -> d
         status = _course_status_consumed(row, taken)
         cr     = float(row["credits"]) if row.get("credits") else 3.0
         if status == "done":
-            credits_earned += taken.get(code, {}).get("credits_earned", cr)
+            credits_earned += _entry_of(code, taken).get("credits_earned", cr)
             done += 1
         elif status == "in_progress":
             ip += 1
@@ -1823,7 +1999,7 @@ def _eval_choose_credits_consumed(rows: list[dict], taken: dict, threshold) -> d
             "course_title": row.get("course_title", ""),
             "credits":      cr,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         }
         if row.get("multi_category"):
             citem["multi_category"] = True
@@ -1847,7 +2023,7 @@ def _eval_choose_courses_consumed(rows: list[dict], taken: dict, threshold) -> d
         status = _course_status_consumed(row, taken)
         if status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
@@ -1857,7 +2033,7 @@ def _eval_choose_courses_consumed(rows: list[dict], taken: dict, threshold) -> d
             "course_title": row.get("course_title", ""),
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         }
         if row.get("multi_category"):
             ccitem["multi_category"] = True
@@ -1893,17 +2069,18 @@ def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold,
 
 # ── Group type evaluators ────────────────────────────────────────────────────
 
-def _course_status(row: dict, taken: dict) -> str:
-    """Returns "done", "in_progress", or "missing" for a single course row."""
-    code      = row.get("course_code", "").strip().upper()
-    min_grade = row.get("min_grade", "")
-    # Try matches in order of specificity:
-    #  1. Exact: "CAS 100" → "CAS 100"
-    #  2. Suffix-stripped: catalog "IST 440W" / "BIOL 230M" → transcript "IST 440" / "BIOL 230"
-    #     (transcript_parser normalises trailing W from transcript codes)
-    #  3. Variant suffix: catalog "CAS 100" → transcript "CAS 100C"
-    #     (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
-    entry = (
+def _find_entry(code: str, taken: dict) -> dict | None:
+    """The transcript entry a requirement code refers to, or None.
+
+    Tried in order of specificity:
+     1. Exact: "CAS 100" → "CAS 100"
+     2. Suffix-stripped: catalog "IST 440W" / "BIOL 230M" → transcript "IST 440" / "BIOL 230"
+        (transcript_parser normalises trailing W from transcript codes)
+     3. Variant suffix: catalog "CAS 100" → transcript "CAS 100C"
+        (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
+    """
+    code = (code or "").strip().upper()
+    return (
         taken.get(code)
         or taken.get(_strip_attr(code))
         or next(
@@ -1912,6 +2089,22 @@ def _course_status(row: dict, taken: dict) -> str:
             None,
         )
     )
+
+
+def _entry_of(code: str, taken: dict) -> dict:
+    """`_find_entry`, or {} — for reading a matched course's credits and grade.
+
+    Reading `taken[code]` directly missed every suffixed requirement: the catalog
+    says "PSYCH 301W", the transcript stores "PSYCH 301", so the course counted
+    as done but contributed 0 credits (a pool fell back to a guessed 3)."""
+    return _find_entry(code, taken) or {}
+
+
+def _course_status(row: dict, taken: dict) -> str:
+    """Returns "done", "in_progress", or "missing" for a single course row."""
+    code      = row.get("course_code", "").strip().upper()
+    min_grade = row.get("min_grade", "")
+    entry = _find_entry(code, taken)
 
     if not entry:
         return "missing"
@@ -1940,7 +2133,7 @@ def _eval_required(rows: list[dict], taken: dict) -> dict:
 
         if status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
@@ -1952,7 +2145,7 @@ def _eval_required(rows: list[dict], taken: dict) -> dict:
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "min_grade":    row.get("min_grade", ""),
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         })
 
     return {
@@ -2005,7 +2198,7 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
             lead = members[0].get("course_code", "").strip().upper()
             if bstatus[key] == "done" and pair_status != "done":
                 pair_status  = "done"
-                best_grade   = taken.get(lead, {}).get("grade", "")
+                best_grade   = _entry_of(lead, taken).get("grade", "")
                 best_code    = lead
                 best_credits = _earned(members, taken)
             elif bstatus[key] == "in_progress" and pair_status == "missing":
@@ -2030,7 +2223,7 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
                 "credits":       float(row["credits"]) if row.get("credits") else None,
                 "min_grade":     row.get("min_grade", ""),
                 "status":        _course_status(row, taken),
-                "grade":         taken.get(code, {}).get("grade", ""),
+                "grade":         _entry_of(code, taken).get("grade", ""),
                 "pair_group_id": pid,
                 "pair_status":   pair_status,   # overall pair outcome
             }
@@ -2046,7 +2239,7 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
         status = _course_status(row, taken)
         if status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
@@ -2056,7 +2249,7 @@ def _eval_choose_one(rows: list[dict], taken: dict) -> dict:
             "course_title": row.get("course_title", ""),
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
+            "grade":        _entry_of(code, taken).get("grade", ""),
         })
 
     return {
@@ -2076,14 +2269,24 @@ def _eval_choose_credits(rows: list[dict], taken: dict, threshold: int | None) -
     credits_earned     = 0.0
     credits_in_progress = 0.0
     done = ip = missing = 0
+    counted: set[int] = set()
 
     for row in rows:
         code   = row.get("course_code", "").strip().upper()
         status = _course_status(row, taken)
         cr     = float(row["credits"]) if row.get("credits") else 3.0
+        # A list naming one course twice ("PHIL 103" and "PHIL 103W") must not
+        # count it twice: both rows find the same transcript entry.
+        entry = _find_entry(code, taken)
+        duplicate = False
+        if status in ("done", "in_progress") and entry is not None:
+            duplicate = id(entry) in counted
+            counted.add(id(entry))
 
-        if status == "done":
-            credits_earned += taken.get(code, {}).get("credits_earned", cr)
+        if duplicate:
+            pass                      # shown with its real status, counted once
+        elif status == "done":
+            credits_earned += _entry_of(code, taken).get("credits_earned", cr)
             done += 1
         elif status == "in_progress":
             credits_in_progress += cr
@@ -2091,13 +2294,16 @@ def _eval_choose_credits(rows: list[dict], taken: dict, threshold: int | None) -
         else:
             missing += 1
 
-        items.append({
+        item = {
             "course_code":  code,
             "course_title": row.get("course_title", ""),
             "credits":      cr,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
-        })
+            "grade":        _entry_of(code, taken).get("grade", ""),
+        }
+        if duplicate:
+            item["duplicate"] = True
+        items.append(item)
 
     credits_needed = max(0, (threshold or 0) - credits_earned)
     satisfied = (threshold is None) or (credits_earned >= threshold)
@@ -2125,26 +2331,37 @@ def _eval_choose_courses(rows: list[dict], taken: dict, threshold: int | None) -
     items = []
     done = ip = missing = 0
     credits_earned = 0.0
+    counted: set[int] = set()
 
     for row in rows:
         code   = row.get("course_code", "").strip().upper()
         status = _course_status(row, taken)
+        entry = _find_entry(code, taken)
+        duplicate = False
+        if status in ("done", "in_progress") and entry is not None:
+            duplicate = id(entry) in counted     # same course named twice in the list
+            counted.add(id(entry))
 
-        if status == "done":
+        if duplicate:
+            pass
+        elif status == "done":
             done += 1
-            credits_earned += taken.get(code, {}).get("credits_earned", 0)
+            credits_earned += _entry_of(code, taken).get("credits_earned", 0)
         elif status == "in_progress":
             ip += 1
         else:
             missing += 1
 
-        items.append({
+        item = {
             "course_code":  code,
             "course_title": row.get("course_title", ""),
             "credits":      float(row["credits"]) if row.get("credits") else None,
             "status":       status,
-            "grade":        taken.get(code, {}).get("grade", ""),
-        })
+            "grade":        _entry_of(code, taken).get("grade", ""),
+        }
+        if duplicate:
+            item["duplicate"] = True
+        items.append(item)
 
     courses_needed = max(0, (threshold or 0) - done)
     satisfied = (threshold is None) or (done >= threshold)
