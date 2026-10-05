@@ -59,11 +59,13 @@ WHAT GRADGPS IS
 GradGPS turns a college student's transcript into a degree audit and a
 semester-by-semester plan to graduation.
 
-THE APP NEEDS A TRANSCRIPT TO SHOW ANYTHING
+THE APP NEEDS A STUDENT'S CLASSES TO SHOW ANYTHING
 
-Every meaningful screen is generated from an uploaded transcript plus a selected
-major; a brand-new account shows an empty state. So you do not need a university
-login, we seeded a demo account that already has a major and a full transcript.
+Every meaningful screen is generated from the student's classes plus a selected
+major. Students either upload a transcript or enter their classes by hand; a
+brand-new account with neither shows only the official plan for its major. So
+you do not need a university login, we seeded a demo account that already has a
+major and a full transcript.
 
 DEMO ACCOUNT (no university login required)
 
@@ -91,12 +93,19 @@ WHAT TO TAP
 8. ACCOUNT: hamburger menu -> "Account". Credits Done / In Progress / Remaining,
    the declared major, and "Minors & Certificates" (declare one and the Timeline
    absorbs the extra courses).
-9. UPLOAD: hamburger menu -> "Upload Transcript".
+9. TRANSCRIPT: hamburger menu -> "Transcript". Past and in-progress classes;
+   the in-progress term can be edited (Swap / drop / "+ Add a class").
+10. ENTER CLASSES (new in 1.2.0): on the Transcript screen, tap "No transcript?
+   Enter your classes". The app walks the major's plan one semester at a time;
+   check the classes taken, add AP/transfer credit, answer one grade question,
+   review, save. Saving replaces the account's classes, so please try this on a
+   throwaway account (any email works with Continue with Email) to keep the demo
+   data intact.
 
 TESTING UPLOAD YOURSELF
 
 A sample unofficial transcript PDF is attached to this submission
-(demo_transcript.pdf). Tap "Upload Transcript" and pick it from the Files app.
+(demo_transcript.pdf). On the Transcript screen, upload it from the Files app.
 Note that re-uploading replaces the demo account's transcript; please use a
 throwaway account if you want the demo data left intact.
 
@@ -365,6 +374,64 @@ Every feature claim above is implemented: degree audit (`backend/audit_engine.py
 detail (`mobile/app/course/[code].tsx`), substitutions (`backend/routers/substitutions.py`),
 manual class edits (`POST`/`PATCH`/`DELETE /transcript/course`). Do not add a claim here that
 isn't implemented — guideline 2.3.1 is about exactly that.
+
+
+### 1.2.0 metadata (draft, Oct 4 2026)
+
+1.2.0 adds no-transcript mode, so copy that says the app *needs* an upload is now incomplete.
+Promotional text can change any time; subtitle, description and What's New go in with the 1.2.0
+version. Every claim below is implemented (`routers/transcript.py` walkthrough/self-report,
+`app/enter-classes.tsx`, `honors.py`, Application Focus, `movable_terms`).
+
+**Subtitle** (replaces "Your transcript to graduation"):
+
+```
+Map your classes to graduation
+```
+
+**30 characters**, exactly at the limit. Fallback if ASC counts differently: `Plan every semester to grad` (27).
+
+**Promotional text:**
+
+```
+Upload your transcript or check off the classes you've taken, pick your major, and see exactly what's left: a degree audit plus a semester-by-semester plan to graduation.
+```
+
+**Keywords:** unchanged (99 characters, no room to add).
+
+**Description** (replaces the second and fourth paragraphs and the delete line; the rest is unchanged):
+
+```
+GradGPS turns your classes into a plan for graduating.
+
+Upload your unofficial transcript, or skip it and check off the classes you've taken, one semester at a time, straight from your major's suggested plan. Then choose your major. GradGPS checks what you've taken against every requirement in your program and shows what's done, what's in progress, and what's left. Then it lays the remaining classes out semester by semester - in prerequisite order, with a realistic credit load each term, and following your program's published suggested plan where one exists.
+
+The home screen shows the classes to register for next, so you know what to sign up for without opening the full plan.
+
+You can declare up to three minors or certificates and see the extra coursework folded into the same timeline. For a general education slot or an elective, a picker lists the courses that actually count so you can choose one instead of leaving a placeholder, and you can move a class to any other semester where its prerequisites still work. If your major has application focus areas, pick yours and the plan fills in from it. Honors courses count where the regular course does, and honors scholars can say so on the Account screen. If your department approved a course substitution, you can record it and the plan updates. And if you add or drop a class for the term you're registered in, you can change it in the app.
+
+Tap any course to see its title, credit value, and official description.
+
+GradGPS currently supports degree programs, minors, and certificates at Penn State's University Park campus. More schools are being added.
+
+GradGPS is an independent project and is not affiliated with, endorsed by, or sponsored by any university. Requirement data comes from publicly published course bulletins. It's a planning tool, not academic advising - confirm with your adviser before you register.
+
+There are no ads and no analytics. You can delete your classes, or your entire account, from the app at any time.
+
+Terms: gradgps.com/terms
+Privacy: gradgps.com/privacy
+Support: gradgps.com/support
+```
+
+The honors line stays school-neutral ("honors scholars"), same rule as the rest of the body.
+
+**What's New in 1.2.0:**
+
+```
+- No transcript? You can now enter your classes instead. Walk through your major's plan one semester at a time, check off what you took, and add AP or transfer credit.
+- Minors and certificates are counted more accurately: each course counts toward one requirement, and credit ranges are checked against the program's total.
+- The update notice is now a simple prompt you can dismiss.
+```
 
 ---
 
