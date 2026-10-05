@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { View, Text, Pressable, Linking, Platform } from "react-native";
+import { View, Text, Pressable, Linking, Platform, Alert } from "react-native";
 import * as Application from "expo-application";
 import { fetchAppConfig, cmpVersions, AppConfig } from "../services/configService";
 
@@ -65,50 +65,15 @@ function BlockingUpdateScreen({ url }: { url: string }) {
   );
 }
 
-/** Dismissible banner pinned to the bottom for an optional update. */
-function UpdateBanner({ url, onDismiss }: { url: string; onDismiss: () => void }) {
-  return (
-    <View
-      style={{
-        position: "absolute",
-        left: 12,
-        right: 12,
-        bottom: 24,
-        backgroundColor: "#1a3a6b",
-        borderRadius: 12,
-        padding: 14,
-        flexDirection: "row",
-        alignItems: "center",
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
-        shadowRadius: 8,
-        shadowOffset: { width: 0, height: 2 },
-        elevation: 4,
-      }}
-    >
-      <Text style={{ color: "#ffffff", flex: 1, fontSize: 14 }}>
-        A new version of GradGPS is available.
-      </Text>
-      <Pressable onPress={() => openUpdate(url)} style={{ paddingHorizontal: 10, paddingVertical: 6 }}>
-        <Text style={{ color: "#ffffff", fontWeight: "700", fontSize: 14 }}>Update</Text>
-      </Pressable>
-      <Pressable onPress={onDismiss} hitSlop={8} style={{ paddingHorizontal: 6, paddingVertical: 6 }}>
-        <Text style={{ color: "#dbe4f3", fontSize: 18 }}>×</Text>
-      </Pressable>
-    </View>
-  );
-}
-
 /**
  * Wraps the app and enforces the backend version gate:
  *  - current < min_supported  → hard block (BlockingUpdateScreen)
- *  - current < latest         → dismissible banner
+ *  - current < latest         → "Update available" alert (Update / Later), once per launch
  * Never gates when the native version is unavailable (Expo web / dev) or the
  * config fetch fails — the gate fails open so a backend hiccup can't lock users out.
  */
 export function UpdateGate({ children }: { children: React.ReactNode }) {
   const [cfg, setCfg] = useState<AppConfig | null>(null);
-  const [dismissed, setDismissed] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -123,18 +88,26 @@ export function UpdateGate({ children }: { children: React.ReactNode }) {
   // No native version to compare against (web/dev) → never gate.
   const canGate = Platform.OS !== "web" && !!CURRENT_VERSION;
 
+  // An optional update asks once per launch, the way most apps do: "Later"
+  // closes it until the app is next opened. A blocked version never gets here.
+  useEffect(() => {
+    if (!cfg || !canGate) return;
+    if (cmpVersions(CURRENT_VERSION!, cfg.min_supported_version) < 0) return;
+    if (cmpVersions(CURRENT_VERSION!, cfg.latest_version) >= 0) return;
+    Alert.alert(
+      "Update available",
+      "A new version of GradGPS is available. Update now to get the latest features and fixes.",
+      [
+        { text: "Later", style: "cancel" },
+        { text: "Update", onPress: () => openUpdate(cfg.ios_update_url) },
+      ],
+    );
+  }, [cfg, canGate]);
+
   if (cfg && canGate) {
     const url = cfg.ios_update_url;
     if (cmpVersions(CURRENT_VERSION!, cfg.min_supported_version) < 0) {
       return <BlockingUpdateScreen url={url} />;
-    }
-    if (!dismissed && cmpVersions(CURRENT_VERSION!, cfg.latest_version) < 0) {
-      return (
-        <>
-          {children}
-          <UpdateBanner url={url} onDismiss={() => setDismissed(true)} />
-        </>
-      );
     }
   }
 

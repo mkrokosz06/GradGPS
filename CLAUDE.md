@@ -969,7 +969,8 @@ phantom course. `PUT`/`DELETE /substitutions` let the student declare the swap t
 
 ### App version gate & client version reporting
 The mobile `UpdateGate` (`components/UpdateGate.tsx`) polls `GET /config/app` at launch and
-compares the running build to `latest_version` (dismissible "update available" banner) and
+compares the running build to `latest_version` (an "Update available" alert with Update / Later,
+once per launch; a bottom banner before Oct 2026) and
 `min_supported_version` (hard block). Two related pieces:
 - **Admin-published gate.** `GET /config/app` resolves each field **stored override → env var →
   fail-open default** (`backend/app_config.py`). The override lives as a singleton row in the
