@@ -8,6 +8,12 @@ uploaded Oct 4 2026. OTA updates (`eas update`) target the runtime of the app ve
 policy): an OTA published for 1.2.0 reaches 1.2.0 installs only.
 Prod has real users — a push to `main` deploys immediately.
 
+**Releasing a new app version:** bump `version` in `mobile/app.json`, `eas build --platform ios --profile
+production --auto-submit`, submit in App Store Connect. **After Apple releases it (not at upload)**, set
+`latest_version` to the new version in the admin dashboard's "App Version & Updates" panel; that is
+what makes older installs show the "Update available" alert. Setting it earlier sends people to a store
+page that still has the old version.
+
 ## Answering style
 
 Be brief. Be concise. Avoid being too verbose or giving unnecessary information.
