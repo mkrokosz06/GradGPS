@@ -389,11 +389,10 @@
           <th>App Version</th>
           <th>Last Seen</th>
           <th>Classes Added / Transcript Uploaded</th>
-          <th>Status</th>
         </tr>
       </thead>
       <tbody id="users-tbody">
-        <tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
+        <tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>
       </tbody>
     </table>
   </div>
@@ -627,7 +626,7 @@
 
   async function loadUsers() {
     const tbody = document.getElementById('users-tbody');
-    tbody.innerHTML = '<tr><td colspan="12"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11"><div class="loading"><div class="spinner"></div>Loading…</div></td></tr>';
     try {
       const d = await get('/admin/users');
       _usersData = d.users;
@@ -640,7 +639,7 @@
       sel.value = cur;
       renderUsers();
     } catch(e) {
-      tbody.innerHTML = `<tr><td colspan="12"><div class="empty">Error: ${e.message}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">Error: ${e.message}</div></td></tr>`;
     }
   }
 
@@ -684,7 +683,7 @@
     document.getElementById('users-count').textContent =
       rows.length === _usersData.length ? `${rows.length} users` : `${rows.length} of ${_usersData.length} users`;
     if (!rows.length) {
-      tbody.innerHTML = `<tr><td colspan="12"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="11"><div class="empty">${_usersData.length ? 'No users match these filters' : 'No signups yet'}</div></td></tr>`;
       return;
     }
     tbody.innerHTML = rows.map(u => `
@@ -705,12 +704,12 @@
             ? `<span class="badge badge-purple">${esc(u.app_version)}</span>`
             : '<span style="color:var(--muted)">—</span>'}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.last_seen)}</td>
-          <td style="color:var(--muted);font-size:12px;">${fmtDate(u.transcript_parsed_at)}</td>
-          <td>${!u.transcript_parsed_at
+          <td style="font-size:12px;">${!u.transcript_parsed_at
             ? '<span class="badge badge-muted">Neither</span>'
-            : u.transcript_kind === 'self_reported'
-              ? '<span class="badge badge-yellow">Classes added</span>'
-              : '<span class="badge badge-green">Transcript uploaded</span>'}</td>
+            : (u.transcript_kind === 'self_reported'
+                ? '<span class="badge badge-yellow">Classes added</span>'
+                : '<span class="badge badge-green">Transcript uploaded</span>')
+              + `<div style="color:var(--muted);margin-top:4px;">${fmtDate(u.transcript_parsed_at)}</div>`}</td>
         </tr>`).join('');
   }
 
