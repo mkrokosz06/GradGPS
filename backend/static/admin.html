@@ -278,7 +278,7 @@
     <div class="value" id="stat-major">—</div>
   </div>
   <div class="stat-card trans">
-    <div class="label">Added Transcript</div>
+    <div class="label">Classes Added / Transcript</div>
     <div class="value" id="stat-trans">—</div>
   </div>
   <div class="stat-card courses">
@@ -344,7 +344,7 @@
     <select id="users-sort" onchange="renderUsers()">
       <option value="created_at">Newest signups</option>
       <option value="last_seen">Recently active</option>
-      <option value="transcript_parsed_at">Latest transcript upload</option>
+      <option value="transcript_parsed_at">Latest classes added / upload</option>
       <option value="name">Name (A–Z)</option>
       <option value="major">Major (A–Z)</option>
       <option value="app_version">App version (newest)</option>
@@ -352,7 +352,8 @@
     <select id="users-status" onchange="renderUsers()">
       <option value="">All users</option>
       <option value="uploaded">Transcript uploaded</option>
-      <option value="none">No transcript</option>
+      <option value="self_reported">Classes added</option>
+      <option value="none">Neither</option>
     </select>
     <select id="users-focus" onchange="renderUsers()">
       <option value="">Any focus</option>
@@ -387,7 +388,7 @@
           <th>Joined</th>
           <th>App Version</th>
           <th>Last Seen</th>
-          <th>Transcript Uploaded</th>
+          <th>Classes Added / Transcript Uploaded</th>
           <th>Status</th>
         </tr>
       </thead>
@@ -657,7 +658,9 @@
       const credNames = (u.credentials || []).map(c => c.program).join(' ');
       if (creds === 'yes' && !credNames) return false;
       if (creds === 'no' && credNames) return false;
-      if (status === 'uploaded' && !u.transcript_parsed_at) return false;
+      const selfReported = u.transcript_kind === 'self_reported';
+      if (status === 'uploaded' && (!u.transcript_parsed_at || selfReported)) return false;
+      if (status === 'self_reported' && (!u.transcript_parsed_at || !selfReported)) return false;
       if (status === 'none' && u.transcript_parsed_at) return false;
       if (focus === 'chosen' && !u.focus) return false;
       if (focus === 'none' && u.focus) return false;
@@ -703,9 +706,11 @@
             : '<span style="color:var(--muted)">—</span>'}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.last_seen)}</td>
           <td style="color:var(--muted);font-size:12px;">${fmtDate(u.transcript_parsed_at)}</td>
-          <td>${u.transcript_parsed_at
-            ? '<span class="badge badge-green">Uploaded</span>'
-            : '<span class="badge badge-muted">No transcript</span>'}</td>
+          <td>${!u.transcript_parsed_at
+            ? '<span class="badge badge-muted">Neither</span>'
+            : u.transcript_kind === 'self_reported'
+              ? '<span class="badge badge-yellow">Classes added</span>'
+              : '<span class="badge badge-green">Transcript uploaded</span>'}</td>
         </tr>`).join('');
   }
 

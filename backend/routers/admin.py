@@ -146,6 +146,8 @@ def get_users():
             "subplan":              u.get("subplan", ""),
             "transcript_parsed_at": u.get("transcript_parsed_at", ""),
             "transcript_s3_key":    u.get("transcript_s3_key", ""),
+            # "self_reported" = classes entered without a transcript (no-transcript mode).
+            "transcript_kind":      u.get("transcript_kind", ""),
             "app_version":          u.get("app_version", ""),
             "last_seen":            u.get("last_seen", ""),
             "created_at":           u.get("created_at", ""),
