@@ -44,11 +44,18 @@ USER_AGENT = "GradGPS-CredentialScraper/1.0 (educational use; mkrokosz06@gmail.c
 # Credential names rarely carry a campus parenthetical — "Business, Minor" has none but
 # lives under /colleges/university-college/ — so UP scoping keys off the URL's college
 # slug, not the name.
+#
+# These must be the slugs as they appear in bulletin URLs, which carry the colleges'
+# named prefixes: /colleges/eberly-science/, /smeal-business/, /bellisario-communications/.
+# The set once listed "science", "business" and "communications" — slugs that occur in
+# no bulletin URL — which silently dropped all 29 Eberly, Smeal and Bellisario
+# credentials (Biology, Journalism, International Business, ...) as "non-UP".
+# "capital" and "university-college" are the non-UP campuses and are deliberately absent.
 UP_COLLEGE_SLUGS = {
-    "agricultural-sciences", "arts-architecture", "business", "communications",
-    "earth-mineral-sciences", "education", "engineering",
+    "agricultural-sciences", "arts-architecture", "smeal-business",
+    "bellisario-communications", "earth-mineral-sciences", "education", "engineering",
     "health-human-development", "information-sciences-technology", "intercollege",
-    "liberal-arts", "nursing", "science",
+    "liberal-arts", "nursing", "eberly-science",
 }
 
 

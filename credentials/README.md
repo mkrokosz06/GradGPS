@@ -62,20 +62,20 @@ python tests/test_credentials.py                    # or: python -m pytest tests
 
 ## Where it landed
 
-207 University Park credentials (154 minors, 53 certificates); the ~55 non-UP ones are
+238 University Park credentials (180 minors, 58 certificates); the ~30 non-UP ones are
 dropped by **URL college slug**, not by name — credential names rarely carry a campus
 parenthetical (*Business, Minor* has none but lives under `/colleges/university-college/`),
 so `is_up_program()`'s name test alone would have leaked them.
 
-**Supported: 207 / 207 (100%), zero quarantined.** Split deliberately, because
+**Supported: 238 / 238 (100%), zero quarantined.** Split deliberately, because
 "supported" is not the same as "audited end to end":
 
 | | count | |
 |---|---|---|
-| audited end to end | **154 (74%)** | every requirement is machine-evaluable |
-| + a student-confirmed part | **53 (26%)** | median 6 cr the bulletin defers to an adviser |
+| audited end to end | **178 (75%)** | every requirement is machine-evaluable |
+| + a student-confirmed part | **60 (25%)** | median 6 cr the bulletin defers to an adviser |
 
-### Accuracy: 204 / 205 agree with PSU's own number
+### Accuracy: 235 / 236 agree with PSU's own number
 
 Structural validation only proves a parse is *well-formed*, never that it is *right* —
 *Environmental Inquiry, Minor* passed every structural check while reconstructing to
@@ -84,8 +84,8 @@ publishes one on nearly every page (`verify.py`):
 
 | source | pages |
 |---|---|
-| `table.tbl_programrequirements` — a "Program Requirements" table | 154 |
-| prose — "…a minimum of N credits is required" | 51 |
+| `table.tbl_programrequirements` — a "Program Requirements" table | 180 |
+| prose — "…a minimum of N credits is required" | 56 |
 | no total published | 2 |
 
 **Every credential that states a total agrees with our reconstruction, except one.**
@@ -117,6 +117,8 @@ Structural validation caught none of these. Each is a distinct way a page can be
 | Geophysics: 42 cr | A section that branches by student type lists every branch; the header's own stated total is authoritative |
 | **15 credentials, ~3 cr each** | **Cross-listed codes (`AFAM/WMNST 101N`, `PHIL 132/RLST 131`), co-requisite pairs (`ANSC 207 & ANSC 208`) and hyphenated subjects (`A-I 305`) did not match the code regex, so those rows were dropped silently** |
 | Computer Engineering: 18 vs 19 | `choose_one` pairs were valued at a flat 3 cr; CMPEN 270 is 4 |
+| **29 credentials missing** (Biology, Journalism, International Business…) | `UP_COLLEGE_SLUGS` listed `science`/`business`/`communications`; the URLs say `eberly-science`/`smeal-business`/`bellisario-communications`, so every Eberly, Smeal and Bellisario credential was dropped as non-UP (Oct 2026) |
+| **13 credentials: second "or" pair mis-attached** | In "(A or B), C or D" the "or D" row was glued onto the A/B pair (the newest group) instead of C, the row above it, leaving C individually required. Arboriculture required FOR 203 *and* PPEM 300 outright (Oct 2026) |
 | International Engineering: 12 cr | A requirement with no verb and no number ("Demonstrate language skills…", 6 cr) was read as a heading |
 | One Health: 7 vs 13 cr | Same, for two 3-credit rows ("Environment or Climate Elective") |
 | Presidential Leadership: 5 cr | Variable-credit courses ("HONOR 401, 1-6") counted at the low end only |

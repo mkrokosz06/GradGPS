@@ -224,12 +224,15 @@ def main():
     # The same pass as the load, per CLAUDE.md: without it the verified
     # alternatives and pairings these programs carried are gone.
     from seed_matthew import (patch_eti_catalog, patch_phys_alternatives,
-                              patch_known_alternatives, patch_choose_credits_option_groups)
+                              patch_known_alternatives, patch_choose_credits_option_groups,
+                              patch_adviser_defined_majors, patch_level_pools)
     from fix_junk_titles import fix_junk_titles
     patch_eti_catalog()
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()
+    patch_adviser_defined_majors()
+    patch_level_pools()
     fix_junk_titles()
     print("Patches applied.")
 

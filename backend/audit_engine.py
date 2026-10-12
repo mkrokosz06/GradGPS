@@ -7,6 +7,7 @@ and returns a structured audit result.
 import re
 from decimal import Decimal
 from collections import defaultdict
+from functools import lru_cache
 
 
 GRADE_ORDER = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "D-", "F"]
@@ -991,6 +992,23 @@ def honors_fills(code: str, for_plan: bool = False) -> tuple[str, ...]:
     return fills
 
 
+def _attempt_key(entry: dict) -> tuple[int, int]:
+    """How good an attempt is: passed > in progress > anything else (failed,
+    withdrawn), then the better grade. An unknown grade ('TR', '') ranks as
+    meeting any minimum, the way _grade_meets reads it.
+
+    Several transcript entries can answer one requirement code — the real row, a
+    cross-listing or rename alias, a suffix-stripped form, an honors fill, a
+    section-letter variant. Taking whichever came first let a failed CAS 100A
+    hide a passed CAS 100B, and prod returns rows sorted by code, so the student
+    saw the failing order. Picking the best attempt makes the audit independent
+    of row order."""
+    status = entry.get("status", "done")
+    rank = 2 if status in ("done", "transfer") else 1 if status == "in_progress" else 0
+    grade = entry.get("grade", "")
+    return rank, -(GRADE_ORDER.index(grade) if grade in GRADE_ORDER else 0)
+
+
 def _build_taken(transcript_courses: list[dict], substitutions: dict | None = None) -> dict:
     """
     Build taken lookup from transcript, including confirmed course equivalences.
@@ -1005,6 +1023,23 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
     student actually took.
     """
     taken: dict = {}
+    # Each key holds the best attempt registered under it (_attempt_key), ties
+    # going to a real row over an alias / stripped form, then to the lower source
+    # code — never to whichever row came first, so row order can't matter (SOC 103
+    # is an alias of both AFAM 103 and WMNST 103).
+    prio: dict[str, tuple] = {}
+
+    def wins(key: str, p: tuple, src: str) -> bool:
+        if key not in taken:
+            return True
+        old, old_src = prio[key]
+        return p > old or (p == old and src < old_src)
+
+    def put(key: str, entry: dict, tier: int, src: str) -> None:
+        p = _attempt_key(entry) + (tier,)
+        if wins(key, p, src):
+            taken[key], prio[key] = entry, (p, src)
+
     for c in transcript_courses:
         code = c["course_code"].strip().upper()
         entry = {
@@ -1013,12 +1048,12 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
             "credits_earned": float(c.get("credits_earned", 0)),
             "is_writing":     bool(c.get("is_writing")),
         }
-        taken[code] = entry
+        put(code, entry, 2, code)
         # A row stored before M was stripped ('BIOL 230M') still matches its
         # requirement ('BIOL 230W' -> 'BIOL 230').
-        taken.setdefault(_strip_attr(code), entry)
+        put(_strip_attr(code), entry, 1, code)
         for alias in _COURSE_ALIASES.get(code, []):
-            taken.setdefault(alias, entry)
+            put(alias, entry, 1, code)
 
     # Honors first-year sequence fills ENGL 15 / CAS 100 / the seminar. Applied
     # after every real course so it only fills codes the student didn't take, and
@@ -1036,7 +1071,13 @@ def _build_taken(transcript_courses: list[dict], substitutions: dict | None = No
                 # credit pools (_pool_taken). Same for 202H's four 202A-D fills,
                 # which a pool would otherwise count as four courses.
                 fill["_fill_named_only"] = True
-            taken.setdefault(target, fill)
+            # A fill never displaces a course the student passed under that
+            # code, but it does replace a failed / in-progress one.
+            p = _attempt_key(fill) + (0,)
+            if target in taken and prio[target][0][2] > 0 and p[0] <= prio[target][0][0]:
+                continue
+            if wins(target, p, code):
+                taken[target], prio[target] = fill, (p, code)
 
     # Student-declared substitutions, applied last so they can only ever fill a
     # code nothing else did (setdefault), and only when the substitute course is
@@ -1276,7 +1317,8 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
             # requirement as written ("Select 6 credits ... in consultation with the
             # minor adviser") rather than a generic placeholder.
             for extra in ("pool_text", "needs_confirmation", "credits_needed",
-                          "credits_counted", "credits_counted_in_progress"):
+                          "credits_counted", "credits_counted_in_progress",
+                          "credits_over_catalog", "credits_over_catalog_in_progress"):
                 if result.get(extra):
                     gr[extra] = result[extra]
             if exclusive and bkey[2] is not None:
@@ -1318,7 +1360,12 @@ def run_audit(requirement_rows: list[dict], transcript_courses: list[dict],
                 }
                 if "credits_in_progress" in res:
                     sr["credits_in_progress"] = res["credits_in_progress"]
-                for extra in ("credits_counted", "credits_counted_in_progress"):
+                # Same extras as the homogeneous path: without credits_needed and
+                # pool_text a departmental pool inside a mixed section was scheduled
+                # at its full threshold (12 with 9 done) under the section's name.
+                for extra in ("pool_text", "needs_confirmation", "credits_needed",
+                              "credits_counted", "credits_counted_in_progress",
+                              "credits_over_catalog", "credits_over_catalog_in_progress"):
                     if res.get(extra):
                         sr[extra] = res[extra]
                 sub_results.append(sr)
@@ -1420,10 +1467,12 @@ def _allocate_exclusive(buckets_by_group: dict, group_meta: dict, taken: dict,
         view = {k: v for k, v in taken.items() if id(v) not in consumed}
         res = _eval_type(gtype, rows, view, thr, attested.get(g))
         pool_done = pool_ip = 0.0
+        mine: dict[int, float] = {}
         for entry, cr in _used_entries(gtype, res, view, rows, thr):
             if id(entry) in consumed:
                 continue
             consumed.add(id(entry))
+            mine[id(entry)] = cr
             if entry.get("status") == "in_progress":
                 ip_cr += cr; pool_ip += cr
             else:
@@ -1431,7 +1480,47 @@ def _allocate_exclusive(buckets_by_group: dict, group_meta: dict, taken: dict,
         # What this requirement used, so a caller can weigh credit ranges.
         out[(g, key)] = {**res, "credits_counted": round(pool_done, 1),
                          "credits_counted_in_progress": round(pool_ip, 1)}
+        if gtype == "choose_one":
+            over, over_ip = _choice_surplus(rows, res, view, mine)
+            if over or over_ip:
+                out[(g, key)]["credits_over_catalog"] = round(over, 1)
+                out[(g, key)]["credits_over_catalog_in_progress"] = round(over_ip, 1)
     return out, (done_cr, ip_cr)
+
+
+def _choice_surplus(rows: list[dict], res: dict, view: dict,
+                    used: dict[int, float]) -> tuple[float, float]:
+    """Credits a choose-one counted above the value the catalog minimum gave it.
+
+    The catalog values a pair at its first stated credits (CourseLeaf prints them
+    once per chain), so "MICRB 421W or MICRB 422" sits in the minimum at 2 credits.
+    A student who took the 3-credit 421W has one credit toward the credential's
+    total that the minimum never assumed — the same kind of credit as a range pool
+    counted above its floor. Never negative: the cheaper option is still a valid
+    choice. Returns (done, done + in progress)."""
+    base: dict[str, float] = {}
+    for r in rows:
+        pid = r.get("pair_group_id")
+        if pid and str(pid) not in base and r.get("credits") is not None:
+            base[str(pid)] = float(r["credits"])
+    by_pair: dict[str, list[dict]] = defaultdict(list)
+    for it in res.get("items", []):
+        if it.get("pair_group_id") is not None:
+            by_pair[str(it["pair_group_id"])].append(it)
+    over = over_ip = 0.0
+    for pid, members in by_pair.items():
+        done = both = 0.0
+        for it in _satisfying_options(members):
+            entry = _find_entry(it.get("course_code", ""), view)
+            if entry is None or id(entry) not in used:
+                continue
+            both += used[id(entry)]
+            if entry.get("status") != "in_progress":
+                done += used[id(entry)]
+        b = base.get(pid, 3.0)
+        over += max(0.0, done - b)
+        over_ip += max(0.0, both - b)
+    return over, over_ip
 
 
 def _satisfying_options(items: list[dict]) -> list[dict]:
@@ -1535,7 +1624,7 @@ def _eval_writing_intensive(taken: dict, threshold) -> dict:
         seen_ids.add(id(entry))
         status = entry.get("status", "done")
         cr     = float(entry.get("credits_earned", 0) or 0)
-        if status == "done":
+        if status in ("done", "transfer"):   # a transferred W course counts too
             credits_earned += cr
             done += 1
         elif status == "in_progress":
@@ -1547,6 +1636,7 @@ def _eval_writing_intensive(taken: dict, threshold) -> dict:
             "status":       status,
             "grade":        entry.get("grade", ""),
         })
+    items.sort(key=lambda i: i["course_code"])   # not transcript order
     satisfied = credits_earned >= thr
     return {
         "satisfied":      satisfied,
@@ -1632,6 +1722,7 @@ def _eval_dept_credits(rows: list[dict], taken: dict, threshold) -> dict:
 
     sub_level   = spec.get("sub_level")
     sub_credits = float(spec.get("sub_credits") or 0)
+    min_grade   = (rows[0].get("min_grade") or "") if rows else ""
 
     for code, entry in sorted(taken.items()):
         if id(entry) in seen or entry.get("_fill_of") or not _in_dept_pool(code, spec):
@@ -1640,6 +1731,12 @@ def _eval_dept_credits(rows: list[dict], taken: dict, threshold) -> dict:
         status = entry.get("status", "done")
         cr     = float(entry.get("credits_earned", 0) or 0) or 3.0
 
+        # The pool's minimum grade applies like every named requirement's. Ignoring
+        # it let a D count here while the same D could not fill a prescribed course,
+        # so raising that grade to an A moved the course to the prescribed list and
+        # un-satisfied this pool (Organizational Leadership: OLEAD 100 + 220 at D).
+        if status in ("done", "transfer") and not _grade_meets(entry.get("grade", ""), min_grade):
+            continue
         if status in ("done", "transfer"):
             credits_earned += cr
             done += 1
@@ -1771,13 +1868,9 @@ def _eval_type_exclusive(
     available_rows = []
     for row in rows:
         code = row.get("course_code", "").strip().upper()
-        # Also check W-stripped and variant-suffix forms (mirrors _course_status logic)
-        w_stripped = _strip_attr(code)
-        variant    = next(
-            (k for k in taken if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
-            None,
-        )
-        actual_code = variant or (w_stripped if w_stripped in taken else code)
+        # The key _course_status will actually read (W-stripped / variant-suffix
+        # forms, best attempt first) — the same choice, so the two can't disagree.
+        actual_code = _find_key(code, taken) or code
         # multi_category courses (interdomain / US+domain dual-designated) are
         # never blocked by the consumed set — they can satisfy two groups at once.
         if actual_code in consumed and not row.get("multi_category"):
@@ -2069,26 +2162,50 @@ def _eval_type(gtype: str, rows: list[dict], taken: dict, threshold,
 
 # ── Group type evaluators ────────────────────────────────────────────────────
 
-def _find_entry(code: str, taken: dict) -> dict | None:
-    """The transcript entry a requirement code refers to, or None.
+def _find_key(code: str, taken: dict) -> str | None:
+    """The `taken` key a requirement code resolves to, or None.
 
-    Tried in order of specificity:
+    Candidates, in order of specificity:
      1. Exact: "CAS 100" → "CAS 100"
      2. Suffix-stripped: catalog "IST 440W" / "BIOL 230M" → transcript "IST 440" / "BIOL 230"
         (transcript_parser normalises trailing W from transcript codes)
      3. Variant suffix: catalog "CAS 100" → transcript "CAS 100C"
         (PSU uses CAS 100A/B/C as variants that all satisfy CAS 100 requirement)
+    The best attempt among them wins (_attempt_key: a failed CAS 100A must not
+    hide a passed CAS 100B); ties go to the more specific candidate.
     """
     code = (code or "").strip().upper()
-    return (
-        taken.get(code)
-        or taken.get(_strip_attr(code))
-        or next(
-            (v for k, v in taken.items()
-             if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()),
-            None,
-        )
-    )
+    cands = [k for k in (code, _strip_attr(code)) if k in taken]
+    cands += sorted(k for k in taken
+                    if k.startswith(code) and len(k) == len(code) + 1 and k[-1].isalpha()
+                    and not _is_follow_on(k, code))
+    if not cands:
+        return None
+    # max() keeps the first of equals, so specificity breaks ties.
+    return max(cands, key=lambda k: _attempt_key(taken[k]))
+
+
+@lru_cache(maxsize=4096)
+def _is_follow_on(variant: str, base: str) -> bool:
+    """Whether a lettered course is a different, later course than its bare code.
+
+    The section-letter rule exists for real variants (CAS 100A/B/C, ENGL 15E,
+    MATH 140G, SPAN 100A). But the bulletin also lists some lettered codes that
+    *require* the bare course — COMM 450A "Digital Campaigns" has COMM 450
+    "Digital Advertising" as its prerequisite, KINES 77A needs KINES 77 — and a
+    follow-on can never stand in for its own prerequisite. Titles can't draw this
+    line (MATH 140G and ENGL 15E differ in title and are accepted variants), the
+    prerequisite can. Missing prerequisite data = old behaviour."""
+    import course_prereqs
+    pre, co = course_prereqs.constraints(variant)
+    base = course_prereqs.norm(base)
+    return any(base in {course_prereqs.norm(c) for c in clause} for clause in pre + co)
+
+
+def _find_entry(code: str, taken: dict) -> dict | None:
+    """The transcript entry a requirement code refers to, or None (see _find_key)."""
+    key = _find_key(code, taken)
+    return taken[key] if key is not None else None
 
 
 def _entry_of(code: str, taken: dict) -> dict:

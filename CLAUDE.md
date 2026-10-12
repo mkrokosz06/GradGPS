@@ -204,6 +204,36 @@ Expo SDK 54, Expo Router v6, NativeWind (Tailwind).
 > imported it — check that file whenever a patch function is deleted, or the next prod catalog run
 > dies on an `ImportError` before applying anything.
 
+**Adviser-defined majors (`patch_adviser_defined_majors()`, Oct 2026):** Integrative Arts B.A. and
+Multidisciplinary Studies B.A. publish credit buckets, not course lists, and were scraped as plan-grid
+rows only (all dropped by `_filter_rows`, so the audit was empty). The patch writes one
+`unstructured_credits` row per bucket (3 / 5; PSU wording in `pool_text`, min grade C): never
+auto-satisfied, so "Remaining" stays open by design (no major attestation flow). Group names start
+"Requirements for the Major:" so `get_subplans` doesn't offer them as tracks. Also run by
+`apply_catalog_patches.py` and `reload_programs.py`. Tests: `tests/test_adviser_defined_majors.py`.
+
+**Level/subject pools (`patch_level_pools()`, Oct 2026):** the scraper read prose rules as courses.
+Anthropology B.A.'s "12 credits from ANTH 420-439 / 400-419, 460-473 / 440-459, 474-479" became ANTH 400/420/440,
+Statistics B.S.'s "400-level CMPSC (other than …)" became a fake CMPSC 451, and Criminology B.S. lost "Any 400-level
+STAT course". No student could finish those pools. They are now major `dept_credits` rows (`LEVEL_POOLS`, code
+`__DEPT_CREDITS_<tag>__`, named courses in `include`, same-section prescribed courses in `exclude`). Anthropology also
+gets its missing 200-level survey pool. "At least 3 in each range" is a 12-credit pool plus one 3-credit pool per
+range, which only works because the major audit is not exclusive. A guard skips a pool that a re-scrape has
+repopulated. Same callers as above. Tests: `tests/test_level_pools.py`.
+Second pass, same function, three more shapes:
+- **Ranges per option.** Anthropological Science B.S. had the fake codes stored as *required* in all 4 options. Each
+  option now gets 3 range pools, plus the survey pool.
+- **A rule inside a course-list pool.** Examples: "Any LER 400-level course" (Psychology and Criminology Business
+  options) and "6 credits from ESC 400-level courses" (Physics Nanotech). These become `expand`, which adds the real
+  LHR/LER or ESC 4xx bulletin courses to that pool. HDFS's research-credits sentence becomes its named examples.
+- **A named course with alternatives.** Kinesiology Exercise Science "MATH 22 or placement" and Linguistics "STAT 200 or
+  appropriate statistics course" become `choose_one` (pair ids 9900001+). Kinesiology also gets its dropped
+  KINES 1-99 pool.
+Patched rows are keyed `#LVLPATCH` / `#__DEPT_CREDITS_`.
+`check_major_counting.py` now flags any requirement code missing from `bulletin_courses.json`, split into
+prose-titled and other. Hyphenated subjects are skipped because the file has none. After the fix, 0 prose-titled
+codes remain. The ~235 others are retired or renamed courses, e.g. LER→LHR, AAAS→AFAM, RUS/THEA/AG left over on pages.
+
 **PHYS 211 / PHYS 250 physics sequence alternatives (32 programs):**
 The scraper captured both the calc-based sequence (PHYS 211) and algebra-based sequence (PHYS 250) as individually `required` in 32+ programs. In reality these are alternatives — MATH 22 track students take PHYS 250, others take PHYS 211. `patch_phys_alternatives()` in `seed_matthew.py` pairs them as `choose_one` with pair IDs 600+.
 
@@ -395,7 +425,7 @@ A student declares minors/certificates **from the Account page** (never onboardi
 remaining courses. Design doc: `docs/minors-certificates.md`.
 
 **Requirements are a bundled file, not table rows.** `backend/credential_data/credential_requirements.json`
-(207 University Park credentials) + `credential_catalog.py`, the same pattern as `sap_templates/` +
+(238 University Park credentials) + `credential_catalog.py`, the same pattern as `sap_templates/` +
 `plan_templates.py`. `run_audit()` is pure — it takes requirement-row dicts, not a table handle — so
 `to_requirement_rows()` converts JSON groups in memory and **the engine cannot tell a credential from
 a major**. A bundled file avoids the per-table prod IAM grant and a prod seeding run on every data
@@ -483,6 +513,15 @@ audit, drop one course at a time) found credentials reading complete too early. 
   no requirement drift, 206/207 still match PSU, +Jewish Studies and Religious Studies minors (209).
 Result: 207 of 209 complete correctly; the 2 others are limits of the check script. Tests: 11 new in
 `tests/test_credentials.py`.
+
+**Oct 6 2026: 29 missing UP credentials added (238).** `UP_COLLEGE_SLUGS` said `science` / `business` /
+`communications`; PSU's URLs say `eberly-science` / `smeal-business` / `bellisario-communications`, so
+Mathematics, Statistics, Chemistry, Physics, Biology, Journalism, Smeal Business Fundamentals… were
+skipped as non-UP. Also fixed in `courseleaf.py`: "(A or B), C or D" attached "or D" to the A/B pair, so C
+read as required (12 existing credentials changed, e.g. Arboriculture). Now 235/236 agree with PSU's
+totals; `check_counting.py` 235 of 238. Engine side (`credentials_audit._apply_total_gate`): a choose-one
+taken at its pricier option counts toward the total (Microbiology 421W vs 422); dept pools now apply
+their `min_grade` (a D no longer fills a C-minimum pool).
 
 **Degree-program scoping.** `is_degree_program()` in `routers/programs.py` keeps minors/certificates
 out of the **major** list (`/programs/all`, `/programs/search`: 487 → 225 programs, then 184 after UP scoping below) and `POST
@@ -1038,6 +1077,25 @@ Students sometimes upload their **official** transcript instead of the unofficia
 - **Consent audit trail** — an acknowledged official upload writes `transcript_kind="official"` and `official_transcript_ack_at` to the user record (both cleared on DELETE / a later unofficial upload); S3 object gets `transcript-kind` metadata. Response adds `transcript_kind` and, for official, a `parse_warning`.
 - **Mobile** — `transcriptService.isOfficialAckError(e)` detects the 409; both `upload.tsx` screens show a consent `Alert` and re-upload on confirm. The error handler guards `typeof detail === "string"` because the 409 `detail` is an object (else `[object Object]`).
 - Tests: `backend/tests/test_official_detector.py` (runs under pytest or plain `python`; set `OFFICIAL_SAMPLE_PDF` to exercise the real-sample end-to-end test).
+
+### Audit testing sweeps (Oct 2026)
+Two read-only scripts against the local catalog; re-run after any engine or catalog change.
+- `python scripts/check_major_counting.py [--major X] [--pairs]`: for every UP major × option × focus
+  (425), builds a transcript that should finish it, checks the audit agrees, drops each course to prove it
+  matters, and flags requirement codes not in `bulletin_courses.json` (invented prose codes like the old
+  `ANTH 400`). `--pairs` checks 12 major + minor combos. Expected noise: Integrative Arts / Multidisciplinary
+  Studies (adviser-defined, never auto-complete) and ~235 retired-course codes.
+- `python scripts/fuzz_audit_invariants.py [--only gened|majors|creds] [--iters N]`: random transcripts
+  checked against order-independence, monotonicity (add / finish / better grade never un-satisfies),
+  failed-is-inert, transfer = pass, count consistency, gen-ed one-course-one-category.
+Fixed from the first run: a **failed attempt hid a passing one** (failed CAS 100A + passed CAS 100B read
+missing; same for cross-listed twins and honors fills). `_build_taken`/`_find_key` now keep the best
+attempt (`_attempt_key`). WAC now counts transfer W courses. A lettered course whose own prerequisite is
+the bare course (COMM 450A ← COMM 450) is no longer a section variant of it (`_is_follow_on`). Mixed-type
+sections now pass `credits_needed`/`pool_text` on sub_groups. Tests: `test_attempt_precedence.py`,
+`test_counting_fixes.py`, `test_level_pools.py`, `test_adviser_defined_majors.py`.
+Open: no LER→LHR prefix equivalence (old LER rows don't match LHR transcripts); Biology's no-option
+auto-pick can switch options under a transcript.
 
 ### Stale uvicorn processes (Windows)
 When running in WSL bash, multiple Python processes can bind to port 8080. If API changes aren't being picked up:

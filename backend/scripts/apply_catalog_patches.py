@@ -19,6 +19,8 @@ from seed_matthew import (
     patch_phys_alternatives,
     patch_known_alternatives,
     patch_choose_credits_option_groups,
+    patch_adviser_defined_majors,
+    patch_level_pools,
 )
 from fix_junk_titles import fix_junk_titles
 
@@ -31,5 +33,7 @@ if __name__ == "__main__":
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()
+    patch_adviser_defined_majors()
+    patch_level_pools()
     fix_junk_titles()
     print("\nAll catalog patches applied.")

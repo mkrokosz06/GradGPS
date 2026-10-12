@@ -8,11 +8,13 @@ plus the credit-range total), then check that (1) it reads complete, (2) removin
 any one course makes it incomplete -- otherwise a course is counted twice or two
 pools merged -- and (3) it reaches PSU's stated total.
 
-Oct 2026: 207 of 209 complete. The other two (Biomedical Engineering,
-Sustainability Leadership) are limits of this script, not the audit: it takes a
+Oct 2026: 235 of 238 complete. Biomedical Engineering, Sustainability Leadership
+and Natural Science are limits of this script, not the audit: it takes a
 variable-credit course at its minimum and doesn't spread extra credits across
-adviser ranges. "course not needed" lines are mostly the script over-picking (a
-4-credit course where 3 would do), and "completes below" lines are variable-credit
+adviser ranges. (Microbiology, a real gap at 234, is fixed: the total gate now also
+counts credits a choose-one took above the option the catalog minimum assumed, so
+MICRB 421W (3) + 4 cr of 400-level MICRB reaches PSU's 24.) "course not needed" lines are mostly the script
+over-picking (a 4-credit course where 3 would do), and "completes below" lines are variable-credit
 courses taken at their minimum; read them rather than count them.
 """
 import json, os, re, sys

@@ -662,6 +662,459 @@ def patch_choose_credits_option_groups():
     print(f"  Patched {patched_groups} option groups ({patched_rows} rows) to choose_credits.")
 
 
+# ── Adviser-defined majors ───────────────────────────────────────────────────
+# Two UP majors publish no course list at all, only credit buckets the student
+# fills with an adviser. The scraper captured just their Suggested Academic Plan
+# grid cells ("... at University Park Campus"), which routers.audit._filter_rows
+# drops as plan duplicates, so their audit was empty ("0 remaining"). Each
+# bucket is modelled as one `unstructured_credits` row: never auto-satisfied,
+# carries PSU's wording, flagged needs_confirmation by the engine.
+#
+# Source: the "Program Requirements" tab, read Oct 6 2026 —
+#   https://bulletins.psu.edu/undergraduate/colleges/arts-architecture/integrative-arts-ba/
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/multidisciplinary-studies-ba/
+# Group names start with "Requirements for the Major" (PSU's heading) so
+# routers.audit.get_subplans skips them instead of offering them as tracks, and
+# avoid "option", "common", "(N credits)" and "at ... Campus" so no other
+# filter or patch reinterprets them.
+ADVISER_DEFINED_MAJORS = {
+    "Integrative Arts, B.A. (Arts and Architecture)": {
+        "college": "Arts Architecture",
+        "degree":  "B.A.",
+        "groups": [
+            ("Requirements for the Major: Primary Arts Area", 24,
+             "Select 24 credits from an arts area. Requirements for the Major: "
+             "Must include at least 15 credits at the 400 or equivalent level. "
+             "Must include 6 credits in History of the Arts."),
+            ("Requirements for the Major: Other Arts Areas", 12,
+             "Select 12 credits from other arts areas"),
+            ("Requirements for the Major: Arts (GA)", 6,
+             "Select 6 credits of GA"),
+        ],
+    },
+    "Multidisciplinary Studies, B.A. (Liberal Arts)": {
+        "college": "Liberal Arts",
+        "degree":  "B.A.",
+        "groups": [
+            ("Requirements for the Major: University-wide Offerings", 24,
+             "Select 24 credits from University-wide offerings to include: "
+             "12 credits at the 400 level representing at least three different "
+             "subject areas; 3 credit 400-level capstone course; A minimum 9 "
+             "credits from the humanities and social sciences. Courses must be "
+             "selected in consultation with an adviser."),
+            ("Requirements for the Major: Research Methods/Projects", 3,
+             "Select 3 credits in research methods/projects from courses that "
+             "involve research methodology or that focus on a research project"),
+            ("Requirements for the Major: Communication Skills", 3,
+             "Select 3 credits in communication skills from courses that focus on "
+             "expression including those in verbal, symbolic, and written skills"),
+            ("Requirements for the Major: Theory/Application", 3,
+             "Select 3 credits in theory/application from courses that focus on "
+             "theory, principle, central concepts, or fundamental issues"),
+            ("Requirements for the Major: Critical Analysis", 3,
+             "Select 3 credits in critical analysis from courses that focus on "
+             "evaluation, synthesis, and analysis"),
+        ],
+    },
+}
+
+ADVISER_DEFINED_CODE = "__ADVISER_DEFINED__"
+
+
+def adviser_defined_rows() -> list[dict]:
+    """The requirement rows patch_adviser_defined_majors() writes (pure, no DB).
+    Same sentinel-row shape as credential_catalog._pool_row."""
+    rows = []
+    for program, spec in ADVISER_DEFINED_MAJORS.items():
+        for group, credits, text in spec["groups"]:
+            rows.append({
+                "program_name":      program,
+                "group_course":      f"{group}#{ADVISER_DEFINED_CODE}",
+                "requirement_group": group,
+                "group_type":        "unstructured_credits",
+                "group_threshold":   Decimal(str(credits)),
+                "course_code":       ADVISER_DEFINED_CODE,
+                "course_title":      text,
+                "credits":           Decimal(str(credits)),
+                "min_grade":         "C",
+                "pool_text":         text,
+                "pool_seq":          Decimal("1"),
+                "college":           spec["college"],
+                "degree":            spec["degree"],
+            })
+    return rows
+
+
+def patch_adviser_defined_majors():
+    """Write one unstructured_credits row per bucket. Idempotent: fixed keys,
+    put_item overwrites. The scraped plan-grid rows are left alone (the audit
+    filter already drops them)."""
+    print("\nPatching adviser-defined majors (Integrative Arts, Multidisciplinary Studies)...")
+    rows = adviser_defined_rows()
+    for row in rows:
+        requirements_table.put_item(Item=row)
+    print(f"  Wrote {len(rows)} unstructured_credits rows "
+          f"across {len(ADVISER_DEFINED_MAJORS)} programs.")
+
+
+# ── Level / subject pools the scraper turned into fake course codes ──────────
+# Bulletin prose rules ("Select 12 credits from the following ranges:
+# Archaeology: ANTH 420-439 …", "400-level CMPSC (other than …)", "Any LER
+# 400-level course") were read as courses: the scraper took the first number in
+# the line, inventing ANTH 400 / 420 / 440, a "400-level CMPSC" CMPSC 451, LER 400
+# and so on, or dropped the line entirely. Pools built on them could never reach
+# their threshold, and in Anthropological Science the fake codes were even stored
+# as individually REQUIRED courses. Each spec below repairs one requirement group:
+#
+#   pools       -> `dept_credits` rows (the engine's subject/level rule, same
+#                  sentinel shape as credential_catalog._pool_row); courses the
+#                  rule names outright go in `include`.
+#   expand      -> a rule that sits INSIDE a course-list pool ("Select 15 credits
+#                  from …, Any LER 400-level course") can't be a separate rule row
+#                  (a different group_type is a separate requirement), so the
+#                  real bulletin courses it covers are added to that pool as
+#                  ordinary choose_credits rows.
+#   choose_one  -> a named course whose bulletin wording allows alternatives
+#                  ("MATH 22 or placement beyond MATH 22") becomes a choose-one
+#                  over real courses, never a hard requirement.
+#
+# A major audit is NOT exclusive (unlike credentials), so a course can count in
+# two pools of one major. That is what makes Anthropology's "12 credits, at least
+# 3 in each range" exact: one 12-credit pool over every range plus a 3-credit
+# pool per range, all seeing the same courses. Courses PRESCRIBED in the same
+# section are excluded from the "additional" pools (PSU's heading is "Additional
+# Courses"), so CMPSC 465 can't also fill Statistics' 9 credits.
+#
+# Guard: a spec only deletes when the scraped rows it was written against are
+# still there (`replaces` = a whole pool by pool_seq holding only those codes;
+# `invented` = (code, title regex) rows). If they are gone and the patch's own
+# rows are absent too, a re-scrape changed the page and the spec is skipped.
+#
+# Source: the "Program Requirements" tab, read Oct 6 2026 —
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/anthropology-ba/
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/anthropological-science-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/eberly-science/statistics-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/criminology-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/psychology-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/health-human-development/human-development-family-studies-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/health-human-development/kinesiology-bs/
+#   https://bulletins.psu.edu/undergraduate/colleges/liberal-arts/linguistics-ba/
+#   https://bulletins.psu.edu/undergraduate/colleges/eberly-science/physics-bs/
+
+def _nums(dept: str, *ranges: tuple[int, int], skip: tuple[int, ...] = ()) -> list[str]:
+    """Every course number in the inclusive ranges, as codes ("ANTH 420"…). The
+    engine excludes on (subject, number), so this also covers suffixed twins."""
+    return [f"{dept} {n}" for lo, hi in ranges for n in range(lo, hi + 1) if n not in skip]
+
+
+_ANTH_ARCH = "Archaeology: ANTH 420-439"
+_ANTH_BIO  = "Biological anthropology: ANTH 400-419, ANTH 460-473"
+_ANTH_CULT = "Human Ecology/Cultural anthropology: ANTH 440-459, ANTH 474-479"
+_ANTH_SURVEY_EXCLUDE = (["ANTH 1", "ANTH 83", "ANTH 2", "ANTH 21", "ANTH 45"]
+                        + _nums("ANTH", (190, 199), (290, 299), skip=(297,)))
+_ANTH_SURVEY_TEXT = ("Select 6 credits in ANTH courses at the 200 level or below (excluding "
+                     "ANTH 1, ANTH 83S, and courses in the following ranges: 190-199, "
+                     "290-299, other than 297)")
+
+
+def _anth_ranges(tag: str, arch: int, bio: int, cult: int, seq0: int = 1) -> list[dict]:
+    """Anthropology's three ANTH 400-level ranges as dept_credits pools."""
+    return [
+        {"tag": f"{tag}_ARCH", "threshold": arch, "pool_seq": seq0, "dept": "ANTH",
+         "min_level": 420, "max_level": 439,
+         "text": f"Select {arch} credits in {_ANTH_ARCH}"},
+        {"tag": f"{tag}_BIO", "threshold": bio, "pool_seq": seq0 + 1, "dept": "ANTH",
+         "min_level": 400, "max_level": 473, "exclude": _nums("ANTH", (420, 459)),
+         "text": f"Select {bio} credits in {_ANTH_BIO}"},
+        {"tag": f"{tag}_CULT", "threshold": cult, "pool_seq": seq0 + 2, "dept": "ANTH",
+         "min_level": 440, "max_level": 479, "exclude": _nums("ANTH", (460, 473)),
+         "text": f"Select {cult} credits in {_ANTH_CULT}"},
+    ]
+
+
+_ANTH_SCI = "Anthropological Science, B.S."
+_ANTH_SCI_FAKE = [("ANTH 400", r"-419"), ("ANTH 420", r"-439"), ("ANTH 440", r"-459")]
+_LER_400 = {"pool_seq": 1, "threshold": 15, "ranges": [("LHR", 400, 499), ("LER", 400, 499)]}
+
+LEVEL_POOLS = [
+    {
+        "program": "Anthropology, B.A.",
+        "group":   "Requirements for the Major",
+        # The invented pool: pool_seq 3, these codes only (the guard below).
+        "replaces": {"pool_seq": 3, "codes": {"ANTH 400", "ANTH 420", "ANTH 440"}},
+        "pools": [
+            # "Area/Survey Courses" — a prose-only pool the scraper dropped outright.
+            {"tag": "ANTH_SURVEY", "threshold": 6, "pool_seq": 1, "dept": "ANTH", "max_level": 299,
+             "exclude": _ANTH_SURVEY_EXCLUDE, "text": _ANTH_SURVEY_TEXT},
+            {"tag": "ANTH_ADVANCED", "threshold": 12, "pool_seq": 3, "dept": "ANTH",
+             "min_level": 400, "max_level": 479,
+             "text": "Select 12 credits from the following ranges (at least 3 credits must be "
+                     f"in each range): {_ANTH_ARCH}; {_ANTH_BIO}; {_ANTH_CULT}"},
+            {"tag": "ANTH_ARCH", "threshold": 3, "pool_seq": 101, "dept": "ANTH",
+             "min_level": 420, "max_level": 439,
+             "text": f"At least 3 credits in {_ANTH_ARCH}"},
+            {"tag": "ANTH_BIO", "threshold": 3, "pool_seq": 102, "dept": "ANTH",
+             "min_level": 400, "max_level": 473, "exclude": _nums("ANTH", (420, 459)),
+             "text": f"At least 3 credits in {_ANTH_BIO}"},
+            {"tag": "ANTH_CULT", "threshold": 3, "pool_seq": 103, "dept": "ANTH",
+             "min_level": 440, "max_level": 479, "exclude": _nums("ANTH", (460, 473)),
+             "text": f"At least 3 credits in {_ANTH_CULT}"},
+        ],
+    },
+    # Anthropological Science: the same ranges, sized per option, stored as three
+    # REQUIRED fake courses per option. Within an option the ranges are disjoint.
+    {"program": _ANTH_SCI, "group": "Archaeological Science Option (33 credits)",
+     "invented": _ANTH_SCI_FAKE, "pools": _anth_ranges("ANTHSCI_ARCHOPT", 12, 3, 3)},
+    {"program": _ANTH_SCI, "group": "Biological Anthropology Option (33 credits)",
+     "invented": _ANTH_SCI_FAKE, "pools": _anth_ranges("ANTHSCI_BIOOPT", 3, 12, 3)},
+    {"program": _ANTH_SCI, "group": "Human Ecology Option (33 credits)",
+     "invented": _ANTH_SCI_FAKE, "pools": _anth_ranges("ANTHSCI_HEOPT", 3, 3, 12)},
+    {"program": _ANTH_SCI, "group": "Integrated Anthropological Science Option (33 credits)",
+     "invented": _ANTH_SCI_FAKE, "pools": _anth_ranges("ANTHSCI_INTOPT", 6, 6, 6)},
+    # The same dropped "Area/Survey" pool as Anthropology B.A.; nothing to delete.
+    {"program": _ANTH_SCI, "group": "Common Requirements for the Major (All Options)",
+     "invented": [],
+     "pools": [{"tag": "ANTHSCI_SURVEY", "threshold": 6, "pool_seq": 1, "dept": "ANTH",
+                "max_level": 299, "exclude": _ANTH_SURVEY_EXCLUDE, "text": _ANTH_SURVEY_TEXT}]},
+    {
+        "program": "Statistics, B.S.",
+        "group":   "Statistics and Computing Option (41 credits)",
+        "replaces": {"pool_seq": 1, "codes": {"CMPSC 221", "CMPSC 451"}},
+        "pools": [
+            {"tag": "CMPSC_400", "threshold": 9, "pool_seq": 1, "dept": "CMPSC",
+             "min_level": 400, "max_level": 499, "include": ["CMPSC 221"],
+             # 451/455 per the bulletin (cross-listed MATH 451/455 resolve to these);
+             # 465 is prescribed in this option.
+             "exclude": ["CMPSC 451", "CMPSC 455", "CMPSC 465"],
+             "text": "Select 9 credits from the following: CMPSC 221; 400-level CMPSC "
+                     "(other than CMPSC 451/MATH 451 or CMPSC 455/MATH 455)"},
+        ],
+    },
+    {
+        "program": "Criminology, B.S.",
+        "group":   "Social Science Research Option (22-23 credits)",
+        "replaces": {"pool_seq": 2, "codes": {"HDFS 401", "PLSC 490"}},
+        "pools": [
+            {"tag": "STAT_400", "threshold": 9, "pool_seq": 2, "dept": "STAT",
+             "min_level": 400, "max_level": 499, "include": ["HDFS 401", "PLSC 490"],
+             "exclude": ["STAT 480"],            # prescribed in this option
+             "text": "Select 9 credits of the following: HDFS 401; PLSC 490; "
+                     "Any 400-level STAT course"},
+        ],
+    },
+    # "Any LER 400-level course" inside a 15-credit list pool. LER was renamed LHR
+    # and the bulletin carries both, so both subjects' 400-level courses join it.
+    {"program": "Criminology, B.S.", "group": "Business/Public Administration Option (21 credits)",
+     "invented": [("LER 400", r"level course")], "expand": _LER_400},
+    {"program": "Psychology, B.S. (Liberal Arts)", "group": "Business Option (24 credits)",
+     "invented": [("LER 400", r"level course")], "expand": _LER_400},
+    # Research Emphasis: "6 Additional Credits of 300-/400-Level Research Credits
+    # (e.g. HDFS 300H, HDFS 310M, HDFS 494, HDFS 494H, HDFS 496) or … Career-Related
+    # Course Work (with Department Approval)" was filed as one HDFS 300H row. The
+    # named examples join the pool (494/494H/496 already are); "with Department
+    # Approval" isn't modelled.
+    {"program": "Human Development and Family Studies, B.S. (Health and Human Development)",
+     "group": "Common Requirements for the Major (All Options)",
+     "invented": [("HDFS 300H", r"Additional Credits")],
+     "expand": {"pool_seq": 5, "threshold": 15, "codes": ["HDFS 300H", "HDFS 310M"]}},
+    # "MATH 22 or Satisfactory performance on the MATH placement examination --
+    # i.e., placement beyond the level of MATH 22", stored as MATH 22 REQUIRED. The
+    # alternatives are the higher courses the same page names for this requirement
+    # in the other options (MATH 26, 40, 41, 110, 140). Placement with no course
+    # taken is invisible to the audit.
+    {"program": "Kinesiology, B.S. (Health and Human Development)",
+     "group": "Exercise Science Option (55-58 credits)",
+     "invented": [("MATH 22", r"placement")],
+     "choose_one": {"pair": 9900001,
+                    "codes": ["MATH 22", "MATH 26", "MATH 40", "MATH 41", "MATH 110", "MATH 140"]},
+     # "Select 3 credits from KINES 1 to KINES 99" — dropped by the scraper.
+     "pools": [{"tag": "KINES_1_99", "threshold": 3, "pool_seq": 101, "dept": "KINES",
+                "min_level": 1, "max_level": 99,
+                "text": "Select 3 credits from KINES 1 to KINES 99"}]},
+    # "STAT 200 or appropriate statistics course": the alternatives are the intro
+    # statistics courses the catalog treats as interchangeable with STAT 200
+    # everywhere else (KNOWN_ALTERNATIVE_GROUPS).
+    {"program": "Linguistics, B.A.", "group": "Requirements for the Major",
+     "invented": [("STAT 200", r"appropriate")],
+     "choose_one": {"pair": 9900002, "codes": ["STAT 200", "STAT 250", "SCM 200", "DS 200"]}},
+    # Nanotechnology Set A: "6 credits from ESC 400-level courses", stored as ESC 400
+    # (a real course, Electromagnetic Fields) with the sentence as its title.
+    {"program": "Physics, B.S. (Science)",
+     "group": "Nanotechnology/Material Science Option (24-25 credits)",
+     "invented": [("ESC 400", r"Supporting Course")],
+     "expand": {"pool_seq": 1, "threshold": 12, "ranges": [("ESC", 400, 499)]}},
+]
+
+LEVEL_POOL_CODE = "__DEPT_CREDITS_{tag}__"
+_LEVEL_KEY = "LVLPATCH"          # rows this patch writes: "<group>#<code>#LVLPATCH"
+
+
+def _bulletin() -> dict:
+    path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "bulletin_courses.json")
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
+
+
+def _expand_codes(exp: dict, bulletin: dict) -> list[str]:
+    """The real bulletin courses an in-pool level rule stands for. A suffixed twin
+    (ESC 460M / 460W) is listed once; the engine matches suffixes anyway."""
+    import re as _re
+    codes = list(exp.get("codes", []))
+    for dept, lo, hi in exp.get("ranges", []):
+        for code in sorted(bulletin):
+            m = _re.fullmatch(rf"{_re.escape(dept)} (\d+)([A-Z]*)", code)
+            if m and lo <= int(m.group(1)) <= hi:
+                codes.append(code)
+    out, seen = [], set()
+    for code in codes:
+        base = _re.sub(r"(\d)[WHMNXY]$", r"\1", code)
+        if base not in seen:
+            seen.add(base)
+            out.append(code)
+    return out
+
+
+def level_pool_rows(spec: dict | None = None) -> list[dict]:
+    """The rows patch_level_pools() writes (pure, no DB) — every spec's, or one's."""
+    bulletin = None
+    out = []
+    for s in ([spec] if spec else LEVEL_POOLS):
+        base = {"program_name": s["program"], "requirement_group": s["group"], "min_grade": "C"}
+        for p in s.get("pools", []):
+            code = LEVEL_POOL_CODE.format(tag=p["tag"])
+            row = {
+                **base,
+                "group_course":      f"{s['group']}#{code}",
+                "group_type":        "dept_credits",
+                "group_threshold":   Decimal(str(p["threshold"])),
+                "course_code":       code,
+                "course_title":      p["text"],
+                "credits":           Decimal(str(p["threshold"])),
+                "pool_text":         p["text"],
+                "pool_seq":          Decimal(str(p["pool_seq"])),
+                "dept":              p["dept"],
+            }
+            for k in ("min_level", "max_level"):
+                if p.get(k) is not None:
+                    row[k] = Decimal(str(p[k]))
+            for k in ("exclude", "include"):
+                if p.get(k):
+                    row[k] = list(p[k])
+            out.append(row)
+        if s.get("expand") or s.get("choose_one"):
+            bulletin = bulletin or _bulletin()
+
+        def course_row(code, **kw):
+            # HDFS 300H is keyed HDFS 300 in the bulletin (an attribute suffix).
+            info = (bulletin.get(code)
+                    or bulletin.get(code[:-1] if code[-1:] in "WHMN" else code) or {})
+            return {**base, "group_course": f"{s['group']}#{code}#{_LEVEL_KEY}",
+                    "course_code": code, "course_title": info.get("title", ""),
+                    "credits": Decimal(str(info.get("credits") or 3)), **kw}
+
+        exp = s.get("expand")
+        if exp:
+            for code in _expand_codes(exp, bulletin):
+                out.append(course_row(code, group_type="choose_credits",
+                                      group_threshold=Decimal(str(exp["threshold"])),
+                                      pool_seq=Decimal(str(exp["pool_seq"]))))
+        c1 = s.get("choose_one")
+        if c1:
+            for code in c1["codes"]:
+                out.append(course_row(code, group_type="choose_one",
+                                      pair_group_id=Decimal(str(c1["pair"]))))
+    return out
+
+
+def _is_patch_row(row: dict) -> bool:
+    gc = row.get("group_course", "")
+    return gc.endswith(f"#{_LEVEL_KEY}") or "#__DEPT_CREDITS_" in gc
+
+
+def level_pool_invented(spec: dict, rows: list[dict]) -> list[dict] | None:
+    """The scraped rows `spec` replaces among a program's `rows`, or None when the
+    spec no longer matches what is loaded (a re-scrape renumbered, repopulated or
+    fixed it) — then nothing is touched.
+
+    `replaces` mode: the whole pool at that pool_seq, which must hold only the
+    expected codes. `invented` mode: rows with that code whose title matches the
+    prose they were cut from, so a real course of the same code is never deleted.
+    An empty result is fine once the patch's own rows are in place (idempotent)."""
+    import re as _re
+    group = [r for r in rows if r.get("requirement_group") == spec["group"]]
+    if "replaces" in spec:
+        rep = spec["replaces"]
+        hit = [r for r in group
+               if r.get("group_type") == "choose_credits" and not _is_patch_row(r)
+               and r.get("pool_seq") is not None and int(r["pool_seq"]) == rep["pool_seq"]]
+        if {r.get("course_code") for r in hit} - rep["codes"]:
+            return None
+    else:
+        hit = [r for r in group if not _is_patch_row(r) and any(
+               r.get("course_code") == code and _re.search(pat, str(r.get("course_title") or ""))
+               for code, pat in spec["invented"])]
+        if spec["invented"] and not hit and not any(_is_patch_row(r) for r in group):
+            return None
+        exp = spec.get("expand")
+        if exp and any(int(r.get("pool_seq") or 0) != exp["pool_seq"]
+                       or int(r.get("group_threshold") or 0) != exp["threshold"] for r in hit):
+            return None            # the pool it sits in isn't the one this expands
+    # A choose-one replaces any scraped row for one of its codes in this group
+    # (e.g. a STAT 250 an alternatives patch inserted beside the STAT 200 row).
+    c1 = spec.get("choose_one")
+    if c1:
+        ids = {id(r) for r in hit}
+        hit += [r for r in group if r.get("course_code") in c1["codes"]
+                and not _is_patch_row(r) and id(r) not in ids]
+    return hit
+
+
+def patch_level_pools():
+    """Replace invented level-rule rows with real rules / course lists. Idempotent:
+    once deleted there is nothing left to match, and put_item overwrites."""
+    print("\nPatching level/subject pools (invented course codes from bulletin prose)...")
+    deleted = written = 0
+    cache: dict[str, list[dict]] = {}
+    for spec in LEVEL_POOLS:
+        prog = spec["program"]
+        if prog not in cache:
+            rows, kw = [], {"KeyConditionExpression": Key("program_name").eq(prog)}
+            while True:
+                resp = requirements_table.query(**kw)
+                rows += resp.get("Items", [])
+                if "LastEvaluatedKey" not in resp:
+                    break
+                kw["ExclusiveStartKey"] = resp["LastEvaluatedKey"]
+            cache[prog] = rows
+        rows = cache[prog]
+        if not rows:
+            print(f"  {prog}: not in catalog, skipped.")
+            continue
+        invented = level_pool_invented(spec, rows)
+        if invented is None:
+            print(f"  WARNING {prog} / '{spec['group']}': the scraped rows this patch replaces "
+                  f"are not there; skipped (check the scrape).")
+            continue
+        for r in invented:
+            requirements_table.delete_item(
+                Key={"program_name": r["program_name"], "group_course": r["group_course"]})
+            deleted += 1
+        # Never add a list course the pool already has from the scrape.
+        gone = {id(r) for r in invented}
+        have = {(r.get("course_code"), str(r.get("pool_seq"))) for r in rows
+                if r.get("requirement_group") == spec["group"] and not _is_patch_row(r)
+                and id(r) not in gone}
+        extra = {k: rows[0][k] for k in ("college", "degree") if rows[0].get(k)}
+        for row in level_pool_rows(spec):
+            if row["group_type"] == "choose_credits" and \
+                    (row["course_code"], str(row["pool_seq"])) in have:
+                continue
+            requirements_table.put_item(Item={**row, **extra})
+            written += 1
+        cache[prog] = [r for r in rows if id(r) not in gone]
+    print(f"  Deleted {deleted} invented rows, wrote {written} rows.")
+
+
 def check_eti_requirements():
     """Check what requirement groups exist for ETI."""
     print(f"\nChecking ETI requirements in catalog...")
@@ -702,6 +1155,8 @@ if __name__ == "__main__":
     patch_phys_alternatives()
     patch_known_alternatives()
     patch_choose_credits_option_groups()
+    patch_adviser_defined_majors()
+    patch_level_pools()
 
     sys.path.append(os.path.dirname(os.path.abspath(__file__)))
     from fix_junk_titles import fix_junk_titles

@@ -93,7 +93,8 @@ def _apply_total_gate(audit: dict, required: float, catalog_min: float,
     "Select 0-6 credits" pools satisfy at zero, so Ethics read as done at 9 of its
     18 credits. Its fixed requirements need 9 (the catalog minimum) and PSU says 18,
     so 9 credits are owed across the ranges: only credits a range pool counted above
-    its own minimum go toward them. Everything else is already enforced per
+    its own minimum go toward them, plus credits a choose-one counted above the
+    option the minimum assumed (`credits_over_catalog`). Everything else is already enforced per
     requirement by exclusive counting, and a credential-wide total would wrongly
     hold back a student whose variable-credit course ran below the catalog's guess.
 
@@ -115,6 +116,13 @@ def _apply_total_gate(audit: dict, required: float, catalog_min: float,
         both = done + float(sg.get("credits_counted_in_progress") or 0)
         extra += max(0.0, min(done, hi) - lo)
         extra_ip += max(0.0, min(both, hi) - lo)
+    # A choose-one counted above the option the catalog minimum assumed: Microbiology's
+    # "MICRB 421W or MICRB 422" is in the 23-credit minimum at 2, so a student who took
+    # the 3-credit 421W plus 4 credits of 400-level MICRB has PSU's 24.
+    for g in audit["groups"]:
+        for sg in (g.get("sub_groups") or [g]):
+            extra += float(sg.get("credits_over_catalog") or 0)
+            extra_ip += float(sg.get("credits_over_catalog_in_progress") or 0)
     short = round(owed - extra, 1)
     if short <= 0:
         return

@@ -134,6 +134,32 @@ def test_or_alternatives_pair_up():
     assert (lo, hi) == (18.0, 18.0)
 
 
+def test_second_or_pair_in_a_section_is_its_own_choice():
+    """"(A or B), C or D" -- the "or D" row belongs to C, the row right above it.
+    It used to be glued onto the A/B pair (the newest group), leaving C
+    individually required: Digital Media Trends and Analytics, Arboriculture and
+    11 others.  Markup as on the real Digital Media page."""
+    def row(code, cls="", hours="3"):
+        a = f'<a class="bubblelink code">{code}</a>'
+        if "orclass" in cls:
+            return (f'<tr class="{cls}"><td class="codecol orclass">or {a}</td>'
+                    f'<td colspan="2">Title</td></tr>')
+        return (f'<tr class="{cls}"><td class="codecol">{a}</td><td>Title</td>'
+                f'<td class="hourscol">{hours}</td></tr>')
+    html = ('<table class="sc_courselist"><tbody>'
+            '<tr class="areaheader"><td colspan="2"><span>Additional Courses</span></td>'
+            '<td class="hourscol"></td></tr>'
+            + row("COMM 310", "even") + row("COMM 422", "orclass even")
+            + row("COMM 320", "odd") + row("COMM 370", "orclass odd")
+            + '</tbody></table>')
+    groups, _ = parse_courselist(html)
+    pairs = sorted(sorted(c["course_code"] for c in g["courses"])
+                   for g in _groups_by_type(groups, "choose_one"))
+    assert pairs == [["COMM 310", "COMM 422"], ["COMM 320", "COMM 370"]], pairs
+    assert not _groups_by_type(groups, "required") or not any(
+        g["courses"] for g in _groups_by_type(groups, "required"))
+
+
 # ── Validation / quarantine ──────────────────────────────────────────────────
 
 def test_validate_accepts_a_clean_credential():

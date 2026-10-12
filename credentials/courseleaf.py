@@ -244,6 +244,12 @@ def parse_courselist(html: str) -> tuple[list[dict], list[str]]:
     open_pool: dict | None = None      # the enumerable pool currently collecting members
     prescribed: dict | None = None     # the running `required` group for this section
     pair_seq = [0]
+    # The group the most recent course row landed in.  An "or" row is an alternative
+    # of THAT row, which is not necessarily in the newest group: in
+    # "(COMM 310 or COMM 422), COMM 320 or COMM 370" the 310/422 pair is created
+    # after the prescribed block, then COMM 320 goes back into the prescribed block,
+    # and looking up "the last group with courses" glued COMM 370 onto 310/422.
+    last_course_group: list[dict | None] = [None]
     # section name -> (declared_min, declared_max) credits, when the header states them
     section_totals: dict[str, tuple[float | None, float | None]] = {}
 
@@ -367,15 +373,18 @@ def parse_courselist(html: str) -> tuple[list[dict], list[str]]:
                             prev["pair_group_id"] = pair_seq[0]
                         entry["pair_group_id"] = prev["pair_group_id"]
                         open_pool["courses"].append(entry)
+                        last_course_group[0] = open_pool
                         continue
 
-                    prev_group = _group_holding_last_course(groups, prescribed)
+                    prev_group = (last_course_group[0]
+                                  or _group_holding_last_course(groups, prescribed))
                     if prev_group is not None and prev_group["courses"]:
                         prev = prev_group["courses"][-1]
                         if prev_group["group_type"] == "choose_one":
                             # Extending an existing chain: A or B or C.
                             entry["pair_group_id"] = prev["pair_group_id"]
                             prev_group["courses"].append(entry)
+                            last_course_group[0] = prev_group
                             continue
                         # Start a new pair: lift the previous course out of the
                         # prescribed block into a choose_one group of its own.
@@ -386,6 +395,7 @@ def parse_courselist(html: str) -> tuple[list[dict], list[str]]:
                         pair_group = new_group(
                             f"{section}: {prev['course_code']} or {code}", "choose_one")
                         pair_group["courses"] = [prev, entry]
+                        last_course_group[0] = pair_group
                         continue
                     warnings.append(f"orphan 'or' row: {code}")
 
@@ -398,8 +408,10 @@ def parse_courselist(html: str) -> tuple[list[dict], list[str]]:
                 # credits, with 80 options of one pool marked required).
                 if open_pool is not None:
                     open_pool["courses"].append(entry)
+                    last_course_group[0] = open_pool
                 else:
-                    prescribed_group()["courses"].append(entry)
+                    last_course_group[0] = prescribed_group()
+                    last_course_group[0]["courses"].append(entry)
                 continue
 
             # ── A code-less row: pool sentence, or a note we ignore ───────────
