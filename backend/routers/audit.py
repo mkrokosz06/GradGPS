@@ -143,14 +143,37 @@ def _pick_best_option(rows: list[dict], taken_codes: set[str]) -> list[dict]:
     if len(option_groups) <= 1:
         return rows  # nothing to collapse
 
-    # Score each option by how many of its course codes appear in the transcript
-    best_option = max(
-        option_groups,
-        key=lambda g: sum(
-            1 for r in option_groups[g]
-            if r.get("course_code", "").strip().upper() in taken_codes
-        ),
-    )
+    # Score each option by the courses ONLY it lists. A course several options
+    # share proves nothing about which one the student is in, and counting it
+    # let the option with the longest list win: a transcript built to finish one
+    # Biology option was audited against another that also listed most of it.
+    # Codes are matched through renames/cross-listings and the stored suffix form.
+    from audit_engine import _COURSE_ALIASES, _strip_attr
+    taken: set[str] = set()
+    for c in taken_codes:
+        c = c.strip().upper()
+        taken |= {c, _strip_attr(c), *_COURSE_ALIASES.get(c, [])}
+
+    def codes(g: str) -> set[str]:
+        return {_strip_attr(r.get("course_code", "").strip().upper())
+                for r in option_groups[g] if r.get("course_code")}
+
+    opt_codes = {g: codes(g) for g in option_groups}
+    count = defaultdict(int)
+    for cs in opt_codes.values():
+        for c in cs:
+            count[c] += 1
+
+    def score(g: str) -> tuple:
+        mine = opt_codes[g] & taken
+        unique = sum(1 for c in mine if count[c] == 1)
+        # Unique courses first, then the share of the option's own list the
+        # student has covered (a short option fully taken beats a long one
+        # half-taken), then raw overlap; ties keep row order.
+        share = len(mine) / len(opt_codes[g]) if opt_codes[g] else 0
+        return unique, share, len(mine)
+
+    best_option = max(option_groups, key=score)
 
     return non_option + option_groups[best_option]
 

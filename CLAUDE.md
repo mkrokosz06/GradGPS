@@ -1094,8 +1094,18 @@ attempt (`_attempt_key`). WAC now counts transfer W courses. A lettered course w
 the bare course (COMM 450A ← COMM 450) is no longer a section variant of it (`_is_follow_on`). Mixed-type
 sections now pass `credits_needed`/`pool_text` on sub_groups. Tests: `test_attempt_precedence.py`,
 `test_counting_fixes.py`, `test_level_pools.py`, `test_adviser_defined_majors.py`.
-Open: no LER→LHR prefix equivalence (old LER rows don't match LHR transcripts); Biology's no-option
-auto-pick can switch options under a transcript.
+Fixed Nov 9 2026:
+- **LER → LHR rename**: `_MANUAL_RENAME_PAIRS` pairs `LER n` ↔ `LHR n` for every number the bulletin lists
+  under LHR and not LER (LER 424/425/485/488/489 are still live LER courses and are not aliased).
+  Tests: `test_ler_lhr_rename.py`.
+- **Option auto-pick** (student chose "Undecided / No preference"): `_pick_best_option()` counted every
+  course an option lists, so the longest list won. It now scores courses unique to one option, then the
+  share of the option's list covered, then raw overlap, matching through aliases and suffix forms. Over
+  every multi-option program (580 synthetic students, full and half an option each): wrong picks 86 → 18.
+  The 18 are options whose course lists are identical or nested (Anthropological Science's four options
+  in the raw scrape, Integrative Science's General vs Legal Studies), which no course-based rule can
+  separate. The pick is still silent; the app doesn't yet say which option it assumed.
+  Tests: `test_option_autopick.py`.
 
 ### Stale uvicorn processes (Windows)
 When running in WSL bash, multiple Python processes can bind to port 8080. If API changes aren't being picked up:

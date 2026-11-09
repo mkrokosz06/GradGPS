@@ -41,6 +41,21 @@ _MANUAL_RENAME_PAIRS: list[tuple[str, str]] = [
     ("LA 83", "LA 283"),
 ]
 
+# ── LER → LHR rename (Labor and Employment Relations → Labor and Human Resources)
+# Same numbers, same titles (LER 100 → LHR 100 "Exploring Work and Employment",
+# LER 460 → LHR 460 "Ethics in the Workplace", …). Older catalog rows still say
+# LER, newer transcripts say LHR (and vice versa for older students), so without
+# this a student who took one is told to take the other. Only numbers the bulletin
+# lists under LHR and NOT under LER: LER 424/425/485/488/489 are still live LER
+# courses with no LHR twin and must not be aliased.
+_LHR_RENAMED = (
+    "83S", "100", "136", "136Y", "160N", "165N", "197", "201", "202", "304", "305",
+    "312", "400", "401", "403", "409", "410", "426", "427", "428", "429", "434",
+    "435", "437", "444", "450", "452", "458Y", "459", "460", "464", "465", "466",
+    "468", "471", "472", "475H", "480", "494", "494H", "495", "496", "497",
+)
+_MANUAL_RENAME_PAIRS += [(f"LER {n}", f"LHR {n}") for n in _LHR_RENAMED]
+
 # ── First-Year Seminar interchangeability ────────────────────────────────────
 # PSU's First-Year Seminar requirement is satisfied by ANY 1-credit first-year
 # seminar (University policy is "take one"), but a bulletin SAP grid hard-codes
