@@ -376,7 +376,7 @@ manual class edits (`POST`/`PATCH`/`DELETE /transcript/course`). Do not add a cl
 isn't implemented — guideline 2.3.1 is about exactly that.
 
 
-### 1.2.0 metadata (draft, Oct 4 2026)
+### 1.2.0 metadata (submitted Oct 4 2026, released)
 
 1.2.0 adds no-transcript mode, so copy that says the app *needs* an upload is now incomplete.
 Promotional text can change any time; subtitle, description and What's New go in with the 1.2.0

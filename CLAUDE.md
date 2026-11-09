@@ -3,9 +3,9 @@
 AI advisor app for Penn State students. FastAPI backend + React Native (Expo) mobile app.
 
 **Status:** publicly released on the App Store since Sept 28 2026 (1.1.0, app ID `6803643612`).
-1.1.1 (build 11) released Oct 2 2026. 1.2.0 (no-transcript mode, minor/certificate counting) built and
-uploaded Oct 4 2026. OTA updates (`eas update`) target the runtime of the app version (`appVersion`
-policy): an OTA published for 1.2.0 reaches 1.2.0 installs only.
+1.1.1 (build 11) released Oct 2 2026. **1.2.0 (build 13: no-transcript mode, minor/certificate counting,
+"Update available" alert) is the current release.** OTA updates (`eas update`) target the runtime of the
+app version (`appVersion` policy): an OTA published for 1.2.0 reaches 1.2.0 installs only.
 Prod has real users — a push to `main` deploys immediately.
 
 **Releasing a new app version:** bump `version` in `mobile/app.json`, `eas build --platform ios --profile
@@ -551,7 +551,7 @@ home dashboard, and gen-ed check with no extra wiring.
   class") lives on the in-progress semester in `app/(tabs)/upload.tsx`.
 
 ### No-transcript mode (self-reported classes)
-A full alternative to uploading (Oct 2026, local only so far): the student walks their major's SAP
+A full alternative to uploading (Oct 2026, shipped in 1.2.0): the student walks their major's SAP
 semester by semester and confirms what they took. Entry points: onboarding upload step and the
 Transcript screen ("No transcript? Enter your classes").
 - **Backend**: `GET /transcript/walkthrough` (plan Fall/Spring semesters as cards via
